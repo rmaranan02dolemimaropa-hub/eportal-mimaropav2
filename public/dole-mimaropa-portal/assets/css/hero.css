@@ -1,0 +1,235 @@
+/* ==========================================================================
+   HERO SECTION
+   ========================================================================== */
+
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding-top: 7rem;
+  padding-bottom: 5rem;
+  overflow: hidden;
+  background: var(--gradient-primary);
+  background-size: 220% 220%;
+  animation: heroGradientMove 16s ease-in-out infinite;
+  isolation: isolate;
+}
+
+@keyframes heroGradientMove {
+  0% { background-position: 0% 30%; }
+  50% { background-position: 100% 70%; }
+  100% { background-position: 0% 30%; }
+}
+
+/* Wave divider at base of hero */
+.hero-wave {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  width: 100%;
+  line-height: 0;
+  z-index: 3;
+}
+.hero-wave svg { width: 100%; height: auto; display: block; }
+.hero-wave path { animation: waveShift 10s ease-in-out infinite; transform-origin: center; }
+@keyframes waveShift {
+  0%, 100% { transform: translateX(0) scaleY(1); }
+  50% { transform: translateX(-2%) scaleY(1.04); }
+}
+
+/* Floating blobs */
+.hero-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(2px);
+  background: rgba(255, 255, 255, 0.08);
+  z-index: 1;
+  animation: blobFloat 12s var(--ease-out) infinite;
+}
+.hero-blob.b1 { width: 260px; height: 260px; top: 8%; left: 4%; animation-duration: 14s; }
+.hero-blob.b2 { width: 160px; height: 160px; top: 60%; left: 12%; background: rgba(0,174,239,0.18); animation-duration: 10s; animation-delay: 1s; }
+.hero-blob.b3 { width: 340px; height: 340px; top: 20%; right: -6%; background: rgba(255,255,255,0.06); animation-duration: 16s; animation-delay: 2s; }
+.hero-blob.b4 { width: 120px; height: 120px; bottom: 8%; right: 20%; background: rgba(31,169,113,0.16); animation-duration: 9s; }
+
+@keyframes blobFloat {
+  0%, 100% { transform: translate(0,0) scale(1); }
+  33% { transform: translate(18px, -24px) scale(1.06); }
+  66% { transform: translate(-14px, 16px) scale(0.96); }
+}
+
+/* Particles */
+.hero-particles { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.particle {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background: rgba(255,255,255,0.6);
+  border-radius: 50%;
+  animation: particleRise linear infinite;
+}
+@keyframes particleRise {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  10% { opacity: 0.9; }
+  90% { opacity: 0.4; }
+  100% { transform: translateY(-520px) translateX(20px); opacity: 0; }
+}
+
+/* Floating service icons */
+.hero-floating-icon {
+  position: absolute;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-white);
+  font-size: 1.35rem;
+  box-shadow: var(--shadow-sm);
+  z-index: 2;
+  animation: iconFloat 6s ease-in-out infinite;
+}
+.hero-floating-icon.fi-1 { top: 12%; right: 8%; animation-delay: 0s; }
+.hero-floating-icon.fi-2 { top: 46%; right: -2%; animation-delay: 1.2s; }
+.hero-floating-icon.fi-3 { bottom: 18%; right: 24%; animation-delay: 2.4s; }
+.hero-floating-icon.fi-4 { top: 4%; left: 46%; animation-delay: 0.6s; width: 42px; height: 42px; font-size: 1.1rem;}
+
+@keyframes iconFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-16px) rotate(4deg); }
+}
+
+/* Hero content */
+.hero .container-xl { position: relative; z-index: 4; }
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 1rem;
+  border-radius: var(--radius-pill);
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.35);
+  color: var(--color-white);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-bottom: 1.5rem;
+}
+.hero-eyebrow .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--color-accent);
+  animation: pulseDot 1.6s ease-in-out infinite;
+}
+@keyframes pulseDot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,174,239,0.6); }
+  70% { box-shadow: 0 0 0 8px rgba(0,174,239,0); }
+}
+
+.hero-title {
+  color: var(--color-white);
+  font-size: clamp(2.4rem, 5.2vw, 4rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin-bottom: 1.1rem;
+}
+.hero-title .line-accent { color: var(--color-accent); }
+
+.hero-subtitle {
+  color: rgba(255,255,255,0.94);
+  font-size: clamp(1.1rem, 1.6vw, 1.35rem);
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.hero-desc {
+  color: rgba(255,255,255,0.82);
+  font-size: 1.05rem;
+  max-width: 520px;
+  margin-bottom: 2.25rem;
+  font-weight: 500;
+}
+
+.hero-cta-group { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 2.5rem; }
+
+.hero-stats-inline {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+.hero-stats-inline .stat-mini strong {
+  display: block;
+  color: var(--color-white);
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+.hero-stats-inline .stat-mini span {
+  color: rgba(255,255,255,0.75);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.hero-visual {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero-visual .visual-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  animation: heroImageFloat 6s ease-in-out infinite;
+  will-change: transform;
+}
+@keyframes heroImageFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+
+.route-path { animation: dashMove 3.5s linear infinite; }
+@keyframes dashMove { to { stroke-dashoffset: -100; } }
+
+.service-node { animation: nodePulse 2.4s ease-in-out infinite; transform-origin: center; }
+@keyframes nodePulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+/* Scroll down indicator */
+.scroll-indicator {
+  position: absolute;
+  bottom: 2.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  color: rgba(255,255,255,0.85);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.scroll-indicator .bounce-arrow {
+  animation: bounceArrow 1.8s ease-in-out infinite;
+  font-size: 1.3rem;
+}
+@keyframes bounceArrow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+
+@media (max-width: 991.98px) {
+  .hero { text-align: center; padding-top: 8rem; }
+  .hero-cta-group { justify-content: center; }
+  .hero-stats-inline { justify-content: center; }
+  .hero-desc { margin-inline: auto; }
+  .hero-visual { margin-top: 3rem; }
+}

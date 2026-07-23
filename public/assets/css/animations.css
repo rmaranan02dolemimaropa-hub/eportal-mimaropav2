@@ -1,0 +1,42 @@
+/* ==========================================================================
+   SCROLL-REVEAL ANIMATION UTILITIES
+   Toggled via .in-view class added by IntersectionObserver in script.js
+   ========================================================================== */
+
+[data-aos] {
+  opacity: 0;
+  transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+  will-change: transform, opacity;
+}
+
+[data-aos="fade-up"] { transform: translateY(36px); }
+[data-aos="fade-left"] { transform: translateX(-36px); }
+[data-aos="fade-right"] { transform: translateX(36px); }
+[data-aos="zoom-in"] { transform: scale(0.9); }
+
+[data-aos].in-view {
+  opacity: 1;
+  transform: translate(0, 0) scale(1);
+}
+
+/* stagger helper via inline custom property --d (seconds) set in HTML */
+[data-aos] { transition-delay: var(--d, 0s); }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-aos] { opacity: 1 !important; transform: none !important; transition: none !important; }
+}
+
+/* Glow hover utility */
+.glow-hover { transition: box-shadow var(--dur-fast) var(--ease-out); }
+.glow-hover:hover { box-shadow: 0 0 28px rgba(0, 174, 239, 0.45); }
+
+/* Scale hover utility */
+.scale-hover { transition: transform var(--dur-fast) var(--ease-out); }
+.scale-hover:hover { transform: scale(1.05); }
+
+/* Pulse effect utility */
+.pulse-fx { animation: pulseFx 2.2s ease-in-out infinite; }
+@keyframes pulseFx {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 56, 168, 0.25); }
+  70% { box-shadow: 0 0 0 12px rgba(0, 56, 168, 0); }
+}

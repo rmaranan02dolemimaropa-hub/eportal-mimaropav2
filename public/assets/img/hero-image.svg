@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 520" width="100%" height="100%" role="img" aria-labelledby="heroIllustrationTitle">
+  <title id="heroIllustrationTitle">Digital services connecting the MIMAROPA islands</title>
+  <defs>
+    <linearGradient id="islandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0056D2"/>
+      <stop offset="100%" stop-color="#0038A8"/>
+    </linearGradient>
+    <radialGradient id="haloGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00AEEF" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#00AEEF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <circle cx="280" cy="260" r="230" fill="url(#haloGrad)"/>
+
+  <!-- stylized island shapes: Mindoro, Marinduque, Romblon, Palawan -->
+  <g fill="url(#islandGrad)" opacity="0.92">
+    <path id="island-mindoro" d="M150 130c30-18 66-10 82 14 14 22 6 46-10 62-20 20-52 30-78 18-24-12-34-42-24-66 6-14 18-22 30-28z"/>
+    <path id="island-marinduque" d="M330 190c22-10 46-2 54 16 8 16-2 34-18 42-18 10-40 8-50-6-10-14-6-36 14-52z"/>
+    <path id="island-romblon" d="M300 300c14-8 30-4 36 8 6 10-2 22-14 26-12 6-26 2-32-8-6-10 0-20 10-26z"/>
+    <path id="island-palawan" d="M110 300c8-30 20-58 34-84 8-14 24-18 34-8 8 8 8 22 2 36-16 38-24 78-20 118 2 18-10 32-26 30-14-2-22-16-20-32 4-22 2-42-4-60z"/>
+  </g>
+
+  <!-- dotted ferry / data routes linking the islands -->
+  <g stroke="#FFFFFF" stroke-width="2.5" stroke-dasharray="1 9" stroke-linecap="round" fill="none" opacity="0.85">
+    <path d="M190 170 C 250 150, 300 170, 350 210" class="route-path"/>
+    <path d="M330 230 C 320 260, 320 280, 310 305" class="route-path"/>
+    <path d="M190 210 C 170 250, 150 280, 140 320" class="route-path"/>
+    <path d="M290 320 C 240 330, 190 330, 150 335" class="route-path"/>
+  </g>
+
+  <!-- service nodes -->
+  <g class="service-node">
+    <circle cx="190" cy="170" r="7" fill="#FFFFFF"/>
+    <circle cx="190" cy="170" r="14" fill="none" stroke="#FFFFFF" stroke-width="1.5" opacity="0.6"/>
+  </g>
+  <g class="service-node" style="animation-delay:.4s">
+    <circle cx="350" cy="210" r="7" fill="#FFFFFF"/>
+    <circle cx="350" cy="210" r="14" fill="none" stroke="#FFFFFF" stroke-width="1.5" opacity="0.6"/>
+  </g>
+  <g class="service-node" style="animation-delay:.8s">
+    <circle cx="310" cy="305" r="7" fill="#FFFFFF"/>
+    <circle cx="310" cy="305" r="14" fill="none" stroke="#FFFFFF" stroke-width="1.5" opacity="0.6"/>
+  </g>
+  <g class="service-node" style="animation-delay:1.2s">
+    <circle cx="140" cy="320" r="7" fill="#FFFFFF"/>
+    <circle cx="140" cy="320" r="14" fill="none" stroke="#FFFFFF" stroke-width="1.5" opacity="0.6"/>
+  </g>
+
+  <!-- floating device / document card -->
+  <g transform="translate(255,360)">
+    <rect x="-70" y="-40" width="140" height="90" rx="14" fill="#FFFFFF" opacity="0.96"/>
+    <rect x="-54" y="-22" width="70" height="8" rx="4" fill="#0038A8" opacity="0.8"/>
+    <rect x="-54" y="-4" width="108" height="6" rx="3" fill="#CBD5E1"/>
+    <rect x="-54" y="10" width="88" height="6" rx="3" fill="#CBD5E1"/>
+    <circle cx="42" cy="20" r="16" fill="#1FA971"/>
+    <path d="M35 20 l5 5 10-11" stroke="#FFFFFF" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

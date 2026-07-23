@@ -1,0 +1,48 @@
+/* ==========================================================================
+   RESPONSIVE OVERRIDES
+   ========================================================================== */
+
+/* ---------- Tablet (≤991.98px): 2-column emphasis ---------- */
+@media (max-width: 991.98px) {
+  :root { --section-pad-y: 4.5rem; }
+
+  .hero-floating-icon.fi-2,
+  .hero-blob.b3 { display: none; }
+
+  .cta-section { margin-inline: 1.25rem; }
+}
+
+/* ---------- Mobile (≤767.98px): single column ---------- */
+@media (max-width: 767.98px) {
+  :root { --section-pad-y: 3.5rem; }
+
+  .section-head { margin-bottom: 2rem; text-align: center; }
+  .section-subtitle { margin-inline: auto; }
+
+  .hero { min-height: auto; padding-top: 7.5rem; padding-bottom: 3.5rem; }
+  .hero-title, .hero-subtitle, .hero-desc { text-align: center; }
+
+  .hero-floating-icon { width: 40px; height: 40px; font-size: 1rem; }
+  .hero-floating-icon.fi-4 { display: none; }
+
+  .stat-item { padding: 0.6rem; }
+
+  .gov-footer .footer-bottom { flex-direction: column; text-align: center; }
+  .gov-footer .footer-brand { justify-content: center; }
+  .gov-footer [class^="col-"] { text-align: center; }
+  .gov-footer .footer-contact li,
+  .gov-footer .footer-links li a { justify-content: center; }
+  .gov-footer .social-icons { justify-content: center; }
+
+  .back-to-top { right: 1rem; bottom: 1rem; width: 42px; height: 42px; }
+}
+
+/* ---------- Small mobile (≤479.98px) ---------- */
+@media (max-width: 479.98px) {
+  .container-xl { padding-inline: 1.1rem; }
+  .btn-gov { width: 100%; }
+  .hero-cta-group { flex-direction: column; }
+  .hero-cta-group .btn-gov { width: 100%; }
+  .cta-section .cta-buttons { flex-direction: column; }
+  .cta-section .cta-buttons .btn-gov { width: 100%; }
+}
