@@ -7,8 +7,8 @@
         <!-- ===================== HEADER CARD ===================== -->
         <div class="header-card">
             <div class="header-top">
-                <div class="logo-badge">   
-                    <img src="<?= base_url('assets/img/dole_blogo.png') ?>" alt="DOLE Logo" class="logo-img">
+                <div class="logo-badge">
+                    <img src="assets/img/dole_blogo.png" alt="DOLE Logo" class="logo-img">
                 </div>
                 <div>
                     <div class="agency-line">DOLE MIMAROPA ePortal</div>
@@ -46,7 +46,7 @@
                                 <option value="service8">201 Documents</option>
                             </select>
                             <label for="serviceAvailed">Service Availed <span class="required-mark">*</span></label>
-                            <div class="invalid-feedback">Please select a service.</div> 
+                            <div class="invalid-feedback">Please select a service.</div>
                         </div>
                     </div>
 
@@ -656,7 +656,7 @@
            CANCEL BUTTON
         ========================================================= */
         cancelBtn.addEventListener('click', function() {
-            resetForm();
+            window.location.href = "eportal";
         });
 
         function resetForm() {

@@ -53,22 +53,21 @@
     margin-bottom: 1.25rem;
   }
 
-.logo-badge {
-    width: 80px;
-    height: 80px;
-    background: #fff;
-    border-radius: 50%;
+/* .logo-badge {
+    width: 100px;
+    height: 100px;
+    background: #11068c;
+    clip-path: polygon(50% 5%, 5% 95%, 95% 95%);
     display: flex;
     justify-content: center;
     align-items: center;
-    box-shadow: 0 5px 20px rgba(0,0,0,.15);
-    overflow: hidden;
-}
+    box-shadow: 0 8px 20px rgba(0,0,0,.2);
+} */
 
 .logo-img {
-    width: 65px;
-    height: 65px;
-    object-fit: contain;
+    width: 50px;
+    height: auto;
+    
 }
 
   .agency-line{
