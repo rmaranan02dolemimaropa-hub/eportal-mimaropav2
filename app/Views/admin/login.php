@@ -77,13 +77,24 @@
             <i class="bi bi-lock input-icon"></i>
             <input
               type="password"
-              class="form-control custom-input"
+              class="form-control custom-input custom-input-with-toggle"
               id="password"
               name="password"
               placeholder="Enter your password"
               autocomplete="current-password"
               required
             />
+            <!-- Show / hide password toggle -->
+            <button
+              type="button"
+              class="password-toggle-btn"
+              id="passwordToggle"
+              aria-label="Show password"
+              aria-pressed="false"
+              aria-controls="password"
+            >
+              <i class="bi bi-eye" id="passwordToggleIcon"></i>
+            </button>
           </div>
         </div>
 
@@ -95,7 +106,6 @@
               Remember me
             </label>
           </div>
-          <a href="#" class="forgot-link">Forgot password?</a>
         </div>
 
         <!-- Submit button -->
@@ -113,5 +123,42 @@
     </section>
   </main>
 
+  <!-- Custom Script -->
+  <script src="assets/js/login.js"></script>
 </body>
 </html>
+
+<script>
+    /* ==========================================================================
+   DOLE MIMAROPA E-Portal — Login Page Script
+   Handles: show / hide password toggle.
+   ========================================================================== */
+
+document.addEventListener("DOMContentLoaded", function () {
+  enablePasswordToggle();
+});
+
+/**
+ * Toggles the password field between masked and plain text,
+ * swapping the eye / eye-slash icon and updating accessible state.
+ */
+function enablePasswordToggle() {
+  const toggleBtn = document.getElementById("passwordToggle");
+  const toggleIcon = document.getElementById("passwordToggleIcon");
+  const passwordInput = document.getElementById("password");
+
+  if (!toggleBtn || !toggleIcon || !passwordInput) return;
+
+  toggleBtn.addEventListener("click", function () {
+    const isPasswordHidden = passwordInput.type === "password";
+
+    passwordInput.type = isPasswordHidden ? "text" : "password";
+
+    toggleIcon.classList.toggle("bi-eye", !isPasswordHidden);
+    toggleIcon.classList.toggle("bi-eye-slash", isPasswordHidden);
+
+    toggleBtn.setAttribute("aria-label", isPasswordHidden ? "Hide password" : "Show password");
+    toggleBtn.setAttribute("aria-pressed", String(isPasswordHidden));
+  });
+}
+</script>

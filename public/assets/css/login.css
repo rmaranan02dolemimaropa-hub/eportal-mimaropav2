@@ -216,6 +216,11 @@ body {
     transform var(--transition-base);
 }
 
+/* Extra right padding so typed text never runs under the show/hide button */
+.custom-input-with-toggle {
+  padding-right: 46px;
+}
+
 .custom-input::placeholder {
   color: #9CA3AF;
   font-weight: 400;
@@ -231,6 +236,37 @@ body {
 .custom-input:focus ~ .input-icon,
 .input-icon-wrap:focus-within .input-icon {
   color: var(--color-secondary);
+}
+
+/* -------------------- Show / Hide Password Toggle -------------------- */
+.password-toggle-btn {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: color var(--transition-base), background-color var(--transition-base);
+}
+
+.password-toggle-btn:hover {
+  color: var(--color-secondary);
+  background-color: rgba(37, 99, 235, 0.08);
+}
+
+.password-toggle-btn:focus-visible {
+  outline: none;
+  color: var(--color-secondary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
 }
 
 /* -------------------- Remember Me / Forgot Password -------------------- */
