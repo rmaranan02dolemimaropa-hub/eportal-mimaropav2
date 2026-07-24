@@ -11,4 +11,5 @@ $routes->get('eportal', 'EportalController::index');
 $routes->get('login', 'EportalController::login');
 $routes->get('service-record', 'EportalController::service_record');
 $routes->post('service-record/save', 'EportalController::save');
+$routes->get('dashboard', 'EportalController::dashboard');
 

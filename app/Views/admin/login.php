@@ -109,7 +109,7 @@
         </div>
 
         <!-- Submit button -->
-        <button type="submit" class="btn login-btn w-100">
+        <button type="submit" href="dashboard" class="btn login-btn w-100">
           Log In
           <i class="bi bi-arrow-right-short"></i>
         </button>
