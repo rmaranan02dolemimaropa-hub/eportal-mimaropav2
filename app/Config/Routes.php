@@ -8,3 +8,4 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'Home::index');
 
 $routes->get('eportal','EportalController::index');
+$routes->get('service-record', 'EportalController::service_record');

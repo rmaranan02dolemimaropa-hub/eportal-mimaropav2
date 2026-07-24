@@ -11,4 +11,8 @@ class EportalController extends BaseController
     {
         return view('eportal/index');
     }
+    public function service_record()
+    {
+    return view('hr_forms/servicerecord');
+    }
 }

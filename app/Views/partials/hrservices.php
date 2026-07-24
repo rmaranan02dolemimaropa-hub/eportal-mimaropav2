@@ -16,7 +16,7 @@
             <div class="glass-icon"><i class="bi bi-journal-text"></i></div>
             <h3>Service Record</h3>
             <p>Get an official summary of your employment history with DOLE.</p>
-            <a href="#" class="btn-request" data-service="Service Record">Request <i class="bi bi-arrow-right"></i></a>
+            <a href="service-record" class="btn-request">Request <i class="bi bi-arrow-right"></i></a>
           </div>
         </div>
         <!-- COE -->
@@ -41,36 +41,9 @@
         <div class="col-sm-6 col-lg-4 col-xl-3 tilt-wrap" data-aos="fade-up" style="--d:.15s">
           <div class="glass-card">
             <div class="glass-icon"><i class="bi bi-patch-check"></i></div>
-            <h3>Certificate of No Pending Case</h3>
+            <h3>Certificate</h3>
             <p>Request clearance confirming you have no pending administrative case.</p>
             <a href="#" class="btn-request" data-service="Certificate of No Pending Case">Request <i class="bi bi-arrow-right"></i></a>
-          </div>
-        </div>
-        <!-- Leave Credits -->
-        <div class="col-sm-6 col-lg-4 col-xl-3 tilt-wrap" data-aos="fade-up">
-          <div class="glass-card">
-            <div class="glass-icon"><i class="bi bi-calendar2-check"></i></div>
-            <h3>Leave Credits</h3>
-            <p>View and request a certified copy of your accumulated leave credits.</p>
-            <a href="#" class="btn-request" data-service="Leave Credits">Request <i class="bi bi-arrow-right"></i></a>
-          </div>
-        </div>
-        <!-- LWOP -->
-        <div class="col-sm-6 col-lg-4 col-xl-3 tilt-wrap" data-aos="fade-up" style="--d:.05s">
-          <div class="glass-card">
-            <div class="glass-icon"><i class="bi bi-calendar-x"></i></div>
-            <h3>Leave Without Pay</h3>
-            <p>File and track leave-without-pay requests and their approval status.</p>
-            <a href="#" class="btn-request" data-service="Leave Without Pay">Request <i class="bi bi-arrow-right"></i></a>
-          </div>
-        </div>
-        <!-- Last Salary -->
-        <div class="col-sm-6 col-lg-4 col-xl-3 tilt-wrap" data-aos="fade-up" style="--d:.1s">
-          <div class="glass-card">
-            <div class="glass-icon"><i class="bi bi-receipt"></i></div>
-            <h3>Last Salary Received</h3>
-            <p>Request a record of the last salary released under your name.</p>
-            <a href="#" class="btn-request" data-service="Last Salary Received">Request <i class="bi bi-arrow-right"></i></a>
           </div>
         </div>
         <!-- IPCR -->

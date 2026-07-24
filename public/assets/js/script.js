@@ -186,14 +186,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  /* ---------------- HR service request buttons ---------------- */
-  document.querySelectorAll('.btn-request').forEach(function (btn) {
-    btn.addEventListener('click', function (e) {
-      e.preventDefault();
-      var service = btn.getAttribute('data-service') || 'this service';
-      alert('Your request for "' + service + '" will open the secure request form once the E-Portal login is connected.');
-    });
-  });
+
 
   /* Login button placeholder */
   document.querySelectorAll('.js-login-trigger').forEach(function (btn) {

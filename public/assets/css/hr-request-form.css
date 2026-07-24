@@ -1,0 +1,257 @@
+:root{
+    --dole-blue: #10058C;
+    --dole-blue-dark: #0a0360;
+    --dole-blue-soft: #EEEBFB;
+    --dole-blue-softer: #F6F5FD;
+    --surface: #ffffff;
+    --text-main: #1C1B29;
+    --text-muted: #6B6B7B;
+    --border-soft: #E3E1F2;
+    --radius-lg: 18px;
+    --radius-md: 12px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body{
+    font-family: 'Manrope', sans-serif;
+    background: linear-gradient(180deg, var(--dole-blue-softer) 0%, #ffffff 320px);
+    color: var(--text-main);
+    min-height: 100vh;
+  }
+
+  .page-wrap{
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2.5rem 1rem 4rem;
+  }
+
+  /* ---------- Header card ---------- */
+  .header-card{
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 10px 30px -18px rgba(16, 5, 140, 0.25);
+    padding: 2.25rem 2rem;
+    margin-bottom: 1.75rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header-card::before{
+    content:"";
+    position:absolute;
+    top:0; left:0; right:0;
+    height:6px;
+    background: linear-gradient(90deg, var(--dole-blue) 0%, #4A3FD1 100%);
+  }
+
+  .header-top{
+    display:flex;
+    align-items:center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+.logo-badge {
+    width: 80px;
+    height: 80px;
+    background: #fff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 5px 20px rgba(0,0,0,.15);
+    overflow: hidden;
+}
+
+.logo-img {
+    width: 65px;
+    height: 65px;
+    object-fit: contain;
+}
+
+  .agency-line{
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dole-blue);
+    margin-bottom: 0.15rem;
+  }
+
+  .header-title{
+    font-weight: 800;
+    font-size: 1.55rem;
+    line-height: 1.25;
+    margin: 0;
+    color: var(--text-main);
+  }
+
+  .header-subtitle{
+    color: var(--text-muted);
+    font-size: 0.98rem;
+    margin-top: 0.65rem;
+    margin-bottom: 0;
+  }
+
+  /* ---------- Form card ---------- */
+  .form-card{
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 10px 30px -20px rgba(16,5,140,0.18);
+    padding: 2rem;
+  }
+
+  @media (max-width: 576px){
+    .header-card, .form-card{ padding: 1.5rem 1.25rem; }
+    .header-title{ font-size: 1.3rem; }
+  }
+
+  .section-label{
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dole-blue);
+    display:flex;
+    align-items:center;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+  }
+
+  .section-label i{ font-size: 1rem; }
+
+  .section-divider{
+    border: none;
+    border-top: 1px dashed var(--border-soft);
+    margin: 1.75rem 0;
+  }
+
+  /* Floating inputs */
+  .form-floating > label{ color: var(--text-muted); }
+  .form-control, .form-select{
+    border-radius: var(--radius-md);
+    border: 1px solid #D8D6EC;
+    font-family: 'Manrope', sans-serif;
+  }
+  .form-control:focus, .form-select:focus{
+    border-color: var(--dole-blue);
+    box-shadow: 0 0 0 0.2rem rgba(16, 5, 140, 0.12);
+  }
+
+  textarea.form-control{ min-height: 130px; }
+
+  /* Radio / checkbox cards */
+  .choice-card{
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+    padding: 0.85rem 1rem;
+    display:flex;
+    align-items:center;
+    gap: 0.65rem;
+    cursor: pointer;
+    transition: border-color .15s ease, background-color .15s ease;
+    background: var(--dole-blue-softer);
+    height: 100%;
+  }
+  .choice-card:hover{ border-color: var(--dole-blue); }
+  .choice-card input{ cursor: pointer; }
+  .choice-card input:checked ~ label,
+  .choice-card:has(input:checked){
+    border-color: var(--dole-blue);
+    background: var(--dole-blue-soft);
+  }
+  .choice-card label{
+    cursor: pointer;
+    margin: 0;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .form-check-input:checked{
+    background-color: var(--dole-blue);
+    border-color: var(--dole-blue);
+  }
+  .form-check-input:focus{
+    box-shadow: 0 0 0 0.2rem rgba(16,5,140,0.15);
+  }
+
+  /* Buttons */
+  .btn-dole-primary{
+    background: var(--dole-blue);
+    border-color: var(--dole-blue);
+    color: #fff;
+    border-radius: 999px;
+    font-weight: 700;
+    padding: 0.65rem 1.75rem;
+    box-shadow: 0 8px 18px -8px rgba(16,5,140,0.55);
+  }
+  .btn-dole-primary:hover, .btn-dole-primary:focus{
+    background: var(--dole-blue-dark);
+    border-color: var(--dole-blue-dark);
+    color: #fff;
+  }
+  .btn-dole-outline{
+    border-radius: 999px;
+    font-weight: 700;
+    padding: 0.65rem 1.75rem;
+    border: 1.5px solid #C9C6E8;
+    color: var(--text-muted);
+    background: transparent;
+  }
+  .btn-dole-outline:hover{
+    border-color: var(--dole-blue);
+    color: var(--dole-blue);
+    background: var(--dole-blue-softer);
+  }
+
+  .action-row{
+    display:flex;
+    justify-content:flex-end;
+    gap: 0.75rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+
+  /* Dynamic sections */
+  .dynamic-section{ display:none; }
+  .dynamic-section.active{ display:block; }
+
+  .required-mark{ color: #D6336C; }
+
+  .footer-note{
+    text-align:center;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    margin-top: 1.5rem;
+  }
+
+  /* Modal accents */
+  .modal-content{
+    border-radius: var(--radius-lg);
+    border: none;
+  }
+  .modal-header{
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .modal-title{
+    font-weight: 800;
+    color: var(--dole-blue);
+  }
+  #summaryList dt{ color: var(--text-muted); font-weight: 600; font-size: 0.85rem; }
+  #summaryList dd{ font-weight: 600; margin-bottom: 0.65rem; }
+
+  .alert-dole{
+    background: var(--dole-blue-soft);
+    border: 1px solid #D6D1F5;
+    color: var(--dole-blue-dark);
+    border-radius: var(--radius-md);
+  }
+
+  /* focus visibility */
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{
+    outline: 3px solid rgba(16,5,140,0.35);
+    outline-offset: 2px;
+  }
