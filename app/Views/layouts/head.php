@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>DOLE MIMAROPA E-Portal | Department of Labor and Employment</title>
 <meta name="description" content="One portal, multiple digital government services. Submit requests, access HR services, and connect with DOLE MIMAROPA online.">
-
+<link rel="icon" type="image/png" sizes="32x32" href="assets/img/doleicon.png">
 <!-- Google Font: Manrope -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

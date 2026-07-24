@@ -61,7 +61,7 @@
                     <div class="col-md-6">
                         <div class="form-floating">
                             <input type="tel" class="form-control" id="contactNumber" placeholder="09XXXXXXXXX"
-                                pattern="^(09\d{9}|\+639\d{9})$" required>
+                                pattern="^(09\d{9}|\+639\d{9})$" maxlength="11" required>
                             <label for="contactNumber">Contact Number <span class="required-mark">*</span></label>
                             <div class="invalid-feedback">Please enter a valid PH mobile number (e.g. 09171234567).</div>
                         </div>
@@ -355,6 +355,8 @@
                 <div class="modal-body text-center py-5">
                     <i class="bi bi-check-circle-fill" style="font-size: 3.5rem; color: var(--dole-blue);"></i>
                     <h4 class="fw-bold mt-3 mb-2">Request Submitted</h4>
+                    <h3 class="fw-bold mt-3 mb-2">Request Submitted</h3>
+
                     <p class="text-muted mb-4">Your HR request has been received. The HR Unit will get in touch with you via the contact details provided.</p>
                     <button type="button" class="btn btn-dole-primary px-4" data-bs-dismiss="modal">Done</button>
                 </div>
@@ -648,7 +650,7 @@
             // Small delay so the confirm modal fully closes before the success modal opens
             setTimeout(function() {
                 successModal.show();
-                resetForm();
+                window.location.href = "eportal";
             }, 300);
         });
 
