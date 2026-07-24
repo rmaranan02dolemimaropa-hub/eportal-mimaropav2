@@ -72,7 +72,7 @@
               <h3>Marinduque Provincial Office</h3>
             </div>
             <ul>
-              <li><i class="bi bi-geo-alt"></i> Tanza, Boac, Marinduque</li>
+              <li><i class="bi bi-geo-alt"></i> Boac Bypass Road Corner Tabi-Lupac Rd., Brgy. Tabi, Boac, Philippines, 4900</li>
               <li><i class="bi bi-telephone"></i> (042) 332-1146</li>
               <li><i class="bi bi-envelope"></i> marinduque.fo@dole.gov.ph</li>
             </ul>
