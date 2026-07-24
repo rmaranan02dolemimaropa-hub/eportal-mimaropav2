@@ -137,7 +137,8 @@
   letter-spacing: -0.01em;
   margin-bottom: 1.1rem;
 }
-.hero-title .line-accent { color: var(--color-accent); }
+.hero-title .line-welcome { color: #7bf7cd }
+.hero-title .line-accent { color: #40c79a }
 
 .hero-subtitle {
   color: rgba(255,255,255,0.94);
@@ -154,7 +155,7 @@
   font-weight: 500;
 }
 
-.hero-cta-group { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 2.5rem; }
+.hero-cta-group { display: flex; gap: 1rem; margin-bottom: 2.5rem; }
 
 .hero-stats-inline {
   display: flex;
@@ -228,7 +229,7 @@
 
 @media (max-width: 991.98px) {
   .hero { text-align: center; padding-top: 8rem; }
-  .hero-cta-group { justify-content: center; }
+  /* .hero-cta-group { justify-content: center; } */
   .hero-stats-inline { justify-content: center; }
   .hero-desc { margin-inline: auto; }
   .hero-visual { margin-top: 3rem; }

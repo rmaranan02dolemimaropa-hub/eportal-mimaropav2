@@ -18,7 +18,7 @@
               <h3>DOLE MIMAROPA Regional Office</h3>
             </div>
             <ul>
-              <li><i class="bi bi-geo-alt"></i> 2nd Flr. PPL Building, P. Guazon St., Calapan City, Oriental Mindoro</li>
+              <li><i class="bi bi-geo-alt"></i> Department of Labor and Employment - Region IV-B, Confil Building, Sampaguita, Calapan City, Oriental Mindoro</li>
               <li><i class="bi bi-telephone"></i> (043) 288-2665</li>
               <li><i class="bi bi-envelope"></i> mimaropa@dole.gov.ph</li>
             </ul>

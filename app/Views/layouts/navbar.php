@@ -5,7 +5,7 @@
   <nav class="navbar navbar-expand-lg gov-navbar" id="mainNavbar" aria-label="Primary">
     <div class="container-xl">
       <a class="navbar-brand-group" href="#home">
-        <img src="assets/img/dole-logo.svg" alt="DOLE Logo" class="brand-logo">
+        <img src="assets/img/dole_logo.png" alt="DOLE Logo" class="brand-logo">
         <span class="brand-text">
           <span class="rp-line">Republic of the Philippines</span>
           <span class="dept-line">Department of Labor and Employment</span>
