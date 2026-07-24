@@ -188,13 +188,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-  /* Login button placeholder */
-  document.querySelectorAll('.js-login-trigger').forEach(function (btn) {
-    btn.addEventListener('click', function (e) {
-      e.preventDefault();
-      alert('Employee login is coming soon. This will connect to the DOLE MIMAROPA staff authentication system.');
-    });
-  });
+
 
   /* Current year in footer */
   var yearEl = document.getElementById('currentYear');

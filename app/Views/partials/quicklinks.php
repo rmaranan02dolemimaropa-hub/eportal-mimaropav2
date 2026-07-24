@@ -2,7 +2,8 @@
        QUICK LINKS
        ========================================================================== -->
   <section id="quick-links" class="bg-white-section pt-0">
-    <div class="container-xl">
+    <div class="container-xl py-5">
+
       <div class="section-head" data-aos="fade-up">
         <span class="eyebrow">Shortcuts</span>
         <h2 class="section-title">Quick Links</h2>
