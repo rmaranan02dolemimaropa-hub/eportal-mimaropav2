@@ -14,7 +14,7 @@ class EportalController extends BaseController
 
     public function service_record()
     {
-        return view('hr_forms/servicerecord');
+        return view('hr_forms/hr_forms');
     }
 
     public function save()
