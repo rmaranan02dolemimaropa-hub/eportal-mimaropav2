@@ -11,6 +11,10 @@ class EportalController extends BaseController
     {
         return view('eportal/index');
     }
+    public function login()
+    {
+        return view('admin/login');
+    }
 
     public function service_record()
     {
