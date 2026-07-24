@@ -25,16 +25,17 @@
                 <i class="bi bi-info-circle me-2"></i><span id="formAlertText"></span>
             </div>
 
-            <form id="hrRequestForm" class="needs-validation" novalidate>
+            <form id="hrRequestForm" action="<?= site_url('service-record/save') ?>" method="post" class="needs-validation">
 
                 <!-- ---------- COMMON FIELDS ---------- -->
+                 <?= csrf_field() ?>
                 <p class="section-label"><i class="bi bi-clipboard2-check"></i>Request Details</p>
 
                 <div class="row g-3">
                     <div class="col-12">
                         <div class="form-floating">
 
-                            <select class="form-select" id="serviceAvailed" required>
+                            <select class="form-select" name="service_availed" id="serviceAvailed" required>
                                 <option value="" selected disabled>Select a service</option>
                                 <option value="service1">Service Record</option>
                                 <option value="service2">Certificate with Compensation</option>
@@ -52,7 +53,7 @@
 
                     <div class="col-md-6">
                         <div class="form-floating">
-                            <input type="text" class="form-control" id="fullName" placeholder="Juan Dela Cruz" required>
+                            <input type="text" name="fullname" class="form-control" id="fullName" placeholder="Juan Dela Cruz" required>
                             <label for="fullName">Full Name <span class="required-mark">*</span></label>
                             <div class="invalid-feedback">Please enter your name.</div>
                         </div>
@@ -60,7 +61,7 @@
 
                     <div class="col-md-6">
                         <div class="form-floating">
-                            <input type="tel" class="form-control" id="contactNumber" placeholder="09XXXXXXXXX"
+                            <input type="tel" name="contact_number" class="form-control" id="contactNumber" placeholder="09XXXXXXXXX"
                                 pattern="^(09\d{9}|\+639\d{9})$" maxlength="11" required>
                             <label for="contactNumber">Contact Number <span class="required-mark">*</span></label>
                             <div class="invalid-feedback">Please enter a valid PH mobile number (e.g. 09171234567).</div>
@@ -69,7 +70,7 @@
 
                     <div class="col-12">
                         <div class="form-floating">
-                            <input type="email" class="form-control" id="emailAddress" placeholder="name@example.com" required>
+                            <input type="email" name="email_address" class="form-control" id="emailAddress" placeholder="name@example.com" required>
                             <label for="emailAddress">Email Address <span class="required-mark">*</span></label>
                             <div class="invalid-feedback">Please enter a valid email address.</div>
                         </div>
@@ -87,7 +88,7 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="form-floating">
-                                <input type="date" class="form-control" id="dateRequested1" data-required-group="service1">
+                                <input type="date" name="service_record_date" class="form-control" id="dateRequested1" data-required-group="service1">
                                 <label for="dateRequested1">Date Requested <span class="required-mark">*</span></label>
                                 <div class="invalid-feedback">Please select the date requested.</div>
                             </div>
@@ -102,7 +103,7 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="form-floating">
-                                <input type="date" class="form-control" id="dateRequested2" data-required-group="service2">
+                                <input type="date" name="certificate_date"   class="form-control" id="dateRequested2" data-required-group="service2">
                                 <label for="dateRequested2">Date Requested <span class="required-mark">*</span></label>
                                 <div class="invalid-feedback">Please select the date requested.</div>
                             </div>
@@ -117,7 +118,7 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="form-floating">
-                                <input type="date" class="form-control" id="dateRequested3" data-required-group="service3">
+                                <input type="date" name="loan_date" class="form-control" id="dateRequested3" data-required-group="service3">
                                 <label for="dateRequested3">Date Requested <span class="required-mark">*</span></label>
                                 <div class="invalid-feedback">Please select the date requested.</div>
                             </div>
@@ -132,7 +133,7 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="form-floating">
-                                <input type="date" class="form-control" id="dateRequested4" data-required-group="service4">
+                                <input type="date" name="leave_date" class="form-control" id="dateRequested4" data-required-group="service4">
                                 <label for="dateRequested4">Date Requested <span class="required-mark">*</span></label>
                                 <div class="invalid-feedback">Please select the date requested.</div>
                             </div>
@@ -149,13 +150,13 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <div class="choice-card">
-                                <input class="form-check-input mt-0" type="radio" name="employeeCategory" id="empCategoryCOS" value="cos" data-required-group="service5">
+                                <input class="form-check-input mt-0" type="radio" name="employee_category" id="empCategoryCOS" value="cos" data-required-group="service5">
                                 <label for="empCategoryCOS">COS Employee</label>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="choice-card">
-                                <input class="form-check-input mt-0" type="radio" name="employeeCategory" id="empCategoryPermanent" value="permanent" data-required-group="service5">
+                                <input class="form-check-input mt-0" type="radio" name="employee_category" id="empCategoryPermanent" value="permanent" data-required-group="service5">
                                 <label for="empCategoryPermanent">Permanent Employee</label>
                             </div>
                         </div>
@@ -167,28 +168,28 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="periodOfService" placeholder="Period of Service" data-required-group="cos">
+                                    <input type="text" class="form-control" name="period_of_service" id="periodOfService" placeholder="Period of Service" data-required-group="cos">
                                     <label for="periodOfService">Period of Service <span class="required-mark">*</span></label>
                                     <div class="invalid-feedback">Please enter the period of service.</div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="cosPosition" placeholder="Position" data-required-group="cos">
+                                    <input type="text" class="form-control" name="position" id="cosPosition" placeholder="Position" data-required-group="cos">
                                     <label for="cosPosition">Position <span class="required-mark">*</span></label>
                                     <div class="invalid-feedback">Please enter your position.</div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="officeAssigned" placeholder="Office / Division Assigned" data-required-group="cos">
+                                    <input type="text" class="form-control" name="office_division" id="officeAssigned" placeholder="Office / Division Assigned" data-required-group="cos">
                                     <label for="officeAssigned">Office / Division Assigned <span class="required-mark">*</span></label>
                                     <div class="invalid-feedback">Please enter your office or division.</div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="date" class="form-control" id="dateRequestedCOS" data-required-group="cos">
+                                    <input type="date" name="cos_date" class="form-control" id="dateRequestedCOS" data-required-group="cos">
                                     <label for="dateRequestedCOS">Date Requested <span class="required-mark">*</span></label>
                                     <div class="invalid-feedback">Please select the date requested.</div>
                                 </div>
@@ -201,14 +202,14 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="permanentPosition" placeholder="Position" data-required-group="permanent">
+                                    <input type="text" class="form-control" name="position" id="permanentPosition" placeholder="Position" data-required-group="permanent">
                                     <label for="permanentPosition">Position <span class="required-mark">*</span></label>
                                     <div class="invalid-feedback">Please enter your position.</div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="date" class="form-control" id="dateRequestedPermanent" data-required-group="permanent">
+                                    <input type="date" name="permanent_date" class="form-control"  id="dateRequestedPermanent" data-required-group="permanent">
                                     <label for="dateRequestedPermanent">Date Requested <span class="required-mark">*</span></label>
                                     <div class="invalid-feedback">Please select the date requested.</div>
                                 </div>
@@ -224,7 +225,7 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <div class="form-floating">
-                                <input type="date" class="form-control" id="dateRequested6" data-required-group="service6">
+                                <input type="date" name="certification_date" class="form-control" id="dateRequested6" data-required-group="service6">
                                 <label for="dateRequested6">Date Requested <span class="required-mark">*</span></label>
                                 <div class="invalid-feedback">Please select the date requested.</div>
                             </div>
@@ -235,25 +236,25 @@
                     <div class="row g-3" id="certificationChecks">
                         <div class="col-md-6">
                             <div class="choice-card">
-                                <input class="form-check-input mt-0" type="checkbox" id="certNoPending" value="No Pending Case">
+                                <input class="form-check-input mt-0" type="checkbox" name="certification[]" id="certNoPending" value="No Pending Case">
                                 <label for="certNoPending">No Pending Case</label>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="choice-card">
-                                <input class="form-check-input mt-0" type="checkbox" id="certLastSalary" value="Last Salary Received">
+                                <input class="form-check-input mt-0" type="checkbox" name="certification[]" id="certLastSalary" value="Last Salary Received">
                                 <label for="certLastSalary">Last Salary Received</label>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="choice-card">
-                                <input class="form-check-input mt-0" type="checkbox" id="certLeaveCredits" value="Leave Credits">
+                                <input class="form-check-input mt-0" type="checkbox" name="certification[]" id="certLeaveCredits" value="Leave Credits">
                                 <label for="certLeaveCredits">Leave Credits</label>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="choice-card">
-                                <input class="form-check-input mt-0" type="checkbox" id="certLeaveWithoutPay" value="Leave Without Pay">
+                                <input class="form-check-input mt-0" type="checkbox" name="certification[]" id="certLeaveWithoutPay" value="Leave Without Pay">
                                 <label for="certLeaveWithoutPay">Leave Without Pay</label>
                             </div>
                         </div>
@@ -270,14 +271,14 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="form-floating">
-                                <input type="date" class="form-control" id="dateRequested7" data-required-group="service7">
+                                <input type="date" name="ipcr_date" class="form-control" id="dateRequested7" data-required-group="service7">
                                 <label for="dateRequested7">Date Requested <span class="required-mark">*</span></label>
                                 <div class="invalid-feedback">Please select the date requested.</div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-floating">
-                                <input type="text" class="form-control" id="ipcrPeriod" placeholder="e.g. January - June 2026" data-required-group="service7">
+                                <input type="text" class="form-control" name="ipcr_period" id="ipcrPeriod" placeholder="e.g. January - June 2026" data-required-group="service7">
                                 <label for="ipcrPeriod">Please Indicate Period <span class="required-mark">*</span></label>
                                 <div class="invalid-feedback">Please indicate the period.</div>
                             </div>
@@ -292,14 +293,14 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="form-floating">
-                                <input type="date" class="form-control" id="dateRequested8" data-required-group="service8">
+                                <input type="date" name="documents_date" class="form-control" id="dateRequested8" data-required-group="service8">
                                 <label for="dateRequested8">Date Requested <span class="required-mark">*</span></label>
                                 <div class="invalid-feedback">Please select the date requested.</div>
                             </div>
                         </div>
                         <div class="col-12">
                             <div class="form-floating">
-                                <textarea class="form-control" id="specify201" placeholder="Please specify" data-required-group="service8" style="height: 140px;"></textarea>
+                                <textarea class="form-control" id="specify201" name="specify_201" placeholder="Please specify" data-required-group="service8" style="height: 140px;"></textarea>
                                 <label for="specify201">Please Specify <span class="required-mark">*</span></label>
                                 <div class="invalid-feedback">Please specify your request.</div>
                             </div>
@@ -355,7 +356,7 @@
                 <div class="modal-body text-center py-5">
                     <i class="bi bi-check-circle-fill" style="font-size: 3.5rem; color: var(--dole-blue);"></i>
                     <h4 class="fw-bold mt-3 mb-2">Request Submitted</h4>
-                    <h3 class="fw-bold mt-3 mb-2">Request Submitted</h3>
+                    <h3 class="fw-bold mt-3 mb-2">Request ID: <span id="reference_no"></span></h3>
 
                     <p class="text-muted mb-4">Your HR request has been received. The HR Unit will get in touch with you via the contact details provided.</p>
                     <button type="button" class="btn btn-dole-primary px-4" data-bs-dismiss="modal">Done</button>
@@ -394,7 +395,7 @@
         const serviceSections = document.querySelectorAll('.dynamic-section[data-service]');
         // Employee-category sub-sections (only inside Service 5)
         const employeeCategorySections = document.querySelectorAll('.dynamic-section[data-employee-category]');
-        const employeeCategoryRadios = document.querySelectorAll('input[name="employeeCategory"]');
+        const employeeCategoryRadios = document.querySelectorAll('input[name="employee_category"]');
         const certificationCheckboxes = document.querySelectorAll('#certificationChecks input[type="checkbox"]');
 
         /* =========================================================
@@ -592,7 +593,7 @@
                     rows.push(['Date Requested', document.getElementById('dateRequested4').value]);
                     break;
                 case 'service5': {
-                    const category = document.querySelector('input[name="employeeCategory"]:checked');
+                    const category = document.querySelector('input[name="employee_category"]:checked');
                     const categoryValue = category ? category.value : '';
                     rows.push(['Employee Category', categoryValue === 'cos' ? 'COS Employee' : 'Permanent Employee']);
                     if (categoryValue === 'cos') {
@@ -640,18 +641,9 @@
             });
         }
 
-        /* =========================================================
-           FINAL SUBMIT (from confirmation modal)
-        ========================================================= */
         confirmSubmitBtn.addEventListener('click', function() {
-            // In production, this is where the form data would be sent to the server (e.g. via fetch()).
             confirmModal.hide();
-
-            // Small delay so the confirm modal fully closes before the success modal opens
-            setTimeout(function() {
-                successModal.show();
-                window.location.href = "eportal";
-            }, 300);
+            form.submit();
         });
 
         /* =========================================================
