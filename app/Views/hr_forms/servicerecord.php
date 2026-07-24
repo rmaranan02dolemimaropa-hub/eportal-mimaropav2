@@ -28,7 +28,7 @@
             <form id="hrRequestForm" action="<?= site_url('service-record/save') ?>" method="post" class="needs-validation">
 
                 <!-- ---------- COMMON FIELDS ---------- -->
-                 <?= csrf_field() ?>
+                <?= csrf_field() ?>
                 <p class="section-label"><i class="bi bi-clipboard2-check"></i>Request Details</p>
 
                 <div class="row g-3">
@@ -103,7 +103,7 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="form-floating">
-                                <input type="date" name="certificate_date"   class="form-control" id="dateRequested2" data-required-group="service2">
+                                <input type="date" name="certificate_date" class="form-control" id="dateRequested2" data-required-group="service2">
                                 <label for="dateRequested2">Date Requested <span class="required-mark">*</span></label>
                                 <div class="invalid-feedback">Please select the date requested.</div>
                             </div>
@@ -209,7 +209,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="date" name="permanent_date" class="form-control"  id="dateRequestedPermanent" data-required-group="permanent">
+                                    <input type="date" name="permanent_date" class="form-control" id="dateRequestedPermanent" data-required-group="permanent">
                                     <label for="dateRequestedPermanent">Date Requested <span class="required-mark">*</span></label>
                                     <div class="invalid-feedback">Please select the date requested.</div>
                                 </div>
@@ -356,9 +356,9 @@
                 <div class="modal-body text-center py-5">
                     <i class="bi bi-check-circle-fill" style="font-size: 3.5rem; color: var(--dole-blue);"></i>
                     <h4 class="fw-bold mt-3 mb-2">Request Submitted</h4>
-                    <h3 class="fw-bold mt-3 mb-2">Request ID: <span id="reference_no"></span></h3>
+                    <h3 class="fw-bold mt-3 mb-2" style="color:#10058C;" ><?= esc(session()->getFlashdata('reference_no')); ?></h3>
 
-                    <p class="text-muted mb-4">Your HR request has been received. The HR Unit will get in touch with you via the contact details provided.</p>
+                    <p class="text-muted mb-4">Your HR request has been received. <br> Keep your reference number for tracking your request.</p>
                     <button type="button" class="btn btn-dole-primary px-4" data-bs-dismiss="modal">Done</button>
                 </div>
             </div>
@@ -370,6 +370,9 @@
 
 <!-- Bootstrap 5 Bundle (includes Popper) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+
+
+
 
 <script>
     (function() {
@@ -671,3 +674,12 @@
         hideAllEmployeeCategorySections();
     })();
 </script>
+
+<?php if (session()->getFlashdata('success')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = new bootstrap.Modal(document.getElementById('successModal'));
+            modal.show();
+        });
+    </script>
+<?php endif; ?>
