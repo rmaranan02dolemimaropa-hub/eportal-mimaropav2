@@ -27,5 +27,7 @@
 
   <!-- Custom Stylesheet -->
   <link rel="stylesheet" href="assets/css/dashboard.css" />
+  <link rel="stylesheet" href="assets/css/modal.css" />
+  
 </head>
 <body>

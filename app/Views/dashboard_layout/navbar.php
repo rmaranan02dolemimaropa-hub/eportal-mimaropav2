@@ -1,10 +1,7 @@
 <!-- ============ TOP NAVBAR ============ -->
   <header class="topbar">
     <div class="topbar-left">
-      <!-- Sidebar toggle (mobile / offcanvas) -->
-      <button class="sidebar-toggle-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas" aria-label="Open menu">
-        <i class="bi bi-list"></i>
-      </button>
+
 
       <div class="brand">
         <div class="brand-mark"><i class="bi bi-shield-check"></i></div>

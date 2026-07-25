@@ -1,0 +1,426 @@
+/* ---------- Minimalist modal shell ---------- */
+#addUserModal .modal-content {
+  border: 1px solid #E5E7EB;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* Kill the bootstrap bg-primary block header look */
+#addUserModal .modal-header {
+  background: #fff !important;
+  color: #111827 !important;
+  border-bottom: 1px solid #E5E7EB;
+  padding: 20px 24px;
+}
+
+#addUserModal .modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#addUserModal .modal-title i {
+  color: #6B7280;
+  font-size: 15px;
+}
+
+/* Close button needs to go back to dark since header is now white */
+#addUserModal .btn-close {
+  filter: none;
+  opacity: 0.5;
+}
+#addUserModal .btn-close:hover {
+  opacity: 1;
+}
+
+/* ---------- Body ---------- */
+#addUserModal .modal-body {
+  padding: 24px;
+}
+
+#addUserModal label {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #6B7280;
+  margin-bottom: 6px;
+  display: inline-block;
+}
+
+#addUserModal .form-control,
+#addUserModal .form-select {
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  font-size: 14px;
+  padding: 9px 12px;
+  color: #111827;
+  background: #FAFAFA;
+}
+
+#addUserModal .form-control:focus,
+#addUserModal .form-select:focus {
+  border-color: #9CA3AF;
+  box-shadow: none;
+  background: #fff;
+}
+
+/* ---------- Footer ---------- */
+#addUserModal .modal-footer {
+  border-top: 1px solid #E5E7EB;
+  padding: 16px 24px;
+}
+
+#addUserModal .btn {
+  font-size: 13.5px;
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 8px 16px;
+}
+
+#addUserModal .btn-secondary {
+  background: #fff;
+  color: #6B7280;
+  border: 1px solid #E5E7EB;
+}
+#addUserModal .btn-secondary:hover {
+  background: #F3F4F6;
+  color: #111827;
+}
+
+#addUserModal .btn-primary {
+  background: #111827;
+  border-color: #111827;
+}
+#addUserModal .btn-primary:hover {
+  background: #1F2937;
+  border-color: #1F2937;
+}
+
+/* ---------- Minimalist modal shell ---------- */
+.edit-user-modal .modal-content {
+  border: 1px solid #E5E7EB;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* Kill the bootstrap bg-warning block header look */
+.edit-user-modal .modal-header {
+  background: #fff !important;
+  border-bottom: 1px solid #E5E7EB;
+  padding: 20px 24px;
+}
+
+.edit-user-modal .modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.edit-user-modal .modal-title::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #C97A25;
+  display: inline-block;
+}
+
+.edit-user-modal .btn-close {
+  filter: none;
+  opacity: 0.5;
+}
+.edit-user-modal .btn-close:hover {
+  opacity: 1;
+}
+
+/* ---------- Body ---------- */
+.edit-user-modal .modal-body {
+  padding: 24px;
+}
+
+.edit-user-modal label {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #6B7280;
+  margin-bottom: 6px;
+  display: inline-block;
+}
+
+.edit-user-modal .form-control,
+.edit-user-modal .form-select {
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  font-size: 14px;
+  padding: 9px 12px;
+  color: #111827;
+  background: #FAFAFA;
+}
+
+.edit-user-modal .form-control:focus,
+.edit-user-modal .form-select:focus {
+  border-color: #9CA3AF;
+  box-shadow: none;
+  background: #fff;
+}
+
+.edit-user-modal .form-control::placeholder {
+  color: #9CA3AF;
+  font-size: 13px;
+}
+
+/* ---------- Footer ---------- */
+.edit-user-modal .modal-footer {
+  border-top: 1px solid #E5E7EB;
+  padding: 16px 24px;
+}
+
+.edit-user-modal .btn {
+  font-size: 13.5px;
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 8px 16px;
+}
+
+.edit-user-modal .btn-secondary {
+  background: #fff;
+  color: #6B7280;
+  border: 1px solid #E5E7EB;
+}
+.edit-user-modal .btn-secondary:hover {
+  background: #F3F4F6;
+  color: #111827;
+}
+
+/* Flat amber instead of bootstrap's yellow-striped warning button */
+.edit-user-modal .btn-warning {
+  background: #C97A25;
+  border-color: #C97A25;
+  color: #fff;
+}
+.edit-user-modal .btn-warning:hover {
+  background: #A8631C;
+  border-color: #A8631C;
+  color: #fff;
+}
+
+/* ---------- Minimalist modal shell ---------- */
+.view-user-modal .modal-content {
+  border: 1px solid #E5E7EB;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* Kill the bootstrap bg-info block header look */
+.view-user-modal .modal-header {
+  background: #fff !important;
+  color: #111827 !important;
+  border-bottom: 1px solid #E5E7EB;
+  padding: 20px 24px;
+}
+
+.view-user-modal .modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.view-user-modal .modal-title::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2E5AAC;
+  display: inline-block;
+}
+
+.view-user-modal .btn-close {
+  filter: none;
+  opacity: 0.5;
+}
+.view-user-modal .btn-close:hover {
+  opacity: 1;
+}
+
+/* ---------- Body: drop the bordered-table look for a flat key/value list ---------- */
+.view-user-modal .modal-body {
+  padding: 8px 24px 20px;
+}
+
+.view-user-modal .table {
+  margin: 0;
+  border: none;
+}
+
+.view-user-modal .table tr {
+  border: none;
+}
+
+.view-user-modal .table th,
+.view-user-modal .table td {
+  border: none;
+  border-bottom: 1px solid #F0F1F3;
+  padding: 12px 0;
+  vertical-align: middle;
+}
+
+.view-user-modal .table tr:last-child th,
+.view-user-modal .table tr:last-child td {
+  border-bottom: none;
+}
+
+.view-user-modal .table th {
+  width: 35%;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #6B7280;
+  text-transform: none;
+}
+
+.view-user-modal .table td {
+  font-size: 14px;
+  color: #111827;
+  text-align: right;
+}
+
+/* ---------- Badges: flat, no bootstrap gradient ---------- */
+.view-user-modal .badge {
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+
+.view-user-modal .badge.bg-success {
+  background: #E5F0E7 !important;
+  color: #2E7D4F;
+}
+
+.view-user-modal .badge.bg-danger {
+  background: #FBEAE6 !important;
+  color: #B3432B;
+}
+
+/* ---------- Footer ---------- */
+.view-user-modal .modal-footer {
+  border-top: 1px solid #E5E7EB;
+  padding: 16px 24px;
+}
+
+.view-user-modal .btn {
+  font-size: 13.5px;
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 8px 16px;
+}
+
+.view-user-modal .btn-secondary {
+  background: #fff;
+  color: #6B7280;
+  border: 1px solid #E5E7EB;
+}
+.view-user-modal .btn-secondary:hover {
+  background: #F3F4F6;
+  color: #111827;
+}
+/* ---------- Minimalist modal shell ---------- */
+.delete-user-modal .modal-content {
+  border: 1px solid #E5E7EB;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.delete-user-modal .modal-header {
+  background: #fff !important;
+  color: #111827 !important;
+  border-bottom: 1px solid #E5E7EB;
+  padding: 20px 24px;
+}
+
+.delete-user-modal .modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.delete-user-modal .modal-title::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #B3432B;
+  display: inline-block;
+}
+
+.delete-user-modal .btn-close {
+  filter: none;
+  opacity: 0.5;
+}
+.delete-user-modal .btn-close:hover {
+  opacity: 1;
+}
+
+/* ---------- Body ---------- */
+.delete-user-modal .modal-body {
+  padding: 28px 24px;
+  text-align: center;
+}
+
+.delete-user-modal .modal-body h5 {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6B7280;
+  margin-bottom: 16px;
+}
+
+.delete-user-modal .modal-body hr {
+  display: none; /* the divider line reads as bootstrap-default clutter here */
+}
+
+.delete-user-modal .modal-body h4 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+/* ---------- Footer ---------- */
+.delete-user-modal .modal-footer {
+  border-top: 1px solid #E5E7EB;
+  padding: 16px 24px;
+  justify-content: center;
+}
+
+.delete-user-modal .btn {
+  font-size: 13.5px;
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 8px 18px;
+}
+
+.delete-user-modal .btn-secondary {
+  background: #fff;
+  color: #6B7280;
+  border: 1px solid #E5E7EB;
+}
+.delete-user-modal .btn-secondary:hover {
+  background: #F3F4F6;
+  color: #111827;
+}
+
+.delete-user-modal .btn-danger {
+  background: #B3432B;
+  border-color: #B3432B;
+}
+.delete-user-modal .btn-danger:hover {
+  background: #8F3320;
+  border-color: #8F3320;
+}

@@ -35,5 +35,19 @@ $routes->get('/unauthorized', function(){
 
 });
 
+/*
+|--------------------------------------------------------------------------
+| USER MANAGEMENT
+|--------------------------------------------------------------------------
+*/
+
+$routes->get('/users', 'EportalController::users');
+
+$routes->post('/users/store', 'EportalController::storeUser');
+
+$routes->post('/users/update/(:num)', 'EportalController::updateUser/$1');
+
+$routes->post('/users/delete/(:num)', 'EportalController::deleteUser/$1');
+
 
 

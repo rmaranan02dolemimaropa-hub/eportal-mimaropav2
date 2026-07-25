@@ -921,3 +921,41 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+
+
+.table-pagination{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:20px;
+    flex-wrap:wrap;
+}
+
+.pagination{
+    margin:0;
+    gap:6px;
+}
+
+.pagination .page-link{
+    border-radius:8px;
+    border:1px solid #dee2e6;
+    color:#10058C;
+    padding:.45rem .9rem;
+}
+
+.pagination .active .page-link{
+    background:#10058C;
+    border-color:#10058C;
+    color:#fff;
+}
+
+.pagination .page-link:hover{
+    background:#10058C;
+    color:#fff;
+}
+
+.pagination .disabled .page-link{
+    pointer-events:none;
+    opacity:.5;
+}

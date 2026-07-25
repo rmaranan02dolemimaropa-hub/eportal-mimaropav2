@@ -22,10 +22,7 @@ class EportalController extends BaseController
     {
         return view('hr_forms/hr_forms');
     }
-    public function users()
-    {
-        return view('dashboard/users');
-    }
+
     public function login()
     {
         return view('admin/login');
@@ -57,10 +54,10 @@ class EportalController extends BaseController
         }
 
         $session->set([
-            'user_id'  => $user['id'],
+            'user_id' => $user['id'],
             'fullname' => $user['fullname'],
-            'role'     => $user['role'],
-            'logged_in'=> true
+            'role' => $user['role'],
+            'logged_in' => true
         ]);
 
         if ($user['role'] == 'IT ADMINISTRATOR') {
@@ -135,25 +132,25 @@ class EportalController extends BaseController
 
         // Prepare data for insertion
         $data = [
-            'reference_no'      => $referenceNo,
-            'service_availed'   => $serviceAvailed,
-            'fullname'          => $this->request->getPost('fullname'),
-            'contact_number'    => $this->request->getPost('contact_number'),
-            'email_address'     => $this->request->getPost('email_address'),
+            'reference_no' => $referenceNo,
+            'service_availed' => $serviceAvailed,
+            'fullname' => $this->request->getPost('fullname'),
+            'contact_number' => $this->request->getPost('contact_number'),
+            'email_address' => $this->request->getPost('email_address'),
             'employee_category' => $this->request->getPost('employee_category'),
             'period_of_service' => $this->request->getPost('period_of_service'),
-            'position'          => $this->request->getPost('position'),
-            'office_division'   => $this->request->getPost('office_division'),
-            'certification'     => $certification,
-            'ipcr_period'       => $this->request->getPost('ipcr_period'),
-            'specify_201'       => $this->request->getPost('specify_201'),
-            'date_requested'    => $dateRequested,
-            'status'            => 'Pending',
-            'remarks'           => '',
-            'date_received'     => null,
-            'received_by'       => null,
-            'date_released'     => null,
-            'released_by'       => null,
+            'position' => $this->request->getPost('position'),
+            'office_division' => $this->request->getPost('office_division'),
+            'certification' => $certification,
+            'ipcr_period' => $this->request->getPost('ipcr_period'),
+            'specify_201' => $this->request->getPost('specify_201'),
+            'date_requested' => $dateRequested,
+            'status' => 'Pending',
+            'remarks' => '',
+            'date_received' => null,
+            'received_by' => null,
+            'date_released' => null,
+            'released_by' => null,
         ];
 
         // Save Request
@@ -166,10 +163,88 @@ class EportalController extends BaseController
 
             dd([
                 'Validation Errors' => $model->errors(),
-                'Database Error'    => $model->db->error(),
-                'POST Data'         => $this->request->getPost(),
-                'Data to Insert'    => $data,
+                'Database Error' => $model->db->error(),
+                'POST Data' => $this->request->getPost(),
+                'Data to Insert' => $data,
             ]);
         }
+    }
+
+    //===================================================
+    // USER LIST
+    //===================================================
+
+    public function users()
+    {
+        $model = new UserModel();
+
+        $data = [
+            'users' => $model->paginate(10),
+            'pager' => $model->pager
+        ];
+
+        // Pass $users to the view
+        return view('dashboard/users', $data);
+    }
+    //===================================================
+    // ADD USER
+    //===================================================
+
+    public function storeUser()
+    {
+        $model = new UserModel();
+
+        $model->save([
+            'fullname' => $this->request->getPost('fullname'),
+            'username' => $this->request->getPost('username'),
+            'password' => password_hash(
+                $this->request->getPost('password'),
+                PASSWORD_DEFAULT
+            ),
+            'role' => $this->request->getPost('role'),
+            'status' => $this->request->getPost('status')
+        ]);
+
+        return redirect()->back()->with('success', 'User added successfully.');
+    }
+
+    //===================================================
+    // UPDATE USER
+    //===================================================
+
+    public function updateUser($id)
+    {
+        $model = new UserModel();
+
+        $data = [
+            'fullname' => $this->request->getPost('fullname'),
+            'username' => $this->request->getPost('username'),
+            'role' => $this->request->getPost('role'),
+            'status' => $this->request->getPost('status')
+        ];
+
+        if (!empty($this->request->getPost('password'))) {
+            $data['password'] = password_hash(
+                $this->request->getPost('password'),
+                PASSWORD_DEFAULT
+            );
+        }
+
+        $model->update($id, $data);
+
+        return redirect()->back()->with('success', 'User updated successfully.');
+    }
+
+    //===================================================
+    // DELETE USER
+    //===================================================
+
+    public function deleteUser($id)
+    {
+        $model = new UserModel();
+
+        $model->delete($id);
+
+        return redirect()->back()->with('success', 'User deleted successfully.');
     }
 }

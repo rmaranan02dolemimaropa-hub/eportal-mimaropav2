@@ -3,23 +3,30 @@
 <?= $this->include('dashboard_layout/sidebar') ?>
 
 
+
+
 <!-- ============ MAIN CONTENT ============ -->
 <main class="main-content">
+    <?php if (session()->getFlashdata('success')): ?>
+
+        <div class="alert alert-success alert-dismissible fade show" id="successAlert">
+
+            <?= session()->getFlashdata('success'); ?>
+
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+            </button>
+
+        </div>
+
+    <?php endif; ?>
 
     <!-- Recent Requests Table -->
     <section class="panel table-panel">
         <div class="panel-header">
             <h2 class="panel-title">Recent Service Requests</h2>
             <div class="panel-tools">
-                <div class="search-box">
-                    <i class="bi bi-search"></i>
-                    <input type="text" class="form-control" placeholder="Search requests..." aria-label="Search requests" />
-                </div>
-                <button class="btn tool-btn" type="button">
-                    <i class="bi bi-funnel"></i><span class="d-none d-md-inline">Filter</span>
-                </button>
-                <button class="btn tool-btn" type="button">
-                    <i class="bi bi-download"></i><span class="d-none d-md-inline">Export</span>
+                <button class="btn tool-btn" type="button" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                    <i class="bi bi-person-plus-fill"></i><span class="d-none d-md-inline">Add User</span>
                 </button>
             </div>
         </div>
@@ -28,129 +35,528 @@
             <table class="table requests-table align-middle mb-0">
                 <thead>
                     <tr>
-                        <th>Reference No.</th>
-                        <th>Requestor</th>
-                        <th>Service</th>
-                        <th>Date Requested</th>
+                        <th>Full Name</th>
+                        <th>Username</th>
+                        <th>Role</th>
                         <th>Status</th>
                         <th class="text-end">Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td class="ref-no">HR-202607240001</td>
-                        <td>Juan Dela Cruz</td>
-                        <td>Certificate of Employment</td>
-                        <td>July 24, 2026</td>
-                        <td><span class="badge badge-pending">Pending</span></td>
-                        <td class="text-end">
-                            <div class="row-actions">
-                                <button class="row-action-btn" title="View"><i class="bi bi-eye"></i></button>
-                                <button class="row-action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
-                                <button class="row-action-btn row-action-danger" title="Delete"><i class="bi bi-trash"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="ref-no">HR-202607230014</td>
-                        <td>Maria Santos</td>
-                        <td>Service Record</td>
-                        <td>July 23, 2026</td>
-                        <td><span class="badge badge-completed">Completed</span></td>
-                        <td class="text-end">
-                            <div class="row-actions">
-                                <button class="row-action-btn" title="View"><i class="bi bi-eye"></i></button>
-                                <button class="row-action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
-                                <button class="row-action-btn row-action-danger" title="Delete"><i class="bi bi-trash"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="ref-no">HR-202607230009</td>
-                        <td>Ramon Villareal</td>
-                        <td>Leave Application</td>
-                        <td>July 23, 2026</td>
-                        <td><span class="badge badge-processing">Processing</span></td>
-                        <td class="text-end">
-                            <div class="row-actions">
-                                <button class="row-action-btn" title="View"><i class="bi bi-eye"></i></button>
-                                <button class="row-action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
-                                <button class="row-action-btn row-action-danger" title="Delete"><i class="bi bi-trash"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="ref-no">HR-202607220031</td>
-                        <td>Angelica Reyes</td>
-                        <td>Certificate of Employment</td>
-                        <td>July 22, 2026</td>
-                        <td><span class="badge badge-released">Released</span></td>
-                        <td class="text-end">
-                            <div class="row-actions">
-                                <button class="row-action-btn" title="View"><i class="bi bi-eye"></i></button>
-                                <button class="row-action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
-                                <button class="row-action-btn row-action-danger" title="Delete"><i class="bi bi-trash"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="ref-no">HR-202607210007</td>
-                        <td>Noel Bautista</td>
-                        <td>Clearance Request</td>
-                        <td>July 21, 2026</td>
-                        <td><span class="badge badge-rejected">Rejected</span></td>
-                        <td class="text-end">
-                            <div class="row-actions">
-                                <button class="row-action-btn" title="View"><i class="bi bi-eye"></i></button>
-                                <button class="row-action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
-                                <button class="row-action-btn row-action-danger" title="Delete"><i class="bi bi-trash"></i></button>
-                            </div>
-                        </td>
-                    </tr>
+                    <?php foreach ($users as $row): ?>
+                        <tr>
+                            <td><?= esc($row['fullname']) ?></td>
+                            <td><?= esc($row['username']) ?></td>
+                            <td><?= esc($row['role']) ?></td>
+                            <td>
+                                <?php if ($row['status'] == 'ACTIVE'): ?>
+                                    <span class="badge badge-completed">ACTIVE</span>
+                                <?php else: ?>
+                                    <span class="badge badge-rejected">INACTIVE</span>
+                                <?php endif; ?>
+                            </td>
+
+                            <td class="text-end">
+                                <div class="row-actions">
+                                    <button class="row-action-btn" title="View" data-bs-toggle="modal"
+                                        data-bs-target="#view<?= $row['id'] ?>"><i class="bi bi-eye"></i></button>
+                                    <button class="row-action-btn" title="Edit" data-bs-toggle="modal"
+                                        data-bs-target="#edit<?= $row['id'] ?>"><i class="bi bi-pencil"></i></button>
+                                    <button class="row-action-btn row-action-danger" title="Delete" data-bs-toggle="modal"
+                                        data-bs-target="#delete<?= $row['id'] ?>"><i class="bi bi-trash"></i></button>
+
+
+                                </div>
+                            </td>
+                        </tr>
+
+                    <?php endforeach; ?>
                 </tbody>
             </table>
         </div>
 
-        <!-- Pagination -->
-        <nav class="table-pagination" aria-label="Requests pagination">
-            <span class="pagination-summary">Showing 1–5 of 128 requests</span>
+        <nav class="table-pagination">
+
+            <span class="pagination-summary">
+                Showing <?= count($users) ?> of <?= $pager->getTotal() ?> users
+            </span>
+
             <ul class="pagination mb-0">
-                <li class="page-item disabled"><a class="page-link" href="#" tabindex="-1"><i class="bi bi-chevron-left"></i></a></li>
-                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item"><a class="page-link" href="#"><i class="bi bi-chevron-right"></i></a></li>
+
+                <!-- Previous -->
+                <li class="page-item <?= $pager->getCurrentPage() == 1 ? 'disabled' : '' ?>">
+                    <a class="page-link"
+                        href="<?= $pager->getCurrentPage() == 1 ? '#' : $pager->getPageURI($pager->getCurrentPage() - 1) ?>">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
+                </li>
+
+                <!-- Page Numbers -->
+                <?php for ($i = 1; $i <= $pager->getPageCount(); $i++): ?>
+                    <li class="page-item <?= $i == $pager->getCurrentPage() ? 'active' : '' ?>">
+                        <a class="page-link" href="<?= $pager->getPageURI($i) ?>">
+                            <?= $i ?>
+                        </a>
+                    </li>
+                <?php endfor; ?>
+
+                <!-- Next -->
+                <li class="page-item <?= $pager->getCurrentPage() == $pager->getPageCount() ? 'disabled' : '' ?>">
+                    <a class="page-link"
+                        href="<?= $pager->getCurrentPage() == $pager->getPageCount() ? '#' : $pager->getPageURI($pager->getCurrentPage() + 1) ?>">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+
             </ul>
+
         </nav>
+
+
     </section>
 </main>
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <form action="<?= base_url('users/store') ?>" method="post">
+
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-person-plus"></i> Add User
+                    </h5>
+
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close">
+                    </button>
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+                            <label>Full Name</label>
+                            <input type="text" name="fullname" class="form-control" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>Username</label>
+                            <input type="text" name="username" class="form-control" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>Password</label>
+                            <input type="password" name="password" class="form-control" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>Role</label>
+
+                            <select name="role" class="form-select" required>
+
+                                <option value="" disabled>Select Role</option>
+
+                                <option value="IT Administrator">
+                                    IT Administrator
+                                </option>
+
+                                <option value="HR Administrator">
+                                    HR Administrator
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>Status</label>
+
+                            <select name="status" class="form-select" required>
+
+                                <option value="ACTIVE">ACTIVE</option>
+                                <option value="INACTIVE">INACTIVE</option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">
+                        Cancel
+                    </button>
+
+                    <button class="btn btn-primary">
+                        Save User
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<?php foreach ($users as $row): ?>
+
+    <div class="modal fade edit-user-modal" id="edit<?= $row['id'] ?>">
+
+        <div class="modal-dialog modal-lg">
+
+            <div class="modal-content">
+
+                <form action="<?= base_url('users/update/' . $row['id']) ?>" method="post">
+
+                    <div class="modal-header bg-warning">
+
+                        <h5 class="modal-title">
+                            Edit User
+                        </h5>
+
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close">
+                        </button>
+
+                    </div>
+
+                    <div class="modal-body">
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+
+                                <label>Full Name</label>
+
+                                <input type="text" name="fullname" class="form-control" value="<?= $row['fullname'] ?>"
+                                    required>
+
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+
+                                <label>Username</label>
+
+                                <input type="text" name="username" class="form-control" value="<?= $row['username'] ?>"
+                                    required>
+
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+
+                                <label>Password</label>
+
+                                <input type="password" name="password" class="form-control"
+                                    placeholder="Leave blank if unchanged">
+
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+
+                                <label>Role</label>
+
+                                <select name="role" class="form-select">
+
+                                    <option <?= $row['role'] == 'IT Administrator' ? 'selected' : '' ?>>
+                                        IT Administrator
+                                    </option>
+
+                                    <option <?= $row['role'] == 'HR Administrator' ? 'selected' : '' ?>>
+                                        HR Administrator
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label>Status</label>
+
+                                <select name="status" class="form-select">
+
+                                    <option <?= $row['status'] == 'ACTIVE' ? 'selected' : '' ?>>
+                                        ACTIVE
+                                    </option>
+
+                                    <option <?= $row['status'] == 'INACTIVE' ? 'selected' : '' ?>>
+                                        INACTIVE
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">
+                            Cancel
+                        </button>
+
+                        <button class="btn btn-warning">
+                            Update User
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+<?php endforeach; ?>
+
+<?php foreach ($users as $row): ?>
+
+    <div class="modal fade view-user-modal" id="view<?= $row['id'] ?>">
+
+        <div class="modal-dialog">
+
+            <div class="modal-content">
+
+                <div class="modal-header bg-info text-white">
+
+                    <h5 class="modal-title">
+
+                        View User
+
+                    </h5>
+
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close">
+                    </button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <table class="table table-bordered">
+
+                        <tr>
+                            <th>Full Name</th>
+                            <td><?= $row['fullname'] ?></td>
+                        </tr>
+
+                        <tr>
+                            <th>Username</th>
+                            <td><?= $row['username'] ?></td>
+                        </tr>
+
+                        <tr>
+                            <th>Role</th>
+                            <td><?= $row['role'] ?></td>
+                        </tr>
+
+                        <tr>
+                            <th>Status</th>
+                            <td>
+                                <?php if ($row['status'] == "ACTIVE"): ?>
+                                    <span class="badge badge-completed">ACTIVE</span>
+                                <?php else: ?>
+                                    <span class="badge badge-rejected">INACTIVE</span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+
+                    </table>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">
+                        Close
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+<?php endforeach; ?>
+
+<?php foreach ($users as $row): ?>
+
+    <div class="modal fade delete-user-modal" id="delete<?= $row['id'] ?>">
+
+        <div class="modal-dialog">
+
+            <div class="modal-content">
+
+                <form action="<?= base_url('users/delete/' . $row['id']) ?>" method="post">
+
+                    <div class="modal-header bg-danger text-white">
+
+                        <h5 class="modal-title">
+
+                            Delete User
+
+                        </h5>
+
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close">
+                        </button>
+
+                    </div>
+
+                    <div class="modal-body">
+
+                        <h5 class="text-center">
+
+                            Are you sure you want to delete?
+
+                        </h5>
+
+                        <hr>
+
+                        <h4 class="text-center">
+
+                            <?= esc($row['fullname']) ?>
+
+                        </h4>
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+
+                        <button class="btn btn-danger">
+
+                            Delete
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+<?php endforeach; ?>
+
+
 </div>
 
 
 <?= $this->include('dashboard_layout/footer') ?>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', function () {
+
+        /* ==========================================
+           ACTIVE SIDEBAR MENU
+        ========================================== */
+
         const currentPath = window.location.pathname.replace(/\/+$/, '');
 
-        const navLinks = document.querySelectorAll('.nav-link:not(.nav-link-logout)');
+        document.querySelectorAll('.nav-link:not(.nav-link-logout)').forEach(function (link) {
 
-        navLinks.forEach(link => {
             const href = link.getAttribute('href');
 
-            // Skip placeholder links entirely
-            if (!href || href === '#') {
-                link.classList.remove('active');
-                return;
+            if (!href || href === '#') return;
+
+            try {
+
+                const linkPath = new URL(link.href).pathname.replace(/\/+$/, '');
+
+                const active =
+                    currentPath === linkPath ||
+                    currentPath.startsWith(linkPath + '/');
+
+                link.classList.toggle('active', active);
+
+            } catch (error) {
+
+                console.warn('Invalid navigation link:', href);
+
             }
 
-            const linkPath = new URL(link.href).pathname.replace(/\/+$/, '');
-
-            const isMatch =
-                currentPath === linkPath ||
-                currentPath.startsWith(linkPath + '/');
-
-            link.classList.toggle('active', isMatch);
         });
+
+        /* ==========================================
+           MODAL FUNCTIONS
+        ========================================== */
+
+        document.querySelectorAll('.modal').forEach(function (modal) {
+
+            // Focus first input when modal opens
+            modal.addEventListener('shown.bs.modal', function () {
+
+                const firstField = modal.querySelector(
+                    'input:not([type="hidden"]), select, textarea'
+                );
+
+                if (firstField) {
+                    firstField.focus();
+                }
+
+            });
+
+        });
+
+        /* ==========================================
+           RESET ONLY ADD USER MODAL
+        ========================================== */
+
+        const addUserModal = document.getElementById('addUserModal');
+
+        if (addUserModal) {
+
+            addUserModal.addEventListener('hidden.bs.modal', function () {
+
+                const form = this.querySelector('form');
+
+                if (form) {
+
+                    form.reset();
+
+                    form.querySelectorAll('.is-invalid').forEach(function (input) {
+                        input.classList.remove('is-invalid');
+                    });
+
+                    form.querySelectorAll('.is-valid').forEach(function (input) {
+                        input.classList.remove('is-valid');
+                    });
+
+                }
+
+            });
+
+        }
+
     });
+
+        document.addEventListener('DOMContentLoaded', function () {
+
+    const successAlert = document.getElementById('successAlert');
+
+        if (successAlert) {
+            setTimeout(function () {
+                const bsAlert = bootstrap.Alert.getOrCreateInstance(successAlert);
+                bsAlert.close();
+            }, 3000); // Auto close after 3 seconds
+    }
+
+});
 </script>
