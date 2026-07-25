@@ -81,5 +81,9 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('request/save', 'EportalController::saveRequest');
     $routes->post('request/update/(:num)', 'EportalController::updateRequest/$1');
     $routes->post('request/delete/(:num)', 'EportalController::deleteRequest/$1');
+    $routes->get('/users', 'EportalController::users');
+    $routes->post('/users/store', 'EportalController::storeUser');
+    $routes->post('/users/update/(:num)', 'EportalController::updateUser/$1');
+    $routes->post('/users/delete/(:num)', 'EportalController::deleteUser/$1');
 });
 
