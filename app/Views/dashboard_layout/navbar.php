@@ -10,26 +10,6 @@
   </div>
 
   <div class="topbar-right">
-    <!-- Notifications -->
-    <div class="dropdown">
-      <button class="icon-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
-        <i class="bi bi-bell"></i>
-        <span class="notif-dot"></span>
-      </button>
-      <ul class="dropdown-menu dropdown-menu-end notif-menu">
-        <li class="dropdown-header">Notifications</li>
-        <li><a class="dropdown-item" href="#"><i class="bi bi-file-earmark-check text-success me-2"></i>Request
-            HR-202607240001 completed</a></li>
-        <li><a class="dropdown-item" href="#"><i class="bi bi-hourglass-split text-warning me-2"></i>New request
-            awaiting review</a></li>
-        <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-up-right text-purple me-2"></i>Certificate
-            released to requestor</a></li>
-        <li>
-          <hr class="dropdown-divider">
-        </li>
-        <li><a class="dropdown-item text-center small" href="#">View all notifications</a></li>
-      </ul>
-    </div>
 
     <!-- User profile -->
     <div class="dropdown">

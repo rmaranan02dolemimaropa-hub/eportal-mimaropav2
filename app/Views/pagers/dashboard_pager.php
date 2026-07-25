@@ -2,91 +2,94 @@
 
 <?php if ($pager->hasPrevious() || $pager->hasNext() || count($pager->links()) > 1): ?>
 
-    <nav class="table-pagination">
+<nav class="table-pagination">
 
-        <span class="pagination-summary">
+    <span class="pagination-summary">
 
-            Showing
-            <?= (($pager->getCurrentPage() - 1) * $pager->getPerPage()) + 1; ?>
-            -
-            <?= min($pager->getCurrentPage() * $pager->getPerPage(), $pager->getTotal()); ?>
-            of
-            <?= $pager->getTotal(); ?>
+        Showing
+        <?= (($pager->getCurrentPage() - 1) * $pager->getPerPage()) + 1; ?>
+        -
+        <?= min($pager->getCurrentPage() * $pager->getPerPage(), $pager->getTotal()); ?>
+        of
+        <?= $pager->getTotal(); ?>
 
-        </span>
+    </span>
 
-        <ul class="pagination mb-0">
+    <ul class="pagination mb-0">
 
-            <?php if ($pager->hasPreviousPage()): ?>
+        <?php if ($pager->hasPreviousPage()): ?>
 
-                <li class="page-item">
+            <li class="page-item">
 
-                    <a class="page-link" href="<?= $pager->getPreviousPageURI() ?>">
+                <a class="page-link"
+                    href="<?= $pager->getPreviousPageURI() ?>">
 
-                        <i class="bi bi-chevron-left"></i>
+                    <i class="bi bi-chevron-left"></i>
 
-                    </a>
+                </a>
 
-                </li>
+            </li>
 
-            <?php else: ?>
+        <?php else: ?>
 
-                <li class="page-item disabled">
+            <li class="page-item disabled">
 
-                    <span class="page-link">
+                <span class="page-link">
 
-                        <i class="bi bi-chevron-left"></i>
+                    <i class="bi bi-chevron-left"></i>
 
-                    </span>
+                </span>
 
-                </li>
+            </li>
 
-            <?php endif; ?>
-
-
-            <?php foreach ($pager->links() as $link): ?>
-
-                <li class="page-item <?= $link['active'] ? 'active' : '' ?>">
-
-                    <a class="page-link" href="<?= $link['uri'] ?>">
-
-                        <?= $link['title'] ?>
-
-                    </a>
-
-                </li>
-
-            <?php endforeach; ?>
+        <?php endif; ?>
 
 
-            <?php if ($pager->hasNextPage()): ?>
+        <?php foreach ($pager->links() as $link): ?>
 
-                <li class="page-item">
+            <li class="page-item <?= $link['active'] ? 'active' : '' ?>">
 
-                    <a class="page-link" href="<?= $pager->getNextPageURI() ?>">
+                <a class="page-link"
+                    href="<?= $link['uri'] ?>">
 
-                        <i class="bi bi-chevron-right"></i>
+                    <?= $link['title'] ?>
 
-                    </a>
+                </a>
 
-                </li>
+            </li>
 
-            <?php else: ?>
+        <?php endforeach; ?>
 
-                <li class="page-item disabled">
 
-                    <span class="page-link">
+        <?php if ($pager->hasNextPage()): ?>
 
-                        <i class="bi bi-chevron-right"></i>
+            <li class="page-item">
 
-                    </span>
+                <a class="page-link"
+                    href="<?= $pager->getNextPageURI() ?>">
 
-                </li>
+                    <i class="bi bi-chevron-right"></i>
 
-            <?php endif; ?>
+                </a>
 
-        </ul>
+            </li>
 
-    </nav>
+        <?php else: ?>
+
+            <li class="page-item disabled">
+
+                <span class="page-link">
+
+                    <i class="bi bi-chevron-right"></i>
+
+                </span>
+
+            </li>
+
+        <?php endif; ?>
+
+    </ul>
+
+</nav>
 
 <?php endif; ?>

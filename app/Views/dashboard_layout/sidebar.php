@@ -15,9 +15,11 @@
         <a href="#" class="nav-link">
           <i class="bi bi-folder2-open"></i><span>Services</span>
         </a>
+        <?php if (session('role') == 'IT ADMINISTRATOR'): ?>
         <a href="users" class="nav-link">
           <i class="bi bi-people"></i><span>Users</span>
         </a>
+        <?php endif; ?>
         <a href="#" class="nav-link">
           <i class="bi bi-bar-chart"></i><span>Reports</span>
         </a>

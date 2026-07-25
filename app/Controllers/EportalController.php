@@ -15,9 +15,25 @@ class EportalController extends BaseController
 
     public function dashboard()
     {
-        return view('dashboard/dashboard');
-    }
+        $requestModel = new HrRequestModel();
 
+        $data = [
+            'pending' => $requestModel->where('status', 'Pending')->countAllResults(),
+            'processing' => $requestModel->where('status', 'Processing')->countAllResults(),
+            'completed' => $requestModel->where('status', 'Completed')->countAllResults(),
+            'released' => $requestModel->where('status', 'Released')->countAllResults(),
+            'rejected' => $requestModel->where('status', 'Rejected')->countAllResults(),
+        ];
+
+        // Load recent requests
+        $data['requests'] = $requestModel
+            ->orderBy('id', 'DESC')
+            ->paginate(10);
+
+        $data['pager'] = $requestModel->pager;
+
+        return view('dashboard/dashboard', $data);
+    }
     public function service_record()
     {
         return view('hr_forms/hr_forms');
