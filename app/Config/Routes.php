@@ -16,6 +16,7 @@ $routes->get('users', 'EportalController::users');
 $routes->get('login', 'EportalController::login');
 $routes->post('login/login_process', 'EportalController::login_process');
 $routes->get('logout', 'EportalController::logout');
+$routes->get('request','EportalController::request');
 
 $routes->group('it', ['filter' => 'auth:IT ADMINISTRATOR'], function($routes){
 
@@ -48,6 +49,8 @@ $routes->post('/users/store', 'EportalController::storeUser');
 $routes->post('/users/update/(:num)', 'EportalController::updateUser/$1');
 
 $routes->post('/users/delete/(:num)', 'EportalController::deleteUser/$1');
+
+$routes->get('export/hr-request', 'ExportController::exportHrRequestReport');
 
 
 

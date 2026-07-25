@@ -12,6 +12,20 @@ class EportalController extends BaseController
     {
         return view('eportal/index');
     }
+    public function request()
+    {
+        $requestModel = new HrRequestModel();
+        $data['requests'] = $requestModel
+            ->orderBy('id', 'DESC')
+            ->paginate(10);
+
+        $data['pager'] = $requestModel->pager;
+
+        
+
+        return view('dashboard/request', $data);
+
+    }
 
     public function dashboard()
     {

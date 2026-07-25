@@ -959,3 +959,62 @@ button {
     pointer-events:none;
     opacity:.5;
 }
+
+.export-overlay {
+    position: fixed;
+    z-index: 9999;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.export-overlay.is-visible {
+    display: flex;
+}
+
+.export-card {
+    width: 360px;
+    padding: 28px;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+    text-align: center;
+}
+
+.export-card h3 {
+    margin: 0 0 8px;
+    color: #10058C;
+}
+
+.export-card p {
+    margin: 0 0 20px;
+    color: #666;
+    font-size: 14px;
+}
+
+.progress-track {
+    height: 8px;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #e6e6e6;
+}
+
+.progress-bar {
+    width: 40%;
+    height: 100%;
+    border-radius: 10px;
+    background: #10058C;
+    animation: export-progress 1.2s ease-in-out infinite;
+}
+
+@keyframes export-progress {
+    0% {
+        transform: translateX(-120%);
+    }
+
+    100% {
+        transform: translateX(300%);
+    }
+}

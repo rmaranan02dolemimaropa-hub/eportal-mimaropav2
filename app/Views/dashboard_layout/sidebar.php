@@ -6,7 +6,7 @@
         <a href="dashboard" class="nav-link active">
           <i class="bi bi-grid-1x2"></i><span>Dashboard</span>
         </a>
-        <a href="#" class="nav-link">
+        <a href="request" class="nav-link">
           <i class="bi bi-file-earmark-text"></i><span>Requests</span>
         </a>
         <a href="#" class="nav-link">
