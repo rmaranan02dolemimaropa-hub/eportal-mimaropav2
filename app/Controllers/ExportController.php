@@ -18,14 +18,17 @@ class ExportController extends BaseController
     public function exportHrRequestReport()
     {
         $requests = $this->requestModel
+            ->select('
+            reference_no AS reference,
+            fullname AS name,
+            service_availed AS service,
+            status
+        ')
             ->orderBy('id', 'DESC')
             ->findAll();
 
-        // Temporary check: uncomment this line to see returned data.
-        // dd($requests);
-
         $data = [
-            'title'    => 'HR Request Report',
+            'title' => 'HR Request Report',
             'requests' => $requests,
         ];
 
@@ -46,5 +49,31 @@ class ExportController extends BaseController
                 'attachment; filename="HR_Request_Report.pdf"'
             )
             ->setBody($dompdf->output());
+
+        $query = $this->requestModel;
+
+        if ($year = $this->request->getGet('year')) {
+            $query->like('date_requested', $year, 'after');
+        }
+
+        if ($status = $this->request->getGet('status')) {
+            $query->like('status', $status);
+        }
+
+        if ($service = $this->request->getGet('service_availed')) {
+            $query->like('service_availed', $service);
+        }
+
+        if ($unit = $this->request->getGet('office_division')) {
+            $query->like('office_division', $unit);
+        }
+
+        if ($dateRequested = $this->request->getGet('date_requested')) {
+            $query->where('date_requested', $dateRequested);
+        }
+
+        $requests = $query
+            ->orderBy('id', 'DESC')
+            ->findAll();
     }
 }

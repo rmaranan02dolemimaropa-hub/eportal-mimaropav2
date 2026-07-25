@@ -21,6 +21,23 @@
             <span id="currentDate"></span>
         </div>
     </div>
+    <?php if (session()->getFlashdata('success')): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill"></i>
+            <?= esc(session()->getFlashdata('success')) ?>
+
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('error')): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <?= esc(session()->getFlashdata('error')) ?>
+
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
 
 
 
@@ -36,24 +53,12 @@
                     <input type="text" class="form-control" placeholder="Search requests..."
                         aria-label="Search requests" />
                 </div>
-                <button class="btn tool-btn" type="button">
+                <button class="btn tool-btn" type="button" data-bs-toggle="modal" data-bs-target="#filterModal">
                     <i class="bi bi-funnel"></i>
                     <span class="d-none d-md-inline">Filter</span>
                 </button>
-
-                <button href="<?= base_url('export/hr-request') ?>" class="btn tool-btn" type="button">
-                    <i class="bi bi-download"></i><span class="d-none d-md-inline">Export</span>
-                </button>
-                <a href="<?= base_url('export/hr-request') ?>" class="btn tool-btn">
-
-                    <i class="bi bi-download"></i>
-
-                    <span class="d-none d-md-inline">
-                        Export
-                    </span>
-
-                </a>
-                <button type="button" id="exportButton">Export PDF</button>
+                <button class="btn tool-btn" type="button" id="exportButton"><i class="bi bi-download"></i>Export
+                    PDF</button>
 
                 <div id="exportOverlay" class="export-overlay" aria-live="polite">
                     <div class="export-card">
@@ -133,8 +138,22 @@
 
                                         <!-- View (Everyone) -->
                                         <button class="row-action-btn" title="View" data-bs-toggle="modal"
-                                            data-bs-target="#view<?= $row['id'] ?>">
-
+                                            data-bs-target="#viewRequestModal"
+                                            data-reference="<?= esc($row['reference_no'] ?? '', 'attr') ?>"
+                                            data-service="<?= esc($row['service_availed'] ?? '', 'attr') ?>"
+                                            data-fullname="<?= esc($row['fullname'] ?? '', 'attr') ?>"
+                                            data-contact="<?= esc($row['contact_number'] ?? '', 'attr') ?>"
+                                            data-email="<?= esc($row['email_address'] ?? '', 'attr') ?>"
+                                            data-date-requested="<?= esc($row['date_requested'] ?? '', 'attr') ?>"
+                                            data-status="<?= esc($row['status'] ?? '', 'attr') ?>"
+                                            data-category="<?= esc($row['employee_category'] ?? '', 'attr') ?>"
+                                            data-period="<?= esc($row['period_of_service'] ?? '', 'attr') ?>"
+                                            data-position="<?= esc($row['position'] ?? '', 'attr') ?>"
+                                            data-office="<?= esc($row['office_division'] ?? '', 'attr') ?>"
+                                            data-certification="<?= esc($row['certification'] ?? '', 'attr') ?>"
+                                            data-ipcr-period="<?= esc($row['ipcr_period'] ?? '', 'attr') ?>"
+                                            data-specify-201="<?= esc($row['specify_201'] ?? '', 'attr') ?>"
+                                            data-remarks="<?= esc($row['remarks'] ?? '', 'attr') ?>">
                                             <i class="bi bi-eye"></i>
 
                                         </button>
@@ -148,6 +167,7 @@
                                                 <i class="bi bi-pencil"></i>
 
                                             </button>
+
 
                                             <!-- Delete -->
                                             <button class="row-action-btn row-action-danger" title="Delete" data-bs-toggle="modal"
@@ -234,7 +254,246 @@
             </ul>
 
         </nav>
+
     </section>
+
+    <div class="modal fade" id="filterModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form method="get" action="<?= site_url('request') ?>" class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Filter HR Requests</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Year</label>
+                        <select name="year" class="form-select">
+                            <option value="">All years</option>
+                            <?php for ($year = date('Y'); $year >= 2020; $year--): ?>
+                                <option value="<?= $year ?>" <?= ($_GET['year'] ?? '') == $year ? 'selected' : '' ?>>
+                                    <?= $year ?>
+                                </option>
+                            <?php endfor; ?>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select name="status" class="form-select">
+                            <option value="">All statuses</option>
+                            <option value="Pending" <?= ($_GET['status'] ?? '') === 'Pending' ? 'selected' : '' ?>>
+                                Pending
+                            </option>
+                            <option value="Processing" <?= ($_GET['status'] ?? '') === 'Processing' ? 'selected' : '' ?>>
+                                Processing
+                            </option>
+                            <option value="Released" <?= ($_GET['status'] ?? '') === 'Released' ? 'selected' : '' ?>>
+                                Released
+                            </option>
+                            <option value="Cancelled" <?= ($_GET['status'] ?? '') === 'Cancelled' ? 'selected' : '' ?>>
+                                Cancelled
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Service Availed</label>
+
+                        <select name="service_availed" class="form-select">
+                            <option value="">All services</option>
+
+                            <option value="Service Record" <?= ($_GET['service_availed'] ?? '') === 'Service Record' ? 'selected' : '' ?>>
+                                Service Record
+                            </option>
+
+                            <option value="Certificate with Compensation" <?= ($_GET['service_availed'] ?? '') === 'Certificate with Compensation' ? 'selected' : '' ?>>
+                                Certificate with Compensation
+                            </option>
+
+                            <option value="Loan Assistance" <?= ($_GET['service_availed'] ?? '') === 'Loan Assistance' ? 'selected' : '' ?>>
+                                Loan Assistance
+                            </option>
+
+                            <option value="Inquiry of Leave Balance" <?= ($_GET['service_availed'] ?? '') === 'Inquiry of Leave Balance' ? 'selected' : '' ?>>
+                                Inquiry of Leave Balance
+                            </option>
+
+                            <option value="Certificate of Employment" <?= ($_GET['service_availed'] ?? '') === 'Certificate of Employment' ? 'selected' : '' ?>>
+                                Certificate of Employment
+                            </option>
+
+                            <option value="Certification" <?= ($_GET['service_availed'] ?? '') === 'Certification' ? 'selected' : '' ?>>
+                                Certification
+                            </option>
+
+                            <option value="IPCR" <?= ($_GET['service_availed'] ?? '') === 'IPCR' ? 'selected' : '' ?>>
+                                IPCR
+                            </option>
+
+                            <option value="201 Documents" <?= ($_GET['service_availed'] ?? '') === '201 Documents' ? 'selected' : '' ?>>
+                               201 Documents
+                            </option>
+                        </select>
+                    </div>
+
+
+                    <div class="mb-3">
+                        <label class="form-label">Date Requested</label>
+                        <input type="date" name="date_requested" class="form-control"
+                            value="<?= esc($_GET['date_requested'] ?? '') ?>">
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <a href="<?= current_url() ?>" class="btn btn-outline-secondary">Clear</a>
+                    <button type="submit" class="btn btn-primary">Apply Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal fade" id="viewRequestModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">HR Request Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div id="requestDetails" class="row g-3"></div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <?php foreach ($requests as $row): ?>
+        <div class="modal fade" id="edit<?= $row['id'] ?>" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <form method="post" action="<?= site_url('request/update/' . $row['id']) ?>" class="modal-content">
+
+                    <?= csrf_field() ?>
+
+                    <div class="modal-header">
+                        <h5 class="modal-title">Update HR Request</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Reference No.</label>
+                                <input type="text" class="form-control" value="<?= esc($row['reference_no']) ?>" readonly>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Status</label>
+                                <select name="status" class="form-select">
+                                    <option value="Pending" <?= $row['status'] === 'Pending' ? 'selected' : '' ?>>
+                                        Pending
+                                    </option>
+                                    <option value="Processing" <?= $row['status'] === 'Processing' ? 'selected' : '' ?>>
+                                        Processing
+                                    </option>
+                                    <option value="Released" <?= $row['status'] === 'Released' ? 'selected' : '' ?>>
+                                        Released
+                                    </option>
+                                    <option value="Cancelled" <?= $row['status'] === 'Cancelled' ? 'selected' : '' ?>>
+                                        Cancelled
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Name</label>
+                                <input type="text" name="fullname" class="form-control"
+                                    value="<?= esc($row['fullname']) ?>">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Contact Number</label>
+                                <input type="text" name="contact_number" class="form-control"
+                                    value="<?= esc($row['contact_number']) ?>">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" name="email_address" class="form-control"
+                                    value="<?= esc($row['email_address']) ?>">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Date Requested</label>
+                                <input type="date" name="date_requested" class="form-control"
+                                    value="<?= esc($row['date_requested']) ?>">
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label">Remarks</label>
+                                <textarea name="remarks" class="form-control"
+                                    rows="3"><?= esc($row['remarks'] ?? '') ?></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Update Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    <?php endforeach; ?>
+
+    <?php foreach ($requests as $row): ?>
+        <div class="modal fade" id="delete<?= $row['id'] ?>" tabindex="-1">
+            <div class="modal-dialog">
+                <form method="post" action="<?= site_url('request/delete/' . $row['id']) ?>" class="modal-content">
+
+                    <?= csrf_field() ?>
+
+                    <div class="modal-header">
+                        <h5 class="modal-title text-danger">Delete HR Request</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        Are you sure you want to delete the request for
+                        <strong><?= esc($row['fullname']) ?></strong>?
+
+                        <p class="text-danger mt-2 mb-0">
+                            This action cannot be undone.
+                        </p>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    <?php endforeach; ?>
+
+
+
+
 
 </main>
 
@@ -421,6 +680,75 @@
             exportButton.disabled = false;
         }
     });
+</script>
+
+<script>
+    const viewRequestModal = document.getElementById('viewRequestModal');
+    const requestDetails = document.getElementById('requestDetails');
+
+    function addDetail(label, value) {
+        const column = document.createElement('div');
+        column.className = 'col-md-6 mb-3';
+
+        const labelElement = document.createElement('small');
+        labelElement.className = 'text-muted d-block';
+        labelElement.textContent = label;
+
+        const valueElement = document.createElement('div');
+        valueElement.className = 'fw-semibold';
+        valueElement.textContent = value || '-';
+
+        column.appendChild(labelElement);
+        column.appendChild(valueElement);
+        requestDetails.appendChild(column);
+    }
+
+    viewRequestModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const data = button.dataset;
+
+        requestDetails.innerHTML = '';
+
+        addDetail('Reference No.', data.reference);
+        addDetail('Service Availed', data.service);
+        addDetail('Name', data.fullname);
+        addDetail('Contact Number', data.contact);
+        addDetail('Email Address', data.email);
+        addDetail('Date Requested', data.dateRequested);
+        addDetail('Status', data.status);
+
+        if (data.service === 'Certificate of Employment') {
+            addDetail('Employee Category', data.category);
+            addDetail('Position', data.position);
+
+            if (data.category === 'COS Employee') {
+                addDetail('Period of Service', data.period);
+                addDetail('Office / Division Assigned', data.office);
+            }
+        }
+
+        if (data.service === 'Certification') {
+            addDetail('Certification Needed', data.certification);
+        }
+
+        if (data.service === 'IPCR') {
+            addDetail('IPCR Period', data.ipcrPeriod);
+        }
+
+        if (data.service === '201 Docs') {
+            addDetail('Specified Document', data.specify201);
+        }
+
+        addDetail('Remarks', data.remarks);
+    });
+</script>
+
+<script>
+    setTimeout(() => {
+        document.querySelectorAll('.alert').forEach(alert => {
+            bootstrap.Alert.getOrCreateInstance(alert).close();
+        });
+    }, 4000);
 </script>
 
 

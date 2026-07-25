@@ -15,16 +15,35 @@ class EportalController extends BaseController
     public function request()
     {
         $requestModel = new HrRequestModel();
-        $data['requests'] = $requestModel
+        $query = $requestModel;
+
+        if ($year = $this->request->getGet('year')) {
+            $query->like('date_requested', $year, 'after');
+        }
+
+        if ($status = $this->request->getGet('status')) {
+            $query->like('status', $status);
+        }
+
+        if ($service = $this->request->getGet('service_availed')) {
+            $query->like('service_availed', $service);
+        }
+
+        if ($unit = $this->request->getGet('office_division')) {
+            $query->like('office_division', $unit);
+        }
+
+        if ($dateRequested = $this->request->getGet('date_requested')) {
+            $query->like('date_requested', $dateRequested, 'after');
+        }
+
+        $data['requests'] = $query
             ->orderBy('id', 'DESC')
-            ->paginate(10);
+            ->paginate(6);
 
         $data['pager'] = $requestModel->pager;
 
-        
-
         return view('dashboard/request', $data);
-
     }
 
     public function dashboard()
@@ -42,7 +61,7 @@ class EportalController extends BaseController
         // Load recent requests
         $data['requests'] = $requestModel
             ->orderBy('id', 'DESC')
-            ->paginate(10);
+            ->paginate(6);
 
         $data['pager'] = $requestModel->pager;
 
@@ -267,5 +286,73 @@ class EportalController extends BaseController
         $model->delete($id);
 
         return redirect()->back()->with('success', 'User deleted successfully.');
+    }
+
+    public function updateRequest($id)
+    {
+        $requestModel = new HrRequestModel();
+
+        $data = [
+            'fullname' => $this->request->getPost('fullname'),
+            'contact_number' => $this->request->getPost('contact_number'),
+            'email_address' => $this->request->getPost('email_address'),
+            'date_requested' => $this->request->getPost('date_requested'),
+            'status' => $this->request->getPost('status'),
+            'remarks' => $this->request->getPost('remarks'),
+        ];
+
+        $requestModel->update($id, $data);
+
+        return redirect()
+            ->to(site_url('request'))
+            ->with('success', 'HR request updated successfully.');
+    }
+
+    public function deleteRequest($id)
+    {
+        $requestModel = new HrRequestModel();
+
+        $request = $requestModel->find($id);
+
+        if (!$request) {
+            return redirect()
+                ->to(site_url('request'))
+                ->with('error', 'Request not found.');
+        }
+
+        $requestModel->delete($id);
+
+        return redirect()
+            ->to(site_url('request'))
+            ->with('success', 'HR request deleted successfully.');
+    }
+
+    public function saveRequest()
+    {
+        $requestModel = new HrRequestModel();
+
+        $data = $this->request->getPost([
+            'service_availed',
+            'fullname',
+            'contact_number',
+            'email_address',
+            'employee_category',
+            'period_of_service',
+            'position',
+            'office_division',
+            'ipcr_period',
+            'specify_201',
+            'date_requested',
+        ]);
+
+        $data['reference_no'] = 'HR-' . date('YmdHis');
+        $data['status'] = 'Pending';
+        $data['certification'] = implode(', ', $this->request->getPost('certification') ?? []);
+
+        $requestModel->insert($data);
+
+        return redirect()
+            ->to(site_url('request'))
+            ->with('success', 'HR request submitted successfully.');
     }
 }
