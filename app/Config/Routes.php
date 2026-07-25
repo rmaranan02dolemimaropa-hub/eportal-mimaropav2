@@ -8,8 +8,32 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'Home::index');
 
 $routes->get('eportal', 'EportalController::index');
-$routes->get('login', 'EportalController::login');
 $routes->get('service-record', 'EportalController::service_record');
 $routes->post('service-record/save', 'EportalController::save');
 $routes->get('dashboard', 'EportalController::dashboard');
+$routes->get('users', 'EportalController::users');
+
+$routes->get('login', 'EportalController::login');
+$routes->post('login/login_process', 'EportalController::login_process');
+$routes->get('login/logout', 'EportalController::logout');
+
+$routes->group('it', ['filter' => 'auth:IT ADMINISTRATOR'], function($routes){
+
+    $routes->get('dashboard', 'ITController::dashboard');
+
+});
+
+$routes->group('hr', ['filter' => 'auth:HR ADMINISTRATOR'], function($routes){
+
+    $routes->get('dashboard', 'HRController::dashboard');
+
+});
+
+$routes->get('/unauthorized', function(){
+
+    return "403 Unauthorized";
+
+});
+
+
 
