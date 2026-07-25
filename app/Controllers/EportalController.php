@@ -30,45 +30,36 @@ class EportalController extends BaseController
 
     public function login_process()
     {
-        $session = session();
+        $model = new UserModel();
 
         $username = $this->request->getPost('username');
         $password = $this->request->getPost('password');
 
-        $model = new UserModel();
-
-        $user = $model
-            ->where('username', $username)
-            ->first();
+        $user = $model->where('username', $username)->first();
 
         if (!$user) {
-            return redirect()->back()->with('error', 'Invalid username.');
+            return redirect()->back()->with('error', 'Invalid username or password.');
         }
 
+        // Check if account is active
+        if ($user['status'] !== 'ACTIVE') {
+            return redirect()->back()->with('error', 'Your account is inactive.');
+        }
+
+        // Verify hashed password
         if (!password_verify($password, $user['password'])) {
-            return redirect()->back()->with('error', 'Invalid password.');
+            return redirect()->back()->with('error', 'Invalid username or password.');
         }
 
-        if ($user['status'] != 1) {
-            return redirect()->back()->with('error', 'Account disabled.');
-        }
-
-        $session->set([
+        session()->set([
             'user_id' => $user['id'],
             'fullname' => $user['fullname'],
+            'username' => $user['username'],
             'role' => $user['role'],
-            'logged_in' => true
+            'logged_in' => true,
         ]);
 
-        if ($user['role'] == 'IT ADMINISTRATOR') {
-            return redirect()->to('/it/dashboard');
-        }
-
-        if ($user['role'] == 'HR ADMINISTRATOR') {
-            return redirect()->to('/hr/dashboard');
-        }
-
-        return redirect()->to('/');
+        return redirect()->to('dashboard');
     }
 
     public function logout()
