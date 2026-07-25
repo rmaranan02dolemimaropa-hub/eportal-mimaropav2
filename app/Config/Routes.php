@@ -15,7 +15,7 @@ $routes->get('users', 'EportalController::users');
 
 $routes->get('login', 'EportalController::login');
 $routes->post('login/login_process', 'EportalController::login_process');
-$routes->get('login/logout', 'EportalController::logout');
+$routes->get('logout', 'EportalController::logout');
 
 $routes->group('it', ['filter' => 'auth:IT ADMINISTRATOR'], function($routes){
 

@@ -7,6 +7,20 @@
 
 <!-- ============ MAIN CONTENT ============ -->
 <main class="main-content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Users Management</h1>
+            <p class="page-subtitle">
+                Welcome back, <?= session('fullname') ?> — manage and monitor all users from this dashboard.
+            </p>
+        </div>
+        <div class="page-date">
+            <i class="bi bi-calendar3"></i>
+            <span id="currentDate"></span>
+        </div>
+    </div>
+
     <?php if (session()->getFlashdata('success')): ?>
 
         <div class="alert alert-success alert-dismissible fade show" id="successAlert">
@@ -547,16 +561,41 @@
 
     });
 
-        document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function () {
 
-    const successAlert = document.getElementById('successAlert');
+        const successAlert = document.getElementById('successAlert');
 
         if (successAlert) {
             setTimeout(function () {
                 const bsAlert = bootstrap.Alert.getOrCreateInstance(successAlert);
                 bsAlert.close();
             }, 3000); // Auto close after 3 seconds
+        }
+
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        setCurrentDate();
+        animateStatCounters();
+        enableTableSearch();
+    });
+
+       /**
+     * Displays today's date in a readable, localized format
+     * inside the #currentDate element in the page header.
+     */
+    function setCurrentDate() {
+        const dateEl = document.getElementById("currentDate");
+        if (!dateEl) return;
+
+        const today = new Date();
+        const options = {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        };
+        dateEl.textContent = today.toLocaleDateString("en-US", options);
     }
 
-});
 </script>

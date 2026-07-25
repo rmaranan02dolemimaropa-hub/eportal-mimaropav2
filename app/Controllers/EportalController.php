@@ -66,7 +66,7 @@ class EportalController extends BaseController
     {
         session()->destroy();
 
-        return redirect()->to('/');
+        return redirect()->to('login')->with('success', 'You have been logged out successfully.');
     }
 
     public function save()

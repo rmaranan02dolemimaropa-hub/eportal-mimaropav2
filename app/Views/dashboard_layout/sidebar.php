@@ -27,7 +27,7 @@
 
         <div class="nav-divider"></div>
 
-        <a href="#" class="nav-link nav-link-logout">
+        <a href="logout" class="nav-link nav-link-logout">
           <i class="bi bi-box-arrow-right"></i><span>Logout</span>
         </a>
       </nav>

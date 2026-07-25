@@ -414,3 +414,21 @@ body {
     font-size: 0.82rem;
   }
 }
+
+.alert{
+    border:none;
+    border-radius:12px;
+    font-size:.95rem;
+    margin-bottom:20px;
+    box-shadow:0 8px 24px rgba(0,0,0,.08);
+}
+
+.alert-danger{
+    background:#fff5f5;
+    color:#dc3545;
+}
+
+.alert-success{
+    background:#f0fff4;
+    color:#198754;
+}

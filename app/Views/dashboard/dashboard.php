@@ -11,12 +11,26 @@
         <div>
             <h1 class="page-title">Dashboard</h1>
             <p class="page-subtitle">
-                Welcome back, Juliana — manage and monitor all HR service requests from this dashboard.
+                Welcome back, <?= session('fullname') ?> — manage and monitor all HR service requests from this dashboard.
             </p>
         </div>
+        <?php if (session()->getFlashdata('success')): ?>
+
+            <div class="alert alert-success alert-dismissible fade show shadow-sm" id="loginSuccess" role="alert">
+
+              <i class="bi bi-check-circle-fill me-2"></i>
+
+                <?= session()->getFlashdata('success') ?>
+
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+              </button>
+
+            </div>
+
+            <?php endif; ?>
         <div class="page-date">
             <i class="bi bi-calendar3"></i>
-            <span id="currentDate">Friday, July 24, 2026</span>
+            <span id="currentDate"></span>
         </div>
     </div>
 
@@ -340,7 +354,32 @@
         });
     }
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
 
+    ['loginAlert', 'loginSuccess'].forEach(function(id){
+
+        const alert = document.getElementById(id);
+
+        if(alert){
+
+            setTimeout(function(){
+
+                alert.style.transition = "opacity .5s";
+                alert.style.opacity = "0";
+
+                setTimeout(function(){
+                    alert.remove();
+                },500);
+
+            },3000);
+
+        }
+
+    });
+
+});
+</script>
 
 
 <?= $this->include('dashboard_layout/footer') ?>
