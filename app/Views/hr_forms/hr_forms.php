@@ -79,13 +79,13 @@
                         <select class="form-select" name="service_availed" id="serviceAvailed" required>
                             <option value="" selected disabled>Select a service</option>
                             <option value="service1">Service Record</option>
-                            <option value="service2">Certificate with Compensation</option>
-                            <option value="service3">Loan Assistance</option>
-                            <option value="service4">Inquiry of Leave Balance</option>
                             <option value="service5">Certificate of Employment</option>
+                            <option value="service2">Certificate with Compensation</option>
                             <option value="service6">Certification</option>
                             <option value="service7">IPCR</option>
                             <option value="service8">201 Documents</option>
+                            <option value="service3">Loan Assistance</option>
+                            <option value="service4">Inquiry of Leave Balance</option>
                             <option value="service9">Others</option>
                         </select>
                         <label for="serviceAvailed">Service Availed <span class="required-mark">*</span></label>
@@ -532,14 +532,18 @@
            SHOW SECTION BASED ON SELECTED SERVICE
         ========================================================= */
         serviceSelect.addEventListener('change', function () {
-            const selected = serviceSelect.value;
+
+            console.log("Selected:", this.value);
 
             hideAllServiceSections();
             hideAllEmployeeCategorySections();
             resetEmployeeCategorySelection();
             formAlert.classList.add('d-none');
 
-            const targetSection = document.getElementById('section-' + selected);
+            const targetSection = document.getElementById('section-' + this.value);
+
+            console.log(targetSection);
+
             if (targetSection) {
                 targetSection.classList.add('active');
                 toggleRequiredGroup(targetSection, true);
@@ -663,8 +667,8 @@
                 service5: 'Certificate of Employment',
                 service6: 'Certification',
                 service7: 'IPCR',
-                service8: '201 Documents'
-                service9: 'Others',
+                service8: '201 Documents',
+                service9: 'Others'
             };
 
             const rows = [];
