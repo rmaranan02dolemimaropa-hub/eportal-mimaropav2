@@ -5,23 +5,39 @@
     <title><?= esc($title) ?></title>
 
     <style>
+        @font-face {
+            font-family: 'Manrope';
+            src: url('<?= FCPATH ?>assets/fonts/Manrope-Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Manrope';
+            src: url('<?= FCPATH ?>assets/fonts/Manrope-Bold.ttf') format('truetype');
+            font-weight: bolder;
+            font-style: normal;
+        }
+
         @page {
             size: A4 portrait;
-            margin: 6cm 1cm 3cm;
+            margin: 6cm 2cm 3cm;
         }
 
         body {
             margin: 0;
-            color: #222;
-            font-family: DejaVu Sans, sans-serif;
+            color: #000;
+            font-family: 'Manrope', sans-serif;
             font-size: 10px;
         }
 
         .header,
         .footer {
             position: fixed;
-            left: 0;
-            width: 100%;
+            left: -2cm;
+            width: 21cm;
+            display: flex;
+            justify-content: center;
         }
 
         .header {
@@ -35,14 +51,15 @@
         .header img,
         .footer img {
             display: block;
-            width: 100%;
+            width: 21cm;
             height: auto;
         }
 
         h1 {
             margin: 0 0 20px;
-            color: #10058C;
+            color: #000;
             font-size: 16px;
+            font-weight: bold;
             text-align: center;
             text-transform: uppercase;
         }
@@ -54,20 +71,29 @@
 
         th {
             padding: 9px;
-            border: 1px solid #10058C;
-            background: #10058C;
-            color: #fff;
+            border: 1px solid #000;
+            background: #fff;
+            color: #000;
             font-size: 9px;
-            text-align: left;
+            font-weight: bold;
+            text-align: center;
         }
 
         td {
             padding: 8px;
-            border: 1px solid #c9c9c9;
+            border: 1px solid #000;
+            background: #fff;
+            text-align: left;
+            vertical-align: middle;
         }
 
-        tr:nth-child(even) {
-            background: #f5f6fa;
+        td.text-center,
+        th.text-center {
+            text-align: center;
+        }
+
+        tr:nth-child(even) td {
+            background: #fff;
         }
     </style>
 </head>
@@ -92,7 +118,7 @@
                 <th>Reference No.</th>
                 <th>Name</th>
                 <th>Service</th>
-                <th>Status</th>
+                <th class="text-center">Status</th>
             </tr>
         </thead>
         <tbody>
@@ -101,7 +127,7 @@
                     <td><?= esc($row['reference'] ?? '') ?></td>
                     <td><?= esc($row['name'] ?? '') ?></td>
                     <td><?= esc($row['service'] ?? '') ?></td>
-                    <td><?= esc($row['status'] ?? '') ?></td>
+                    <td class="text-center"><?= esc($row['status'] ?? '') ?></td>
                 </tr>
             <?php endforeach; ?>
         </tbody>

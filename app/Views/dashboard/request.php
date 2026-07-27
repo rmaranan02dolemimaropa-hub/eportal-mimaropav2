@@ -292,8 +292,11 @@
                             <option value="Released" <?= ($_GET['status'] ?? '') === 'Released' ? 'selected' : '' ?>>
                                 Released
                             </option>
-                            <option value="Cancelled" <?= ($_GET['status'] ?? '') === 'Cancelled' ? 'selected' : '' ?>>
-                                Cancelled
+                            <option value="Completed" <?= ($_GET['status'] ?? '') === 'Completed' ? 'selected' : '' ?>>
+                                Completed
+                            </option>
+                            <option value="Rejected" <?= ($_GET['status'] ?? '') === 'Rejected' ? 'selected' : '' ?>>
+                                Rejected
                             </option>
                         </select>
                     </div>
@@ -406,8 +409,11 @@
                                     <option value="Released" <?= $row['status'] === 'Released' ? 'selected' : '' ?>>
                                         Released
                                     </option>
-                                    <option value="Cancelled" <?= $row['status'] === 'Cancelled' ? 'selected' : '' ?>>
-                                        Cancelled
+                                    <option value="Completed" <?= $row['status'] === 'Completed' ? 'selected' : '' ?>>
+                                        Completed
+                                    </option>
+                                    <option value="Rejected" <?= $row['status'] === 'Rejected' ? 'selected' : '' ?>>
+                                        Rejected
                                     </option>
                                 </select>
                             </div>
