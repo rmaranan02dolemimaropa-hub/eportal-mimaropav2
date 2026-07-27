@@ -135,6 +135,7 @@ class EportalController extends BaseController
             'service6' => 'Certification',
             'service7' => 'IPCR',
             'service8' => '201 Documents',
+            'service9' => 'Others',
         ];
 
         $serviceAvailed = $services[$this->request->getPost('service_availed')] ?? 'Unknown Service';
@@ -146,29 +147,8 @@ class EportalController extends BaseController
             $certification = implode(', ', $certification);
         }
 
-        // Get Date Requested from the active service
-        $dateRequested = null;
 
-        $dateFields = [
-            'service_record_date',
-            'certificate_date',
-            'loan_date',
-            'leave_date',
-            'cos_date',
-            'permanent_date',
-            'certification_date',
-            'ipcr_date',
-            'documents_date'
-        ];
 
-        foreach ($dateFields as $field) {
-            $value = $this->request->getPost($field);
-
-            if (!empty($value)) {
-                $dateRequested = $value;
-                break;
-            }
-        }
 
         // Prepare data for insertion
         $data = [
@@ -184,13 +164,30 @@ class EportalController extends BaseController
             'certification' => $certification,
             'ipcr_period' => $this->request->getPost('ipcr_period'),
             'specify_201' => $this->request->getPost('specify_201'),
-            'date_requested' => $dateRequested,
+            'other_request' => $this->request->getPost('other_request'),
+            'date_requested' => date('Y-m-d'),
             'status' => 'Pending',
             'remarks' => '',
             'date_received' => null,
             'received_by' => null,
             'date_released' => null,
             'released_by' => null,
+        ];
+
+        $ipcrPeriod = $this->request->getPost('ipcr_from_month') . ' ' .
+            $this->request->getPost('ipcr_from_year') . ' to ' .
+            $this->request->getPost('ipcr_to_month') . ' ' .
+            $this->request->getPost('ipcr_to_year');
+
+        $data['ipcr_period'] = $ipcrPeriod;
+
+        $rules = [
+            'specify_201' => [
+                'rules' => 'permit_empty|regex_match[/^[A-Za-z0-9\s.,()\/-]+$/]',
+                'errors' => [
+                    'regex_match' => 'Only letters, numbers, spaces, commas, periods, hyphens, parentheses, and slashes are allowed.'
+                ]
+            ]
         ];
 
         // Save Request

@@ -26,6 +26,7 @@ class HrRequestModel extends Model
         'certification',
         'ipcr_period',
         'specify_201',
+        'other_request',
         'date_requested',
         'status',
         'remarks',
