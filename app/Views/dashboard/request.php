@@ -57,8 +57,9 @@
                     <i class="bi bi-funnel"></i>
                     <span class="d-none d-md-inline">Filter</span>
                 </button>
-                <button class="btn tool-btn" type="button" id="exportButton"><i class="bi bi-download"></i>Export
-                    PDF</button>
+                <button class="btn tool-btn" type="button" id="exportButton">
+                    <i class="bi bi-download"></i> Export PDF
+                </button>
 
                 <div id="exportOverlay" class="export-overlay" aria-live="polite">
                     <div class="export-card">
@@ -332,7 +333,7 @@
                             </option>
 
                             <option value="201 Documents" <?= ($_GET['service_availed'] ?? '') === '201 Documents' ? 'selected' : '' ?>>
-                               201 Documents
+                                201 Documents
                             </option>
                         </select>
                     </div>
@@ -646,39 +647,44 @@
 </script>
 
 <script>
-    const exportButton = document.getElementById('exportButton');
-    const exportOverlay = document.getElementById('exportOverlay');
+    document.addEventListener('DOMContentLoaded', function () {
+        const button = document.getElementById('exportButton');
+        const overlay = document.getElementById('exportOverlay');
 
-    exportButton.addEventListener('click', async function () {
-        exportButton.disabled = true;
-        exportOverlay.classList.add('is-visible');
+        button.addEventListener('click', async function () {
+            button.disabled = true;
+            overlay.classList.add('is-visible');
 
-        try {
-            const response = await fetch("<?= site_url('export/hr-request') ?>");
+            try {
+                // Forward whatever filters are currently in the URL
+                const currentParams = window.location.search; // e.g. "?year=2026&status=Pending"
 
-            if (!response.ok) {
-                throw new Error('PDF export failed.');
+                const response = await fetch(
+                    "<?= site_url('export/hr-request') ?>" + currentParams,
+                    { credentials: 'same-origin' }
+                );
+
+                if (!response.ok) {
+                    throw new Error('Export failed.');
+                }
+
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+
+                link.href = url;
+                link.download = 'HR_Request_Report.pdf';
+                link.click();
+
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+            } catch (error) {
+                alert('Unable to export the PDF. Please try again.');
+                console.error(error);
+            } finally {
+                overlay.classList.remove('is-visible');
+                button.disabled = false;
             }
-
-            const pdfBlob = await response.blob();
-            const downloadUrl = URL.createObjectURL(pdfBlob);
-
-            const link = document.createElement('a');
-            link.href = downloadUrl;
-            link.download = 'HR_Request_Report.pdf';
-
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-
-            URL.revokeObjectURL(downloadUrl);
-        } catch (error) {
-            alert('Unable to export the PDF. Please try again.');
-            console.error(error);
-        } finally {
-            exportOverlay.classList.remove('is-visible');
-            exportButton.disabled = false;
-        }
+        });
     });
 </script>
 

@@ -5,10 +5,11 @@ namespace App\Controllers;
 use App\Models\HrRequestModel;
 use Dompdf\Dompdf;
 use Dompdf\Options;
+use Throwable;
 
 class ExportController extends BaseController
 {
-    protected $requestModel;
+    protected HrRequestModel $requestModel;
 
     public function __construct()
     {
@@ -16,64 +17,98 @@ class ExportController extends BaseController
     }
 
     public function exportHrRequestReport()
-    {
-        $requests = $this->requestModel
+{
+    try {
+        $year           = $this->request->getGet('year');
+        $status         = $this->request->getGet('status');
+        $serviceAvailed = $this->request->getGet('service_availed');
+        $dateRequested  = $this->request->getGet('date_requested');
+
+        $builder = $this->requestModel
             ->select('
-            reference_no AS reference,
-            fullname AS name,
-            service_availed AS service,
-            status
-        ')
+                reference_no AS reference,
+                fullname AS name,
+                service_availed AS service,
+                status
+            ');
+
+        if (!empty($year)) {
+            $builder->where('YEAR(date_requested)', $year);
+        }
+
+        if (!empty($status)) {
+            $builder->where('status', $status);
+        }
+
+        if (!empty($serviceAvailed)) {
+            $builder->where('service_availed', $serviceAvailed);
+        }
+
+        if (!empty($dateRequested)) {
+            $builder->where('date_requested', $dateRequested);
+        }
+
+        $requests = $builder
             ->orderBy('id', 'DESC')
             ->findAll();
 
-        $data = [
+        $html = view('exports/request_report', [
             'title' => 'HR Request Report',
             'requests' => $requests,
-        ];
+            'headerImage' => $this->imageDataUri(
+                FCPATH . 'assets/img/dole-header.png'
+            ),
+            'footerImage' => $this->imageDataUri(
+                FCPATH . 'assets/img/dole-footer.png'
+            ),
+        ]);
 
         $options = new Options();
-        $options->set('chroot', FCPATH);
-        $options->set('isRemoteEnabled', false);
-        $options->set('defaultFont', 'Arial');
+        $options->set('defaultFont', 'DejaVu Sans');
 
         $dompdf = new Dompdf($options);
-        $dompdf->loadHtml(view('exports/request_report', $data), 'UTF-8');
+        $dompdf->loadHtml($html, 'UTF-8');
         $dompdf->setPaper('A4', 'portrait');
+
+        ini_set('memory_limit', '512M');
+        set_time_limit(120);
+
         $dompdf->render();
+        $pdf = $dompdf->output();
+
+        if (!str_starts_with($pdf, '%PDF-') || !str_contains(substr($pdf, -1024), '%%EOF')) {
+            throw new \RuntimeException('Dompdf produced an incomplete PDF.');
+        }
 
         return $this->response
-            ->setHeader('Content-Type', 'application/pdf')
-            ->setHeader(
-                'Content-Disposition',
-                'attachment; filename="HR_Request_Report.pdf"'
-            )
-            ->setBody($dompdf->output());
+            ->download('HR_Request_Report.pdf', $pdf)
+            ->setContentType('application/pdf');
+    } catch (Throwable $exception) {
+        log_message('error', 'PDF export error: {message}', [
+            'message' => $exception->getMessage(),
+        ]);
 
-        $query = $this->requestModel;
-
-        if ($year = $this->request->getGet('year')) {
-            $query->like('date_requested', $year, 'after');
+        return $this->response
+            ->setStatusCode(500)
+            ->setContentType('text/plain')
+            ->setBody('PDF export error: ' . $exception->getMessage());
+    }
+}                                                                                                                        
+    private function imageDataUri(string $path): ?string
+    {
+        if (!is_file($path) || !is_readable($path)) {
+            log_message('error', 'PDF image not found: {path}', ['path' => $path]);
+            return null;
         }
 
-        if ($status = $this->request->getGet('status')) {
-            $query->like('status', $status);
+        $contents = file_get_contents($path);
+
+        if ($contents === false) {
+            return null;
         }
 
-        if ($service = $this->request->getGet('service_availed')) {
-            $query->like('service_availed', $service);
-        }
+        $mime = mime_content_type($path) ?: 'image/png';
 
-        if ($unit = $this->request->getGet('office_division')) {
-            $query->like('office_division', $unit);
-        }
-
-        if ($dateRequested = $this->request->getGet('date_requested')) {
-            $query->where('date_requested', $dateRequested);
-        }
-
-        $requests = $query
-            ->orderBy('id', 'DESC')
-            ->findAll();
+        return 'data:' . $mime . ';base64,' . base64_encode($contents);
     }
 }

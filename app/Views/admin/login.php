@@ -44,6 +44,21 @@
       <h1 id="portalTitle" class="portal-title">DOLE MIMAROPA E-PORTAL</h1>
       <p class="portal-subtitle">Employee &amp; Client Login</p>
 
+      <?php if (session()->getFlashdata('error')): ?>
+
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm" id="loginAlert" role="alert">
+
+              <i class="bi bi-exclamation-circle-fill me-2"></i>
+
+                <?= session()->getFlashdata('error') ?>
+
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+              </button>
+
+            </div>
+
+            <?php endif; ?>
+
       <!-- Login form -->
       <form class="login-form" action="<?= base_url('login/login_process') ?>" method="post" novalidate>
 
@@ -90,20 +105,7 @@
         <div class="text-center mt-3">
 
 
-          <?php if (session()->getFlashdata('error')): ?>
-
-            <div class="alert alert-danger alert-dismissible fade show shadow-sm" id="loginAlert" role="alert">
-
-              <i class="bi bi-exclamation-circle-fill me-2"></i>
-
-                <?= session()->getFlashdata('error') ?>
-
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-              </button>
-
-            </div>
-
-            <?php endif; ?>
+          
 
             
         </div>
@@ -176,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     alert.remove();
                 },500);
 
-            },3000);
+            },5000);
 
         }
 

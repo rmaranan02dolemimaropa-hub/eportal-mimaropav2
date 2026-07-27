@@ -66,17 +66,24 @@ $routes->post('login/login_process', 'EportalController::login_process');
 | AUTHENTICATED ROUTES
 |--------------------------------------------------------------------------
 */
-$routes->group('', ['filter' => 'auth'], function ($routes) {
 
-    $routes->get('eportal', 'EportalController::index');
+   $routes->get('eportal', 'EportalController::index');
+
     $routes->get('service-record', 'EportalController::service_record');
     $routes->post('service-record/save', 'EportalController::save');
+ $routes->get('export/hr-request', 'ExportController::exportHrRequestReport');
+
+ 
+$routes->group('', ['filter' => 'auth'], function ($routes) {
+
+ 
+  
 
     $routes->get('dashboard', 'EportalController::dashboard');
     $routes->get('request', 'EportalController::request');
     $routes->get('logout', 'EportalController::logout');
 
-    $routes->get('export/hr-request', 'ExportController::exportHrRequestReport');
+   
 
     $routes->post('request/save', 'EportalController::saveRequest');
     $routes->post('request/update/(:num)', 'EportalController::updateRequest/$1');

@@ -16,7 +16,7 @@
         <h3>HR Service Request</h3>
         <p>Request HR documents and file concerns without leaving your desk.</p>
 
-        <a href="service-record" class="btn-request">Request <i class="bi bi-arrow-right"></i></a>
+        <a href="<?= base_url('service-record') ?>" class="btn-request">Request <i class="bi bi-arrow-right"></i></a>
       </div>
     </div>
   </div>

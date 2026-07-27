@@ -183,7 +183,7 @@
 
                         </div>
 
-                        <div class="col-md-6 mb-3">
+                        <!-- <div class="col-md-6 mb-3">
                             <label>Status</label>
 
                             <select name="status" class="form-select" required>
@@ -193,6 +193,21 @@
 
                             </select>
 
+                        </div> -->
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label d-block">Status</label>
+
+                            <input type="hidden" name="status" value="INACTIVE">
+
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="statusToggle" name="status"
+                                    value="ACTIVE" checked>
+
+                                <label class="form-check-label" for="statusToggle" id="statusLabel">
+                                    ACTIVE
+                                </label>
+                            </div>
                         </div>
 
                     </div>
@@ -287,7 +302,7 @@
 
                             </div>
 
-                            <div class="col-md-6">
+                            <!-- <div class="col-md-6">
 
                                 <label>Status</label>
 
@@ -303,6 +318,21 @@
 
                                 </select>
 
+                            </div> -->
+                            <div class="col-md-6">
+                                <label class="form-label d-block">Status</label>
+
+                                <input type="hidden" name="status" value="INACTIVE">
+
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input status-toggle" type="checkbox"
+                                        id="statusToggle<?= $row['id'] ?>" name="status" value="ACTIVE"
+                                        <?= $row['status'] === 'ACTIVE' ? 'checked' : '' ?>>
+
+                                    <label class="form-check-label status-label" for="statusToggle<?= $row['id'] ?>">
+                                        <?= $row['status'] === 'ACTIVE' ? 'ACTIVE' : 'INACTIVE' ?>
+                                    </label>
+                                </div>
                             </div>
 
                         </div>
@@ -580,10 +610,10 @@
         enableTableSearch();
     });
 
-       /**
-     * Displays today's date in a readable, localized format
-     * inside the #currentDate element in the page header.
-     */
+    /**
+  * Displays today's date in a readable, localized format
+  * inside the #currentDate element in the page header.
+  */
     function setCurrentDate() {
         const dateEl = document.getElementById("currentDate");
         if (!dateEl) return;
@@ -598,4 +628,23 @@
         dateEl.textContent = today.toLocaleDateString("en-US", options);
     }
 
+</script>
+
+<script>
+    const statusToggle = document.getElementById('statusToggle');
+    const statusLabel = document.getElementById('statusLabel');
+
+    statusToggle.addEventListener('change', function () {
+        statusLabel.textContent = this.checked ? 'ACTIVE' : 'INACTIVE';
+    });
+
+</script>
+
+<script>
+    document.querySelectorAll('.status-toggle').forEach(toggle => {
+        toggle.addEventListener('change', function () {
+            const label = this.closest('.form-switch').querySelector('.status-label');
+            label.textContent = this.checked ? 'ACTIVE' : 'INACTIVE';
+        });
+    });
 </script>

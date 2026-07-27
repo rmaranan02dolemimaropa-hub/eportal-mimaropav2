@@ -1,28 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <title><?= htmlspecialchars($title ?? 'HR Request Report', ENT_QUOTES, 'UTF-8') ?></title>
-
-    <?php
-    // Dompdf reads these local files through its configured chroot (FCPATH).
-    $headerImage = 'assets/img/dole-header.png';
-    $footerImage = 'assets/img/dole-footer.png';
-    ?>
+    <title><?= esc($title) ?></title>
 
     <style>
         @page {
             size: A4 portrait;
-            margin: 6cm 1cm 3cm 1cm;
+            margin: 6cm 1cm 3cm;
         }
 
         body {
             margin: 0;
             color: #222;
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 11px;
-            line-height: 1.4;
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 10px;
         }
 
         .header,
@@ -40,27 +32,17 @@
             bottom: -2.5cm;
         }
 
-        .header img {
-            display: block;
-            width: 100%;
-            height: auto;
-        }
-
+        .header img,
         .footer img {
             display: block;
             width: 100%;
             height: auto;
         }
 
-        .content {
-            margin-top: 10px;
-        }
-
-        .report-title {
+        h1 {
             margin: 0 0 20px;
             color: #10058C;
             font-size: 16px;
-            font-weight: bold;
             text-align: center;
             text-transform: uppercase;
         }
@@ -71,74 +53,58 @@
         }
 
         th {
-            padding: 9px 8px;
-            background-color: #10058C;
+            padding: 9px;
             border: 1px solid #10058C;
+            background: #10058C;
             color: #fff;
-            font-size: 10px;
+            font-size: 9px;
             text-align: left;
-            text-transform: uppercase;
         }
 
         td {
             padding: 8px;
             border: 1px solid #c9c9c9;
-            vertical-align: top;
         }
 
-        tbody tr:nth-child(even) {
-            background-color: #f5f6fa;
-        }
-
-        .no-records {
-            padding: 18px;
-            color: #666;
-            text-align: center;
+        tr:nth-child(even) {
+            background: #f5f6fa;
         }
     </style>
 </head>
-
 <body>
     <div class="header">
-        <img src="<?= $headerImage ?>" alt="DOLE Header">
+        <?php if ($headerImage): ?>
+            <img src="<?= esc($headerImage, 'attr') ?>" alt="DOLE Header">
+        <?php endif; ?>
     </div>
 
     <div class="footer">
-        <img src="<?= $footerImage ?>" alt="">
+        <?php if ($footerImage): ?>
+            <img src="<?= esc($footerImage, 'attr') ?>" alt="">
+        <?php endif; ?>
     </div>
 
-    <main class="content">
-        <h1 class="report-title">
-            <?= esc($title) ?>
-        </h1>
+    <h1><?= esc($title) ?></h1>
 
-        <table>
-            <thead>
+    <table>
+        <thead>
+            <tr>
+                <th>Reference No.</th>
+                <th>Name</th>
+                <th>Service</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($requests as $row): ?>
                 <tr>
-                    <th>Reference No.</th>
-                    <th>Name</th>
-                    <th>Service</th>
-                    <th>Status</th>
+                    <td><?= esc($row['reference'] ?? '') ?></td>
+                    <td><?= esc($row['name'] ?? '') ?></td>
+                    <td><?= esc($row['service'] ?? '') ?></td>
+                    <td><?= esc($row['status'] ?? '') ?></td>
                 </tr>
-            </thead>
-            <tbody>
-                <?php if (!empty($requests)): ?>
-                    <?php foreach ($requests as $row): ?>
-                        <tr>
-                            <td><?= esc($row['reference'] ?? '') ?></td>
-                            <td><?= esc($row['name'] ?? '') ?></td>
-                            <td><?= esc($row['service'] ?? '') ?></td>
-                            <td><?= esc($row['status'] ?? '') ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <tr>
-                        <td colspan="4">No request records found.</td>
-                    </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
-    </main>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
 </body>
-
 </html>
