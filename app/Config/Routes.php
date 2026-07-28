@@ -72,6 +72,10 @@ $routes->post('login/login_process', 'EportalController::login_process');
     $routes->get('service-record', 'EportalController::service_record');
     $routes->post('service-record/save', 'EportalController::save');
  $routes->get('export/hr-request', 'ExportController::exportHrRequestReport');
+    $routes->get('reports', 'EportalController::reports');
+    $routes->get('reports/print', 'ExportController::printHrRequestReport');
+    $routes->get('export/reports-pdf', 'ExportController::exportReportsPdf');
+    
 
  
 $routes->group('', ['filter' => 'auth'], function ($routes) {

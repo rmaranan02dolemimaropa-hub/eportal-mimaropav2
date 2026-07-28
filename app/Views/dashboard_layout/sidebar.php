@@ -21,7 +21,7 @@
           <i class="bi bi-people"></i><span>Users</span>
         </a>
       <?php endif; ?>
-      <a href="#" class="nav-link">
+      <a href="reports" class="nav-link">
         <i class="bi bi-bar-chart"></i><span>Reports</span>
       </a>
       <a href="#" class="nav-link">

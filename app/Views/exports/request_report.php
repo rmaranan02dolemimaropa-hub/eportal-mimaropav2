@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title><?= esc($title) ?></title>
@@ -97,6 +98,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="header">
         <?php if ($headerImage): ?>
@@ -109,6 +111,7 @@
             <img src="<?= esc($footerImage, 'attr') ?>" alt="">
         <?php endif; ?>
     </div>
+    
 
     <h1><?= esc($title) ?></h1>
 
@@ -133,4 +136,5 @@
         </tbody>
     </table>
 </body>
+
 </html>

@@ -28,6 +28,9 @@
   <!-- Custom Stylesheet -->
   <link rel="stylesheet" href="assets/css/dashboard.css" />
   <link rel="stylesheet" href="assets/css/modal.css" />
+   <link rel="stylesheet" href="assets/css/report-minimal.css" />
+
+  
   
 </head>
 <body>

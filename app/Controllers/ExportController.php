@@ -17,20 +17,120 @@ class ExportController extends BaseController
     }
 
     public function exportHrRequestReport()
-{
-    try {
-        $year           = $this->request->getGet('year');
-        $status         = $this->request->getGet('status');
-        $serviceAvailed = $this->request->getGet('service_availed');
-        $dateRequested  = $this->request->getGet('date_requested');
+    {
+        try {
+            $year = $this->request->getGet('year');
+            $status = $this->request->getGet('status');
+            $serviceAvailed = $this->request->getGet('service_availed');
+            $dateRequested = $this->request->getGet('date_requested');
 
-        $builder = $this->requestModel
-            ->select('
+            $builder = $this->requestModel
+                ->select('
                 reference_no AS reference,
                 fullname AS name,
                 service_availed AS service,
                 status
             ');
+
+            if (!empty($year)) {
+                $builder->where('YEAR(date_requested)', $year);
+            }
+
+            if (!empty($status)) {
+                $builder->where('status', $status);
+            }
+
+            if (!empty($serviceAvailed)) {
+                $builder->where('service_availed', $serviceAvailed);
+            }
+
+            if (!empty($dateRequested)) {
+                $builder->where('date_requested', $dateRequested);
+            }
+
+            $requests = $builder
+                ->orderBy('id', 'DESC')
+                ->findAll();
+
+            $html = view('exports/request_report', [
+                'title' => 'HR Request Report',
+                'requests' => $requests,
+                'headerImage' => $this->imageDataUri(
+                    FCPATH . 'assets/img/dole-header.png'
+                ),
+                'footerImage' => $this->imageDataUri(
+                    FCPATH . 'assets/img/dole-footer.png'
+                ),
+            ]);
+
+            $options = new Options();
+            $options->set('defaultFont', 'DejaVu Sans');
+
+            $dompdf = new Dompdf($options);
+            $dompdf->loadHtml($html, 'UTF-8');
+            $dompdf->setPaper('A4', 'portrait');
+
+            ini_set('memory_limit', '512M');
+            set_time_limit(120);
+
+            $dompdf->render();
+            $pdf = $dompdf->output();
+
+            if (!str_starts_with($pdf, '%PDF-') || !str_contains(substr($pdf, -1024), '%%EOF')) {
+                throw new \RuntimeException('Dompdf produced an incomplete PDF.');
+            }
+
+            return $this->response
+                ->download('HR_Request_Report.pdf', $pdf)
+                ->setContentType('application/pdf');
+        } catch (Throwable $exception) {
+            log_message('error', 'PDF export error: {message}', [
+                'message' => $exception->getMessage(),
+            ]);
+
+            return $this->response
+                ->setStatusCode(500)
+                ->setContentType('text/plain')
+                ->setBody('PDF export error: ' . $exception->getMessage());
+        }
+    }
+    private function imageDataUri(string $path): ?string
+    {
+        if (!is_file($path) || !is_readable($path)) {
+            log_message('error', 'PDF image not found: {path}', ['path' => $path]);
+            return null;
+        }
+
+        $contents = file_get_contents($path);
+
+        if ($contents === false) {
+            return null;
+        }
+
+        $mime = mime_content_type($path) ?: 'image/png';
+
+        return 'data:' . $mime . ';base64,' . base64_encode($contents);
+    }
+
+    public function printHrRequestReport()
+    {
+        $month = $this->request->getGet('month');
+        $year = $this->request->getGet('year');
+        $status = $this->request->getGet('status');
+        $serviceAvailed = $this->request->getGet('service_availed');
+        $dateRequested = $this->request->getGet('date_requested');
+
+        $builder = $this->requestModel
+            ->select('
+            reference_no AS reference,
+            fullname AS name,
+            service_availed AS service,
+            status
+        ');
+
+        if (!empty($month)) {
+            $builder->where('MONTH(date_requested)', $month);
+        }
 
         if (!empty($year)) {
             $builder->where('YEAR(date_requested)', $year);
@@ -52,63 +152,90 @@ class ExportController extends BaseController
             ->orderBy('id', 'DESC')
             ->findAll();
 
-        $html = view('exports/request_report', [
+        return view('exports/request_report_print', [
             'title' => 'HR Request Report',
             'requests' => $requests,
-            'headerImage' => $this->imageDataUri(
-                FCPATH . 'assets/img/dole-header.png'
-            ),
-            'footerImage' => $this->imageDataUri(
-                FCPATH . 'assets/img/dole-footer.png'
-            ),
+            'year' => $year,
+            'status' => $status,
+            'serviceAvailed' => $serviceAvailed,
+            'dateRequested' => $dateRequested,
         ]);
-
-        $options = new Options();
-        $options->set('defaultFont', 'DejaVu Sans');
-
-        $dompdf = new Dompdf($options);
-        $dompdf->loadHtml($html, 'UTF-8');
-        $dompdf->setPaper('A4', 'portrait');
-
-        ini_set('memory_limit', '512M');
-        set_time_limit(120);
-
-        $dompdf->render();
-        $pdf = $dompdf->output();
-
-        if (!str_starts_with($pdf, '%PDF-') || !str_contains(substr($pdf, -1024), '%%EOF')) {
-            throw new \RuntimeException('Dompdf produced an incomplete PDF.');
-        }
-
-        return $this->response
-            ->download('HR_Request_Report.pdf', $pdf)
-            ->setContentType('application/pdf');
-    } catch (Throwable $exception) {
-        log_message('error', 'PDF export error: {message}', [
-            'message' => $exception->getMessage(),
-        ]);
-
-        return $this->response
-            ->setStatusCode(500)
-            ->setContentType('text/plain')
-            ->setBody('PDF export error: ' . $exception->getMessage());
     }
-}                                                                                                                        
-    private function imageDataUri(string $path): ?string
+    public function exportReportsPdf()
     {
-        if (!is_file($path) || !is_readable($path)) {
-            log_message('error', 'PDF image not found: {path}', ['path' => $path]);
-            return null;
+        try {
+
+            // Increase PHP limits
+            ini_set('memory_limit', '512M');
+            set_time_limit(120);
+
+            $year = $this->request->getGet('year');
+            $month = $this->request->getGet('month');
+            $service = $this->request->getGet('service');
+            $search = $this->request->getGet('q');
+
+            $builder = $this->requestModel
+                ->select('
+                reference_no,
+                fullname,
+                service_availed,
+                date_requested,
+                status
+            ');
+
+            if (!empty($year)) {
+                $builder->where('YEAR(date_requested)', $year);
+            }
+
+            if (!empty($month)) {
+                $builder->where('MONTH(date_requested)', $month);
+            }
+
+            if (!empty($service)) {
+                $builder->where('service_availed', $service);
+            }
+
+            if (!empty($search)) {
+                $builder->groupStart()
+                    ->like('reference_no', $search)
+                    ->orLike('fullname', $search)
+                    ->orLike('service_availed', $search)
+                    ->groupEnd();
+            }
+
+            $requests = $builder
+                ->orderBy('id', 'DESC')
+                ->findAll();
+
+            $html = view('exports/reports_pdf', [
+                'title' => 'Service Requests Report',
+                'requests' => $requests,
+                'headerImage' => $this->imageDataUri(FCPATH . 'assets/img/dole-header.png'),
+                'footerImage' => $this->imageDataUri(FCPATH . 'assets/img/dole-footer.png'),
+            ]);
+
+            $options = new Options();
+            $options->set('defaultFont', 'DejaVu Sans');
+            $options->setIsRemoteEnabled(true);
+            $options->setIsHtml5ParserEnabled(true);
+
+            $dompdf = new Dompdf($options);
+
+            $dompdf->loadHtml($html, 'UTF-8');
+            $dompdf->setPaper('A4', 'landscape');
+            $dompdf->render();
+
+            $pdf = $dompdf->output();
+
+            return $this->response
+                ->download('Service_Requests_Report.pdf', $pdf)
+                ->setContentType('application/pdf');
+
+        } catch (Throwable $e) {
+
+            return $this->response
+                ->setStatusCode(500)
+                ->setBody($e->getMessage());
         }
-
-        $contents = file_get_contents($path);
-
-        if ($contents === false) {
-            return null;
-        }
-
-        $mime = mime_content_type($path) ?: 'image/png';
-
-        return 'data:' . $mime . ';base64,' . base64_encode($contents);
     }
 }

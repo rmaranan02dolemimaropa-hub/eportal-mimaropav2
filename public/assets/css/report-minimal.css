@@ -1,0 +1,332 @@
+/* ==========================================================================
+   REPORTS PAGE — Minimalist theme
+   Scoped under .report-page so it layers cleanly over dashboard.css
+   without touching navbar / sidebar / other dashboard pages.
+   ========================================================================== */
+
+.report-page {
+  --r-bg: #ffffff;
+  --r-ink: #111827;
+  --r-ink-soft: #8a8f98;
+  --r-line: #e9e9ec;
+  --r-accent: #10058c;
+  --r-ok: #1f7a4d;
+  --r-pending: #9a6b00;
+  --r-cancelled: #b3261e;
+
+  font-family: "Manrope", "Segoe UI", Arial, sans-serif;
+  color: var(--r-ink);
+}
+
+/* -------------------- Header -------------------- */
+.report-page .r-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 20px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid var(--r-line);
+}
+
+.report-page .r-eyebrow {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--r-ink-soft);
+  margin: 0 0 6px;
+}
+
+.report-page .r-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+  letter-spacing: -0.01em;
+}
+
+.report-page .r-subtitle {
+  font-size: 0.88rem;
+  color: var(--r-ink-soft);
+  margin: 0;
+  max-width: 480px;
+}
+
+.report-page .r-date {
+  font-size: 0.8rem;
+  color: var(--r-ink-soft);
+  white-space: nowrap;
+}
+
+/* -------------------- Filter row (no card, just fields on a line) -------------------- */
+.report-page .r-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 20px;
+  padding-bottom: 24px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--r-line);
+}
+
+.report-page .r-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 140px;
+}
+
+.report-page .r-field.grow {
+  flex: 1 1 240px;
+}
+
+.report-page .r-field label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--r-ink-soft);
+}
+
+.report-page .r-field select,
+.report-page .r-field input {
+  border: none;
+  border-bottom: 1px solid var(--r-line);
+  border-radius: 0;
+  padding: 6px 2px;
+  font-size: 0.88rem;
+  color: var(--r-ink);
+  background: transparent;
+  width: 100%;
+  transition: border-color 0.2s ease;
+}
+
+.report-page .r-field select:focus,
+.report-page .r-field input:focus {
+  outline: none;
+  border-color: var(--r-ink);
+}
+
+.report-page .r-field input::placeholder {
+  color: #c4c7cc;
+}
+
+/* -------------------- Buttons -------------------- */
+.report-page .r-btn {
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0 16px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.report-page .r-btn-primary {
+  background: var(--r-ink);
+  color: #ffffff;
+}
+
+.report-page .r-btn-primary:hover {
+  background: var(--r-accent);
+}
+
+.report-page .r-btn-text {
+  color: var(--r-ink-soft);
+  padding: 0 4px;
+}
+
+.report-page .r-btn-text:hover {
+  color: var(--r-ink);
+}
+
+.report-page .r-btn-outline {
+  border-color: var(--r-line);
+  color: var(--r-ink);
+}
+
+.report-page .r-btn-outline:hover {
+  border-color: var(--r-ink);
+}
+
+/* -------------------- Toolbar (result count + export) -------------------- */
+.report-page .r-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.report-page .r-count {
+  font-size: 0.82rem;
+  color: var(--r-ink-soft);
+}
+
+.report-page .r-count b {
+  color: var(--r-ink);
+  font-weight: 700;
+}
+
+.report-page .r-export-group {
+  display: flex;
+  gap: 4px;
+}
+
+/* -------------------- Table -------------------- */
+.report-page .r-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+
+.report-page .r-table thead th {
+  text-align: left;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--r-ink-soft);
+  padding: 0 12px 10px;
+  border-bottom: 1px solid var(--r-ink);
+  white-space: nowrap;
+}
+
+.report-page .r-table tbody td {
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--r-line);
+  vertical-align: middle;
+  color: var(--r-ink);
+}
+
+.report-page .r-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.report-page .r-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.report-page .r-mono {
+  font-family: "SFMono-Regular", Consolas, "IBM Plex Mono", monospace;
+  font-size: 0.82rem;
+  color: var(--r-ink-soft);
+}
+
+.report-page .r-ref {
+  font-family: "SFMono-Regular", Consolas, "IBM Plex Mono", monospace;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--r-ink);
+}
+
+/* -------------------- Status: plain text + dot, no pill backgrounds -------------------- */
+.report-page .r-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.report-page .r-status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.report-page .r-status.completed { color: var(--r-ok); }
+.report-page .r-status.pending   { color: var(--r-pending); }
+.report-page .r-status.cancelled { color: var(--r-cancelled); }
+
+/* -------------------- Empty state -------------------- */
+.report-page .r-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--r-ink-soft);
+  font-size: 0.88rem;
+}
+
+/* -------------------- Pagination -------------------- */
+.report-page .r-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--r-line);
+}
+
+.report-page .r-pagination .r-summary {
+  font-size: 0.78rem;
+  color: var(--r-ink-soft);
+}
+
+.report-page .r-pagination ul {
+  list-style: none;
+  display: flex;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+}
+
+.report-page .r-pagination a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  color: var(--r-ink-soft);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.report-page .r-pagination a:hover {
+  background: #f4f4f5;
+  color: var(--r-ink);
+}
+
+.report-page .r-pagination li.active a {
+  background: var(--r-ink);
+  color: #ffffff;
+}
+
+.report-page .r-pagination li.disabled a {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* -------------------- Print -------------------- */
+@media print {
+  .no-print { display: none !important; }
+  .topbar, .sidebar, .app-footer { display: none !important; }
+  .main-content { padding: 0 !important; }
+  .report-page .r-table thead th { border-bottom: 1px solid #000; }
+}
+
+/* -------------------- Responsive -------------------- */
+@media (max-width: 640px) {
+  .report-page .r-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .report-page .r-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

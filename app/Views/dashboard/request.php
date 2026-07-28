@@ -56,20 +56,24 @@
                         aria-label="Search requests" />
                 </div>
 
-                <button class="btn tool-btn" type="button" id="exportButton">
-                    <i class="bi bi-download"></i> Export PDF
-                </button>
+                <button class="btn tool-btn" id="exportButton">
+    <i class="bi bi-download"></i> Export PDF
+</button>
 
-                <div id="exportOverlay" class="export-overlay" aria-live="polite">
-                    <div class="export-card">
-                        <h3>Preparing PDF</h3>
-                        <p>Please wait while your report is being generated.</p>
+<div id="exportOverlay" class="export-overlay">
+    <div class="export-card">
+        <h3>Preparing PDF Report</h3>
+        <p id="exportText">Initializing...</p>
 
-                        <div class="progress-track">
-                            <div class="progress-bar"></div>
-                        </div>
-                    </div>
-                </div>
+        <div class="progress-track">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div class="progress-percent">
+            <span id="progressValue">0%</span>
+        </div>
+    </div>
+</div>
             </div>
         </div>
 
@@ -593,45 +597,108 @@
 </script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const button = document.getElementById('exportButton');
-        const overlay = document.getElementById('exportOverlay');
+document.addEventListener("DOMContentLoaded", function () {
 
-        button.addEventListener('click', async function () {
-            button.disabled = true;
-            overlay.classList.add('is-visible');
+    const button = document.getElementById("exportButton");
+    const overlay = document.getElementById("exportOverlay");
+    const bar = document.getElementById("progressBar");
+    const percent = document.getElementById("progressValue");
+    const text = document.getElementById("exportText");
 
-            try {
-                // Forward whatever filters are currently in the URL
-                const currentParams = window.location.search; // e.g. "?year=2026&status=Pending"
+    button.addEventListener("click", async function () {
 
-                const response = await fetch(
-                    "<?= site_url('export/hr-request') ?>" + currentParams,
-                    { credentials: 'same-origin' }
-                );
+        button.disabled = true;
+        overlay.classList.add("is-visible");
 
-                if (!response.ok) {
-                    throw new Error('Export failed.');
-                }
+        let progress = 0;
 
-                const blob = await response.blob();
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
+        bar.style.width = "0%";
+        percent.textContent = "0%";
+        text.textContent = "Preparing report...";
 
-                link.href = url;
-                link.download = 'HR_Request_Report.pdf';
-                link.click();
+        const timer = setInterval(() => {
 
-                setTimeout(() => URL.revokeObjectURL(url), 1000);
-            } catch (error) {
-                alert('Unable to export the PDF. Please try again.');
-                console.error(error);
-            } finally {
-                overlay.classList.remove('is-visible');
-                button.disabled = false;
+            if (progress < 90) {
+
+                progress += Math.floor(Math.random() * 8) + 3;
+
+                if (progress > 90) progress = 90;
+
+                bar.style.width = progress + "%";
+                percent.textContent = progress + "%";
+
+                if (progress > 25)
+                    text.textContent = "Collecting records...";
+
+                if (progress > 55)
+                    text.textContent = "Generating PDF...";
+
+                if (progress > 80)
+                    text.textContent = "Almost finished...";
             }
-        });
+
+        }, 180);
+
+        try {
+
+            // Get current filter parameters
+            const currentParams = window.location.search;
+
+            const response = await fetch(
+                "<?= site_url('export/hr-request') ?>" + currentParams,
+                {
+                    credentials: "same-origin"
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Export failed.");
+            }
+
+            const blob = await response.blob();
+
+            clearInterval(timer);
+
+            progress = 100;
+            bar.style.width = "100%";
+            percent.textContent = "100%";
+            text.textContent = "Download ready.";
+
+            const url = URL.createObjectURL(blob);
+
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "HR_Request_Report.pdf";
+            link.click();
+
+            setTimeout(() => {
+                URL.revokeObjectURL(url);
+
+                overlay.classList.remove("is-visible");
+                button.disabled = false;
+
+                bar.style.width = "0%";
+                percent.textContent = "0%";
+                text.textContent = "Preparing report...";
+            }, 700);
+
+        } catch (error) {
+
+            clearInterval(timer);
+
+            overlay.classList.remove("is-visible");
+            button.disabled = false;
+
+            bar.style.width = "0%";
+            percent.textContent = "0%";
+
+            alert("Unable to export the PDF. Please try again.");
+            console.error(error);
+        }
+
     });
+
+});
 </script>
 
 <script>
