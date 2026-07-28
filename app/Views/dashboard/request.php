@@ -48,15 +48,14 @@
         <div class="panel-header">
             <h2 class="panel-title">Recent Service Requests</h2>
             <div class="panel-tools">
+
+
                 <div class="search-box">
                     <i class="bi bi-search"></i>
                     <input type="text" class="form-control" placeholder="Search requests..."
                         aria-label="Search requests" />
                 </div>
-                <button class="btn tool-btn" type="button" data-bs-toggle="modal" data-bs-target="#filterModal">
-                    <i class="bi bi-funnel"></i>
-                    <span class="d-none d-md-inline">Filter</span>
-                </button>
+
                 <button class="btn tool-btn" type="button" id="exportButton">
                     <i class="bi bi-download"></i> Export PDF
                 </button>
@@ -73,6 +72,44 @@
                 </div>
             </div>
         </div>
+
+
+        <div class="status-filter mb-4">
+
+            <?php $status = $_GET['status'] ?? ''; ?>
+
+            <a href="<?= current_url() ?>" class="status-pill <?= $status == '' ? 'active' : '' ?>">
+                All
+            </a>
+
+            <a href="<?= current_url() ?>?status=New+Application"
+                class="status-pill <?= $status == 'New Application' ? 'active' : '' ?>">
+                New Application
+            </a>
+
+            <a href="<?= current_url() ?>?status=Processing"
+                class="status-pill <?= $status == 'Processing' ? 'active' : '' ?>">
+                Processing
+            </a>
+
+            <a href="<?= current_url() ?>?status=For+Released"
+                class="status-pill <?= $status == 'For Released' ? 'active' : '' ?>">
+                For Released
+            </a>
+
+            <a href="<?= current_url() ?>?status=Completed"
+                class="status-pill <?= $status == 'Completed' ? 'active' : '' ?>">
+                Completed
+            </a>
+
+            <a href="<?= current_url() ?>?status=Rejected"
+                class="status-pill <?= $status == 'Rejected' ? 'active' : '' ?>">
+                Rejected
+            </a>
+
+        </div>
+
+
 
 
         <div class="table-responsive">
@@ -258,104 +295,7 @@
 
     </section>
 
-    <div class="modal fade" id="filterModal" tabindex="-1">
-        <div class="modal-dialog">
-            <form method="get" action="<?= site_url('request') ?>" class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Filter HR Requests</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
 
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Year</label>
-                        <select name="year" class="form-select">
-                            <option value="">All years</option>
-                            <?php for ($year = date('Y'); $year >= 2020; $year--): ?>
-                                <option value="<?= $year ?>" <?= ($_GET['year'] ?? '') == $year ? 'selected' : '' ?>>
-                                    <?= $year ?>
-                                </option>
-                            <?php endfor; ?>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Status</label>
-                        <select name="status" class="form-select">
-                            <option value="">All statuses</option>
-                            <option value="New Application" <?= ($_GET['status'] ?? '') === 'New Application' ? 'selected' : '' ?>>
-                                New Application
-                            </option>
-                            <option value="Processing" <?= ($_GET['status'] ?? '') === 'Processing' ? 'selected' : '' ?>>
-                                Processing
-                            </option>
-                            <option value="For Released" <?= ($_GET['status'] ?? '') === 'For Released' ? 'selected' : '' ?>>
-                                For Released
-                            </option>
-                            <option value="Completed" <?= ($_GET['status'] ?? '') === 'Completed' ? 'selected' : '' ?>>
-                                Completed
-                            </option>
-                            <option value="Rejected" <?= ($_GET['status'] ?? '') === 'Rejected' ? 'selected' : '' ?>>
-                                Rejected
-                            </option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Service Availed</label>
-
-                        <select name="service_availed" class="form-select">
-                            <option value="">All services</option>
-
-                            <option value="Service Record" <?= ($_GET['service_availed'] ?? '') === 'Service Record' ? 'selected' : '' ?>>
-                                Service Record
-                            </option>
-
-                            <option value="Certificate with Compensation" <?= ($_GET['service_availed'] ?? '') === 'Certificate with Compensation' ? 'selected' : '' ?>>
-                                Certificate with Compensation
-                            </option>
-
-                            <option value="Loan Assistance" <?= ($_GET['service_availed'] ?? '') === 'Loan Assistance' ? 'selected' : '' ?>>
-                                Loan Assistance
-                            </option>
-
-                            <option value="Inquiry of Leave Balance" <?= ($_GET['service_availed'] ?? '') === 'Inquiry of Leave Balance' ? 'selected' : '' ?>>
-                                Inquiry of Leave Balance
-                            </option>
-
-                            <option value="Certificate of Employment" <?= ($_GET['service_availed'] ?? '') === 'Certificate of Employment' ? 'selected' : '' ?>>
-                                Certificate of Employment
-                            </option>
-
-                            <option value="Certification" <?= ($_GET['service_availed'] ?? '') === 'Certification' ? 'selected' : '' ?>>
-                                Certification
-                            </option>
-
-                            <option value="IPCR" <?= ($_GET['service_availed'] ?? '') === 'IPCR' ? 'selected' : '' ?>>
-                                IPCR
-                            </option>
-
-                            <option value="201 Documents" <?= ($_GET['service_availed'] ?? '') === '201 Documents' ? 'selected' : '' ?>>
-                                201 Documents
-                            </option>
-                        </select>
-                    </div>
-
-
-                    <div class="mb-3">
-                        <label class="form-label">Date Requested</label>
-                        <input type="date" name="date_requested" class="form-control"
-                            value="<?= esc($_GET['date_requested'] ?? '') ?>">
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <a href="<?= current_url() ?>" class="btn btn-outline-secondary">Clear</a>
-                    <button type="submit" class="btn btn-primary">Apply Filter</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
     <div class="modal fade" id="viewRequestModal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
