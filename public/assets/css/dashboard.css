@@ -626,7 +626,7 @@ button {
   border-radius: 999px;
 }
 
-.badge-pending {
+.badge-new-application {
   background: #FEF3C7;
   color: #92400E;
 }
@@ -641,7 +641,7 @@ button {
   color: #15803D;
 }
 
-.badge-released {
+.badge-for-released {
   background: #EDE9FE;
   color: #6D28D9;
 }

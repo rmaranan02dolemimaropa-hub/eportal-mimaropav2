@@ -16,12 +16,6 @@
       <a href="request" class="nav-link <?= $isActive('request') ?>">
         <i class="bi bi-file-earmark-text"></i><span>Requests</span>
       </a>
-      <a href="#" class="nav-link">
-        <i class="bi bi-clipboard-check"></i><span>My Requests</span>
-      </a>
-      <a href="#" class="nav-link">
-        <i class="bi bi-folder2-open"></i><span>Services</span>
-      </a>
       <?php if (session('role') == 'IT ADMINISTRATOR'): ?>
         <a href="users" class="nav-link">
           <i class="bi bi-people"></i><span>Users</span>

@@ -51,10 +51,10 @@ class EportalController extends BaseController
         $requestModel = new HrRequestModel();
 
         $data = [
-            'pending' => $requestModel->where('status', 'Pending')->countAllResults(),
+            'new_application' => $requestModel->where('status', 'New Application')->countAllResults(),
             'processing' => $requestModel->where('status', 'Processing')->countAllResults(),
             'completed' => $requestModel->where('status', 'Completed')->countAllResults(),
-            'released' => $requestModel->where('status', 'Released')->countAllResults(),
+            'for_released' => $requestModel->where('status', 'For Released')->countAllResults(),
             'rejected' => $requestModel->where('status', 'Rejected')->countAllResults(),
         ];
 
@@ -166,7 +166,7 @@ class EportalController extends BaseController
             'specify_201' => $this->request->getPost('specify_201'),
             'other_request' => $this->request->getPost('other_request'),
             'date_requested' => date('Y-m-d'),
-            'status' => 'Pending',
+            'status' => 'New Application',
             'remarks' => '',
             'date_received' => null,
             'received_by' => null,
@@ -343,7 +343,7 @@ class EportalController extends BaseController
         ]);
 
         $data['reference_no'] = 'HR-' . date('YmdHis');
-        $data['status'] = 'Pending';
+        $data['status'] = 'New Application';
         $data['certification'] = implode(', ', $this->request->getPost('certification') ?? []);
 
         $requestModel->insert($data);

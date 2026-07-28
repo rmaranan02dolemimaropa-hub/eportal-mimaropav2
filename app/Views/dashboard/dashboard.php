@@ -41,8 +41,8 @@
         <div class="stat-card">
             <div class="stat-icon stat-icon-orange"><i class="bi bi-hourglass-split"></i></div>
             <div class="stat-body">
-                <span class="stat-number" data-target="<?= $pending ?>">0</span>
-                <span class="stat-label">Pending</span>
+                <span class="stat-number" data-target="<?= $new_application ?>">0</span>
+                <span class="stat-label">New Applications</span>
                 <span class="stat-trend trend-up"><i class="bi bi-arrow-up-short"></i>4.2% this week</span>
             </div>
         </div>
@@ -57,6 +57,15 @@
         </div>
 
         <div class="stat-card">
+            <div class="stat-icon stat-icon-purple"><i class="bi bi-box-arrow-up-right"></i></div>
+            <div class="stat-body">
+                <span class="stat-number" data-target="<?= $for_released ?>">0</span>
+                <span class="stat-label">For Released</span>
+                <span class="stat-trend trend-up"><i class="bi bi-arrow-up-short"></i>2.1% this week</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
             <div class="stat-icon stat-icon-green"><i class="bi bi-check-circle"></i></div>
             <div class="stat-body">
                 <span class="stat-number" data-target="<?= $completed ?>">0</span>
@@ -65,14 +74,7 @@
             </div>
         </div>
 
-        <div class="stat-card">
-            <div class="stat-icon stat-icon-purple"><i class="bi bi-box-arrow-up-right"></i></div>
-            <div class="stat-body">
-                <span class="stat-number" data-target="<?= $released ?>">0</span>
-                <span class="stat-label">Released</span>
-                <span class="stat-trend trend-up"><i class="bi bi-arrow-up-short"></i>2.1% this week</span>
-            </div>
-        </div>
+        
 
         <div class="stat-card">
             <div class="stat-icon stat-icon-red"><i class="bi bi-x-circle"></i></div>
@@ -98,12 +100,6 @@
                         <input type="text" class="form-control" placeholder="Search requests..."
                             aria-label="Search requests" />
                     </div>
-                    <button class="btn tool-btn" type="button">
-                        <i class="bi bi-funnel"></i><span class="d-none d-md-inline">Filter</span>
-                    </button>
-                    <button class="btn tool-btn" type="button">
-                        <i class="bi bi-download"></i><span class="d-none d-md-inline">Export</span>
-                    </button>
                 </div>
             </div>
 
@@ -116,14 +112,35 @@
                             <th>Service</th>
                             <th>Date Requested</th>
                             <th>Status</th>
-                            <th class="text-end">Action</th>
+                            
                         </tr>
                     </thead>
+
                     <tbody>
+
+                        <?php
+                        $allowedStatus = [
+                            'New Application',
+                            'Processing',
+                            'For Released'
+                        ];
+
+                        $statusClass = [
+                            'New Application' => 'badge-new-application',
+                            'Processing'      => 'badge-processing',
+                            'For Released'    => 'badge-for-released',
+                        ];
+
+                        $hasData = false;
+                        ?>
 
                         <?php if (!empty($requests)): ?>
 
                             <?php foreach ($requests as $row): ?>
+
+                                <?php if (!in_array($row['status'], $allowedStatus)) continue; ?>
+
+                                <?php $hasData = true; ?>
 
                                 <tr>
 
@@ -144,91 +161,26 @@
                                     </td>
 
                                     <td>
-
-                                        <?php
-
-                                        $statusClass = [
-                                            'Pending' => 'badge-pending',
-                                            'Processing' => 'badge-processing',
-                                            'Completed' => 'badge-completed',
-                                            'Released' => 'badge-released',
-                                            'Rejected' => 'badge-rejected',
-                                        ];
-
-                                        ?>
-
-                                        <span class="badge <?= $statusClass[$row['status']] ?? 'bg-secondary' ?>">
-
+                                        <span class="badge <?= $statusClass[$row['status']] ?>">
                                             <?= esc($row['status']) ?>
-
                                         </span>
-
                                     </td>
 
-                                    <td class="text-end">
-
-                                        <div class="row-actions">
-
-                                            <!-- View (Everyone) -->
-                                            <button class="row-action-btn" title="View" data-bs-toggle="modal"
-                                                data-bs-target="#view<?= $row['id'] ?>">
-
-                                                <i class="bi bi-eye"></i>
-
-                                            </button>
-
-                                            <?php if (session('role') == 'IT ADMINISTRATOR'): ?>
-
-                                                <!-- Edit -->
-                                                <button class="row-action-btn" title="Edit" data-bs-toggle="modal"
-                                                    data-bs-target="#edit<?= $row['id'] ?>">
-
-                                                    <i class="bi bi-pencil"></i>
-
-                                                </button>
-
-                                                <!-- Delete -->
-                                                <button class="row-action-btn row-action-danger" title="Delete"
-                                                    data-bs-toggle="modal" data-bs-target="#delete<?= $row['id'] ?>">
-
-                                                    <i class="bi bi-trash"></i>
-
-                                                </button>
-
-                                            <?php elseif (session('role') == 'HR ADMINISTRATOR'): ?>
-
-                                                <!-- HR can update request status -->
-                                                <button class="row-action-btn" title="Update Status" data-bs-toggle="modal"
-                                                    data-bs-target="#status<?= $row['id'] ?>">
-
-                                                    <i class="bi bi-arrow-repeat"></i>
-
-                                                </button>
-
-                                            <?php endif; ?>
-
-                                        </div>
-
-                                    </td>
 
                                 </tr>
 
                             <?php endforeach; ?>
 
-                        <?php else: ?>
+                        <?php endif; ?>
+
+                        <?php if (!$hasData): ?>
 
                             <tr>
-
                                 <td colspan="6" class="text-center py-5">
-
                                     <i class="bi bi-inbox fs-1 text-muted"></i>
-
                                     <br>
-
                                     No service requests found.
-
                                 </td>
-
                             </tr>
 
                         <?php endif; ?>

@@ -116,10 +116,10 @@
                                     <?php
 
                                     $statusClass = [
-                                        'Pending' => 'badge-pending',
+                                        'New Application' => 'badge-new-application',
                                         'Processing' => 'badge-processing',
                                         'Completed' => 'badge-completed',
-                                        'Released' => 'badge-released',
+                                        'For Released' => 'badge-for-released',
                                         'Rejected' => 'badge-rejected',
                                     ];
 
@@ -283,14 +283,14 @@
                         <label class="form-label">Status</label>
                         <select name="status" class="form-select">
                             <option value="">All statuses</option>
-                            <option value="Pending" <?= ($_GET['status'] ?? '') === 'Pending' ? 'selected' : '' ?>>
-                                Pending
+                            <option value="New Application" <?= ($_GET['status'] ?? '') === 'New Application' ? 'selected' : '' ?>>
+                                New Application
                             </option>
                             <option value="Processing" <?= ($_GET['status'] ?? '') === 'Processing' ? 'selected' : '' ?>>
                                 Processing
                             </option>
-                            <option value="Released" <?= ($_GET['status'] ?? '') === 'Released' ? 'selected' : '' ?>>
-                                Released
+                            <option value="For Released" <?= ($_GET['status'] ?? '') === 'For Released' ? 'selected' : '' ?>>
+                                For Released
                             </option>
                             <option value="Completed" <?= ($_GET['status'] ?? '') === 'Completed' ? 'selected' : '' ?>>
                                 Completed
@@ -400,14 +400,14 @@
                             <div class="col-md-6">
                                 <label class="form-label">Status</label>
                                 <select name="status" class="form-select">
-                                    <option value="Pending" <?= $row['status'] === 'Pending' ? 'selected' : '' ?>>
-                                        Pending
+                                    <option value="New Application" <?= $row['status'] === 'New Application' ? 'selected' : '' ?>>
+                                        New Application
                                     </option>
                                     <option value="Processing" <?= $row['status'] === 'Processing' ? 'selected' : '' ?>>
                                         Processing
                                     </option>
-                                    <option value="Released" <?= $row['status'] === 'Released' ? 'selected' : '' ?>>
-                                        Released
+                                    <option value="For Released" <?= $row['status'] === 'For Released' ? 'selected' : '' ?>>
+                                        For Released
                                     </option>
                                     <option value="Completed" <?= $row['status'] === 'Completed' ? 'selected' : '' ?>>
                                         Completed
