@@ -93,7 +93,9 @@
             </div>
 
             <button type="submit" class="r-btn r-btn-primary">Search</button>
-            <button type="reset" class="r-btn r-btn-text">Reset</button>
+            <button type="button" class="r-btn r-btn-text" id="btnReset">
+                Reset
+            </button>
         </form>
 
         <!-- ---------- Toolbar ---------- -->
@@ -447,7 +449,22 @@
         });
 
     });
+    document.getElementById("btnReset").addEventListener("click", function () {
+        window.location.href = "<?= site_url('reports') ?>";
+    });
+
+    document.getElementById("btnCsv").addEventListener("click", function () {
+
+        const params = new URLSearchParams(
+            new FormData(document.querySelector(".r-filters"))
+        );
+
+        window.location.href =
+            "<?= site_url('export/reports-csv') ?>?" + params.toString();
+
+    });
 </script>
+
 
 
 

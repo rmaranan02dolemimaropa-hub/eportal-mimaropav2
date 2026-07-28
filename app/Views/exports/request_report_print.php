@@ -67,7 +67,7 @@
     </div>
 
 
-    <h1><?= esc($title) ?></h1>
+   <h1 style="text-align:center;">Service Requests Report</h1>
 
     <table>
         <thead>

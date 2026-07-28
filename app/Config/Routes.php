@@ -67,27 +67,28 @@ $routes->post('login/login_process', 'EportalController::login_process');
 |--------------------------------------------------------------------------
 */
 
-   $routes->get('eportal', 'EportalController::index');
+$routes->get('eportal', 'EportalController::index');
 
-    $routes->get('service-record', 'EportalController::service_record');
-    $routes->post('service-record/save', 'EportalController::save');
- $routes->get('export/hr-request', 'ExportController::exportHrRequestReport');
-    $routes->get('reports', 'EportalController::reports');
-    $routes->get('reports/print', 'ExportController::printHrRequestReport');
-    $routes->get('export/reports-pdf', 'ExportController::exportReportsPdf');
-    
+$routes->get('service-record', 'EportalController::service_record');
+$routes->post('service-record/save', 'EportalController::save');
+$routes->get('export/hr-request', 'ExportController::exportHrRequestReport');
+$routes->get('reports', 'EportalController::reports');
+$routes->get('reports/print', 'ExportController::printHrRequestReport');
+$routes->get('export/reports-pdf', 'ExportController::exportReportsPdf');
+$routes->get('export/reports-csv', 'ExportController::exportReportsCsv');
 
- 
+
+
 $routes->group('', ['filter' => 'auth'], function ($routes) {
 
- 
-  
+
+
 
     $routes->get('dashboard', 'EportalController::dashboard');
     $routes->get('request', 'EportalController::request');
     $routes->get('logout', 'EportalController::logout');
 
-   
+
 
     $routes->post('request/save', 'EportalController::saveRequest');
     $routes->post('request/update/(:num)', 'EportalController::updateRequest/$1');

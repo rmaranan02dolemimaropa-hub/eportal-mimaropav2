@@ -238,4 +238,70 @@ class ExportController extends BaseController
                 ->setBody($e->getMessage());
         }
     }
+
+    public function exportReportsCsv()
+    {
+        $year = $this->request->getGet('year');
+        $month = $this->request->getGet('month');
+        $service = $this->request->getGet('service');
+        $search = $this->request->getGet('q');
+
+        $builder = $this->requestModel;
+
+        if (!empty($year)) {
+            $builder->where('YEAR(date_requested)', $year);
+        }
+
+        if (!empty($month)) {
+            $builder->where('MONTH(date_requested)', $month);
+        }
+
+        if (!empty($service)) {
+            $builder->where('service_availed', $service);
+        }
+
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('reference_no', $search)
+                ->orLike('fullname', $search)
+                ->orLike('service_availed', $search)
+                ->groupEnd();
+        }
+
+        $requests = $builder
+            ->orderBy('id', 'DESC')
+            ->findAll();
+
+        $filename = 'Service_Requests_Report_' . date('Ymd_His') . '.csv';
+
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        $output = fopen('php://output', 'w');
+
+        // Header row
+        fputcsv($output, [
+            'Reference No.',
+            'Requestor',
+            'Service',
+            'Date Requested',
+            'Status'
+        ]);
+
+        // Data
+        foreach ($requests as $row) {
+
+            fputcsv($output, [
+                $row['reference_no'],
+                $row['fullname'],
+                $row['service_availed'],
+                date('F d, Y', strtotime($row['date_requested'])),
+                $row['status']
+            ]);
+
+        }
+
+        fclose($output);
+        exit;
+    }
 }
