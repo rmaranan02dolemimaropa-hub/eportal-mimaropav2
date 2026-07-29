@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Models\HrRequestModel;
 use App\Models\UserModel;
+use App\Libraries\Mailer; // ADD THIS
 
 class EportalController extends BaseController
 {
@@ -137,7 +138,8 @@ class EportalController extends BaseController
         // Generate Reference Number
         $referenceNo = 'HR-' . date('YmdHis');
 
-        // Convert service code to readable service name
+
+        // Service List
         $services = [
             'service1' => 'Service Record',
             'service2' => 'Certificate with Compensation',
@@ -150,9 +152,14 @@ class EportalController extends BaseController
             'service9' => 'Others',
         ];
 
-        $serviceAvailed = $services[$this->request->getPost('service_availed')] ?? 'Unknown Service';
 
-        // Get Certification (multiple checkbox)
+        $serviceAvailed = $services[
+            $this->request->getPost('service_availed')
+        ] ?? 'Unknown Service';
+
+
+
+        // Certification Checkbox
         $certification = $this->request->getPost('certification');
 
         if (is_array($certification)) {
@@ -161,64 +168,211 @@ class EportalController extends BaseController
 
 
 
-
-        // Prepare data for insertion
-        $data = [
-            'reference_no' => $referenceNo,
-            'service_availed' => $serviceAvailed,
-            'fullname' => $this->request->getPost('fullname'),
-            'contact_number' => $this->request->getPost('contact_number'),
-            'email_address' => $this->request->getPost('email_address'),
-            'employee_category' => $this->request->getPost('employee_category'),
-            'period_of_service' => $this->request->getPost('period_of_service'),
-            'position' => $this->request->getPost('position'),
-            'office_division' => $this->request->getPost('office_division'),
-            'certification' => $certification,
-            'ipcr_period' => $this->request->getPost('ipcr_period'),
-            'specify_201' => $this->request->getPost('specify_201'),
-            'other_request' => $this->request->getPost('other_request'),
-            'date_requested' => date('Y-m-d'),
-            'status' => 'New Application',
-            'remarks' => '',
-            'date_received' => null,
-            'received_by' => null,
-            'date_released' => null,
-            'released_by' => null,
-        ];
-
-        $ipcrPeriod = $this->request->getPost('ipcr_from_month') . ' ' .
-            $this->request->getPost('ipcr_from_year') . ' to ' .
+        // IPCR Period
+        $ipcrPeriod =
+            $this->request->getPost('ipcr_from_month') . ' ' .
+            $this->request->getPost('ipcr_from_year') .
+            ' to ' .
             $this->request->getPost('ipcr_to_month') . ' ' .
             $this->request->getPost('ipcr_to_year');
 
-        $data['ipcr_period'] = $ipcrPeriod;
 
-        $rules = [
-            'specify_201' => [
-                'rules' => 'permit_empty|regex_match[/^[A-Za-z0-9\s.,()\/-]+$/]',
-                'errors' => [
-                    'regex_match' => 'Only letters, numbers, spaces, commas, periods, hyphens, parentheses, and slashes are allowed.'
-                ]
-            ]
+
+        // Data Save
+        $data = [
+
+            'reference_no' => $referenceNo,
+
+            'service_availed' => $serviceAvailed,
+
+            'fullname' => trim(
+                $this->request->getPost('fullname')
+            ),
+
+            'contact_number' => trim(
+                $this->request->getPost('contact_number')
+            ),
+
+            'email_address' => trim(
+                $this->request->getPost('email_address')
+            ),
+
+            'employee_category' =>
+                $this->request->getPost('employee_category'),
+
+            'period_of_service' =>
+                $this->request->getPost('period_of_service'),
+
+            'position' =>
+                $this->request->getPost('position'),
+
+            'office_division' =>
+                $this->request->getPost('office_division'),
+
+            'certification' => $certification,
+
+            'ipcr_period' => $ipcrPeriod,
+
+            'specify_201' =>
+                $this->request->getPost('specify_201'),
+
+            'other_request' =>
+                $this->request->getPost('other_request'),
+
+            'date_requested' => date('Y-m-d'),
+
+            'status' => 'New Application',
+
+            'remarks' => '',
+
+            'date_received' => null,
+
+            'received_by' => null,
+
+            'date_released' => null,
+
+            'released_by' => null,
+
         ];
+
+
 
         // Save Request
         if ($model->insert($data)) {
 
-            return redirect()->back()
-                ->with('success', 'Your request has been submitted successfully.')
+
+            /*
+            |--------------------------------------------------------------------------
+            | SEND EMAIL USING PHPMailer
+            |--------------------------------------------------------------------------
+            */
+
+
+            $mailer = new Mailer();
+
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CLIENT CONFIRMATION EMAIL
+            |--------------------------------------------------------------------------
+            */
+
+
+            $clientEmail = view(
+                'emails/hr_request_confirmation',
+                [
+                    'fullname' => $data['fullname'],
+                    'reference_no' => $referenceNo,
+                    'service' => $serviceAvailed,
+                    'date_requested' => $data['date_requested']
+                ]
+            );
+
+
+
+            $mailer->send(
+
+                $data['email_address'],
+
+                'HR Request Submitted Successfully',
+
+                $clientEmail
+
+            );
+
+
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | SEND EMAIL TO ACTIVE HR ADMINISTRATORS
+            |--------------------------------------------------------------------------
+            */
+
+
+            $userModel = new UserModel();
+
+
+            $hrAdmins = $userModel
+
+                ->where('role', 'HR Administrator')
+
+                ->where('status', 'ACTIVE')
+
+                ->findAll();
+
+
+
+            foreach ($hrAdmins as $admin) {
+
+
+                $adminEmail = view(
+
+                    'emails/hr_request_admin_notification',
+
+                    [
+
+                        'reference_no' => $referenceNo,
+
+                        'fullname' => $data['fullname'],
+
+                        'service' => $serviceAvailed,
+
+                        'date_requested' => $data['date_requested']
+
+                    ]
+
+                );
+
+
+
+                $mailer->send(
+
+                    $admin['email'],
+
+                    'New HR Request Submitted',
+
+                    $adminEmail
+
+                );
+
+
+            }
+
+
+
+            return redirect()
+
+                ->back()
+
+                ->with(
+                    'success',
+                    'Your request has been submitted successfully.'
+                )
+
                 ->with('reference_no', $referenceNo);
-        } else {
 
-            dd([
-                'Validation Errors' => $model->errors(),
-                'Database Error' => $model->db->error(),
-                'POST Data' => $this->request->getPost(),
-                'Data to Insert' => $data,
-            ]);
+
+
         }
-    }
 
+
+
+        // Database Error
+
+        return redirect()
+
+            ->back()
+
+            ->withInput()
+
+            ->with(
+                'error',
+                'Unable to submit your request.'
+            );
+
+    }
     //===================================================
     // USER LIST
     //===================================================
@@ -243,34 +397,35 @@ class EportalController extends BaseController
     {
         $model = new UserModel();
 
-        $username = trim($this->request->getPost('username'));
+        $rules = [
+            'fullname' => 'required|min_length[3]',
+            'username' => 'required|min_length[4]',
+            'email' => 'required|valid_email|is_unique[users.email]',
+            'password' => 'required|min_length[8]',
+            'role' => 'required',
+            'status' => 'required'
+        ];
 
-        // Check if username already exists
-        if ($model->where('username', $username)->first()) {
+        if (!$this->validate($rules)) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Username already exists.');
-        }
-
-        $password = $this->request->getPost('password');
-
-        if (empty($password)) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Password is required.');
+                ->with('errors', $this->validator->getErrors());
         }
 
         $model->insert([
             'fullname' => trim($this->request->getPost('fullname')),
-            'username' => $username,
-            'password' => password_hash($password, PASSWORD_DEFAULT),
+            'username' => trim($this->request->getPost('username')),
+            'email' => trim($this->request->getPost('email')),
+            'password' => password_hash(
+                $this->request->getPost('password'),
+                PASSWORD_DEFAULT
+            ),
             'role' => $this->request->getPost('role'),
             'status' => $this->request->getPost('status'),
         ]);
 
         return redirect()->back()->with('success', 'User added successfully.');
     }
-
     //===================================================
     // UPDATE USER
     //===================================================
@@ -294,14 +449,14 @@ class EportalController extends BaseController
 
         $data = [
             'fullname' => trim($this->request->getPost('fullname')),
-            'username' => $username,
+            'username' => trim($this->request->getPost('username')),
+            'email' => trim($this->request->getPost('email')),
             'role' => $this->request->getPost('role'),
             'status' => $this->request->getPost('status'),
         ];
 
         $password = trim($this->request->getPost('password'));
 
-        // Only update password if a new one was entered
         if ($password !== '') {
             $data['password'] = password_hash($password, PASSWORD_DEFAULT);
         }

@@ -158,6 +158,11 @@
                             <label>Username</label>
                             <input type="text" name="username" class="form-control" required>
                         </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Email Address</label>
+                            <input type="email" name="email" class="form-control" placeholder="example@dole.gov.ph"
+                                required>
+                        </div>
 
                         <div class="col-md-6 mb-3">
                             <label for="password" class="form-label">
@@ -288,6 +293,12 @@
                                 <input type="text" name="username" class="form-control" value="<?= $row['username'] ?>"
                                     required>
 
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Email Address</label>
+                                <input type="email" name="email" class="form-control" value="<?= esc($row['email']) ?>"
+                                    required>
                             </div>
 
                             <div class="col-md-6 mb-3">
@@ -670,22 +681,22 @@
 
     document.querySelectorAll(".toggle-password").forEach(button => {
 
-    button.addEventListener("click", function () {
+        button.addEventListener("click", function () {
 
-        const input = document.getElementById(this.dataset.target);
-        const icon = this.querySelector("i");
+            const input = document.getElementById(this.dataset.target);
+            const icon = this.querySelector("i");
 
-        if (input.type === "password") {
-            input.type = "text";
-            icon.classList.replace("bi-eye", "bi-eye-slash");
-        } else {
-            input.type = "password";
-            icon.classList.replace("bi-eye-slash", "bi-eye");
-        }
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.replace("bi-eye", "bi-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.replace("bi-eye-slash", "bi-eye");
+            }
+
+        });
 
     });
-
-});
 
 </script>
 <script>
