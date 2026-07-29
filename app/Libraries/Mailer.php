@@ -2,91 +2,59 @@
 
 namespace App\Libraries;
 
-
-require_once ROOTPATH . 'app/thirdparty/PHPMailer/src/Exception.php';
-require_once ROOTPATH . 'app/thirdparty/PHPMailer/src/PHPMailer.php';
-require_once ROOTPATH . 'app/thirdparty/PHPMailer/src/SMTP.php';
-
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
+use Config\Services;
 
 class Mailer
 {
+    protected $email;
+
+
+    public function __construct()
+    {
+        $this->email = Services::email();
+    }
+
+
     public function send($to, $subject, $message)
     {
-        $mail = new PHPMailer(true);
 
-        try {
-
-
-            $mail->isSMTP();
+        $this->email->clear(true);
 
 
-            $mail->Host = 'smtp.gmail.com';
-
-            $mail->SMTPAuth = true;
-
-
-            $mail->Username = 'rmaranan02.dolemimaropa@gmail.com';
-
-            $mail->Password = 'ilsz kfdr ijix mizz';
+        $this->email->setFrom(
+            config('Email')->fromEmail,
+            config('Email')->fromName
+        );
 
 
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-
-            $mail->Port = 587;
+        $this->email->setTo($to);
 
 
-
-            // Sender
-            $mail->setFrom(
-                'rmaranan02.dolemimaropa@gmail.com',
-                'DOLE MIMAROPA E-Portal'
-            );
-
-
-            // Prevent Reply
-            $mail->addReplyTo(
-                'noreply.dolemimaropa@gmail.com',
-                'DOLE MIMAROPA E-Portal (No Reply)'
-            );
+        // No Reply
+        $this->email->setReplyTo(
+            'noreply.dolemimaropa@gmail.com',
+            'DOLE MIMAROPA E-Portal (No Reply)'
+        );
 
 
-
-            // Receiver
-            $mail->addAddress($to);
+        $this->email->setSubject($subject);
 
 
-
-            $mail->isHTML(true);
-
-
-            $mail->Subject = $subject;
+        $this->email->setMessage($message);
 
 
-            $mail->Body = $message;
-
-
-
-            $mail->send();
-
-
+        if($this->email->send())
+        {
             return true;
-
-
-        } catch (Exception $e) {
-
-
-            log_message(
-                'error',
-                $mail->ErrorInfo
-            );
-
-
-            return false;
-
         }
+
+
+        log_message(
+            'error',
+            $this->email->printDebugger(['headers'])
+        );
+
+
+        return false;
     }
 }

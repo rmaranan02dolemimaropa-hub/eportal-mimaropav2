@@ -5,7 +5,7 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Models\HrRequestModel;
 use App\Models\UserModel;
-use App\Libraries\Mailer; // ADD THIS
+use App\Libraries\Mailer; 
 
 class EportalController extends BaseController
 {
