@@ -16,6 +16,7 @@ class HrRequestModel extends Model
 
         'reference_no',
         'service_availed',
+        'service_purpose',
         'fullname',
         'contact_number',
         'email_address',

@@ -4,8 +4,9 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Models\HrRequestModel;
+use App\Models\HrEmploymentHistoryModel;
 use App\Models\UserModel;
-use App\Libraries\Mailer; 
+use App\Libraries\Mailer;
 
 class EportalController extends BaseController
 {
@@ -134,10 +135,10 @@ class EportalController extends BaseController
     public function save()
     {
         $model = new HrRequestModel();
+        $historyModel = new HrEmploymentHistoryModel();
 
         // Generate Reference Number
         $referenceNo = 'HR-' . date('YmdHis');
-
 
         // Service List
         $services = [
@@ -152,21 +153,14 @@ class EportalController extends BaseController
             'service9' => 'Others',
         ];
 
+        $serviceAvailed = $services[$this->request->getPost('service_availed')] ?? 'Unknown Service';
 
-        $serviceAvailed = $services[
-            $this->request->getPost('service_availed')
-        ] ?? 'Unknown Service';
-
-
-
-        // Certification Checkbox
+        // Certification
         $certification = $this->request->getPost('certification');
 
         if (is_array($certification)) {
             $certification = implode(', ', $certification);
         }
-
-
 
         // IPCR Period
         $ipcrPeriod =
@@ -176,70 +170,85 @@ class EportalController extends BaseController
             $this->request->getPost('ipcr_to_month') . ' ' .
             $this->request->getPost('ipcr_to_year');
 
-
-
-        // Data Save
+        // Main Request Data
         $data = [
 
             'reference_no' => $referenceNo,
-
             'service_availed' => $serviceAvailed,
+            'service_purpose' => trim($this->request->getPost('service_purpose') ?? ''),
+            'fullname' => trim($this->request->getPost('fullname') ?? ''),
+            'contact_number' => trim($this->request->getPost('contact_number') ?? ''),
+            'email_address' => trim($this->request->getPost('email_address') ?? ''),
+            'employee_category' => $this->request->getPost('employee_category'),
 
-            'fullname' => trim(
-                $this->request->getPost('fullname')
-            ),
-
-            'contact_number' => trim(
-                $this->request->getPost('contact_number')
-            ),
-
-            'email_address' => trim(
-                $this->request->getPost('email_address')
-            ),
-
-            'employee_category' =>
-                $this->request->getPost('employee_category'),
-
-            'period_of_service' =>
-                $this->request->getPost('period_of_service'),
-
-            'position' =>
-                $this->request->getPost('position'),
-
-            'office_division' =>
-                $this->request->getPost('office_division'),
+            // Employment history is stored in another table
+            'period_of_service' => null,
+            'position' => null,
+            'office_division' => null,
 
             'certification' => $certification,
-
             'ipcr_period' => $ipcrPeriod,
-
-            'specify_201' =>
-                $this->request->getPost('specify_201'),
-
-            'other_request' =>
-                $this->request->getPost('other_request'),
+            'specify_201' => $this->request->getPost('specify_201'),
+            'other_request' => $this->request->getPost('other_request'),
 
             'date_requested' => date('Y-m-d'),
 
             'status' => 'New Application',
-
             'remarks' => '',
 
             'date_received' => null,
-
             'received_by' => null,
-
             'date_released' => null,
-
             'released_by' => null,
-
         ];
 
-
-
-        // Save Request
+        // Save Main Request
         if ($model->insert($data)) {
 
+            /*
+            |--------------------------------------------------------------------------
+            | SAVE EMPLOYMENT HISTORY (COS ONLY)
+            |--------------------------------------------------------------------------
+            */
+
+            if ($this->request->getPost('employee_category') === 'cos') {
+
+                $periods = $this->request->getPost('period_of_service');
+                $positions = $this->request->getPost('position');
+                $offices = $this->request->getPost('office_division');
+
+                if (is_array($periods)) {
+
+                    foreach ($periods as $key => $period) {
+
+                        if (trim($period) === '') {
+                            continue;
+                        }
+
+                        $historyModel->insert([
+                            'reference_no' => $referenceNo,
+                            'period_of_service' => trim($period),
+                            'position' => trim($positions[$key] ?? ''),
+                            'office_division' => trim($offices[$key] ?? ''),
+                        ]);
+                    }
+
+                } else {
+
+                    // Backward compatibility (single employment history)
+
+                    if (!empty($periods)) {
+
+                        $historyModel->insert([
+                            'reference_no' => $referenceNo,
+                            'period_of_service' => trim($periods),
+                            'position' => trim($positions),
+                            'office_division' => trim($offices),
+                        ]);
+
+                    }
+                }
+            }
 
             /*
             |--------------------------------------------------------------------------
@@ -247,18 +256,9 @@ class EportalController extends BaseController
             |--------------------------------------------------------------------------
             */
 
-
             $mailer = new Mailer();
 
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | CLIENT CONFIRMATION EMAIL
-            |--------------------------------------------------------------------------
-            */
-
-
+            // Client Email
             $clientEmail = view(
                 'emails/hr_request_confirmation',
                 [
@@ -269,113 +269,55 @@ class EportalController extends BaseController
                 ]
             );
 
-
-
             $mailer->send(
-
                 $data['email_address'],
-
                 'HR Request Submitted Successfully',
-
                 $clientEmail
-
             );
-
-
-
 
             /*
             |--------------------------------------------------------------------------
-            | SEND EMAIL TO ACTIVE HR ADMINISTRATORS
+            | SEND EMAIL TO HR ADMINISTRATORS
             |--------------------------------------------------------------------------
             */
 
-
             $userModel = new UserModel();
 
-
             $hrAdmins = $userModel
-
                 ->where('role', 'HR Administrator')
-
                 ->where('status', 'ACTIVE')
-
                 ->findAll();
-
-
 
             foreach ($hrAdmins as $admin) {
 
-
                 $adminEmail = view(
-
                     'emails/hr_request_admin_notification',
-
                     [
-
                         'reference_no' => $referenceNo,
-
                         'fullname' => $data['fullname'],
-
                         'service' => $serviceAvailed,
-
                         'date_requested' => $data['date_requested']
-
                     ]
-
                 );
-
-
 
                 $mailer->send(
-
                     $admin['email'],
-
                     'New HR Request Submitted',
-
                     $adminEmail
-
                 );
-
-
             }
 
-
-
             return redirect()
-
                 ->back()
-
-                ->with(
-                    'success',
-                    'Your request has been submitted successfully.'
-                )
-
+                ->with('success', 'Your request has been submitted successfully.')
                 ->with('reference_no', $referenceNo);
-
-
-
         }
 
-
-
-        // Database Error
-
         return redirect()
-
             ->back()
-
             ->withInput()
-
-            ->with(
-                'error',
-                'Unable to submit your request.'
-            );
-
+            ->with('error', 'Unable to submit your request.');
     }
-    //===================================================
-    // USER LIST
-    //===================================================
 
     public function users()
     {

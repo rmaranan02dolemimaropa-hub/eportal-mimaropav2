@@ -92,6 +92,27 @@
                         <div class="invalid-feedback">Please select a service.</div>
                     </div>
                 </div>
+                <!-- ---------- SERVICE PURPOSE ---------- -->
+                <div class="col-12 py-3">
+                    <div class="form-floating">
+
+                        <textarea class="form-control" name="service_purpose" id="servicePurpose"
+                            placeholder="Please state your purpose" maxlength="500" style="height: 140px;"></textarea>
+
+                        <label for="servicePurpose">
+                            Purpose / Request Details
+                        </label>
+
+                        <div class="invalid-feedback">
+                            Please specify the purpose of your request.
+                        </div>
+
+                        <div class="form-text">
+                            Please provide the reason why you need this HR service.
+                        </div>
+
+                    </div>
+                </div>
 
                 <!-- ================================================= -->
                 <!-- SERVICE-SPECIFIC SECTIONS (shown/hidden by JS)     -->
@@ -127,46 +148,95 @@
 
                     <!-- COS Employee fields -->
                     <div class="dynamic-section" id="section-cos" data-employee-category="cos">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control" name="period_of_service"
-                                        id="periodOfService" placeholder="Period of Service" data-required-group="cos">
-                                    <label for="periodOfService">Period of Service <span
-                                            class="required-mark">*</span></label>
-                                    <div class="invalid-feedback">Please enter the period of service.</div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control" name="position" id="cosPosition"
-                                        placeholder="Position" data-required-group="cos">
-                                    <label for="cosPosition">Position <span class="required-mark">*</span></label>
-                                    <div class="invalid-feedback">Please enter your position.</div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <select class="form-select" name="office_division" id="officeAssigned"
-                                        data-required-group="cos">
-                                        <option value="" selected disabled>Select Office / Division</option>
-                                        <option value="Regional Office">Regional Office</option>
-                                        <option value="Occidental Mindoro">Occidental Mindoro</option>
-                                        <option value="Oriental Mindoro">Oriental Mindoro</option>
-                                        <option value="Marinduque">Marinduque</option>
-                                        <option value="Romblon">Romblon</option>
-                                        <option value="Palawan">Palawan</option>
-                                        <option value="IMSD">IMSD</option>
-                                        <option value="TSSD">TSSD</option>
-                                        <option value="MALSU">MALSU</option>
-                                        <option value="ORD">ORD</option>
-                                    </select>
-                                    <label for="officeAssigned">Office / Division Assigned <span
-                                            class="required-mark">*</span></label>
-                                    <div class="invalid-feedback">Please select an office/division.</div>
-                                </div>
-                            </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="mb-0 fw-bold">
+                                <i class="bi bi-briefcase me-2"></i>Employment History
+                            </h6>
+
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="addEmployment">
+                                <i class="bi bi-plus-circle"></i> Add Employment Record
+                            </button>
                         </div>
+
+                        <div id="employmentContainer">
+
+                            <!-- Employment Record -->
+                            <div class="employment-card card border-0 shadow-sm mb-3">
+
+                                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                    <strong> #1</strong>
+
+                                    <button type="button" class="btn btn-sm btn-outline-danger removeEmployment d-none">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+
+                                <div class="card-body">
+
+                                    <div class="row g-3">
+
+                                        <div class="col-md-4">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" name="period_of_service[]"
+                                                    placeholder="Period of Service" data-required-group="cos">
+
+                                                <label>
+                                                    Period of Service
+                                                    <span class="required-mark">*</span>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" name="position[]"
+                                                    placeholder="Position" data-required-group="cos">
+
+                                                <label>
+                                                    Position
+                                                    <span class="required-mark">*</span>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-floating">
+
+                                                <select class="form-select" name="office_division[]"
+                                                    data-required-group="cos">
+
+                                                    <option value="" selected disabled>Select Office</option>
+
+                                                    <option value="Regional Office">Regional Office</option>
+                                                    <option value="Occidental Mindoro">Occidental Mindoro</option>
+                                                    <option value="Oriental Mindoro">Oriental Mindoro</option>
+                                                    <option value="Marinduque">Marinduque</option>
+                                                    <option value="Romblon">Romblon</option>
+                                                    <option value="Palawan">Palawan</option>
+                                                    <option value="IMSD">IMSD</option>
+                                                    <option value="TSSD">TSSD</option>
+                                                    <option value="MALSU">MALSU</option>
+                                                    <option value="ORD">ORD</option>
+
+                                                </select>
+
+                                                <label>
+                                                    Office / Division
+                                                    <span class="required-mark">*</span>
+                                                </label>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
                     </div>
 
                     <!-- Permanent Employee fields -->
@@ -678,6 +748,10 @@
             rows.push(['Contact Number', document.getElementById('contactNumber').value]);
             rows.push(['Email Address', document.getElementById('emailAddress').value]);
             rows.push(['Date Requested', dateRequestedHidden.value]);
+            rows.push([
+                'Purpose / Request Details',
+                document.getElementById('servicePurpose').value
+            ]);
 
             switch (serviceSelect.value) {
                 case 'service1':
@@ -691,9 +765,30 @@
                     const categoryValue = category ? category.value : '';
                     rows.push(['Employee Category', categoryValue === 'cos' ? 'COS Employee' : 'Permanent Employee']);
                     if (categoryValue === 'cos') {
-                        rows.push(['Period of Service', document.getElementById('periodOfService').value]);
-                        rows.push(['Position', document.getElementById('cosPosition').value]);
-                        rows.push(['Office / Division Assigned', document.getElementById('officeAssigned').value]);
+
+                        const periods = document.querySelectorAll('input[name="period_of_service[]"]');
+                        const positions = document.querySelectorAll('input[name="position[]"]');
+                        const offices = document.querySelectorAll('select[name="office_division[]"]');
+
+                        let history = '';
+
+                        periods.forEach((item, index) => {
+
+                            history +=
+                                (index + 1) + '. ' +
+                                item.value + ' | ' +
+                                positions[index].value + ' | ' +
+                                offices[index].value +
+                                '<br>';
+
+                        });
+
+
+                        rows.push([
+                            'Employment History',
+                            history
+                        ]);
+
                     }
                     break;
                 }
@@ -822,6 +917,64 @@
             }
 
         });
+
+    }
+
+    const employmentContainer = document.getElementById('employmentContainer');
+    const addEmploymentBtn = document.getElementById('addEmployment');
+
+    if (employmentContainer && addEmploymentBtn) {
+
+        addEmploymentBtn.addEventListener('click', function () {
+
+            const card = employmentContainer.firstElementChild.cloneNode(true);
+
+            card.querySelectorAll('input').forEach(input => {
+                input.value = '';
+            });
+
+            card.querySelectorAll('select').forEach(select => {
+                select.selectedIndex = 0;
+            });
+
+            card.querySelector('.removeEmployment').classList.remove('d-none');
+
+            employmentContainer.appendChild(card);
+
+            updateEmploymentNumbers();
+
+        });
+
+        employmentContainer.addEventListener('click', function (e) {
+
+            const btn = e.target.closest('.removeEmployment');
+
+            if (!btn) return;
+
+            btn.closest('.employment-card').remove();
+
+            updateEmploymentNumbers();
+
+        });
+
+        function updateEmploymentNumbers() {
+
+            document.querySelectorAll('.employment-card').forEach((card, index) => {
+
+                card.querySelector('.card-header strong').textContent =
+                    '#' + (index + 1);
+
+                const removeBtn = card.querySelector('.removeEmployment');
+
+                if (index === 0) {
+                    removeBtn.classList.add('d-none');
+                } else {
+                    removeBtn.classList.remove('d-none');
+                }
+
+            });
+
+        }
 
     }
 </script>
