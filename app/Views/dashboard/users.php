@@ -160,8 +160,23 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label>Password</label>
-                            <input type="password" name="password" class="form-control" required>
+                            <label for="password" class="form-label">
+                                Password <span class="text-danger">*</span>
+                            </label>
+
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="password" name="password"
+                                    placeholder="Enter a strong password" minlength="8" autocomplete="new-password"
+                                    required>
+
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+
+                            <small class="text-muted">
+                                Minimum 8 characters. Use uppercase, lowercase, number, and special character.
+                            </small>
                         </div>
 
                         <div class="col-md-6 mb-3">
@@ -276,12 +291,27 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
+                                <label for="password<?= $row['id'] ?>" class="form-label">
+                                    New Password
+                                </label>
 
-                                <label>Password</label>
+                                <div class="input-group">
+                                    <input type="password" id="password<?= $row['id'] ?>" name="password"
+                                        class="form-control password-input"
+                                        placeholder="Leave blank to keep current password" minlength="8"
+                                        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$"
+                                        title="Minimum 8 characters with uppercase, lowercase, number and special character."
+                                        autocomplete="new-password">
 
-                                <input type="password" name="password" class="form-control"
-                                    placeholder="Leave blank if unchanged">
+                                    <button class="btn btn-outline-secondary toggle-password" type="button"
+                                        data-target="password<?= $row['id'] ?>">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
 
+                                <small class="text-muted">
+                                    Leave blank if you don't want to change the password.
+                                </small>
                             </div>
 
                             <div class="col-md-6 mb-3">
@@ -638,6 +668,40 @@
         statusLabel.textContent = this.checked ? 'ACTIVE' : 'INACTIVE';
     });
 
+    document.querySelectorAll(".toggle-password").forEach(button => {
+
+    button.addEventListener("click", function () {
+
+        const input = document.getElementById(this.dataset.target);
+        const icon = this.querySelector("i");
+
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.replace("bi-eye", "bi-eye-slash");
+        } else {
+            input.type = "password";
+            icon.classList.replace("bi-eye-slash", "bi-eye");
+        }
+
+    });
+
+});
+
+</script>
+<script>
+    document.getElementById('togglePassword').addEventListener('click', function () {
+
+        const password = document.getElementById('password');
+        const icon = this.querySelector('i');
+
+        if (password.type === 'password') {
+            password.type = 'text';
+            icon.classList.replace('bi-eye', 'bi-eye-slash');
+        } else {
+            password.type = 'password';
+            icon.classList.replace('bi-eye-slash', 'bi-eye');
+        }
+    });
 </script>
 
 <script>

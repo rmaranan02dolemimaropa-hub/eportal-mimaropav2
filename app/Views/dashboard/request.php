@@ -57,23 +57,23 @@
                 </div>
 
                 <button class="btn tool-btn" id="exportButton">
-    <i class="bi bi-download"></i> Export PDF
-</button>
+                    <i class="bi bi-download"></i> Export PDF
+                </button>
 
-<div id="exportOverlay" class="export-overlay">
-    <div class="export-card">
-        <h3>Preparing PDF Report</h3>
-        <p id="exportText">Initializing...</p>
+                <div id="exportOverlay" class="export-overlay">
+                    <div class="export-card">
+                        <h3>Preparing PDF Report</h3>
+                        <p id="exportText">Initializing...</p>
 
-        <div class="progress-track">
-            <div class="progress-bar" id="progressBar"></div>
-        </div>
+                        <div class="progress-track">
+                            <div class="progress-bar" id="progressBar"></div>
+                        </div>
 
-        <div class="progress-percent">
-            <span id="progressValue">0%</span>
-        </div>
-    </div>
-</div>
+                        <div class="progress-percent">
+                            <span id="progressValue">0%</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -200,36 +200,25 @@
 
                                         </button>
 
-                                        <?php if (session('role') == 'IT ADMINISTRATOR'): ?>
+                                       
 
-                                            <!-- Edit -->
-                                            <button class="row-action-btn" title="Edit" data-bs-toggle="modal"
-                                                data-bs-target="#edit<?= $row['id'] ?>">
+                                                <?php if ($row['status'] != 'Completed' && $row['status'] != 'Rejected'): ?>
 
-                                                <i class="bi bi-pencil"></i>
+                                                <!-- Edit -->
+                                                <button class="row-action-btn" title="Edit" data-bs-toggle="modal"
+                                                    data-bs-target="#edit<?= $row['id'] ?>">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
 
-                                            </button>
+                                                <!-- Delete -->
+                                                <button class="row-action-btn row-action-danger" title="Delete" data-bs-toggle="modal"
+                                                    data-bs-target="#delete<?= $row['id'] ?>">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
 
+                                            <?php endif; ?>
 
-                                            <!-- Delete -->
-                                            <button class="row-action-btn row-action-danger" title="Delete" data-bs-toggle="modal"
-                                                data-bs-target="#delete<?= $row['id'] ?>">
-
-                                                <i class="bi bi-trash"></i>
-
-                                            </button>
-
-                                        <?php elseif (session('role') == 'HR ADMINISTRATOR'): ?>
-
-                                            <!-- HR can update request status -->
-                                            <button class="row-action-btn" title="Update Status" data-bs-toggle="modal"
-                                                data-bs-target="#status<?= $row['id'] ?>">
-
-                                                <i class="bi bi-arrow-repeat"></i>
-
-                                            </button>
-
-                                        <?php endif; ?>
+                                       
 
                                     </div>
 
@@ -597,108 +586,108 @@
 </script>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function () {
 
-    const button = document.getElementById("exportButton");
-    const overlay = document.getElementById("exportOverlay");
-    const bar = document.getElementById("progressBar");
-    const percent = document.getElementById("progressValue");
-    const text = document.getElementById("exportText");
+        const button = document.getElementById("exportButton");
+        const overlay = document.getElementById("exportOverlay");
+        const bar = document.getElementById("progressBar");
+        const percent = document.getElementById("progressValue");
+        const text = document.getElementById("exportText");
 
-    button.addEventListener("click", async function () {
+        button.addEventListener("click", async function () {
 
-        button.disabled = true;
-        overlay.classList.add("is-visible");
+            button.disabled = true;
+            overlay.classList.add("is-visible");
 
-        let progress = 0;
+            let progress = 0;
 
-        bar.style.width = "0%";
-        percent.textContent = "0%";
-        text.textContent = "Preparing report...";
+            bar.style.width = "0%";
+            percent.textContent = "0%";
+            text.textContent = "Preparing report...";
 
-        const timer = setInterval(() => {
+            const timer = setInterval(() => {
 
-            if (progress < 90) {
+                if (progress < 90) {
 
-                progress += Math.floor(Math.random() * 8) + 3;
+                    progress += Math.floor(Math.random() * 8) + 3;
 
-                if (progress > 90) progress = 90;
+                    if (progress > 90) progress = 90;
 
-                bar.style.width = progress + "%";
-                percent.textContent = progress + "%";
+                    bar.style.width = progress + "%";
+                    percent.textContent = progress + "%";
 
-                if (progress > 25)
-                    text.textContent = "Collecting records...";
+                    if (progress > 25)
+                        text.textContent = "Collecting records...";
 
-                if (progress > 55)
-                    text.textContent = "Generating PDF...";
+                    if (progress > 55)
+                        text.textContent = "Generating PDF...";
 
-                if (progress > 80)
-                    text.textContent = "Almost finished...";
-            }
-
-        }, 180);
-
-        try {
-
-            // Get current filter parameters
-            const currentParams = window.location.search;
-
-            const response = await fetch(
-                "<?= site_url('export/hr-request') ?>" + currentParams,
-                {
-                    credentials: "same-origin"
+                    if (progress > 80)
+                        text.textContent = "Almost finished...";
                 }
-            );
 
-            if (!response.ok) {
-                throw new Error("Export failed.");
-            }
+            }, 180);
 
-            const blob = await response.blob();
+            try {
 
-            clearInterval(timer);
+                // Get current filter parameters
+                const currentParams = window.location.search;
 
-            progress = 100;
-            bar.style.width = "100%";
-            percent.textContent = "100%";
-            text.textContent = "Download ready.";
+                const response = await fetch(
+                    "<?= site_url('export/hr-request') ?>" + currentParams,
+                    {
+                        credentials: "same-origin"
+                    }
+                );
 
-            const url = URL.createObjectURL(blob);
+                if (!response.ok) {
+                    throw new Error("Export failed.");
+                }
 
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = "HR_Request_Report.pdf";
-            link.click();
+                const blob = await response.blob();
 
-            setTimeout(() => {
-                URL.revokeObjectURL(url);
+                clearInterval(timer);
+
+                progress = 100;
+                bar.style.width = "100%";
+                percent.textContent = "100%";
+                text.textContent = "Download ready.";
+
+                const url = URL.createObjectURL(blob);
+
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = "HR_Request_Report.pdf";
+                link.click();
+
+                setTimeout(() => {
+                    URL.revokeObjectURL(url);
+
+                    overlay.classList.remove("is-visible");
+                    button.disabled = false;
+
+                    bar.style.width = "0%";
+                    percent.textContent = "0%";
+                    text.textContent = "Preparing report...";
+                }, 700);
+
+            } catch (error) {
+
+                clearInterval(timer);
 
                 overlay.classList.remove("is-visible");
                 button.disabled = false;
 
                 bar.style.width = "0%";
                 percent.textContent = "0%";
-                text.textContent = "Preparing report...";
-            }, 700);
 
-        } catch (error) {
+                alert("Unable to export the PDF. Please try again.");
+                console.error(error);
+            }
 
-            clearInterval(timer);
-
-            overlay.classList.remove("is-visible");
-            button.disabled = false;
-
-            bar.style.width = "0%";
-            percent.textContent = "0%";
-
-            alert("Unable to export the PDF. Please try again.");
-            console.error(error);
-        }
+        });
 
     });
-
-});
 </script>
 
 <script>

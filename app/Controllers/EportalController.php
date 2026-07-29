@@ -39,7 +39,7 @@ class EportalController extends BaseController
 
         $data['requests'] = $query
             ->orderBy('id', 'DESC')
-            ->paginate(6);
+            ->paginate(10);
 
         $data['pager'] = $requestModel->pager;
 
@@ -61,7 +61,7 @@ class EportalController extends BaseController
         // Load recent requests
         $data['requests'] = $requestModel
             ->orderBy('id', 'DESC')
-            ->paginate(6);
+            ->paginate(10);
 
         $data['pager'] = $requestModel->pager;
 
@@ -83,24 +83,34 @@ class EportalController extends BaseController
     {
         $model = new UserModel();
 
-        $username = $this->request->getPost('username');
+        $username = trim($this->request->getPost('username'));
         $password = $this->request->getPost('password');
 
         $user = $model->where('username', $username)->first();
 
+        // Username not found
         if (!$user) {
-            return redirect()->back()->with('error', 'Invalid username or password.');
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Invalid username or password.');
         }
 
-        // Check if account is active
+        // Account inactive
         if ($user['status'] !== 'ACTIVE') {
-            return redirect()->back()->with('error', 'Your account is inactive.');
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Your account is inactive. Please contact the administrator.');
         }
 
         // Verify hashed password
         if (!password_verify($password, $user['password'])) {
-            return redirect()->back()->with('error', 'Invalid username or password.');
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Invalid username or password.');
         }
+
+        // Regenerate session ID to prevent session fixation
+        session()->regenerate();
 
         session()->set([
             'user_id' => $user['id'],
@@ -110,7 +120,7 @@ class EportalController extends BaseController
             'logged_in' => true,
         ]);
 
-        return redirect()->to('dashboard');
+        return redirect()->to(site_url('dashboard'));
     }
 
     public function logout()
@@ -233,15 +243,29 @@ class EportalController extends BaseController
     {
         $model = new UserModel();
 
-        $model->save([
-            'fullname' => $this->request->getPost('fullname'),
-            'username' => $this->request->getPost('username'),
-            'password' => password_hash(
-                $this->request->getPost('password'),
-                PASSWORD_DEFAULT
-            ),
+        $username = trim($this->request->getPost('username'));
+
+        // Check if username already exists
+        if ($model->where('username', $username)->first()) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Username already exists.');
+        }
+
+        $password = $this->request->getPost('password');
+
+        if (empty($password)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Password is required.');
+        }
+
+        $model->insert([
+            'fullname' => trim($this->request->getPost('fullname')),
+            'username' => $username,
+            'password' => password_hash($password, PASSWORD_DEFAULT),
             'role' => $this->request->getPost('role'),
-            'status' => $this->request->getPost('status')
+            'status' => $this->request->getPost('status'),
         ]);
 
         return redirect()->back()->with('success', 'User added successfully.');
@@ -255,18 +279,31 @@ class EportalController extends BaseController
     {
         $model = new UserModel();
 
+        $username = trim($this->request->getPost('username'));
+
+        // Check if another user already uses this username
+        $existing = $model->where('username', $username)
+            ->where('id !=', $id)
+            ->first();
+
+        if ($existing) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Username already exists.');
+        }
+
         $data = [
-            'fullname' => $this->request->getPost('fullname'),
-            'username' => $this->request->getPost('username'),
+            'fullname' => trim($this->request->getPost('fullname')),
+            'username' => $username,
             'role' => $this->request->getPost('role'),
-            'status' => $this->request->getPost('status')
+            'status' => $this->request->getPost('status'),
         ];
 
-        if (!empty($this->request->getPost('password'))) {
-            $data['password'] = password_hash(
-                $this->request->getPost('password'),
-                PASSWORD_DEFAULT
-            );
+        $password = trim($this->request->getPost('password'));
+
+        // Only update password if a new one was entered
+        if ($password !== '') {
+            $data['password'] = password_hash($password, PASSWORD_DEFAULT);
         }
 
         $model->update($id, $data);

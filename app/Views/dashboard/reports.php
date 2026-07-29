@@ -136,8 +136,7 @@
                         <th>Requestor</th>
                         <th>Service</th>
                         <th>Date Requested</th>
-                        <th>Status</th>
-                        <th class="text-end">Action</th>
+                        <th class="text-end">Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -164,7 +163,7 @@
                                     <?= date('F d, Y', strtotime($row['date_requested'])) ?>
                                 </td>
 
-                                <td>
+                                <td class="text-end">
 
                                     <?php
 
@@ -183,67 +182,6 @@
                                         <?= esc($row['status']) ?>
 
                                     </span>
-
-                                </td>
-
-                                <td class="text-end">
-
-                                    <div class="row-actions">
-
-                                        <!-- View (Everyone) -->
-                                        <button class="row-action-btn" title="View" data-bs-toggle="modal"
-                                            data-bs-target="#viewRequestModal"
-                                            data-reference="<?= esc($row['reference_no'] ?? '', 'attr') ?>"
-                                            data-service="<?= esc($row['service_availed'] ?? '', 'attr') ?>"
-                                            data-fullname="<?= esc($row['fullname'] ?? '', 'attr') ?>"
-                                            data-contact="<?= esc($row['contact_number'] ?? '', 'attr') ?>"
-                                            data-email="<?= esc($row['email_address'] ?? '', 'attr') ?>"
-                                            data-date-requested="<?= esc($row['date_requested'] ?? '', 'attr') ?>"
-                                            data-status="<?= esc($row['status'] ?? '', 'attr') ?>"
-                                            data-category="<?= esc($row['employee_category'] ?? '', 'attr') ?>"
-                                            data-period="<?= esc($row['period_of_service'] ?? '', 'attr') ?>"
-                                            data-position="<?= esc($row['position'] ?? '', 'attr') ?>"
-                                            data-office="<?= esc($row['office_division'] ?? '', 'attr') ?>"
-                                            data-certification="<?= esc($row['certification'] ?? '', 'attr') ?>"
-                                            data-ipcr-period="<?= esc($row['ipcr_period'] ?? '', 'attr') ?>"
-                                            data-specify-201="<?= esc($row['specify_201'] ?? '', 'attr') ?>"
-                                            data-remarks="<?= esc($row['remarks'] ?? '', 'attr') ?>">
-                                            <i class="bi bi-eye"></i>
-
-                                        </button>
-
-                                        <?php if (session('role') == 'IT ADMINISTRATOR'): ?>
-
-                                            <!-- Edit -->
-                                            <button class="row-action-btn" title="Edit" data-bs-toggle="modal"
-                                                data-bs-target="#edit<?= $row['id'] ?>">
-
-                                                <i class="bi bi-pencil"></i>
-
-                                            </button>
-
-
-                                            <!-- Delete -->
-                                            <button class="row-action-btn row-action-danger" title="Delete" data-bs-toggle="modal"
-                                                data-bs-target="#delete<?= $row['id'] ?>">
-
-                                                <i class="bi bi-trash"></i>
-
-                                            </button>
-
-                                        <?php elseif (session('role') == 'HR ADMINISTRATOR'): ?>
-
-                                            <!-- HR can update request status -->
-                                            <button class="row-action-btn" title="Update Status" data-bs-toggle="modal"
-                                                data-bs-target="#status<?= $row['id'] ?>">
-
-                                                <i class="bi bi-arrow-repeat"></i>
-
-                                            </button>
-
-                                        <?php endif; ?>
-
-                                    </div>
 
                                 </td>
 

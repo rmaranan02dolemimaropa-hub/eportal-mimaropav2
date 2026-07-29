@@ -46,18 +46,18 @@
 
       <?php if (session()->getFlashdata('error')): ?>
 
-            <div class="alert alert-danger alert-dismissible fade show shadow-sm" id="loginAlert" role="alert">
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" id="loginAlert" role="alert">
 
-              <i class="bi bi-exclamation-circle-fill me-2"></i>
+          <i class="bi bi-exclamation-circle-fill me-2"></i>
 
-                <?= session()->getFlashdata('error') ?>
+          <?= session()->getFlashdata('error') ?>
 
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-              </button>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+          </button>
 
-            </div>
+        </div>
 
-            <?php endif; ?>
+      <?php endif; ?>
 
       <!-- Login form -->
       <form class="login-form" action="<?= base_url('login/login_process') ?>" method="post" novalidate>
@@ -74,17 +74,30 @@
 
         <!-- Password -->
         <div class="mb-3 input-group-custom">
-          <label for="password" class="form-label">Password</label>
+          <label for="password" class="form-label">
+            Password <span class="text-danger">*</span>
+          </label>
+
           <div class="input-icon-wrap">
             <i class="bi bi-lock input-icon"></i>
+
             <input type="password" class="form-control custom-input custom-input-with-toggle" id="password"
-              name="password" placeholder="Enter your password" autocomplete="current-password" required />
-            <!-- Show / hide password toggle -->
+              name="password" placeholder="Enter your password" minlength="8"
+              pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$"
+              title="Minimum 8 characters with uppercase, lowercase, number, and special character."
+              autocomplete="new-password" required>
+
+            <!-- Show / Hide Password -->
             <button type="button" class="password-toggle-btn" id="passwordToggle" aria-label="Show password"
               aria-pressed="false" aria-controls="password">
+
               <i class="bi bi-eye" id="passwordToggleIcon"></i>
             </button>
           </div>
+
+          <small class="text-muted">
+            Minimum 8 characters with uppercase, lowercase, number and special character.
+          </small>
         </div>
 
         <!-- Remember me + Forgot password -->
@@ -105,9 +118,9 @@
         <div class="text-center mt-3">
 
 
-          
 
-            
+
+
         </div>
 
       </form>
@@ -123,66 +136,39 @@
 </body>
 
 </html>
-
 <script>
-  /* ==========================================================================
- DOLE MIMAROPA E-Portal — Login Page Script
- Handles: show / hide password toggle.
- ========================================================================== */
 
-  document.addEventListener("DOMContentLoaded", function () {
-    enablePasswordToggle();
+  const passwordInput = document.getElementById('password'); const
+    toggleButton = document.getElementById('passwordToggle'); const
+      toggleIcon = document.getElementById('passwordToggleIcon'); toggleButton.addEventListener('click', function () {
+        const
+        isHidden = passwordInput.type === 'password'; passwordInput.type = isHidden ? 'text' : 'password';
+        toggleIcon.classList.toggle('bi-eye', !isHidden); toggleIcon.classList.toggle('bi-eye-slash', isHidden);
+        this.setAttribute('aria-pressed', isHidden);
+      }); </script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+
+    ['loginAlert', 'loginSuccess'].forEach(function (id) {
+
+      const alert = document.getElementById(id);
+
+      if (alert) {
+
+        setTimeout(function () {
+
+          alert.style.transition = "opacity .5s";
+          alert.style.opacity = "0";
+
+          setTimeout(function () {
+            alert.remove();
+          }, 500);
+
+        }, 5000);
+
+      }
+
+    });
+
   });
-
-  /**
-   * Toggles the password field between masked and plain text,
-   * swapping the eye / eye-slash icon and updating accessible state.
-   */
-  function enablePasswordToggle() {
-    const toggleBtn = document.getElementById("passwordToggle");
-    const toggleIcon = document.getElementById("passwordToggleIcon");
-    const passwordInput = document.getElementById("password");
-
-    if (!toggleBtn || !toggleIcon || !passwordInput) return;
-
-    toggleBtn.addEventListener("click", function () {
-      const isPasswordHidden = passwordInput.type === "password";
-
-      passwordInput.type = isPasswordHidden ? "text" : "password";
-
-      toggleIcon.classList.toggle("bi-eye", !isPasswordHidden);
-      toggleIcon.classList.toggle("bi-eye-slash", isPasswordHidden);
-
-      toggleBtn.setAttribute("aria-label", isPasswordHidden ? "Hide password" : "Show password");
-      toggleBtn.setAttribute("aria-pressed", String(isPasswordHidden));
-    });
-  }
-
-
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-
-    ['loginAlert', 'loginSuccess'].forEach(function(id){
-
-        const alert = document.getElementById(id);
-
-        if(alert){
-
-            setTimeout(function(){
-
-                alert.style.transition = "opacity .5s";
-                alert.style.opacity = "0";
-
-                setTimeout(function(){
-                    alert.remove();
-                },500);
-
-            },5000);
-
-        }
-
-    });
-
-});
-</script>
+</scriptconst>
