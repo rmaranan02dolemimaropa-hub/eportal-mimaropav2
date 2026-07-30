@@ -500,6 +500,117 @@ class EportalController extends BaseController
         $requestModel->update($id, $data);
 
 
+        //===================================================
+// SEND STATUS UPDATE EMAIL TO CLIENT
+//===================================================
+
+        $request = $requestModel->find($id);
+
+        if ($request && !empty($request['email_address'])) {
+
+            $mailer = new Mailer();
+
+            switch ($status) {
+
+
+                case 'Processing':
+
+                    $subject = "Your HR Request is Now Being Processed";
+
+                    $message = view('emails/hr_status_update', [
+                        'fullname' => $request['fullname'],
+                        'reference_no' => $request['reference_no'],
+                        'service' => $request['service_availed'],
+                        'status' => 'Processing',
+                        'remarks' => $request['remarks'],
+                        'message' =>
+                            'Your request has been received and is currently being processed by the Human Resource Unit.'
+                    ]);
+
+                    break;
+
+
+
+                case 'For Released':
+
+                    $subject = "Your Requested Document is Ready for Release";
+
+                    $message = view('emails/hr_status_update', [
+                        'fullname' => $request['fullname'],
+                        'reference_no' => $request['reference_no'],
+                        'service' => $request['service_availed'],
+                        'status' => 'For Released',
+                        'remarks' => $request['remarks'],
+                        'message' =>
+                            'Your requested document is now ready for release. Please coordinate with the Human Resource Unit for claiming.'
+                    ]);
+
+                    break;
+
+
+
+                case 'Completed':
+
+                    $subject = "Your HR Request Has Been Completed";
+
+                    $message = view('emails/hr_status_update', [
+                        'fullname' => $request['fullname'],
+                        'reference_no' => $request['reference_no'],
+                        'service' => $request['service_availed'],
+                        'status' => 'Completed',
+                        'remarks' => $request['remarks'],
+                        'message' =>
+                            'Your HR request has been successfully completed. Thank you for using the DOLE MIMAROPA Client Portal.'
+                    ]);
+
+                    break;
+
+
+
+                case 'Rejected':
+
+                    $subject = "Update Regarding Your HR Request";
+
+                    $message = view('emails/hr_status_update', [
+                        'fullname' => $request['fullname'],
+                        'reference_no' => $request['reference_no'],
+                        'service' => $request['service_availed'],
+                        'status' => 'Rejected',
+                        'remarks' => $request['remarks'],
+                        'message' =>
+                            'We regret to inform you that your request cannot be processed at this time.'
+                    ]);
+
+                    break;
+
+
+                default:
+
+                    $subject = "HR Request Status Update";
+
+                    $message = view('emails/hr_status_update', [
+                        'fullname' => $request['fullname'],
+                        'reference_no' => $request['reference_no'],
+                        'service' => $request['service_availed'],
+                        'status' => $status,
+                        'remarks' => $request['remarks'],
+                        'message' =>
+                            'Your request status has been updated.'
+                    ]);
+
+                    break;
+            }
+
+
+            $mailer->send(
+                $request['email_address'],
+                $subject,
+                $message
+            );
+
+        }
+
+
         return redirect()
             ->to(site_url('request'))
             ->with('success', 'HR request updated successfully.');
