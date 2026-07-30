@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Models\HrRequestModel;
 use App\Models\HrEmploymentHistoryModel;
+use App\Models\ClientSatisfactionModel;
 use App\Models\UserModel;
 use App\Libraries\Mailer;
 
@@ -535,14 +536,19 @@ class EportalController extends BaseController
 
                     $subject = "Your Requested Document is Ready for Release";
 
+                    $csmLink = base_url('csm/' . $request['reference_no']);
+
                     $message = view('emails/hr_status_update', [
                         'fullname' => $request['fullname'],
                         'reference_no' => $request['reference_no'],
                         'service' => $request['service_availed'],
                         'status' => 'For Released',
                         'remarks' => $request['remarks'],
+
                         'message' =>
-                            'Your requested document is now ready for release. Please coordinate with the Human Resource Unit for claiming.'
+                            'Your requested document is now ready for release. Please coordinate with the Human Resource Unit for claiming.',
+
+                        'csm_link' => $csmLink
                     ]);
 
                     break;
@@ -702,6 +708,77 @@ class EportalController extends BaseController
         ];
 
         return view('dashboard/reports', $data);
+    }
+
+    public function feedback()
+    {
+        return view('feedback/feedback_form_english');
+    }
+    public function submitCSM()
+    {
+        $csmModel = new ClientSatisfactionModel();
+
+        $data = [
+            'reference_no' => $this->request->getPost('reference_no'),
+            'office_name' => $this->request->getPost('office_name'),
+            'transaction_no' => $this->request->getPost('transaction_no'),
+            'service_availed' => $this->request->getPost('service_availed'),
+            'client_type' => $this->request->getPost('client_type'),
+            'date' => $this->request->getPost('date'),
+            'sex' => $this->request->getPost('sex'),
+            'age' => $this->request->getPost('age'),
+            'name' => $this->request->getPost('name'),
+            'address' => $this->request->getPost('address'),
+            'cc1' => $this->request->getPost('cc1'),
+            'cc2' => $this->request->getPost('cc2'),
+            'cc3' => $this->request->getPost('cc3'),
+            'sqd0' => $this->request->getPost('sqd0'),
+            'sqd1' => $this->request->getPost('sqd1'),
+            'sqd2' => $this->request->getPost('sqd2'),
+            'sqd3' => $this->request->getPost('sqd3'),
+            'sqd4' => $this->request->getPost('sqd4'),
+            'sqd5' => $this->request->getPost('sqd5'),
+            'sqd6' => $this->request->getPost('sqd6'),
+            'sqd7' => $this->request->getPost('sqd7'),
+            'sqd8' => $this->request->getPost('sqd8'),
+            'suggestions' => $this->request->getPost('suggestions'),
+            'email' => $this->request->getPost('email'),
+        ];
+
+        $result = $csmModel->insert($data);
+
+        if (!$result) {
+            dd(
+                $csmModel->errors(),
+                $csmModel->db->error(),
+                $data
+            );
+        }
+
+        return redirect()->back()->with(
+            'success',
+            'Thank you for answering our Client Satisfaction Survey.'
+        );
+    }
+
+    public function csm($reference_no)
+    {
+        $requestModel = new HrRequestModel();
+
+        $request = $requestModel
+            ->where('reference_no', $reference_no)
+            ->first();
+
+        if (!$request) {
+            return redirect()->back()
+                ->with('error', 'Reference number not found');
+        }
+
+        return view('feedback/feedback_form_english', [
+            'reference_no' => $request['reference_no'],
+            'service_availed' => $request['service_availed'],
+            'request' => $request,
+        ]);
     }
 
 }

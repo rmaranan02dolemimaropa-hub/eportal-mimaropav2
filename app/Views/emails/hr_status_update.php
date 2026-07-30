@@ -64,6 +64,41 @@
         DOLE MIMAROPA
     </p>
 
+    <?php if (isset($csm_link)): ?>
+
+        <hr>
+
+        <p>
+            We value your feedback. After receiving your requested document,
+            we kindly invite you to answer our Client Satisfaction Measurement (CSM) Survey.
+        </p>
+
+        <p>
+            Your feedback will help us improve our services.
+        </p>
+
+        <p style="text-align:center;">
+            <a href="<?= $csm_link ?>" style="
+background:#10058C;
+color:#ffffff;
+padding:12px 20px;
+border-radius:8px;
+text-decoration:none;
+display:inline-block;
+font-weight:bold;
+">
+                Answer Client Satisfaction Survey
+            </a>
+        </p>
+
+        <p>
+            Reference No.: <strong>
+                <?= $reference_no ?>
+            </strong>
+        </p>
+
+    <?php endif; ?>
+
 
 </body>
 

@@ -24,6 +24,9 @@
       <a href="reports" class="nav-link <?= $isActive('reports') ?>">
         <i class="bi bi-bar-chart"></i><span>Reports</span>
       </a>
+      <a href="feedback" class="nav-link <?= $isActive('feedback') ?>">
+        <i class="bi bi-chat-right-text-fill"></i></i><span>Feedback</span>
+      </a>
       <a href="#" class="nav-link">
         <i class="bi bi-gear"></i><span>Settings</span>
       </a>
