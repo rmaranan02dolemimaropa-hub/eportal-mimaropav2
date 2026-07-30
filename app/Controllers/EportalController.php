@@ -17,35 +17,61 @@ class EportalController extends BaseController
     public function request()
     {
         $requestModel = new HrRequestModel();
+        $historyModel = new HrEmploymentHistoryModel();
+
         $query = $requestModel;
 
+
+        // Search
+        if ($search = $this->request->getGet('search')) {
+
+            $query->groupStart()
+                ->like('reference_no', $search)
+                ->orLike('fullname', $search)
+                ->orLike('email_address', $search)
+                ->orLike('contact_number', $search)
+                ->orLike('service_availed', $search)
+                ->orLike('status', $search)
+                ->groupEnd();
+
+        }
+
+
+        // Filters
         if ($year = $this->request->getGet('year')) {
             $query->like('date_requested', $year, 'after');
         }
 
+
         if ($status = $this->request->getGet('status')) {
-            $query->like('status', $status);
+            $query->where('status', $status);
         }
+
 
         if ($service = $this->request->getGet('service_availed')) {
-            $query->like('service_availed', $service);
+            $query->where('service_availed', $service);
         }
 
-        if ($unit = $this->request->getGet('office_division')) {
-            $query->like('office_division', $unit);
-        }
 
-        if ($dateRequested = $this->request->getGet('date_requested')) {
-            $query->like('date_requested', $dateRequested, 'after');
-        }
-
-        $data['requests'] = $query
+        $requests = $query
             ->orderBy('id', 'DESC')
             ->paginate(10);
 
-        $data['pager'] = $requestModel->pager;
 
-        return view('dashboard/request', $data);
+
+        foreach ($requests as &$row) {
+
+            $row['employment_history'] = $historyModel
+                ->where('reference_no', $row['reference_no'])
+                ->findAll();
+
+        }
+
+
+        return view('dashboard/request', [
+            'requests' => $requests,
+            'pager' => $requestModel->pager
+        ]);
     }
 
     public function dashboard()
@@ -425,16 +451,54 @@ class EportalController extends BaseController
     {
         $requestModel = new HrRequestModel();
 
+        $status = $this->request->getPost('status');
+
+
         $data = [
             'fullname' => $this->request->getPost('fullname'),
             'contact_number' => $this->request->getPost('contact_number'),
             'email_address' => $this->request->getPost('email_address'),
             'date_requested' => $this->request->getPost('date_requested'),
-            'status' => $this->request->getPost('status'),
+            'status' => $status,
             'remarks' => $this->request->getPost('remarks'),
         ];
 
+
+        // Update status date automatically
+        switch ($status) {
+
+            case 'Processing':
+
+                $data['date_processing'] = date('Y-m-d H:i:s');
+
+                break;
+
+
+            case 'For Released':
+
+                $data['date_released'] = date('Y-m-d H:i:s');
+
+                break;
+
+
+            case 'Completed':
+
+                $data['date_completed'] = date('Y-m-d H:i:s');
+
+                break;
+
+
+            case 'Rejected':
+
+                $data['date_rejected'] = date('Y-m-d H:i:s');
+
+                break;
+
+        }
+
+
         $requestModel->update($id, $data);
+
 
         return redirect()
             ->to(site_url('request'))

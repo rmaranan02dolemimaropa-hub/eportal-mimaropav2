@@ -157,7 +157,37 @@
                                     </td>
 
                                     <td>
-                                        <?= date('F d, Y', strtotime($row['date_requested'])) ?>
+                                        <?php
+
+                                    $displayDate = $row['date_requested'];
+
+                                    if ($row['status'] == 'Processing' && $row['date_processing']) {
+
+                                        $displayDate = $row['date_processing'];
+
+                                    }
+
+                                    elseif ($row['status'] == 'For Released' && $row['date_released']) {
+
+                                        $displayDate = $row['date_released'];
+
+                                    }
+
+                                    elseif ($row['status'] == 'Completed' && $row['date_completed']) {
+
+                                        $displayDate = $row['date_completed'];
+
+                                    }
+
+                                    elseif ($row['status'] == 'Rejected' && $row['date_rejected']) {
+
+                                        $displayDate = $row['date_rejected'];
+
+                                    }
+
+                                    ?>
+
+                                    <?= date('F d, Y', strtotime($displayDate)) ?>
                                     </td>
 
                                     <td>

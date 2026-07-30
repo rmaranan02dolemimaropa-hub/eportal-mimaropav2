@@ -52,8 +52,12 @@
 
                 <div class="search-box">
                     <i class="bi bi-search"></i>
-                    <input type="text" class="form-control" placeholder="Search requests..."
-                        aria-label="Search requests" />
+                    <input 
+                        type="text"
+                        id="searchRequest"
+                        class="form-control"
+                        placeholder="Search requests..."
+                        value="<?= esc($_GET['search'] ?? '') ?>">
                 </div>
 
                 <button class="btn tool-btn" id="exportButton">
@@ -114,8 +118,7 @@
         </div>
 
 
-
-
+      
         <div class="table-responsive">
             <table class="table requests-table align-middle mb-0">
                 <thead>
@@ -123,7 +126,7 @@
                         <th>Reference No.</th>
                         <th>Requestor</th>
                         <th>Service</th>
-                        <th>Date Requested</th>
+                        <th>Date</th>
                         <th>Status</th>
                         <th class="text-end">Action</th>
                     </tr>
@@ -149,7 +152,37 @@
                                 </td>
 
                                 <td>
-                                    <?= date('F d, Y', strtotime($row['date_requested'])) ?>
+                                <?php
+
+                                    $displayDate = $row['date_requested'];
+
+                                    if ($row['status'] == 'Processing' && $row['date_processing']) {
+
+                                        $displayDate = $row['date_processing'];
+
+                                    }
+
+                                    elseif ($row['status'] == 'For Released' && $row['date_released']) {
+
+                                        $displayDate = $row['date_released'];
+
+                                    }
+
+                                    elseif ($row['status'] == 'Completed' && $row['date_completed']) {
+
+                                        $displayDate = $row['date_completed'];
+
+                                    }
+
+                                    elseif ($row['status'] == 'Rejected' && $row['date_rejected']) {
+
+                                        $displayDate = $row['date_rejected'];
+
+                                    }
+
+                                    ?>
+
+                                    <?= date('F d, Y', strtotime($displayDate)) ?>
                                 </td>
 
                                 <td>
@@ -179,70 +212,74 @@
                                     <div class="row-actions">
 
                                         <!-- View (Everyone) -->
-                                        <button class="row-action-btn" title="View" data-bs-toggle="modal"
+                                        <button class="row-action-btn"
+                                            title="View"
+                                            data-bs-toggle="modal"
                                             data-bs-target="#viewRequestModal"
-                                            data-reference="<?= esc($row['reference_no'] ?? '', 'attr') ?>"
-                                            data-service="<?= esc($row['service_availed'] ?? '', 'attr') ?>"
-                                            data-fullname="<?= esc($row['fullname'] ?? '', 'attr') ?>"
-                                            data-contact="<?= esc($row['contact_number'] ?? '', 'attr') ?>"
-                                            data-email="<?= esc($row['email_address'] ?? '', 'attr') ?>"
-                                            data-date-requested="<?= esc($row['date_requested'] ?? '', 'attr') ?>"
-                                            data-status="<?= esc($row['status'] ?? '', 'attr') ?>"
+
+                                            data-reference="<?= esc($row['reference_no'], 'attr') ?>"
+                                            data-service="<?= esc($row['service_availed'], 'attr') ?>"
+                                            data-fullname="<?= esc($row['fullname'], 'attr') ?>"
+                                            data-contact="<?= esc($row['contact_number'], 'attr') ?>"
+                                            data-email="<?= esc($row['email_address'], 'attr') ?>"
+                                            data-date-requested="<?= esc($row['date_requested'], 'attr') ?>"
+                                            data-status="<?= esc($row['status'], 'attr') ?>"
+
                                             data-category="<?= esc($row['employee_category'] ?? '', 'attr') ?>"
-                                            data-period="<?= esc($row['period_of_service'] ?? '', 'attr') ?>"
-                                            data-position="<?= esc($row['position'] ?? '', 'attr') ?>"
-                                            data-office="<?= esc($row['office_division'] ?? '', 'attr') ?>"
+
+                                            data-history="<?= htmlspecialchars(json_encode($row['employment_history'] ?? []), ENT_QUOTES, 'UTF-8') ?>"
+
                                             data-certification="<?= esc($row['certification'] ?? '', 'attr') ?>"
                                             data-ipcr-period="<?= esc($row['ipcr_period'] ?? '', 'attr') ?>"
                                             data-specify-201="<?= esc($row['specify_201'] ?? '', 'attr') ?>"
                                             data-remarks="<?= esc($row['remarks'] ?? '', 'attr') ?>">
+
                                             <i class="bi bi-eye"></i>
 
                                         </button>
 
-                                       
 
                                                 <?php if ($row['status'] != 'Completed' && $row['status'] != 'Rejected'): ?>
 
-                                                <!-- Edit -->
-                                                <button class="row-action-btn" title="Edit" data-bs-toggle="modal"
-                                                    data-bs-target="#edit<?= $row['id'] ?>">
-                                                    <i class="bi bi-pencil"></i>
-                                                </button>
+                                                        <!-- Edit -->
+                                                        <button class="row-action-btn" title="Edit" data-bs-toggle="modal"
+                                                            data-bs-target="#edit<?= $row['id'] ?>">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </button>
 
-                                                <!-- Delete -->
-                                                <button class="row-action-btn row-action-danger" title="Delete" data-bs-toggle="modal"
-                                                    data-bs-target="#delete<?= $row['id'] ?>">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
+                                                        <!-- Delete -->
+                                                        <button class="row-action-btn row-action-danger" title="Delete" data-bs-toggle="modal"
+                                                            data-bs-target="#delete<?= $row['id'] ?>">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
 
-                                            <?php endif; ?>
+                                                <?php endif; ?>
 
-                                       
 
-                                    </div>
+
+                                            </div>
+
+                                        </td>
+
+                                    </tr>
+
+                            <?php endforeach; ?>
+
+                    <?php else: ?>
+
+                            <tr>
+
+                                <td colspan="6" class="text-center py-5">
+
+                                    <i class="bi bi-inbox fs-1 text-muted"></i>
+
+                                    <br>
+
+                                    No service requests found.
 
                                 </td>
 
                             </tr>
-
-                        <?php endforeach; ?>
-
-                    <?php else: ?>
-
-                        <tr>
-
-                            <td colspan="6" class="text-center py-5">
-
-                                <i class="bi bi-inbox fs-1 text-muted"></i>
-
-                                <br>
-
-                                No service requests found.
-
-                            </td>
-
-                        </tr>
 
                     <?php endif; ?>
 
@@ -267,11 +304,11 @@
 
                 <!-- Page Numbers -->
                 <?php for ($i = 1; $i <= $pager->getPageCount(); $i++): ?>
-                    <li class="page-item <?= $i == $pager->getCurrentPage() ? 'active' : '' ?>">
-                        <a class="page-link" href="<?= $pager->getPageURI($i) ?>">
-                            <?= $i ?>
-                        </a>
-                    </li>
+                        <li class="page-item <?= $i == $pager->getCurrentPage() ? 'active' : '' ?>">
+                            <a class="page-link" href="<?= $pager->getPageURI($i) ?>">
+                                <?= $i ?>
+                            </a>
+                        </li>
                 <?php endfor; ?>
 
                 <!-- Next -->
@@ -312,123 +349,123 @@
     </div>
 
     <?php foreach ($requests as $row): ?>
-        <div class="modal fade" id="edit<?= $row['id'] ?>" tabindex="-1">
-            <div class="modal-dialog modal-lg">
-                <form method="post" action="<?= site_url('request/update/' . $row['id']) ?>" class="modal-content">
+            <div class="modal fade" id="edit<?= $row['id'] ?>" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <form method="post" action="<?= site_url('request/update/' . $row['id']) ?>" class="modal-content">
 
-                    <?= csrf_field() ?>
+                        <?= csrf_field() ?>
 
-                    <div class="modal-header">
-                        <h5 class="modal-title">Update HR Request</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
+                        <div class="modal-header">
+                            <h5 class="modal-title">Update HR Request</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
 
-                    <div class="modal-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Reference No.</label>
-                                <input type="text" class="form-control" value="<?= esc($row['reference_no']) ?>" readonly>
-                            </div>
+                        <div class="modal-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Reference No.</label>
+                                    <input type="text" class="form-control" value="<?= esc($row['reference_no']) ?>" readonly>
+                                </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label">Status</label>
-                                <select name="status" class="form-select">
-                                    <option value="New Application" <?= $row['status'] === 'New Application' ? 'selected' : '' ?>>
-                                        New Application
-                                    </option>
-                                    <option value="Processing" <?= $row['status'] === 'Processing' ? 'selected' : '' ?>>
-                                        Processing
-                                    </option>
-                                    <option value="For Released" <?= $row['status'] === 'For Released' ? 'selected' : '' ?>>
-                                        For Released
-                                    </option>
-                                    <option value="Completed" <?= $row['status'] === 'Completed' ? 'selected' : '' ?>>
-                                        Completed
-                                    </option>
-                                    <option value="Rejected" <?= $row['status'] === 'Rejected' ? 'selected' : '' ?>>
-                                        Rejected
-                                    </option>
-                                </select>
-                            </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Status</label>
+                                    <select name="status" class="form-select">
+                                        <option value="New Application" <?= $row['status'] === 'New Application' ? 'selected' : '' ?>>
+                                            New Application
+                                        </option>
+                                        <option value="Processing" <?= $row['status'] === 'Processing' ? 'selected' : '' ?>>
+                                            Processing
+                                        </option>
+                                        <option value="For Released" <?= $row['status'] === 'For Released' ? 'selected' : '' ?>>
+                                            For Released
+                                        </option>
+                                        <option value="Completed" <?= $row['status'] === 'Completed' ? 'selected' : '' ?>>
+                                            Completed
+                                        </option>
+                                        <option value="Rejected" <?= $row['status'] === 'Rejected' ? 'selected' : '' ?>>
+                                            Rejected
+                                        </option>
+                                    </select>
+                                </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label">Name</label>
-                                <input type="text" name="fullname" class="form-control"
-                                    value="<?= esc($row['fullname']) ?>">
-                            </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Name</label>
+                                    <input type="text" name="fullname" class="form-control"
+                                        value="<?= esc($row['fullname']) ?>">
+                                </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label">Contact Number</label>
-                                <input type="text" name="contact_number" class="form-control"
-                                    value="<?= esc($row['contact_number']) ?>">
-                            </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Contact Number</label>
+                                    <input type="text" name="contact_number" class="form-control"
+                                        value="<?= esc($row['contact_number']) ?>">
+                                </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label">Email Address</label>
-                                <input type="email" name="email_address" class="form-control"
-                                    value="<?= esc($row['email_address']) ?>">
-                            </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Email Address</label>
+                                    <input type="email" name="email_address" class="form-control"
+                                        value="<?= esc($row['email_address']) ?>">
+                                </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label">Date Requested</label>
-                                <input type="date" name="date_requested" class="form-control"
-                                    value="<?= esc($row['date_requested']) ?>">
-                            </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Date Requested</label>
+                                    <input type="date" name="date_requested" class="form-control"
+                                        value="<?= esc($row['date_requested']) ?>">
+                                </div>
 
-                            <div class="col-md-12">
-                                <label class="form-label">Remarks</label>
-                                <textarea name="remarks" class="form-control"
-                                    rows="3"><?= esc($row['remarks'] ?? '') ?></textarea>
+                                <div class="col-md-12">
+                                    <label class="form-label">Remarks</label>
+                                    <textarea name="remarks" class="form-control"
+                                        rows="3"><?= esc($row['remarks'] ?? '') ?></textarea>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            Cancel
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-check-circle"></i> Update Request
-                        </button>
-                    </div>
-                </form>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Update Request
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
     <?php endforeach; ?>
 
     <?php foreach ($requests as $row): ?>
-        <div class="modal fade" id="delete<?= $row['id'] ?>" tabindex="-1">
-            <div class="modal-dialog">
-                <form method="post" action="<?= site_url('request/delete/' . $row['id']) ?>" class="modal-content">
+            <div class="modal fade" id="delete<?= $row['id'] ?>" tabindex="-1">
+                <div class="modal-dialog">
+                    <form method="post" action="<?= site_url('request/delete/' . $row['id']) ?>" class="modal-content">
 
-                    <?= csrf_field() ?>
+                        <?= csrf_field() ?>
 
-                    <div class="modal-header">
-                        <h5 class="modal-title text-danger">Delete HR Request</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
+                        <div class="modal-header">
+                            <h5 class="modal-title text-danger">Delete HR Request</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
 
-                    <div class="modal-body">
-                        Are you sure you want to delete the request for
-                        <strong><?= esc($row['fullname']) ?></strong>?
+                        <div class="modal-body">
+                            Are you sure you want to delete the request for
+                            <strong><?= esc($row['fullname']) ?></strong>?
 
-                        <p class="text-danger mt-2 mb-0">
-                            This action cannot be undone.
-                        </p>
-                    </div>
+                            <p class="text-danger mt-2 mb-0">
+                                This action cannot be undone.
+                            </p>
+                        </div>
 
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            Cancel
-                        </button>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                Cancel
+                            </button>
 
-                        <button type="submit" class="btn btn-danger">
-                            <i class="bi bi-trash"></i> Delete
-                        </button>
-                    </div>
-                </form>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
     <?php endforeach; ?>
 
 
@@ -513,22 +550,54 @@
      * reference number, requestor name, and service name.
      */
     function enableTableSearch() {
-        const searchInput = document.querySelector(".search-box input");
-        const tableRows = document.querySelectorAll(".requests-table tbody tr");
 
-        if (!searchInput || !tableRows.length) return;
+    const searchInput = document.getElementById("searchRequest");
 
-        searchInput.addEventListener("input", function () {
-            const query = searchInput.value.trim().toLowerCase();
+    if (!searchInput) return;
 
-            tableRows.forEach(function (row) {
-                const rowText = row.textContent.toLowerCase();
-                row.style.display = rowText.includes(query) ? "" : "none";
-            });
-        });
-    }
-</script>
-<script>
+
+    let timer;
+
+
+    searchInput.addEventListener("input", function () {
+
+
+        clearTimeout(timer);
+
+
+        timer = setTimeout(() => {
+
+
+            const keyword = searchInput.value.trim();
+
+
+            const url = new URL(window.location.href);
+
+
+            if (keyword) {
+
+                url.searchParams.set(
+                    "search",
+                    keyword
+                );
+
+            } else {
+
+                url.searchParams.delete("search");
+
+            }
+
+
+            window.location.href = url.toString();
+
+
+        }, 500);
+
+
+    });
+
+}
+
     document.addEventListener('DOMContentLoaded', function () {
 
         ['loginAlert', 'loginSuccess'].forEach(function (id) {
@@ -583,9 +652,7 @@
         });
 
     });
-</script>
 
-<script>
     document.addEventListener("DOMContentLoaded", function () {
 
         const button = document.getElementById("exportButton");
@@ -688,70 +755,289 @@
         });
 
     });
-</script>
 
-<script>
+
+
     const viewRequestModal = document.getElementById('viewRequestModal');
     const requestDetails = document.getElementById('requestDetails');
 
+
     function addDetail(label, value) {
+
         const column = document.createElement('div');
+
         column.className = 'col-md-6 mb-3';
 
-        const labelElement = document.createElement('small');
-        labelElement.className = 'text-muted d-block';
-        labelElement.textContent = label;
 
-        const valueElement = document.createElement('div');
-        valueElement.className = 'fw-semibold';
-        valueElement.textContent = value || '-';
+        column.innerHTML = `
+            <small class="text-muted d-block">
+                ${label}
+            </small>
 
-        column.appendChild(labelElement);
-        column.appendChild(valueElement);
+            <div class="fw-semibold">
+                ${value || '-'}
+            </div>
+        `;
+
+
         requestDetails.appendChild(column);
+
     }
 
+
+
+    function addEmploymentHistory(histories) {
+
+
+        if (!Array.isArray(histories) || histories.length === 0) {
+
+            addDetail(
+                'Employment History',
+                'No employment records found.'
+            );
+
+            return;
+
+        }
+
+
+
+        histories.forEach((history, index) => {
+
+
+            const wrapper = document.createElement('div');
+
+            wrapper.className = 'col-12 mb-3';
+
+
+
+            wrapper.innerHTML = `
+
+                <div class="card border shadow-sm">
+
+                    <div class="card-header bg-light fw-bold">
+
+                        #${index + 1}
+
+                    </div>
+
+
+                    <div class="card-body">
+
+
+                        <div class="row g-3">
+
+
+                            <div class="col-md-4">
+
+                                <small class="text-muted">
+                                    Period of Service
+                                </small>
+
+                                <div class="fw-semibold">
+                                    ${history.period_of_service ?? '-'}
+                                </div>
+
+                            </div>
+
+
+
+                            <div class="col-md-4">
+
+                                <small class="text-muted">
+                                    Position
+                                </small>
+
+                                <div class="fw-semibold">
+                                    ${history.position ?? '-'}
+                                </div>
+
+                            </div>
+
+
+
+                            <div class="col-md-4">
+
+                                <small class="text-muted">
+                                    Office / Division
+                                </small>
+
+                                <div class="fw-semibold">
+                                    ${history.office_division ?? '-'}
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            `;
+
+
+            requestDetails.appendChild(wrapper);
+
+
+        });
+
+
+    }
+
+
+
+
     viewRequestModal.addEventListener('show.bs.modal', function (event) {
+
+
         const button = event.relatedTarget;
+
         const data = button.dataset;
+
 
         requestDetails.innerHTML = '';
 
+
+
         addDetail('Reference No.', data.reference);
+
         addDetail('Service Availed', data.service);
+
         addDetail('Name', data.fullname);
+
         addDetail('Contact Number', data.contact);
+
         addDetail('Email Address', data.email);
+
         addDetail('Date Requested', data.dateRequested);
+
         addDetail('Status', data.status);
 
-        if (data.service === 'Certificate of Employment') {
-            addDetail('Employee Category', data.category);
-            addDetail('Position', data.position);
 
-            if (data.category === 'COS Employee') {
-                addDetail('Period of Service', data.period);
-                addDetail('Office / Division Assigned', data.office);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Certificate of Employment
+        |--------------------------------------------------------------------------
+        */
+
+        if (data.service === 'Certificate of Employment') {
+
+
+            addDetail(
+                'Employee Category',
+                data.category
+            );
+
+
+            const category = (data.category || '')
+                .trim()
+                .toLowerCase();
+
+
+
+            if (category === 'cos' || category === 'cos employee') {
+
+
+                let histories = [];
+
+
+                try {
+
+                    histories = JSON.parse(data.history || '[]');
+
+                } catch (error) {
+
+                    console.error(
+                        'Employment history error:',
+                        error
+                    );
+
+                }
+
+
+
+                addEmploymentHistory(histories);
+
+
+            } else {
+
+
+                addDetail(
+                    'Position',
+                    data.position
+                );
+
+
             }
+
+
         }
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Certification
+        |--------------------------------------------------------------------------
+        */
 
         if (data.service === 'Certification') {
-            addDetail('Certification Needed', data.certification);
+
+            addDetail(
+                'Certification Needed',
+                data.certification
+            );
+
         }
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | IPCR
+        |--------------------------------------------------------------------------
+        */
 
         if (data.service === 'IPCR') {
-            addDetail('IPCR Period', data.ipcrPeriod);
+
+            addDetail(
+                'IPCR Period',
+                data.ipcrPeriod
+            );
+
         }
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | 201 Documents
+        |--------------------------------------------------------------------------
+        */
 
         if (data.service === '201 Docs') {
-            addDetail('Specified Document', data.specify201);
+
+            addDetail(
+                'Specified Document',
+                data.specify201
+            );
+
         }
 
-        addDetail('Remarks', data.remarks);
-    });
-</script>
 
-<script>
+
+        addDetail(
+            'Remarks',
+            data.remarks
+        );
+
+
+    });
+
     setTimeout(() => {
         document.querySelectorAll('.alert').forEach(alert => {
             bootstrap.Alert.getOrCreateInstance(alert).close();

@@ -34,7 +34,11 @@ class HrRequestModel extends Model
         'date_received',
         'received_by',
         'date_released',
-        'released_by'
+        'released_by',
+        'date_processing',
+        'date_completed',
+        'date_rejected',
+        
 
     ];
 
