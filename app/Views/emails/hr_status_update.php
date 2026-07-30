@@ -64,30 +64,47 @@
         DOLE MIMAROPA
     </p>
 
-    <?php if (isset($csm_link)): ?>
+    <?php if (isset($csm_link) || isset($csmtagalog_Link)): ?>
 
         <hr>
 
         <p>
             We value your feedback. After receiving your requested document,
             we kindly invite you to answer our Client Satisfaction Measurement (CSM) Survey.
+            <br>
+            (Lubos naming pinahahalagahan ang inyong opinyon. Matapos ninyong matanggap ang inyong hinihiling na dokumento, 
+            hinihikayat namin kayong maglaan ng ilang minuto upang sagutan ang aming Client Satisfaction Measurement (CSM) Survey. 
+            Ang inyong mga kasagutan ay makatutulong sa amin upang higit pang mapabuti ang aming mga serbisyo.)
         </p>
 
         <p>
             Your feedback will help us improve our services.
+            <br>
+            Ang inyong puna at mungkahi ay makatutulong sa amin upang higit pang mapabuti ang kalidad ng aming mga serbisyo.
         </p>
 
         <p style="text-align:center;">
             <a href="<?= $csm_link ?>" style="
-background:#10058C;
-color:#ffffff;
-padding:12px 20px;
-border-radius:8px;
-text-decoration:none;
-display:inline-block;
-font-weight:bold;
-">
-                Answer Client Satisfaction Survey
+                background:#10058C;
+                color:#ffffff;
+                padding:12px 20px;
+                border-radius:8px;
+                text-decoration:none;
+                display:inline-block;
+                font-weight:bold;
+                ">
+                Answer Client Satisfaction Survey English
+            </a>
+                        <a href="<?= $csmtagalog_Link ?>" style="
+                background:#10058C;
+                color:#ffffff;
+                padding:12px 20px;
+                border-radius:8px;
+                text-decoration:none;
+                display:inline-block;
+                font-weight:bold;
+                ">
+                Sagutin and Client Satisfaction Survey Tagalog
             </a>
         </p>
 

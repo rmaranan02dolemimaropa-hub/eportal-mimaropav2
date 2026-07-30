@@ -537,6 +537,7 @@ class EportalController extends BaseController
                     $subject = "Your Requested Document is Ready for Release";
 
                     $csmLink = base_url('csm/' . $request['reference_no']);
+                    $csmtagalog_Link = base_url('csmtagalog/' . $request['reference_no']);
 
                     $message = view('emails/hr_status_update', [
                         'fullname' => $request['fullname'],
@@ -548,7 +549,8 @@ class EportalController extends BaseController
                         'message' =>
                             'Your requested document is now ready for release. Please coordinate with the Human Resource Unit for claiming.',
 
-                        'csm_link' => $csmLink
+                        'csm_link' => $csmLink,
+                        'csmtagalog_Link' => $csmtagalog_Link
                     ]);
 
                     break;
@@ -710,10 +712,6 @@ class EportalController extends BaseController
         return view('dashboard/reports', $data);
     }
 
-    public function feedback()
-    {
-        return view('feedback/feedback_form_english');
-    }
     public function submitCSM()
     {
         $csmModel = new ClientSatisfactionModel();
@@ -775,6 +773,25 @@ class EportalController extends BaseController
         }
 
         return view('feedback/feedback_form_english', [
+            'reference_no' => $request['reference_no'],
+            'service_availed' => $request['service_availed'],
+            'request' => $request,
+        ]);
+    }
+        public function csmtagalog($reference_no)
+    {
+        $requestModel = new HrRequestModel();
+
+        $request = $requestModel
+            ->where('reference_no', $reference_no)
+            ->first();
+
+        if (!$request) {
+            return redirect()->back()
+                ->with('error', 'Reference number not found');
+        }
+
+        return view('feedback/feedback_form_tagalog', [
             'reference_no' => $request['reference_no'],
             'service_availed' => $request['service_availed'],
             'request' => $request,

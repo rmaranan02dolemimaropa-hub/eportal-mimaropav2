@@ -510,7 +510,8 @@
     </div>
   </div>
 
-  <form id="csmForm" novalidate>
+  <form method="post" action="<?= base_url('submit-csm') ?>" id="csmForm">
+            <?= csrf_field() ?>
 
     <!-- ===================== TO BE ACCOMPLISHED BY DOLE PERSONNEL ===================== -->
     <div class="form-card">
@@ -519,15 +520,15 @@
       <div class="office-use">
         <div>
           <label for="officeName">Pangalan ng Opisina / Yunit na Operatibo</label>
-          <input type="text" id="officeName" name="office_name">
+           <input type="text" id="officeName" name="office_name" value="DOLE MIMAROPA" readonly>
         </div>
         <div>
           <label for="transactionNo">Bilang ng Transaksyon</label>
-          <input type="text" id="transactionNo" name="transaction_no">
+          <input type="text" id="transactionNo" name="transaction_no" value="1" readonly>
         </div>
         <div class="full">
           <label for="serviceProvided">Pangalan ng Serbisyong Ibinigay</label>
-          <input type="text" id="serviceProvided" name="service_provided">
+          <input type="text" name="service_availed" value="<?= esc($service_availed) ?>" readonly>
         </div>
       </div>
     </div>

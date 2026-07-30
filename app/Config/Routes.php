@@ -77,6 +77,7 @@ $routes->get('reports/print', 'ExportController::printHrRequestReport');
 $routes->get('export/reports-pdf', 'ExportController::exportReportsPdf');
 $routes->get('export/reports-csv', 'ExportController::exportReportsCsv');
 $routes->get('csm/(:any)', 'EportalController::csm/$1');
+$routes->get('csmtagalog/(:any)', 'EportalController::csmtagalog/$1');
 
 $routes->post('submit-csm', 'EportalController::submitCSM');
 
