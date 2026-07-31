@@ -1,5 +1,8 @@
+<!-- Bootstrap Bundle JS (load first, so anything depending on it later is safe) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>/* ==========================================================================
+<script>
+/* ==========================================================================
    DOLE MIMAROPA E-Portal — Dashboard Script
    Handles: current date display, animated stat counters, table search filter.
    No external dependencies beyond the Bootstrap bundle already loaded.
@@ -76,7 +79,4 @@ function enableTableSearch() {
     });
   });
 }
-
-
 </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

@@ -147,3 +147,81 @@
 .tilt-wrap:hover .service-card {
   transform: translateY(-10px) rotateX(3deg) rotateY(-3deg);
 }
+
+/* ==========================================================================
+   RESPONSIVE OVERRIDES
+   ========================================================================== */
+
+/* ---------- Tablet (≤991.98px) ---------- */
+@media (max-width: 991.98px) {
+  .feature-card {
+    padding: 1.9rem 1.5rem;
+  }
+
+  .glass-card {
+    padding: 1.6rem 1.35rem;
+  }
+}
+
+/* ---------- Mobile (≤767.98px) ---------- */
+@media (max-width: 767.98px) {
+  .feature-card {
+    padding: 1.75rem 1.4rem;
+    text-align: center;
+  }
+  .feature-card .feature-icon {
+    width: 54px;
+    height: 54px;
+    font-size: 1.4rem;
+    margin-inline: auto;
+    margin-bottom: 1rem;
+  }
+
+  .glass-card {
+    padding: 1.5rem 1.25rem;
+    text-align: center;
+  }
+  .glass-card .glass-icon {
+    width: 46px;
+    height: 46px;
+    font-size: 1.2rem;
+    margin-inline: auto;
+    margin-bottom: 1rem;
+  }
+  .glass-card p {
+    min-height: 0; /* fixed min-height was for grid alignment across a row;
+                       once cards stack full-width this constraint isn't needed
+                       and can leave awkward empty space under short copy */
+  }
+  .glass-card .btn-request {
+    justify-content: center;
+  }
+}
+
+/* ---------- Small mobile (≤479.98px) ---------- */
+@media (max-width: 479.98px) {
+  .feature-card,
+  .glass-card {
+    padding: 1.5rem 1.15rem;
+  }
+}
+
+/* ---------- Touch devices: disable hover-only motion ----------
+   translateY/rotate-on-hover effects rely on a mouse pointer that can
+   "leave" the element. On touch, :hover sticks after a tap (no reliable
+   leave event), so cards can appear stuck mid-animation. Hover/tilt effects
+   are scoped to devices that actually support fine-pointer hover. */
+@media (hover: none) {
+  .feature-card:hover,
+  .glass-card:hover,
+  .tilt-wrap:hover .glass-card,
+  .tilt-wrap:hover .service-card {
+    transform: none;
+  }
+  .feature-card:hover .feature-icon {
+    transform: none;
+  }
+  .glass-card:hover::before {
+    opacity: 0;
+  }
+}

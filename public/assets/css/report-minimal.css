@@ -317,7 +317,10 @@
   .topbar, .sidebar, .app-footer { display: none !important; }
   .main-content { padding: 0 !important; }
   .report-page .r-table thead th { border-bottom: 1px solid #000; }
+  .topbar, .sidebar, .app-footer { display: none !important; }
 }
+
+
 
 /* -------------------- Responsive -------------------- */
 @media (max-width: 640px) {

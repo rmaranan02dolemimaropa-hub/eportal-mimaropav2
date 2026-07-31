@@ -20,3 +20,38 @@
   padding: 0.2rem 0.7rem;
   margin-bottom: 0.8rem;
 }
+
+/* ==========================================================================
+   RESPONSIVE OVERRIDES
+   ========================================================================== */
+
+/* ---------- Tablet (≤991.98px) ---------- */
+@media (max-width: 991.98px) {
+  .contact-directory-grid { row-gap: 1.5rem; }
+}
+
+/* ---------- Mobile (≤767.98px): single column ---------- */
+@media (max-width: 767.98px) {
+  #contact .section-head { padding-inline: 1rem; }
+
+  .contact-directory-grid { row-gap: 1.25rem; }
+
+  /* Card content isn't centered globally here since core visuals
+     live in services.css — only the badge is addressed below to
+     make sure it doesn't look off-center against centered card text. */
+  .contact-card .contact-office-badge {
+    font-size: 0.68rem;
+    padding: 0.18rem 0.6rem;
+    margin-bottom: 0.65rem;
+  }
+}
+
+/* ---------- Small mobile (≤479.98px) ---------- */
+@media (max-width: 479.98px) {
+  .contact-directory-grid { row-gap: 1rem; }
+
+  .contact-card .contact-office-badge {
+    font-size: 0.64rem;
+    padding: 0.16rem 0.55rem;
+  }
+}

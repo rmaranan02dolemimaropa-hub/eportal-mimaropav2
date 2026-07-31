@@ -94,4 +94,56 @@
   align-items: center;
   justify-content: space-between;
 }
-.gov-footer .footer-bottom .legal-links { display: flex; gap: 1.3rem; }
+.gov-footer .footer-bottom .legal-links { display: flex; gap: 1.3rem; flex-wrap: wrap; }
+
+/* ==========================================================================
+   RESPONSIVE OVERRIDES
+
+   Note: responsive.css previously duplicated some of these rules
+   (.footer-bottom, .footer-brand, [class^="col-"], .footer-contact li,
+   .footer-links li a, .social-icons at ≤767.98px). They're consolidated
+   here as the single source of truth for the footer — remove the
+   duplicate lines from responsive.css to avoid two files disagreeing later.
+   ========================================================================== */
+
+/* ---------- Tablet (≤991.98px) ---------- */
+@media (max-width: 991.98px) {
+  .gov-footer { padding-top: 3.75rem; }
+
+  .gov-footer p.footer-desc { max-width: 100%; }
+}
+
+/* ---------- Mobile (≤767.98px): stacked columns, centered ---------- */
+@media (max-width: 767.98px) {
+  .gov-footer { padding-top: 3rem; text-align: center; }
+
+  .gov-footer [class^="col-"] { text-align: center; }
+
+  .gov-footer .footer-brand { justify-content: center; }
+  .gov-footer p.footer-desc { margin-inline: auto; }
+
+  .gov-footer h4 { margin-top: 1.75rem; margin-bottom: 1rem; }
+
+  .gov-footer .footer-links li a,
+  .gov-footer .footer-contact li { justify-content: center; }
+  .gov-footer .footer-contact li .bi { margin-top: 0.15rem; }
+
+  .gov-footer .office-hours { margin-inline: auto; max-width: 320px; }
+
+  .gov-footer .social-icons { justify-content: center; }
+
+  .gov-footer .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.9rem;
+    margin-top: 2.5rem;
+  }
+  .gov-footer .footer-bottom .legal-links { justify-content: center; }
+}
+
+/* ---------- Small mobile (≤479.98px) ---------- */
+@media (max-width: 479.98px) {
+  .gov-footer .footer-bottom .legal-links { gap: 0.9rem; }
+
+  .gov-footer .office-hours { padding: 0.85rem 1rem; }
+}
