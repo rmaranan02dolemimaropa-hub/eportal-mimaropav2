@@ -78,7 +78,8 @@ $routes->get('export/reports-pdf', 'ExportController::exportReportsPdf');
 $routes->get('export/reports-csv', 'ExportController::exportReportsCsv');
 $routes->get('csm/(:any)', 'EportalController::csm/$1');
 $routes->get('csmtagalog/(:any)', 'EportalController::csmtagalog/$1');
-$routes->get('feedback/print/(:num)', 'EportalController::printFeedback/$1');
+$routes->get('feedback/print/english/(:num)', 'EportalController::printEnglish/$1');
+$routes->get('feedback/print/tagalog/(:num)', 'EportalController::printTagalog/$1');
 
 $routes->post('submit-csm', 'EportalController::submitCSM');
 

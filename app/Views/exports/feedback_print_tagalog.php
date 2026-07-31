@@ -14,6 +14,8 @@
 
         * {
             box-sizing: border-box;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
 
         body {
@@ -146,8 +148,12 @@
             background: #000;
             color: #fff;
             font-weight: 700;
-            width: 120px;
+            width: 130px;
             text-align: left;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            color-adjust: exact;
+            /* older Firefox */
         }
 
         .brand-row {
@@ -162,24 +168,11 @@
             gap: 14px;
         }
 
-        .brand-badge {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            background: var(--dole-blue);
-            color: #fff;
-            font-size: 7px;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            line-height: 1.1;
+        .brand-logo {
+            width: 42px;
+            height: 42px;
+            object-fit: contain;
             flex-shrink: 0;
-        }
-
-        .brand-badge.alt {
-            background: #c8102e;
         }
 
         .brand-text .agency {
@@ -212,13 +205,21 @@
         }
 
         .box {
-            display: inline-block;
-            width: 9px;
-            height: 9px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 10px;
+            height: 10px;
             border: 1px solid #000;
             margin: 0 4px 0 10px;
             position: relative;
             top: 1px;
+            font-size: 9px;
+            line-height: 1;
+            font-weight: 800;
+            color: #000;
+            overflow: hidden;
+            flex-shrink: 0;
         }
 
         .box:first-of-type {
@@ -229,7 +230,7 @@
             display: inline-block;
             border-bottom: 1px solid #000;
             min-width: 90px;
-            height: 11px;
+            height: 10px;
         }
 
         hr.divider {
@@ -301,6 +302,15 @@
             width: 34%;
         }
 
+        table.sqd-table tbody td:not(:first-child) {
+            width: 9.5%;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 11px;
+            font-weight: 700;
+            color: #000;
+        }
+
         table.sqd-table .emoji {
             font-size: 15px;
             display: block;
@@ -310,10 +320,6 @@
 
         table.sqd-table tbody td:first-child {
             text-align: left;
-        }
-
-        table.sqd-table tbody td:not(:first-child) {
-            width: 9.5%;
         }
 
         .suggestions-block {
@@ -382,6 +388,9 @@
             <div class="sub">Official-layout replica of the DOLE MIMAROPA paper form, ready for printing.</div>
         </div>
         <div class="toolbar-actions">
+            <button type="button" class="tbtn primary" onclick="window.location.href='<?= base_url('feedback') ?>'">
+                Back
+            </button>
             <button class="tbtn primary" onclick="window.print()">🖨️ Print Form</button>
         </div>
     </div>
@@ -399,26 +408,30 @@
 
             <table class="top-table">
                 <tr>
-                    <td class="dole-cell" rowspan="3">Para sa Pagkumpleto<br>ng mga Kawani ng DOLE</td>
-                    <td colspan="2">Pangalan ng Opisina/Yunit na Operatibo:</td>
+                    <td class="dole-cell" rowspan="2">Para sa Pagkumpleto<br>ng mga Kawani ng DOLE</td>
+                    <td colspan="2">Pangalan ng Opisina/Yunit na Operatibo:
+                        <?= esc($feedback['office_name']) ?>
+                    </td>
                 </tr>
                 <tr>
-                    <td colspan="2">Pangalan ng Serbisyong Ibinigay:</td>
-                </tr>
-                <tr>
-                    <td style="width:70%;"></td>
-                    <td>Bilang ng Transaksyon: ___</td>
+                    <td style="width:50%;">Pangalan ng Serbisyong Ibinigay:
+                        <?= esc($feedback['service_availed']) ?>
+                    </td>
+                    <td>Bilang ng Transaksyon:
+                        <?= esc($feedback['transaction_no']) ?>
+                    </td>
                 </tr>
             </table>
 
             <div class="brand-row">
                 <div class="logos">
-                    <div class="brand-badge">DOLE<br>LOGO</div>
+                    <img src="<?= base_url('assets/img/dole_mimaropa.png') ?>" alt="DOLE Logo" class="brand-logo">
                     <div class="brand-text">
                         <div class="agency">Department of Labor and Employment</div>
                         <div class="tagline">TULUNGAN NINYO KAMING MAS MAPABUTI ANG AMING SERBISYO!</div>
                     </div>
-                    <div class="brand-badge alt">BAGONG<br>PILIPINAS</div>
+                    <img src="<?= base_url('assets/img/bagong_pilipinas.png') ?>" alt="Bagong Pilipinas Logo"
+                        class="brand-logo">
                 </div>
             </div>
 
@@ -430,22 +443,44 @@
 
             <div class="inline-field">
                 <strong>Uri ng Kliyente:</strong>
-                <span class="box"></span> Mamamayan
-                <span class="box"></span> Negosyo
-                <span class="box"></span> Gobyerno (Empleyado o Ahensya)
+                <span class="box">
+                    <?= $feedback['client_type'] == 'Mamamayan' ? '✓' : '' ?>
+                </span> Mamamayan
+                <span class="box">
+                    <?= $feedback['client_type'] == 'Negosyo' ? '✓' : '' ?>
+                </span> Negosyo
+                <span class="box">
+                    <?= $feedback['client_type'] == 'Gobyerno' ? '✓' : '' ?>
+                </span> Gobyerno (Empleyado o Ahensya)
             </div>
 
             <div class="inline-field">
-                <strong>Petsa:</strong> <span class="fill-line"></span>
+                <strong>Petsa:</strong>
+                <span style="display:inline-block; border-bottom:1px solid #000; min-width:100px; text-align: center;">
+                    <?= date('F d, Y', strtotime($feedback['date'])) ?>
+                </span>
                 &nbsp;&nbsp;<strong>Kasarian:</strong>
-                <span class="box"></span> Lalaki
-                <span class="box"></span> Babae
-                &nbsp;&nbsp;<strong>Edad:</strong> <span class="fill-line" style="min-width:60px;"></span>
+                <span class="box">
+                    <?= $feedback['sex'] == 'Lalaki' ? '✓' : '' ?>
+                </span> Lalaki
+                <span class="box">
+                    <?= $feedback['sex'] == 'Babae' ? '✓' : '' ?>
+                </span> Babae
+                &nbsp;&nbsp;<strong>Edad:</strong>
+                <span style="display:inline-block; border-bottom:1px solid #000; min-width:50px; text-align: center;">
+                    <?= esc($feedback['age']) ?>
+                </span>
             </div>
 
             <div class="inline-field">
-                <strong>Pangalan:</strong> (Opsyonal) <span class="fill-line"></span>
-                &nbsp;&nbsp;<strong>Tirahan</strong> (Opsyonal): <span class="fill-line"></span>
+                <strong>Pangalan:</strong> (Opsyonal)
+                <span style="display:inline-block; border-bottom:1px solid #000; min-width:120px; text-align: center;">
+                    <?= esc($feedback['name']) ?>
+                </span>
+                &nbsp;&nbsp;<strong>Tirahan</strong> (Opsyonal):
+                <span style="display:inline-block; border-bottom:1px solid #000; min-width:80px; text-align: center;">
+                    <?= esc($feedback['address']) ?>
+                </span>
             </div>
 
             <hr class="divider">
@@ -460,15 +495,19 @@
                     <td class="cc-code">CC1</td>
                     <td>
                         Alin sa mga sumusunod ang naglalarawan sa iyong kaalaman sa CC?
-                        <div class="cc-opt"><span class="box"></span> 1. Alam ko ang CC at nakita ko ito sa napuntahang
-                            opisina</div>
-                        <div class="cc-opt"><span class="box"></span> 2. Alam ko ang CC pero hindi ko ito nakita sa
-                            napuntahang opisina</div>
-                        <div class="cc-opt"><span class="box"></span> 3. Nalaman ko ang CC nang makita ko ito sa
-                            napuntahang opisina</div>
-                        <div class="cc-opt"><span class="box"></span> 4. Hindi ko alam kung ano ang CC at wala akong
-                            nakita sa napuntahang opisina (Lagyan ng tsek ang &lsquo;N/A&rsquo; sa CC2 at CC3 kapag ito
-                            ang iyong sagot)</div>
+                        <div class="cc-opt"><span class="box">
+                                <?= $feedback['cc1'] == 1 ? '✓' : '' ?>
+                            </span> 1. Alam ko ang CC at nakita ko ito sa napuntahang opisina</div>
+                        <div class="cc-opt"><span class="box">
+                                <?= $feedback['cc1'] == 2 ? '✓' : '' ?>
+                            </span> 2. Alam ko ang CC pero hindi ko ito nakita sa napuntahang opisina</div>
+                        <div class="cc-opt"><span class="box">
+                                <?= $feedback['cc1'] == 3 ? '✓' : '' ?>
+                            </span> 3. Nalaman ko ang CC nang makita ko ito sa napuntahang opisina</div>
+                        <div class="cc-opt"><span class="box">
+                                <?= $feedback['cc1'] == 4 ? '✓' : '' ?>
+                            </span> 4. Hindi ko alam kung ano ang CC at wala akong nakita sa napuntahang opisina (Lagyan
+                            ng tsek ang &lsquo;N/A&rsquo; sa CC2 at CC3 kapag ito ang iyong sagot)</div>
                     </td>
                 </tr>
                 <tr>
@@ -478,13 +517,23 @@
                         opisina ay&hellip;
                         <div class="cc-two-col">
                             <div>
-                                <div class="cc-opt"><span class="box"></span> 1. Madaling makita</div>
-                                <div class="cc-opt"><span class="box"></span> 2. Medyo madaling makita</div>
-                                <div class="cc-opt"><span class="box"></span> 3. Mahirap makita</div>
+                                <div class="cc-opt"><span class="box">
+                                        <?= $feedback['cc2'] == 1 ? '✓' : '' ?>
+                                    </span> 1. Madaling makita</div>
+                                <div class="cc-opt"><span class="box">
+                                        <?= $feedback['cc2'] == 2 ? '✓' : '' ?>
+                                    </span> 2. Medyo madaling makita</div>
+                                <div class="cc-opt"><span class="box">
+                                        <?= $feedback['cc2'] == 3 ? '✓' : '' ?>
+                                    </span> 3. Mahirap makita</div>
                             </div>
                             <div>
-                                <div class="cc-opt"><span class="box"></span> 4. Hindi makita</div>
-                                <div class="cc-opt"><span class="box"></span> 5. Hindi angkop</div>
+                                <div class="cc-opt"><span class="box">
+                                        <?= $feedback['cc2'] == 4 ? '✓' : '' ?>
+                                    </span> 4. Hindi makita</div>
+                                <div class="cc-opt"><span class="box">
+                                        <?= $feedback['cc2'] == 5 ? '✓' : '' ?>
+                                    </span> 5. Hindi angkop</div>
                             </div>
                         </div>
                     </td>
@@ -495,12 +544,20 @@
                         Kung alam ang CC (nag-tsek sa opsyon 1-3 sa CC1), gaano nakatulong ang CC sa transaksyon mo?
                         <div class="cc-two-col">
                             <div>
-                                <div class="cc-opt"><span class="box"></span> 1. Sobrang nakatulong</div>
-                                <div class="cc-opt"><span class="box"></span> 2. Nakatulong naman</div>
+                                <div class="cc-opt"><span class="box">
+                                        <?= $feedback['cc3'] == 1 ? '✓' : '' ?>
+                                    </span> 1. Sobrang nakatulong</div>
+                                <div class="cc-opt"><span class="box">
+                                        <?= $feedback['cc3'] == 2 ? '✓' : '' ?>
+                                    </span> 2. Nakatulong naman</div>
                             </div>
                             <div>
-                                <div class="cc-opt"><span class="box"></span> 3. Hindi nakatulong</div>
-                                <div class="cc-opt"><span class="box"></span> 4. Hindi angkop</div>
+                                <div class="cc-opt"><span class="box">
+                                        <?= $feedback['cc3'] == 3 ? '✓' : '' ?>
+                                    </span> 3. Hindi nakatulong</div>
+                                <div class="cc-opt"><span class="box">
+                                        <?= $feedback['cc3'] == 4 ? '✓' : '' ?>
+                                    </span> 4. Hindi angkop</div>
                             </div>
                         </div>
                     </td>
@@ -526,103 +583,221 @@
                     <tr>
                         <td><strong>SQD0.</strong> Nasiyahan ako sa serbisyo na aking natanggap sa napuntahan na
                             tanggapan.</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <?php
+                        function checkSQD($value, $answer)
+                        {
+                            return (string) $value === (string) $answer ? '✓' : '';
+                        }
+                        ?>
+                        <td>
+                            <?= checkSQD($feedback['sqd0'], 'strongly_agree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd0'], 'agree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd0'], 'neutral') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd0'], 'disagree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd0'], 'strongly_disagree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd0'], 'na') ?>
+                        </td>
                     </tr>
+
                     <tr>
                         <td><strong>SQD1.</strong> Makatwiran ang oras na aking ginugol para sa pagproseso ng aking
                             transaksyon.</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td>
+                            <?= checkSQD($feedback['sqd1'], 'strongly_agree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd1'], 'agree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd1'], 'neutral') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd1'], 'disagree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd1'], 'strongly_disagree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd1'], 'na') ?>
+                        </td>
                     </tr>
                     <tr>
                         <td><strong>SQD2.</strong> Ang opisina ay sumusunod sa mga kinakailangang dokumento at mga
                             hakbang batay sa impormasyong ibinigay.</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td>
+                            <?= checkSQD($feedback['sqd2'], 'strongly_agree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd2'], 'agree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd2'], 'neutral') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd2'], 'disagree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd2'], 'strongly_disagree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd2'], 'na') ?>
+                        </td>
                     </tr>
                     <tr>
                         <td><strong>SQD3.</strong> Ang mga hakbang sa pagproseso, kasama na ang pagbayad ay madali at
                             simple lamang.</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td>
+                            <?= checkSQD($feedback['sqd3'], 'strongly_agree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd3'], 'agree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd3'], 'neutral') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd3'], 'disagree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd3'], 'strongly_disagree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd3'], 'na') ?>
+                        </td>
                     </tr>
                     <tr>
                         <td><strong>SQD4.</strong> Mabilis at madali akong nakahanap ng impormasyon tungkol sa aking
                             transaksyon mula sa opisina o sa website nito.</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td>
+                            <?= checkSQD($feedback['sqd4'], 'strongly_agree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd4'], 'agree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd4'], 'neutral') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd4'], 'disagree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd4'], 'strongly_disagree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd4'], 'na') ?>
+                        </td>
                     </tr>
                     <tr>
                         <td><strong>SQD5.</strong> Nagbayad ako ng makatwirang halaga para sa aking transaksyon.
-                            <em>(Kung ang sebisyo ay ibinigay ng libre, maglagay ng tsek sa hanay ng N/A.)</em></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                            <em>(Kung ang sebisyo ay ibinigay ng libre, maglagay ng tsek sa hanay ng N/A.)</em>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd5'], 'strongly_agree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd5'], 'agree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd5'], 'neutral') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd5'], 'disagree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd5'], 'strongly_disagree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd5'], 'na') ?>
+                        </td>
                     </tr>
                     <tr>
                         <td><strong>SQD6.</strong> Pakiramdam ko ay patas ang opisina sa lahat, o &ldquo;walang
                             palakasan&rdquo;, sa aking transaksyon.</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td>
+                            <?= checkSQD($feedback['sqd6'], 'strongly_agree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd6'], 'agree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd6'], 'neutral') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd6'], 'disagree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd6'], 'strongly_disagree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd6'], 'na') ?>
+                        </td>
                     </tr>
                     <tr>
                         <td><strong>SQD7.</strong> Magalang akong trinato ng mga tauhan, at (kung sakali ako ay humingi
                             ng tulong) alam ko na sila ay handang tumulong sa akin.</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td>
+                            <?= checkSQD($feedback['sqd7'], 'strongly_agree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd7'], 'agree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd7'], 'neutral') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd7'], 'disagree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd7'], 'strongly_disagree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd7'], 'na') ?>
+                        </td>
                     </tr>
                     <tr>
                         <td><strong>SQD8.</strong> Nakuha ko ang kinakailangan ko mula sa tanggapan ng gobyerno, kung
                             tinanggihan man, ito ay sapat na ipinaliwanag sa akin.</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td>
+                            <?= checkSQD($feedback['sqd8'], 'strongly_agree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd8'], 'agree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd8'], 'neutral') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd8'], 'disagree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd8'], 'strongly_disagree') ?>
+                        </td>
+                        <td>
+                            <?= checkSQD($feedback['sqd8'], 'na') ?>
+                        </td>
                     </tr>
                 </tbody>
             </table>
 
             <div class="suggestions-block">
                 Mga suhestiyon kung paano pa mapapabuti pa ang aming mga serbisyo (opsyonal):
-                <div class="suggest-line"></div>
-                <div class="suggest-line"></div>
+                <div class="suggest-line">
+                    <?= nl2br(esc($feedback['suggestions'])) ?>
+                </div>
             </div>
 
-            <div class="email-line">Email address (opsyonal): <span class="fill-line" style="min-width:220px;"></span>
+            <div class="email-line">Email address (opsyonal):
+                <?= esc($feedback['email']) ?>
             </div>
 
             <div class="thank-you">MARAMING SALAMAT!</div>
@@ -632,13 +807,7 @@
     </div>
 
     <script>
-        window.onload = function () {
-            window.print();
 
-            window.onafterprint = function () {
-                window.close();
-            };
-        };
     </script>
 
 </body>

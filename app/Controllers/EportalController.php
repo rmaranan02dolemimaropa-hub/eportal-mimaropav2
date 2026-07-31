@@ -464,28 +464,30 @@ class EportalController extends BaseController
     /**
      * Print CSM Feedback
      */
-    public function printFeedback($id)
+    public function printEnglish($id)
     {
         $csmModel = new ClientSatisfactionModel();
 
-        $feedback = $csmModel->find($id);
+        $data['feedback'] = $csmModel->find($id);
 
-        if (!$feedback) {
+        if (!$data['feedback']) {
             return redirect()->back()->with('error', 'Feedback not found.');
         }
 
-        // If you saved the selected language in the database
-        // e.g. english or tagalog
-        if (isset($feedback['language']) && strtolower($feedback['language']) == 'tagalog') {
-            return view('feedback/feedback_print_tagalog', [
-                'feedback' => $feedback
-            ]);
+        return view('exports/feedback_print_english', $data);
+    }
+
+    public function printTagalog($id)
+    {
+        $csmModel = new ClientSatisfactionModel();
+
+        $data['feedback'] = $csmModel->find($id);
+
+        if (!$data['feedback']) {
+            return redirect()->back()->with('error', 'Feedback not found.');
         }
 
-        // Default: English
-        return view('exports/feedback_print_english', [
-            'feedback' => $feedback
-        ]);
+        return view('exports/feedback_print_tagalog', $data);
     }
 
     public function updateRequest($id)

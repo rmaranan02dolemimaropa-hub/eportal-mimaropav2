@@ -10,9 +10,9 @@
     <!-- Page Header -->
     <div class="page-header">
         <div>
-            <h1 class="page-title">Users Management</h1>
+            <h1 class="page-title">User Management</h1>
             <p class="page-subtitle">
-                Welcome back, <?= session('fullname') ?> — manage and monitor all users from this dashboard.
+                Welcome back, <?= session('fullname') ?> — create, update, and manage user accounts and system access.
             </p>
         </div>
         <div class="page-date">

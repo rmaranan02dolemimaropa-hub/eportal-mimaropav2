@@ -396,6 +396,9 @@
       <div class="sub">Official-layout replica of the DOLE MIMAROPA paper form, ready for printing.</div>
     </div>
     <div class="toolbar-actions">
+      <button type="button" class="tbtn primary" onclick="window.location.href='<?= base_url('feedback') ?>'">
+        Back
+      </button>
       <button class="tbtn primary" onclick="window.print()">🖨️ Print Form</button>
     </div>
   </div>
@@ -703,13 +706,7 @@
   </div>
 
   <script>
-    window.onload = function () {
-      window.print();
 
-      // window.onafterprint = function () {
-      //   window.close();
-    };
-    // };
   </script>
 
 </body>

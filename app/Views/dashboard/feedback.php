@@ -9,10 +9,10 @@
     <!-- Page Header -->
     <div class="page-header">
         <div>
-            <h1 class="page-title">Requests</h1>
+            <h1 class="page-title">Feedback</h1>
             <p class="page-subtitle">
-                Welcome back, <?= session('fullname') ?> — manage and monitor all HR service requests from this
-                dashboard.
+                Welcome back, <?= session('fullname') ?> — access and review Client Satisfaction Measurement (CSM)
+                responses submitted by clients.
             </p>
         </div>
 
@@ -135,11 +135,15 @@
 
                             <td>
 
-                                <a href="<?= site_url('feedback/print/' . $row['id']) ?>"
-                                    class="btn btn-sm btn-outline-primary" target="_blank" title="Print Feedback">
 
-                                    <i class="bi bi-printer"></i>
+                                <a href="<?= site_url('feedback/print/english/' . $row['id']) ?>" target="_blank"
+                                    class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-printer"></i> EN
+                                </a>
 
+                                <a href="<?= base_url('feedback/print/tagalog/' . $row['id']) ?>" target="_blank"
+                                    class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-printer"></i> TL
                                 </a>
 
                             </td>
@@ -207,9 +211,49 @@
 <!-- Bootstrap 5 JS Bundle (needed for offcanvas / dropdown components) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
 
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("searchRequest");
+        const table = document.querySelector("table tbody");
+
+        searchInput.addEventListener("keyup", function () {
+            const filter = this.value.toLowerCase();
+            const rows = table.querySelectorAll("tr");
+
+            rows.forEach(function (row) {
+                const text = row.textContent.toLowerCase();
+
+                if (text.includes(filter)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        setCurrentDate();
+    });
+
+    function setCurrentDate() {
+        const dateEl = document.getElementById("currentDate");
+        if (!dateEl) return;
+
+        const today = new Date();
+        const options = {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        };
+        dateEl.textContent = today.toLocaleDateString("en-US", options);
+    }
 </script>
+
+
 
 
 <?= $this->include('dashboard_layout/footer') ?>
