@@ -619,6 +619,84 @@
             border-radius: 6px;
             margin-bottom: 18px;
         }
+        /* Success Modal */
+.modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.45);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    visibility:hidden;
+    opacity:0;
+    transition:.25s;
+    z-index:9999;
+}
+
+.modal-overlay.show{
+    visibility:visible;
+    opacity:1;
+}
+
+.modal-box{
+    width:420px;
+    max-width:92%;
+    background:#fff;
+    border-radius:14px;
+    padding:35px 28px;
+    text-align:center;
+    animation:popup .25s ease;
+}
+
+.success-icon{
+    width:75px;
+    height:75px;
+    margin:auto;
+    border-radius:50%;
+    background:#28a745;
+    color:#fff;
+    font-size:38px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:20px;
+}
+
+.modal-box h2{
+    margin:0 0 12px;
+    color:#10058C;
+}
+
+.modal-box p{
+    color:#666;
+    margin-bottom:25px;
+    line-height:1.6;
+}
+
+.modal-btn{
+    background:#10058C;
+    color:#fff;
+    border:none;
+    padding:12px 30px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.modal-btn:hover{
+    background:#0d0473;
+}
+
+@keyframes popup{
+    from{
+        transform:scale(.8);
+        opacity:0;
+    }
+    to{
+        transform:scale(1);
+        opacity:1;
+    }
+}
     </style>
 </head>
 
@@ -694,6 +772,7 @@
                 </div>
 
                 <div class="row">
+
                     <div class="col-4 field">
                         <label for="csmDate">Date <span class="required-mark">*</span></label>
                         <input type="date" id="csmDate" name="date">
@@ -832,6 +911,24 @@
         <p class="footer-note">DOLE MIMAROPA &middot; Client Satisfaction Measurement &middot; Thank you for helping us
             serve you better.</p>
 
+        <!-- Success Modal -->
+        <div id="successModal" class="modal-overlay">
+            <div class="modal-box">
+                <div class="success-icon">✓</div>
+
+                <h2>Feedback Submitted!</h2>
+
+                <p>
+                    Thank you for completing the Client Satisfaction Measurement (CSM).
+                    Your feedback has been successfully recorded.
+                </p>
+
+                <button id="btnSuccessOk" class="modal-btn">
+                    Continue
+                </button>
+            </div>
+        </div>
+
     </main>
 
 
@@ -900,6 +997,7 @@
             });
         })();
     </script>
+    L<
 
 </body>
 

@@ -33,6 +33,7 @@
                 </select>
             </div>
 
+
             <div class="r-field">
                 <label for="fMonth">Month</label>
                 <select id="fMonth" name="month">
@@ -85,6 +86,27 @@
                     </option>
                 </select>
             </div>
+            <div class="r-field">
+                <label for="fStatus">Status</label>
+                <select id="fStatus" name="status">
+                    <option value="">All Status</option>
+                    <option value="New Application" <?= ($status ?? '') == 'New Application' ? 'selected' : '' ?>>
+                        New Application
+                    </option>
+                    <option value="Processing" <?= ($status ?? '') == 'Processing' ? 'selected' : '' ?>>
+                        Processing
+                    </option>
+                    <option value="For Released" <?= ($status ?? '') == 'For Released' ? 'selected' : '' ?>>
+                        For Released
+                    </option>
+                    <option value="Completed" <?= ($status ?? '') == 'Completed' ? 'selected' : '' ?>>
+                        Completed
+                    </option>
+                    <option value="Rejected" <?= ($status ?? '') == 'Rejected' ? 'selected' : '' ?>>
+                        Rejected
+                    </option>
+                </select>
+            </div>
 
             <div class="r-field grow">
                 <label for="fSearch">Search</label>
@@ -104,9 +126,11 @@
             </div>
             <div class="r-export-group">
                 <button type="button" class="r-btn r-btn-outline" id="btnPrint">
-                    Print
+                    <i class="bi bi-printer"></i> Print
                 </button>
-                <button type="button" class="r-btn r-btn-outline" id="btnCsv">Export CSV</button>
+                <button type="button" class="r-btn r-btn-outline" id="btnCsv">
+                    <i class="bi bi-filetype-csv"></i> Export CSV
+                </button>
                 <button class="btn tool-btn" type="button" id="exportButton">
                     <i class="bi bi-download"></i> Export PDF
                 </button>
@@ -304,14 +328,31 @@
 
     });
 
-    document.getElementById('btnPrint').addEventListener('click', function () {
+    document.addEventListener('DOMContentLoaded', function () {
 
-        const params = new URLSearchParams(window.location.search);
+        function getFilters() {
+            return new URLSearchParams(window.location.search).toString();
+        }
 
-        window.open(
-            "<?= site_url('reports/print') ?>?" + params.toString(),
-            "_blank"
-        );
+        // PRINT
+        document.getElementById('btnPrint').addEventListener('click', function () {
+            window.open(
+                "<?= site_url('reports/print') ?>?" + getFilters(),
+                "_blank"
+            );
+        });
+
+        // CSV
+        document.getElementById('btnCsv').addEventListener('click', function () {
+            window.location.href =
+                "<?= site_url('reports/export/csv') ?>?" + getFilters();
+        });
+
+        // PDF
+        document.getElementById('exportButton').addEventListener('click', function () {
+            window.location.href =
+                "<?= site_url('reports/export/pdf') ?>?" + getFilters();
+        });
 
     });
 </script>

@@ -28,9 +28,7 @@
     <a href="feedback" class="nav-link<?= $isActive('feedback') ?>" <?= $dismiss ?>>
       <i class="bi bi-chat-right-text-fill"></i><span>Feedback</span>
     </a>
-    <a href="#" class="nav-link" <?= $dismiss ?>>
-      <i class="bi bi-gear"></i><span>Settings</span>
-    </a>
+  
 
     <div class="nav-divider"></div>
 

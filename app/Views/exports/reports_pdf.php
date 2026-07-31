@@ -124,15 +124,35 @@
         </thead>
 
         <tbody>
-            <?php foreach ($requests as $row): ?>
+
+            <?php if (!empty($requests)): ?>
+
+                <?php foreach ($requests as $row): ?>
+
+                    <tr>
+                        <td><?= esc($row['reference_no']) ?></td>
+                        <td><?= esc($row['fullname']) ?></td>
+                        <td><?= esc($row['service_availed']) ?></td>
+                        <td class="text-center">
+                            <?= date('F d, Y', strtotime($row['date_requested'])) ?>
+                        </td>
+                        <td class="text-center">
+                            <?= esc($row['status']) ?>
+                        </td>
+                    </tr>
+
+                <?php endforeach; ?>
+
+            <?php else: ?>
+
                 <tr>
-                    <td><?= esc($row['reference_no']) ?></td>
-                    <td><?= esc($row['fullname']) ?></td>
-                    <td><?= esc($row['service_availed']) ?></td>
-                    <td><?= date('F d, Y', strtotime($row['date_requested'])) ?></td>
-                    <td><?= esc($row['status']) ?></td>
+                    <td colspan="5" class="text-center">
+                        No records found.
+                    </td>
                 </tr>
-            <?php endforeach; ?>
+
+            <?php endif; ?>
+
         </tbody>
 
     </table>
