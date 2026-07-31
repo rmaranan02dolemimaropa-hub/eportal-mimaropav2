@@ -1,0 +1,215 @@
+<?= $this->include('dashboard_layout/head') ?>
+<?= $this->include('dashboard_layout/navbar') ?>
+<?= $this->include('dashboard_layout/sidebar') ?>
+
+
+<!-- ============ MAIN CONTENT ============ -->
+<main class="main-content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Requests</h1>
+            <p class="page-subtitle">
+                Welcome back, <?= session('fullname') ?> — manage and monitor all HR service requests from this
+                dashboard.
+            </p>
+        </div>
+
+        <div class="page-date">
+            <i class="bi bi-calendar3"></i>
+            <span id="currentDate"></span>
+        </div>
+    </div>
+    <?php if (session()->getFlashdata('success')): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill"></i>
+            <?= esc(session()->getFlashdata('success')) ?>
+
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('error')): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <?= esc(session()->getFlashdata('error')) ?>
+
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
+
+
+
+
+    <!-- Recent Requests Table -->
+    <section class="panel table-panel">
+        <div class="panel-header">
+            <h2 class="panel-title">Recent Service Requests</h2>
+            <div class="panel-tools">
+
+
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="searchRequest" class="form-control" placeholder="Search requests..."
+                        value="<?= esc($_GET['search'] ?? '') ?>">
+                </div>
+
+                <div id="exportOverlay" class="export-overlay">
+                    <div class="export-card">
+                        <h3>Preparing PDF Report</h3>
+                        <p id="exportText">Initializing...</p>
+
+                        <div class="progress-track">
+                            <div class="progress-bar" id="progressBar"></div>
+                        </div>
+
+                        <div class="progress-percent">
+                            <span id="progressValue">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="table-responsive">
+            <table class="table requests-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Reference No.</th>
+                        <th>Service Availed</th>
+                        <th>Client</th>
+                        <th>Client Type</th>
+                        <th>Date Submitted</th>
+                        <th>Overall Rating</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <?php foreach ($feedbacks as $row): ?>
+
+                        <tr>
+
+                            <td><?= esc($row['reference_no']) ?></td>
+
+                            <td><?= esc($row['service_availed']) ?></td>
+
+                            <td><?= esc($row['name'] ?: 'Anonymous') ?></td>
+
+                            <td><?= esc($row['client_type']) ?></td>
+
+                            <td><?= date('F d, Y', strtotime($row['created_at'])) ?></td>
+
+                            <td>
+
+                                <?php
+
+                                $scores = [
+                                    $row['sqd0'],
+                                    $row['sqd1'],
+                                    $row['sqd2'],
+                                    $row['sqd3'],
+                                    $row['sqd4'],
+                                    $row['sqd5'],
+                                    $row['sqd6'],
+                                    $row['sqd7'],
+                                    $row['sqd8'],
+                                ];
+
+                                $count = array_count_values($scores);
+
+                                if (($count['strongly_agree'] ?? 0) >= 5) {
+                                    echo '<span class="badge bg-success">Excellent</span>';
+                                } elseif (($count['agree'] ?? 0) >= 5) {
+                                    echo '<span class="badge bg-primary">Very Satisfied</span>';
+                                } else {
+                                    echo '<span class="badge bg-warning text-dark">Needs Review</span>';
+                                }
+
+                                ?>
+
+                            </td>
+
+                            <td>
+
+                                <a href="<?= site_url('feedback/print/' . $row['id']) ?>"
+                                    class="btn btn-sm btn-outline-primary" target="_blank" title="Print Feedback">
+
+                                    <i class="bi bi-printer"></i>
+
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                    <?php endforeach; ?>
+
+                </tbody>
+            </table>
+        </div>
+        <nav class="table-pagination">
+
+            <span class="pagination-summary">
+                Showing <?= count($feedbacks) ?> of <?= $pager->getTotal() ?> feedback(s)
+            </span>
+
+            <ul class="pagination mb-0">
+
+                <!-- Previous -->
+                <li class="page-item <?= $pager->getCurrentPage() == 1 ? 'disabled' : '' ?>">
+                    <a class="page-link"
+                        href="<?= $pager->getCurrentPage() == 1 ? '#' : $pager->getPageURI($pager->getCurrentPage() - 1) ?>">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
+                </li>
+
+                <!-- Page Numbers -->
+                <?php for ($i = 1; $i <= $pager->getPageCount(); $i++): ?>
+                    <li class="page-item <?= $i == $pager->getCurrentPage() ? 'active' : '' ?>">
+                        <a class="page-link" href="<?= $pager->getPageURI($i) ?>">
+                            <?= $i ?>
+                        </a>
+                    </li>
+                <?php endfor; ?>
+
+                <!-- Next -->
+                <li class="page-item <?= $pager->getCurrentPage() == $pager->getPageCount() ? 'disabled' : '' ?>">
+                    <a class="page-link"
+                        href="<?= $pager->getCurrentPage() == $pager->getPageCount() ? '#' : $pager->getPageURI($pager->getCurrentPage() + 1) ?>">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+
+            </ul>
+
+        </nav>
+
+    </section>
+
+
+
+
+
+
+
+
+
+</main>
+
+</div>
+
+
+
+<!-- Bootstrap 5 JS Bundle (needed for offcanvas / dropdown components) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+</script>
+
+
+<?= $this->include('dashboard_layout/footer') ?>

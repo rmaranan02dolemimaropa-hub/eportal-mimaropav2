@@ -448,6 +448,46 @@ class EportalController extends BaseController
         return redirect()->back()->with('success', 'User deleted successfully.');
     }
 
+    public function feedback()
+    {
+        $csmModel = new ClientSatisfactionModel();
+
+        $data['feedbacks'] = $csmModel
+            ->orderBy('created_at', 'DESC')
+            ->paginate(10);
+
+        $data['pager'] = $csmModel->pager;
+
+        return view('dashboard/feedback', $data);
+    }
+
+    /**
+     * Print CSM Feedback
+     */
+    public function printFeedback($id)
+    {
+        $csmModel = new ClientSatisfactionModel();
+
+        $feedback = $csmModel->find($id);
+
+        if (!$feedback) {
+            return redirect()->back()->with('error', 'Feedback not found.');
+        }
+
+        // If you saved the selected language in the database
+        // e.g. english or tagalog
+        if (isset($feedback['language']) && strtolower($feedback['language']) == 'tagalog') {
+            return view('feedback/feedback_print_tagalog', [
+                'feedback' => $feedback
+            ]);
+        }
+
+        // Default: English
+        return view('exports/feedback_print_english', [
+            'feedback' => $feedback
+        ]);
+    }
+
     public function updateRequest($id)
     {
         $requestModel = new HrRequestModel();
@@ -778,7 +818,7 @@ class EportalController extends BaseController
             'request' => $request,
         ]);
     }
-        public function csmtagalog($reference_no)
+    public function csmtagalog($reference_no)
     {
         $requestModel = new HrRequestModel();
 

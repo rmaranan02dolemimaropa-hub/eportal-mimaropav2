@@ -78,6 +78,7 @@ $routes->get('export/reports-pdf', 'ExportController::exportReportsPdf');
 $routes->get('export/reports-csv', 'ExportController::exportReportsCsv');
 $routes->get('csm/(:any)', 'EportalController::csm/$1');
 $routes->get('csmtagalog/(:any)', 'EportalController::csmtagalog/$1');
+$routes->get('feedback/print/(:num)', 'EportalController::printFeedback/$1');
 
 $routes->post('submit-csm', 'EportalController::submitCSM');
 
@@ -89,6 +90,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
 
 
     $routes->get('dashboard', 'EportalController::dashboard');
+    $routes->get('feedback', 'EportalController::feedback');
     $routes->get('request', 'EportalController::request');
     $routes->get('logout', 'EportalController::logout');
 
