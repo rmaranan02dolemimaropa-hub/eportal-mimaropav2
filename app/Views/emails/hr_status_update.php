@@ -43,7 +43,7 @@
                             </tr>
                             <tr>
                                 <td style="color:#ffffff; font-size:20px; font-weight:bold; padding-top:4px;">
-                                    DOLE MIMAROPA &mdash; HR Request Update
+                                    DOLE MIMAROPA &mdash; <?= esc($service) ?>
                                 </td>
                             </tr>
                         </table>
@@ -112,7 +112,7 @@
                         </table>
 
                         <p style="margin:0; font-size:14px; color:#555555;">
-                            Thank you for using the <strong>DOLE MIMAROPA Client Portal</strong>.
+                            Thank you for using the <strong>DOLE MIMAROPA e-Client Portal</strong>.
                         </p>
 
                     </td>
@@ -196,9 +196,6 @@
                 <!-- Footer -->
                 <tr>
                     <td style="background-color:#f8f8fc; padding:20px 32px; text-align:center; border-top:1px solid #eeeeee;">
-                        <p style="margin:0; font-size:13px; color:#555555; font-weight:bold;">
-                            Human Resource Unit
-                        </p>
                         <p style="margin:2px 0 0 0; font-size:12px; color:#999999;">
                             DOLE MIMAROPA
                         </p>
@@ -217,4 +214,4 @@
 </table>
 
 </body>
-</html>
+</html>+

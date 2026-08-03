@@ -567,7 +567,7 @@ class EportalController extends BaseController
                         'status' => 'Processing',
                         'remarks' => $request['remarks'],
                         'message' =>
-                            'Your request has been received and is currently being processed by the Human Resource Unit.'
+                            'Your request has been received and is currently being processed.'
                     ]);
 
                     break;
@@ -610,7 +610,7 @@ class EportalController extends BaseController
                         'status' => 'Completed',
                         'remarks' => $request['remarks'],
                         'message' =>
-                            'Your HR request has been successfully completed. Thank you for using the DOLE MIMAROPA Client Portal.'
+                            'Your HR request has been successfully completed. Thank you for using the DOLE MIMAROPA e-Client Portal.'
                     ]);
 
                     break;
@@ -797,7 +797,7 @@ class EportalController extends BaseController
 
         return redirect()->back()->with(
             'success',
-            'Thank you for answering our Client Satisfaction Survey.'
+            'Thank you for answering our Feedback Survey. Your response has been recorded successfully.'
         );
     }
 
