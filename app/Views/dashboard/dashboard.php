@@ -43,7 +43,7 @@
             <div class="stat-body">
                 <span class="stat-number" data-target="<?= $new_application ?>">0</span>
                 <span class="stat-label">New Applications</span>
-                <span class="stat-trend trend-up"><i class="bi bi-arrow-up-short"></i>4.2% this week</span>
+                <span class="stat-trend trend-up"><i class="bi bi-calendar-check me-1"></i> <?= $new_today ?> received today</span>
             </div>
         </div>
 
@@ -52,7 +52,7 @@
             <div class="stat-body">
                 <span class="stat-number" data-target="<?= $processing ?>">0</span>
                 <span class="stat-label">Processing</span>
-                <span class="stat-trend trend-up"><i class="bi bi-arrow-up-short"></i>1.8% this week</span>
+                <span class="stat-trend trend-up"><i class="bi bi-arrow-repeat me-1"></i><?= $processing_today ?> updated today</span>
             </div>
         </div>
 
@@ -61,7 +61,7 @@
             <div class="stat-body">
                 <span class="stat-number" data-target="<?= $for_released ?>">0</span>
                 <span class="stat-label">For Released</span>
-                <span class="stat-trend trend-up"><i class="bi bi-arrow-up-short"></i>2.1% this week</span>
+                <span class="stat-trend trend-up"><i class="bi bi-box-seam me-1"></i><?= $released_today ?> ready today </span>
             </div>
         </div>
 
@@ -70,7 +70,7 @@
             <div class="stat-body">
                 <span class="stat-number" data-target="<?= $completed ?>">0</span>
                 <span class="stat-label">Completed</span>
-                <span class="stat-trend trend-up"><i class="bi bi-arrow-up-short"></i>9.6% this week</span>
+                <span class="stat-trend trend-up"><i class="bi bi-calendar-month me-1"></i><?= $completed_month ?> completed this month</span>
             </div>
         </div>
 
@@ -81,7 +81,7 @@
             <div class="stat-body">
                 <span class="stat-number" data-target="<?= $rejected ?>">0</span>
                 <span class="stat-label">Rejected</span>
-                <span class="stat-trend trend-down"><i class="bi bi-arrow-down-short"></i>0.6% this week</span>
+                <span class="stat-trend trend-down"><i class="bi bi-calendar-x me-1"></i><?= $rejected_month ?> rejected this month</span>
             </div>
         </div>
 

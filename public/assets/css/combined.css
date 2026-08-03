@@ -1921,3 +1921,26 @@ body:has(.offcanvas.show) .export-overlay {
   background: #8F3320;
   border-color: #8F3320;
 }
+
+.processing-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(255,255,255,.75);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:99999;
+}
+
+.processing-overlay.d-none{
+    display:none;
+}
+
+.processing-card{
+    width:340px;
+    background:#fff;
+    border-radius:12px;
+    padding:25px;
+    text-align:center;
+    box-shadow:0 10px 35px rgba(0,0,0,.15);
+}

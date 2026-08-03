@@ -81,6 +81,8 @@ $routes->get('csmtagalog/(:any)', 'EportalController::csmtagalog/$1');
 $routes->get('feedback/print/english/(:num)', 'EportalController::printEnglish/$1');
 $routes->get('feedback/print/tagalog/(:num)', 'EportalController::printTagalog/$1');
 
+
+
 $routes->post('submit-csm', 'EportalController::submitCSM');
 
 
@@ -89,7 +91,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
 
 
 
-
+    $routes->post('request/start-processing', 'EportalController::startProcessing');
     $routes->get('dashboard', 'EportalController::dashboard');
     $routes->get('feedback', 'EportalController::feedback');
     $routes->get('request', 'EportalController::request');

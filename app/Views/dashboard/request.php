@@ -52,11 +52,7 @@
 
                 <div class="search-box">
                     <i class="bi bi-search"></i>
-                    <input 
-                        type="text"
-                        id="searchRequest"
-                        class="form-control"
-                        placeholder="Search requests..."
+                    <input type="text" id="searchRequest" class="form-control" placeholder="Search requests..."
                         value="<?= esc($_GET['search'] ?? '') ?>">
                 </div>
 
@@ -118,7 +114,7 @@
         </div>
 
 
-      
+
         <div class="table-responsive">
             <table class="table requests-table align-middle mb-0">
                 <thead>
@@ -128,6 +124,7 @@
                         <th>Service</th>
                         <th>Date</th>
                         <th>Status</th>
+                        <th>Feedback</th>
                         <th class="text-end">Action</th>
                     </tr>
                 </thead>
@@ -152,7 +149,7 @@
                                 </td>
 
                                 <td>
-                                <?php
+                                    <?php
 
                                     $displayDate = $row['date_requested'];
 
@@ -160,21 +157,15 @@
 
                                         $displayDate = $row['date_processing'];
 
-                                    }
-
-                                    elseif ($row['status'] == 'For Released' && $row['date_released']) {
+                                    } elseif ($row['status'] == 'For Released' && $row['date_released']) {
 
                                         $displayDate = $row['date_released'];
 
-                                    }
-
-                                    elseif ($row['status'] == 'Completed' && $row['date_completed']) {
+                                    } elseif ($row['status'] == 'Completed' && $row['date_completed']) {
 
                                         $displayDate = $row['date_completed'];
 
-                                    }
-
-                                    elseif ($row['status'] == 'Rejected' && $row['date_rejected']) {
+                                    } elseif ($row['status'] == 'Rejected' && $row['date_rejected']) {
 
                                         $displayDate = $row['date_rejected'];
 
@@ -206,17 +197,38 @@
                                     </span>
 
                                 </td>
+                                <td>
+                                    <?php if (!empty($row['feedback_id'])): ?>
+
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle-fill"></i>
+                                            Submitted
+                                        </span>
+
+                                    <?php elseif ($row['status'] == 'For Released'): ?>
+
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="bi bi-hourglass-split"></i>
+                                            Waiting for Client
+                                        </span>
+
+                                    <?php else: ?>
+
+                                        <span class="badge bg-secondary">
+                                            <i class="bi bi-dash-circle"></i>
+                                            Not Yet Available
+                                        </span>
+
+                                    <?php endif; ?>
+                                </td>
 
                                 <td class="text-end">
 
                                     <div class="row-actions">
 
                                         <!-- View (Everyone) -->
-                                        <button class="row-action-btn"
-                                            title="View"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#viewRequestModal"
-
+                                        <button class="row-action-btn" title="View" data-bs-toggle="modal"
+                                            data-bs-target="#viewRequestModal" data-id="<?= $row['id'] ?>"
                                             data-reference="<?= esc($row['reference_no'], 'attr') ?>"
                                             data-service="<?= esc($row['service_availed'], 'attr') ?>"
                                             data-fullname="<?= esc($row['fullname'], 'attr') ?>"
@@ -224,11 +236,8 @@
                                             data-email="<?= esc($row['email_address'], 'attr') ?>"
                                             data-date-requested="<?= esc($row['date_requested'], 'attr') ?>"
                                             data-status="<?= esc($row['status'], 'attr') ?>"
-
                                             data-category="<?= esc($row['employee_category'] ?? '', 'attr') ?>"
-
                                             data-history="<?= htmlspecialchars(json_encode($row['employment_history'] ?? []), ENT_QUOTES, 'UTF-8') ?>"
-
                                             data-certification="<?= esc($row['certification'] ?? '', 'attr') ?>"
                                             data-ipcr-period="<?= esc($row['ipcr_period'] ?? '', 'attr') ?>"
                                             data-specify-201="<?= esc($row['specify_201'] ?? '', 'attr') ?>"
@@ -239,47 +248,47 @@
                                         </button>
 
 
-                                                <?php if ($row['status'] != 'Completed' && $row['status'] != 'Rejected'): ?>
+                                        <?php if (in_array($row['status'], ['Processing', 'For Released'])): ?>
 
-                                                        <!-- Edit -->
-                                                        <button class="row-action-btn" title="Edit" data-bs-toggle="modal"
-                                                            data-bs-target="#edit<?= $row['id'] ?>">
-                                                            <i class="bi bi-pencil"></i>
-                                                        </button>
+                                            <!-- Edit -->
+                                            <button class="row-action-btn" title="Edit" data-bs-toggle="modal"
+                                                data-bs-target="#edit<?= $row['id'] ?>">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
 
-                                                        <!-- Delete -->
-                                                        <button class="row-action-btn row-action-danger" title="Delete" data-bs-toggle="modal"
-                                                            data-bs-target="#delete<?= $row['id'] ?>">
-                                                            <i class="bi bi-trash"></i>
-                                                        </button>
+                                            <!-- Delete -->
+                                            <button class="row-action-btn row-action-danger" title="Delete" data-bs-toggle="modal"
+                                                data-bs-target="#delete<?= $row['id'] ?>">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
 
-                                                <?php endif; ?>
+                                        <?php endif; ?>
 
 
 
-                                            </div>
-
-                                        </td>
-
-                                    </tr>
-
-                            <?php endforeach; ?>
-
-                    <?php else: ?>
-
-                            <tr>
-
-                                <td colspan="6" class="text-center py-5">
-
-                                    <i class="bi bi-inbox fs-1 text-muted"></i>
-
-                                    <br>
-
-                                    No service requests found.
+                                    </div>
 
                                 </td>
 
                             </tr>
+
+                        <?php endforeach; ?>
+
+                    <?php else: ?>
+
+                        <tr>
+
+                            <td colspan="6" class="text-center py-5">
+
+                                <i class="bi bi-inbox fs-1 text-muted"></i>
+
+                                <br>
+
+                                No service requests found.
+
+                            </td>
+
+                        </tr>
 
                     <?php endif; ?>
 
@@ -304,11 +313,11 @@
 
                 <!-- Page Numbers -->
                 <?php for ($i = 1; $i <= $pager->getPageCount(); $i++): ?>
-                        <li class="page-item <?= $i == $pager->getCurrentPage() ? 'active' : '' ?>">
-                            <a class="page-link" href="<?= $pager->getPageURI($i) ?>">
-                                <?= $i ?>
-                            </a>
-                        </li>
+                    <li class="page-item <?= $i == $pager->getCurrentPage() ? 'active' : '' ?>">
+                        <a class="page-link" href="<?= $pager->getPageURI($i) ?>">
+                            <?= $i ?>
+                        </a>
+                    </li>
                 <?php endfor; ?>
 
                 <!-- Next -->
@@ -343,130 +352,160 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         Close
                     </button>
+
+                    <button type="button" id="startProcessingBtn" class="btn btn-primary d-none">
+                        <i class="bi bi-play-circle"></i>
+                        Start Processing
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <?php foreach ($requests as $row): ?>
-            <div class="modal fade" id="edit<?= $row['id'] ?>" tabindex="-1">
-                <div class="modal-dialog modal-lg">
-                    <form method="post" action="<?= site_url('request/update/' . $row['id']) ?>" class="modal-content">
+        <div class="modal fade" id="edit<?= $row['id'] ?>" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <form method="post" action="<?= site_url('request/update/' . $row['id']) ?>"
+                    class="modal-content updateRequestForm">
 
-                        <?= csrf_field() ?>
+                    <?= csrf_field() ?>
 
-                        <div class="modal-header">
-                            <h5 class="modal-title">Update HR Request</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
+                    <div class="modal-header">
+                        <h5 class="modal-title">Update HR Request</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
 
-                        <div class="modal-body">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Reference No.</label>
-                                    <input type="text" class="form-control" value="<?= esc($row['reference_no']) ?>" readonly>
-                                </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Reference No.</label>
+                                <input type="text" class="form-control" value="<?= esc($row['reference_no']) ?>" readonly>
+                            </div>
 
-                                <div class="col-md-6">
-                                    <label class="form-label">Status</label>
-                                    <select name="status" class="form-select">
-                                        <option value="New Application" <?= $row['status'] === 'New Application' ? 'selected' : '' ?>>
-                                            New Application
-                                        </option>
-                                        <option value="Processing" <?= $row['status'] === 'Processing' ? 'selected' : '' ?>>
-                                            Processing
-                                        </option>
-                                        <option value="For Released" <?= $row['status'] === 'For Released' ? 'selected' : '' ?>>
-                                            For Released
-                                        </option>
-                                        <option value="Completed" <?= $row['status'] === 'Completed' ? 'selected' : '' ?>>
-                                            Completed
-                                        </option>
-                                        <option value="Rejected" <?= $row['status'] === 'Rejected' ? 'selected' : '' ?>>
-                                            Rejected
-                                        </option>
-                                    </select>
-                                </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Status</label>
+                                <select name="status" class="form-select requestStatus">
 
-                                <div class="col-md-6">
-                                    <label class="form-label">Name</label>
-                                    <input type="text" name="fullname" class="form-control"
-                                        value="<?= esc($row['fullname']) ?>">
-                                </div>
+                                    <?php if ($row['status'] == 'Processing'): ?>
 
-                                <div class="col-md-6">
-                                    <label class="form-label">Contact Number</label>
-                                    <input type="text" name="contact_number" class="form-control"
-                                        value="<?= esc($row['contact_number']) ?>">
-                                </div>
+                                        <option value="Processing" selected>Processing</option>
+                                        <option value="For Released">For Released</option>
+                                        <option value="Completed">Completed</option>
+                                        <option value="Rejected">Rejected</option>
 
-                                <div class="col-md-6">
-                                    <label class="form-label">Email Address</label>
-                                    <input type="email" name="email_address" class="form-control"
-                                        value="<?= esc($row['email_address']) ?>">
-                                </div>
+                                    <?php elseif ($row['status'] == 'For Released'): ?>
 
-                                <div class="col-md-6">
-                                    <label class="form-label">Date Requested</label>
-                                    <input type="date" name="date_requested" class="form-control"
-                                        value="<?= esc($row['date_requested']) ?>">
-                                </div>
+                                        <option value="For Released" selected>For Released</option>
+                                        <option value="Completed">Completed</option>
+                                        <option value="Rejected">Rejected</option>
 
-                                <div class="col-md-12">
-                                    <label class="form-label">Remarks</label>
-                                    <textarea name="remarks" class="form-control"
-                                        rows="3"><?= esc($row['remarks'] ?? '') ?></textarea>
-                                </div>
+                                    <?php endif; ?>
+
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Name</label>
+                                <input type="text" name="fullname" class="form-control"
+                                    value="<?= esc($row['fullname']) ?>">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Contact Number</label>
+                                <input type="text" name="contact_number" class="form-control"
+                                    value="<?= esc($row['contact_number']) ?>">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" name="email_address" class="form-control"
+                                    value="<?= esc($row['email_address']) ?>">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Date Requested</label>
+                                <input type="date" name="date_requested" class="form-control"
+                                    value="<?= esc($row['date_requested']) ?>">
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label">Remarks</label>
+                                <textarea name="remarks" class="form-control"
+                                    rows="3"><?= esc($row['remarks'] ?? '') ?></textarea>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                Cancel
-                            </button>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-circle"></i> Update Request
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Update Request
+                        </button>
+                    </div>
+                </form>
             </div>
+        </div>
     <?php endforeach; ?>
 
     <?php foreach ($requests as $row): ?>
-            <div class="modal fade" id="delete<?= $row['id'] ?>" tabindex="-1">
-                <div class="modal-dialog">
-                    <form method="post" action="<?= site_url('request/delete/' . $row['id']) ?>" class="modal-content">
+        <div class="modal fade" id="delete<?= $row['id'] ?>" tabindex="-1">
+            <div class="modal-dialog">
+                <form method="post" action="<?= site_url('request/delete/' . $row['id']) ?>" class="modal-content">
 
-                        <?= csrf_field() ?>
+                    <?= csrf_field() ?>
 
-                        <div class="modal-header">
-                            <h5 class="modal-title text-danger">Delete HR Request</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
+                    <div class="modal-header">
+                        <h5 class="modal-title text-danger">Delete HR Request</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
 
-                        <div class="modal-body">
-                            Are you sure you want to delete the request for
-                            <strong><?= esc($row['fullname']) ?></strong>?
+                    <div class="modal-body">
+                        Are you sure you want to delete the request for
+                        <strong><?= esc($row['fullname']) ?></strong>?
 
-                            <p class="text-danger mt-2 mb-0">
-                                This action cannot be undone.
-                            </p>
-                        </div>
+                        <p class="text-danger mt-2 mb-0">
+                            This action cannot be undone.
+                        </p>
+                    </div>
 
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                Cancel
-                            </button>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
 
-                            <button type="submit" class="btn btn-danger">
-                                <i class="bi bi-trash"></i> Delete
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </div>
+                </form>
             </div>
+        </div>
     <?php endforeach; ?>
+
+    <div id="processingOverlay" class="processing-overlay d-none">
+        <div class="processing-card">
+            <div class="spinner-border text-primary mb-3" role="status"></div>
+
+            <h5>Starting Processing...</h5>
+
+            <p id="processingText">
+                Updating request and sending email...
+            </p>
+        </div>
+    </div>
+    <div id="updateOverlay" class="processing-overlay d-none">
+        <div class="processing-card">
+            <div class="spinner-border text-primary mb-3" role="status"></div>
+
+            <h5>Updating Request...</h5>
+
+            <p id="updateText">
+                Please wait while we update the request status and send the email notification.
+            </p>
+        </div>
+    </div>
 
 
 
@@ -551,52 +590,52 @@
      */
     function enableTableSearch() {
 
-    const searchInput = document.getElementById("searchRequest");
+        const searchInput = document.getElementById("searchRequest");
 
-    if (!searchInput) return;
-
-
-    let timer;
+        if (!searchInput) return;
 
 
-    searchInput.addEventListener("input", function () {
+        let timer;
 
 
-        clearTimeout(timer);
+        searchInput.addEventListener("input", function () {
 
 
-        timer = setTimeout(() => {
+            clearTimeout(timer);
 
 
-            const keyword = searchInput.value.trim();
+            timer = setTimeout(() => {
 
 
-            const url = new URL(window.location.href);
+                const keyword = searchInput.value.trim();
 
 
-            if (keyword) {
-
-                url.searchParams.set(
-                    "search",
-                    keyword
-                );
-
-            } else {
-
-                url.searchParams.delete("search");
-
-            }
+                const url = new URL(window.location.href);
 
 
-            window.location.href = url.toString();
+                if (keyword) {
+
+                    url.searchParams.set(
+                        "search",
+                        keyword
+                    );
+
+                } else {
+
+                    url.searchParams.delete("search");
+
+                }
 
 
-        }, 500);
+                window.location.href = url.toString();
 
 
-    });
+            }, 500);
 
-}
+
+        });
+
+    }
 
     document.addEventListener('DOMContentLoaded', function () {
 
@@ -976,6 +1015,18 @@
 
 
         }
+        const startBtn = document.getElementById("startProcessingBtn");
+
+        if (data.status === "New Application") {
+
+            startBtn.classList.remove("d-none");
+            startBtn.dataset.id = data.id;
+
+        } else {
+
+            startBtn.classList.add("d-none");
+
+        }
 
 
 
@@ -1043,6 +1094,119 @@
             bootstrap.Alert.getOrCreateInstance(alert).close();
         });
     }, 4000);
+
+
+
+    const overlay = document.getElementById("processingOverlay");
+    const processingText = document.getElementById("processingText");
+
+    document.getElementById("startProcessingBtn")
+        .addEventListener("click", function () {
+
+            const id = this.dataset.id;
+
+            if (!confirm("Start processing this request?")) {
+                return;
+            }
+
+            overlay.classList.remove("d-none");
+
+            processingText.innerHTML =
+                "Updating request...<br>Please wait.";
+
+            fetch("<?= site_url('request/start-processing') ?>", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+
+                body: JSON.stringify({
+                    id: id
+                })
+
+            })
+                .then(res => res.json())
+                .then(result => {
+
+                    if (result.success) {
+
+                        processingText.innerHTML =
+                            "Email sent successfully.<br>Refreshing page...";
+
+                        setTimeout(() => {
+                            location.reload();
+                        }, 800);
+
+                    } else {
+
+                        overlay.classList.add("d-none");
+                        alert(result.message);
+
+                    }
+
+                })
+                .catch(err => {
+
+                    overlay.classList.add("d-none");
+                    alert("Something went wrong.");
+
+                    console.error(err);
+
+                });
+
+        });
+
+    const updateOverlay = document.getElementById("updateOverlay");
+    const updateText = document.getElementById("updateText");
+
+    document.querySelectorAll(".updateRequestForm").forEach(form => {
+
+        form.addEventListener("submit", function () {
+
+            const status = form.querySelector(".requestStatus").value;
+
+            switch (status) {
+
+                case "Processing":
+                    updateText.innerHTML =
+                        "Updating request...<br><small>Sending processing notification...</small>";
+                    break;
+
+                case "For Released":
+                    updateText.innerHTML =
+                        "Updating request...<br><small>Sending release notification...</small>";
+                    break;
+
+                case "Completed":
+                    updateText.innerHTML =
+                        "Completing request...<br><small>Sending completion email and feedback link...</small>";
+                    break;
+
+                case "Rejected":
+                    updateText.innerHTML =
+                        "Rejecting request...<br><small>Sending rejection email...</small>";
+                    break;
+
+                default:
+                    updateText.innerHTML =
+                        "Updating request...<br><small>Please wait...</small>";
+            }
+
+            updateOverlay.classList.remove("d-none");
+
+            // Prevent double submission
+            const submitBtn = form.querySelector("button[type='submit']");
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Updating...
+        `;
+        });
+
+    });
 </script>
 
 

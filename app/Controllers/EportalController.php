@@ -17,10 +17,20 @@ class EportalController extends BaseController
     }
     public function request()
     {
-        $requestModel = new HrRequestModel();
+
         $historyModel = new HrEmploymentHistoryModel();
 
-        $query = $requestModel;
+        $requestModel = new HrRequestModel();
+
+        $query = $requestModel
+            ->select('hr_requests.*, client_satisfaction.id AS feedback_id')
+            ->join(
+                'client_satisfaction',
+                'client_satisfaction.reference_no = hr_requests.reference_no',
+                'left'
+            );
+
+
 
 
         // Search
@@ -55,7 +65,26 @@ class EportalController extends BaseController
 
 
         $requests = $query
-            ->orderBy('id', 'DESC')
+            ->orderBy("
+        CASE
+            WHEN status = 'New Application' THEN 1
+            WHEN status = 'Processing' THEN 2
+            WHEN status = 'For Released' THEN 3
+            WHEN status = 'Completed' THEN 4
+            WHEN status = 'Rejected' THEN 5
+            ELSE 6
+        END
+    ", '', false)
+            ->orderBy("
+        CASE
+            WHEN status = 'New Application' THEN date_requested
+            WHEN status = 'Processing' THEN date_processing
+            WHEN status = 'For Released' THEN date_released
+            WHEN status = 'Completed' THEN date_completed
+            WHEN status = 'Rejected' THEN date_rejected
+            ELSE date_requested
+        END
+    ", 'DESC', false)
             ->paginate(10);
 
 
@@ -89,10 +118,55 @@ class EportalController extends BaseController
 
         // Load recent requests
         $data['requests'] = $requestModel
-            ->orderBy('id', 'DESC')
+            ->orderBy("
+        CASE
+            WHEN status = 'New Application' THEN 1
+            WHEN status = 'Processing' THEN 2
+            WHEN status = 'For Released' THEN 3
+            WHEN status = 'Completed' THEN 4
+            WHEN status = 'Rejected' THEN 5
+            ELSE 6
+        END
+    ", '', false)
+            ->orderBy("
+        CASE
+            WHEN status = 'New Application' THEN date_requested
+            WHEN status = 'Processing' THEN date_processing
+            WHEN status = 'For Released' THEN date_released
+            WHEN status = 'Completed' THEN date_completed
+            WHEN status = 'Rejected' THEN date_rejected
+        END
+    ", 'DESC', false)
             ->paginate(10);
 
         $data['pager'] = $requestModel->pager;
+
+        $data['new_today'] = $requestModel
+            ->where('status', 'New Application')
+            ->where('DATE(date_requested)', date('Y-m-d'))
+            ->countAllResults();
+
+        $data['processing_today'] = $requestModel
+            ->where('status', 'Processing')
+            ->where('DATE(date_processing)', date('Y-m-d'))
+            ->countAllResults();
+
+        $data['released_today'] = $requestModel
+            ->where('status', 'For Released')
+            ->where('DATE(date_released)', date('Y-m-d'))
+            ->countAllResults();
+
+        $data['completed_month'] = $requestModel
+            ->where('status', 'Completed')
+            ->where('YEAR(date_completed)', date('Y'))
+            ->where('MONTH(date_completed)', date('m'))
+            ->countAllResults();
+
+        $data['rejected_month'] = $requestModel
+            ->where('status', 'Rejected')
+            ->where('YEAR(date_rejected)', date('Y'))
+            ->where('MONTH(date_rejected)', date('m'))
+            ->countAllResults();
 
         return view('dashboard/dashboard', $data);
     }
@@ -840,6 +914,62 @@ class EportalController extends BaseController
         ]);
     }
 
-   
+    public function startProcessing()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setStatusCode(404);
+        }
+
+        $requestModel = new HrRequestModel();
+
+        $data = $this->request->getJSON(true);
+
+        $request = $requestModel->find($data['id']);
+
+        if (!$request) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Request not found.'
+            ]);
+        }
+
+        if ($request['status'] != 'New Application') {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'This request has already been processed.'
+            ]);
+        }
+
+        $requestModel->update($request['id'], [
+            'status' => 'Processing',
+            'date_processing' => date('Y-m-d H:i:s')
+        ]);
+
+        // Send Processing Email
+        $mailer = new Mailer();
+
+        $subject = "Your HR Request is Now Being Processed";
+
+        $message = view('emails/hr_status_update', [
+            'fullname' => $request['fullname'],
+            'reference_no' => $request['reference_no'],
+            'service' => $request['service_availed'],
+            'status' => 'Processing',
+            'remarks' => '',
+            'message' => 'Your request has been received and is currently being processed.'
+        ]);
+
+        $mailer->send(
+            $request['email_address'],
+            $subject,
+            $message
+        );
+
+        return $this->response->setJSON([
+            'success' => true
+        ]);
+    }
+
+
 
 }
