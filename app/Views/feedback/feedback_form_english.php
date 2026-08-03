@@ -603,6 +603,12 @@
             transform: translateY(1px);
         }
 
+        .btn:disabled {
+            opacity: .65;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .footer-note {
             text-align: center;
             font-size: .78rem;
@@ -619,84 +625,101 @@
             border-radius: 6px;
             margin-bottom: 18px;
         }
+
         /* Success Modal */
-.modal-overlay{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.45);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    visibility:hidden;
-    opacity:0;
-    transition:.25s;
-    z-index:9999;
-}
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: .25s;
+            z-index: 9999;
+        }
 
-.modal-overlay.show{
-    visibility:visible;
-    opacity:1;
-}
+        .modal-overlay.show {
+            visibility: visible;
+            opacity: 1;
+        }
 
-.modal-box{
-    width:420px;
-    max-width:92%;
-    background:#fff;
-    border-radius:14px;
-    padding:35px 28px;
-    text-align:center;
-    animation:popup .25s ease;
-}
+        .modal-box {
+            width: 420px;
+            max-width: 92%;
+            background: #fff;
+            border-radius: 14px;
+            padding: 35px 28px;
+            text-align: center;
+            animation: popup .25s ease;
+        }
 
-.success-icon{
-    width:75px;
-    height:75px;
-    margin:auto;
-    border-radius:50%;
-    background:#28a745;
-    color:#fff;
-    font-size:38px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    margin-bottom:20px;
-}
+        .success-icon {
+            width: 75px;
+            height: 75px;
+            margin: auto;
+            border-radius: 50%;
+            background: #28a745;
+            color: #fff;
+            font-size: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
 
-.modal-box h2{
-    margin:0 0 12px;
-    color:#10058C;
-}
+        .modal-box h2 {
+            margin: 0 0 12px;
+            color: #10058C;
+        }
 
-.modal-box p{
-    color:#666;
-    margin-bottom:25px;
-    line-height:1.6;
-}
+        .modal-box p {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
 
-.modal-btn{
-    background:#10058C;
-    color:#fff;
-    border:none;
-    padding:12px 30px;
-    border-radius:8px;
-    cursor:pointer;
-    font-weight:600;
-}
+        .modal-ref {
+            font-size: .82rem;
+            color: var(--muted);
+            background: #f4f6fb;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin: -10px 0 22px;
+        }
 
-.modal-btn:hover{
-    background:#0d0473;
-}
+        .modal-ref strong {
+            color: var(--dole-blue);
+        }
 
-@keyframes popup{
-    from{
-        transform:scale(.8);
-        opacity:0;
-    }
-    to{
-        transform:scale(1);
-        opacity:1;
-    }
-}
+        .modal-btn {
+            background: #10058C;
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: inherit;
+            font-size: .9rem;
+        }
+
+        .modal-btn:hover {
+            background: #0d0473;
+        }
+
+        @keyframes popup {
+            from {
+                transform: scale(.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 
@@ -723,7 +746,7 @@
 
         <form method="post" action="<?= base_url('submit-csm') ?>" id="csmForm">
             <?= csrf_field() ?>
-            <input type="hidden" name="reference_no" value="<?= $reference_no ?>">
+            <input type="hidden" name="reference_no" value="<?= esc($reference_no) ?>">
 
             <!-- ===================== TO BE ACCOMPLISHED BY DOLE PERSONNEL ===================== -->
             <div class="form-card">
@@ -756,7 +779,7 @@
                         <label>Client Type <span class="required-mark">*</span></label>
                         <div class="choice-group">
                             <div class="choice-pill">
-                                <input type="radio" name="client_type" id="clientCitizen" value="Citizen">
+                                <input type="radio" name="client_type" id="clientCitizen" value="Citizen" required>
                                 <label for="clientCitizen">Citizen</label>
                             </div>
                             <div class="choice-pill">
@@ -775,13 +798,13 @@
 
                     <div class="col-4 field">
                         <label for="csmDate">Date <span class="required-mark">*</span></label>
-                        <input type="date" id="csmDate" name="date">
+                        <input type="date" id="csmDate" name="date" required>
                     </div>
                     <div class="col-4 field">
                         <label>Sex <span class="required-mark">*</span></label>
                         <div class="choice-group">
                             <div class="choice-pill">
-                                <input type="radio" name="sex" id="sexMale" value="Male">
+                                <input type="radio" name="sex" id="sexMale" value="Male" required>
                                 <label for="sexMale">Male</label>
                             </div>
                             <div class="choice-pill">
@@ -792,7 +815,7 @@
                     </div>
                     <div class="col-4 field">
                         <label for="csmAge">Age <span class="required-mark">*</span></label>
-                        <input type="number" id="csmAge" name="age" min="0" max="120" placeholder="e.g. 34">
+                        <input type="number" id="csmAge" name="age" min="0" max="120" placeholder="e.g. 34" required>
                     </div>
                 </div>
 
@@ -902,7 +925,7 @@
 
                 <div class="action-row">
                     <button type="reset" class="btn btn-outline">Clear Form</button>
-                    <button type="submit" class="btn btn-primary">Submit Feedback</button>
+                    <button type="submit" class="btn btn-primary" id="btnSubmit">Submit Feedback</button>
                 </div>
             </div>
 
@@ -916,14 +939,16 @@
             <div class="modal-box">
                 <div class="success-icon">✓</div>
 
-                <h2>Feedback Submitted!</h2>
+                <h2>Successfully Filled Up!</h2>
 
                 <p>
-                    Thank you for completing the Client Satisfaction Measurement (CSM).
+                    Thank you for completing the Client Satisfaction Measurement (CSM) form.
                     Your feedback has been successfully recorded.
                 </p>
 
-                <button id="btnSuccessOk" class="modal-btn">
+                <p class="modal-ref">Reference No.: <strong><?= esc($reference_no ?? '') ?></strong></p>
+
+                <button id="btnSuccessOk" class="modal-btn" type="button">
                     Continue
                 </button>
             </div>
@@ -991,13 +1016,78 @@
             }
 
             const form = document.getElementById('csmForm');
-            form.addEventListener('submit', function () {
+            const modal = document.getElementById('successModal');
+            const btnSubmit = document.getElementById('btnSubmit');
+            const btnSuccessOk = document.getElementById('btnSuccessOk');
+
+            function showSuccessModal() {
+                modal.classList.add('show');
+            }
+
+            function hideSuccessModal() {
+                modal.classList.remove('show');
+            }
+
+            form.addEventListener('submit', function (e) {
+                // Let native HTML5 validation run first; if the form is invalid,
+                // the browser blocks submission and this handler exits safely.
+                if (!form.checkValidity()) {
+                    return;
+                }
+
                 e.preventDefault();
-                alert('Thank you! Your feedback has been recorded.');
+
+                btnSubmit.disabled = true;
+                btnSubmit.textContent = 'Submitting...';
+
+                fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error('Request failed with status ' + response.status);
+                        }
+                        showSuccessModal();
+                        form.reset();
+                    })
+                    .catch(function (err) {
+                        alert('Something went wrong while submitting your feedback. Please try again.');
+                        console.error(err);
+                    })
+                    .finally(function () {
+                        btnSubmit.disabled = false;
+                        btnSubmit.textContent = 'Submit Feedback';
+                    });
+            });
+
+            // Where to send the client if this tab can't be closed
+            // (e.g. it wasn't opened via script, so window.close() is blocked by the browser).
+            const fallbackRedirectUrl = <?= json_encode($redirect_url ?? base_url('/')) ?>;
+
+            btnSuccessOk.addEventListener('click', function () {
+                hideSuccessModal();
+
+                // Try to close this tab/window (works if it was opened via a link
+                // target="_blank" from the email, or via window.open()).
+                window.close();
+
+                // If we're still here after a brief delay, the browser blocked the close
+                // (most browsers won't let a script close a tab it didn't open).
+                // Fall back to sending the client to a safe landing page.
+                setTimeout(function () {
+                    window.location.href = fallbackRedirectUrl;
+                }, 300);
+            });
+
+            modal.addEventListener('click', function (e) {
+                if (e.target === modal) {
+                    hideSuccessModal();
+                }
             });
         })();
     </script>
-    L<
 
 </body>
 
