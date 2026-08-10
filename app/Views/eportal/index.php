@@ -8,11 +8,8 @@
         <?= $this->include('partials/hrservices') ?>
         <?= $this->include('partials/doleonlineservices') ?>
         <?= $this->include('partials/mvqsection') ?>
-        
-        <?= $this->include('partials/newsections') ?>
         <?= $this->include('partials/quicklinks') ?>
         <?= $this->include('partials/calldirectorysection') ?>
-        <?= $this->include('partials/calltoaction') ?>
 
     </main>
 

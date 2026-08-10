@@ -81,7 +81,6 @@
 .contact-card .contact-logo {
   width: 46px;
   height: 46px;
-  border-radius: 50%;
   flex-shrink: 0;
 }
 .contact-card h3 { font-size: 1.02rem; margin: 0; }
