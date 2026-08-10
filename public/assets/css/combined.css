@@ -1944,3 +1944,170 @@ body:has(.offcanvas.show) .export-overlay {
     text-align:center;
     box-shadow:0 10px 35px rgba(0,0,0,.15);
 }
+
+/* ==========================================
+   DOLE MIMAROPA LIGHT LOADING SCREEN
+========================================== */
+
+#doleLoadingScreen {
+    position: fixed !important;
+    inset: 0 !important;
+
+    width: 100vw !important;
+    height: 100vh !important;
+
+    /* LIGHT MODE */
+    background: #ffffff !important;
+
+    z-index: 2147483647 !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    opacity: 0;
+    visibility: hidden;
+
+    transition:
+        opacity .25s ease,
+        visibility .25s ease;
+}
+
+#doleLoadingScreen.show {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+
+/* CONTENT */
+
+#doleLoadingContent {
+    width: 380px;
+    max-width: 90vw;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    text-align: center;
+}
+
+
+/* ==========================================
+   LOGO
+========================================== */
+
+#doleLogoBox {
+    width: 170px;
+    height: 170px;
+
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 22px;
+}
+
+
+/* Rotating DOLE BLUE ring */
+
+#doleLogoBox::before {
+    content: "";
+
+    position: absolute;
+
+    width: 165px;
+    height: 165px;
+
+    border-radius: 50%;
+
+    border: 4px solid #eeeeee;
+
+    border-top-color: #10058C;
+    border-right-color: #10058C;
+
+    animation: doleLogoSpin 1.5s linear infinite;
+}
+
+
+/* LOGO */
+
+#doleLoadingLogo {
+    position: relative !important;
+
+    z-index: 10 !important;
+
+    display: block !important;
+
+    width: 125px !important;
+    height: 125px !important;
+
+    object-fit: contain !important;
+
+    opacity: 1 !important;
+    visibility: visible !important;
+
+    animation: doleLogoFloat 2s ease-in-out infinite;
+}
+
+
+/* ==========================================
+   TITLE
+========================================== */
+
+#doleLoadingTitle {
+    color: #10058C;
+
+    font-size: 24px;
+    font-weight: 800;
+
+    letter-spacing: 1.5px;
+
+    text-transform: uppercase;
+}
+
+
+#doleLoadingSubtitle {
+    color: #555555;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    letter-spacing: 5px;
+
+    margin-top: 4px;
+}
+
+
+
+/* ==========================================
+   ANIMATION
+========================================== */
+
+@keyframes doleLogoSpin {
+
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+
+}
+
+@keyframes doleLogoFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+
+}
+

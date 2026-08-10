@@ -2,6 +2,15 @@
 
 <main id="main-content">
 
+    <!-- ===================== LOADING OVERLAY ===================== -->
+    <div id="loadingOverlay" class="loading-overlay d-none">
+        <div class="loading-box">
+            <div class="spinner-border" role="status" style="width:3rem;height:3rem;color:#10058C;"></div>
+            <p class="mt-3 fw-semibold mb-0">Submitting your request...</p>
+            <p class="text-muted small">Please wait, do not close or refresh this page.</p>
+        </div>
+    </div>
+
     <div class="page-wrap">
 
         <!-- ===================== HEADER CARD ===================== -->
@@ -26,6 +35,13 @@
                 <i class="bi bi-info-circle me-2"></i><span id="formAlertText"></span>
             </div>
 
+            <div id="draftRestoredAlert" class="alert alert-dole d-none" role="alert">
+                <i class="bi bi-clock-history me-2"></i>Your previous unsaved entries were restored.
+                <button type="button" class="btn btn-sm btn-outline-dole-outline ms-2" id="clearDraftBtn">
+                    Clear and start over
+                </button>
+            </div>
+
             <form id="hrRequestForm" action="<?= site_url('service-record/save') ?>" method="post"
                 class="needs-validation">
 
@@ -39,11 +55,7 @@
                     <input type="hidden" name="date_requested" id="dateRequestedHidden" value="<?= date('Y-m-d') ?>">
                 </div>
 
-
-
-
                 <div class="row g-3">
-
 
                     <div class="col-md-6">
                         <div class="form-floating">
@@ -118,8 +130,6 @@
                 <!-- SERVICE-SPECIFIC SECTIONS (shown/hidden by JS)     -->
                 <!-- ================================================= -->
 
-
-
                 <!-- ---------- SERVICE 5: Certificate of Employment ---------- -->
                 <div class="dynamic-section" id="section-service5" data-service="service5">
                     <hr class="section-divider">
@@ -154,20 +164,39 @@
                                 <i class="bi bi-briefcase me-2"></i>Employment History
                             </h6>
 
-                            <button type="button" class="btn btn-sm btn-outline-primary" id="addEmployment">
-                                <i class="bi bi-plus-circle"></i> Add Employment Record
-                            </button>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-danger d-none"
+                                    id="deleteAllEmployment">
+                                    <i class="bi bi-trash3"></i> Delete All
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="addEmployment">
+                                    <i class="bi bi-plus-circle"></i> Add Employment Record
+                                </button>
+                            </div>
                         </div>
 
-                        <div id="employmentContainer">
+                        <!-- Employment cards are appended here dynamically, cloned from
+                             #employmentCardTemplate. Starts empty by design. -->
+                        <div id="employmentContainer"></div>
 
-                            <!-- Employment Record -->
+                        <div id="noEmploymentRecords" class="text-center text-muted py-4 border rounded-3 bg-light">
+                            <i class="bi bi-inbox fs-3 d-block mb-1"></i>
+                            No records found. Click "Add Employment Record" to add one.
+                        </div>
+
+                        <div class="text-danger small mt-2" id="employmentError" style="display:none;">
+                            <i class="bi bi-exclamation-circle me-1"></i>Please add at least one employment record.
+                        </div>
+
+                        <!-- Inert template used to clone new employment cards from.
+                             Content inside <template> is never rendered or submitted. -->
+                        <template id="employmentCardTemplate">
                             <div class="employment-card card border-0 shadow-sm mb-3">
 
                                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                                    <strong> #1</strong>
+                                    <strong class="employment-card-number">#1</strong>
 
-                                    <button type="button" class="btn btn-sm btn-outline-danger removeEmployment d-none">
+                                    <button type="button" class="btn btn-sm btn-outline-danger removeEmployment">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
@@ -234,8 +263,7 @@
                                 </div>
 
                             </div>
-
-                        </div>
+                        </template>
 
                     </div>
 
@@ -294,7 +322,6 @@
                     </div>
                 </div>
 
-                <!-- ---------- SERVICE 7: IPCR ---------- -->
                 <!-- ---------- SERVICE 7: IPCR ---------- -->
                 <div class="dynamic-section" id="section-service7" data-service="service7">
                     <hr class="section-divider">
@@ -410,7 +437,6 @@
                 </div>
 
                 <!-- ---------- SERVICE 9: Others ---------- -->
-                <!-- ---------- SERVICE 9: Others ---------- -->
                 <div class="dynamic-section" id="section-service9" data-service="service9">
                     <hr class="section-divider">
                     <p class="section-label">
@@ -505,9 +531,6 @@
 <!-- Bootstrap 5 Bundle (includes Popper) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
 
-
-
-
 <script>
     (function () {
         'use strict';
@@ -522,6 +545,7 @@
         const confirmModal = new bootstrap.Modal(confirmModalEl);
         const successModal = new bootstrap.Modal(document.getElementById('successModal'));
         const confirmSubmitBtn = document.getElementById('confirmSubmitBtn');
+        const loadingOverlay = document.getElementById('loadingOverlay');
         const summaryList = document.getElementById('summaryList');
         const certificationError = document.getElementById('certificationError');
         const empCategoryError = document.getElementById('empCategoryError');
@@ -529,7 +553,16 @@
         const formAlertText = document.getElementById('formAlertText');
         const dateRequestedDisplay = document.getElementById('dateRequestedDisplay');
         const dateRequestedHidden = document.getElementById('dateRequestedHidden');
-
+        const draftRestoredAlert = document.getElementById('draftRestoredAlert');
+        const clearDraftBtn = document.getElementById('clearDraftBtn');
+        const employmentContainer = document.getElementById('employmentContainer');
+        const employmentTemplate = document.getElementById('employmentCardTemplate');
+        const addEmploymentBtn = document.getElementById('addEmployment');
+        const deleteAllEmploymentBtn = document.getElementById('deleteAllEmployment');
+        const noEmploymentRecords = document.getElementById('noEmploymentRecords');
+        const employmentError = document.getElementById('employmentError');
+        const otherRequest = document.getElementById('otherRequest');
+        const specify201 = document.getElementById('specify201');
 
         // All service-specific sections keyed by service value
         const serviceSections = document.querySelectorAll('.dynamic-section[data-service]');
@@ -539,8 +572,154 @@
         const certificationCheckboxes = document.querySelectorAll('#certificationChecks input[type="checkbox"]');
 
         /* =========================================================
+           DRAFT PERSISTENCE (localStorage) — keeps user-entered data
+           across page reloads/refreshes until the form is submitted
+           or the user clears it manually.
+        ========================================================= */
+        const DRAFT_KEY = 'doleHrRequestFormDraft';
+        let restoringDraft = false; // guards against saving while we are restoring
+
+        function collectDraftData() {
+            const employment = [];
+            document.querySelectorAll('.employment-card').forEach(function (card) {
+                employment.push({
+                    period: card.querySelector('input[name="period_of_service[]"]').value,
+                    position: card.querySelector('input[name="position[]"]').value,
+                    office: card.querySelector('select[name="office_division[]"]').value
+                });
+            });
+
+            const category = document.querySelector('input[name="employee_category"]:checked');
+
+            return {
+                fullname: document.getElementById('fullName').value,
+                contact_number: document.getElementById('contactNumber').value,
+                email_address: document.getElementById('emailAddress').value,
+                service_availed: serviceSelect.value,
+                service_purpose: document.getElementById('servicePurpose').value,
+                employee_category: category ? category.value : '',
+                employment: employment,
+                certification: Array.from(certificationCheckboxes)
+                    .filter(function (cb) { return cb.checked; })
+                    .map(function (cb) { return cb.value; }),
+                ipcr_from_month: document.getElementById('ipcrFromMonth').value,
+                ipcr_from_year: document.getElementById('ipcrFromYear').value,
+                ipcr_to_month: document.getElementById('ipcrToMonth').value,
+                ipcr_to_year: document.getElementById('ipcrToYear').value,
+                specify_201: specify201 ? specify201.value : '',
+                other_request: otherRequest ? otherRequest.value : ''
+            };
+        }
+
+        function saveDraft() {
+            if (restoringDraft) return;
+            try {
+                localStorage.setItem(DRAFT_KEY, JSON.stringify(collectDraftData()));
+            } catch (e) {
+                // localStorage unavailable (private browsing, quota, etc.) — fail silently
+            }
+        }
+
+        function clearDraft() {
+            try {
+                localStorage.removeItem(DRAFT_KEY);
+            } catch (e) { }
+        }
+
+        function restoreDraft() {
+            let data;
+            try {
+                const raw = localStorage.getItem(DRAFT_KEY);
+                if (!raw) return;
+                data = JSON.parse(raw);
+            } catch (e) {
+                return;
+            }
+
+            if (!data) return;
+
+            // Only show the "restored" banner if there's actually something meaningful saved
+            const hasContent =
+                data.fullname || data.contact_number || data.email_address ||
+                data.service_availed || data.service_purpose ||
+                (data.employment && data.employment.some(function (r) { return r.period || r.position || r.office; })) ||
+                (data.certification && data.certification.length) ||
+                data.specify_201 || data.other_request;
+
+            if (!hasContent) return;
+
+            restoringDraft = true;
+
+            document.getElementById('fullName').value = data.fullname || '';
+            document.getElementById('contactNumber').value = data.contact_number || '';
+            document.getElementById('emailAddress').value = data.email_address || '';
+            document.getElementById('servicePurpose').value = data.service_purpose || '';
+
+            if (data.service_availed) {
+                serviceSelect.value = data.service_availed;
+                serviceSelect.dispatchEvent(new Event('change'));
+            }
+
+            if (data.employee_category) {
+                const radio = document.querySelector(
+                    'input[name="employee_category"][value="' + data.employee_category + '"]'
+                );
+                if (radio) {
+                    radio.checked = true;
+                    radio.dispatchEvent(new Event('change'));
+                }
+            }
+
+            if (data.employment && data.employment.length > 0 && addEmploymentBtn) {
+                while (document.querySelectorAll('.employment-card').length < data.employment.length) {
+                    addEmploymentBtn.click();
+                }
+                const cards = document.querySelectorAll('.employment-card');
+                data.employment.forEach(function (rec, index) {
+                    if (!cards[index]) return;
+                    cards[index].querySelector('input[name="period_of_service[]"]').value = rec.period || '';
+                    cards[index].querySelector('input[name="position[]"]').value = rec.position || '';
+                    cards[index].querySelector('select[name="office_division[]"]').value = rec.office || '';
+                });
+            }
+
+            if (data.certification && data.certification.length) {
+                certificationCheckboxes.forEach(function (cb) {
+                    cb.checked = data.certification.indexOf(cb.value) !== -1;
+                });
+            }
+
+            if (data.ipcr_from_month) document.getElementById('ipcrFromMonth').value = data.ipcr_from_month;
+            if (data.ipcr_from_year) document.getElementById('ipcrFromYear').value = data.ipcr_from_year;
+            if (data.ipcr_to_month) document.getElementById('ipcrToMonth').value = data.ipcr_to_month;
+            if (data.ipcr_to_year) document.getElementById('ipcrToYear').value = data.ipcr_to_year;
+
+            if (specify201 && data.specify_201) specify201.value = data.specify_201;
+            if (otherRequest && data.other_request) otherRequest.value = data.other_request;
+
+            restoringDraft = false;
+
+            draftRestoredAlert.classList.remove('d-none');
+        }
+
+        if (clearDraftBtn) {
+            clearDraftBtn.addEventListener('click', function () {
+                clearDraft();
+                form.reset();
+                hideAllServiceSections();
+                hideAllEmployeeCategorySections();
+                employmentContainer.innerHTML = '';
+                updateEmploymentNumbers();
+                draftRestoredAlert.classList.add('d-none');
+            });
+        }
+
+        // Autosave on every field change/input across the whole form
+        form.addEventListener('input', saveDraft);
+        form.addEventListener('change', saveDraft);
+
+        /* =========================================================
            DATE REQUESTED: SET ONCE, ALWAYS TODAY'S DATE
-           (static, top of form — no longer tied to a service section)
         ========================================================= */
         function getTodayDateString() {
             const now = new Date();
@@ -568,7 +747,6 @@
         function hideAllServiceSections() {
             serviceSections.forEach(function (section) {
                 section.classList.remove('active');
-                // Disable required-group inputs inside hidden sections so they don't block validation
                 toggleRequiredGroup(section, false);
             });
         }
@@ -580,19 +758,20 @@
             });
         }
 
-        // Enables/disables the "required" attribute for inputs within a section
         function toggleRequiredGroup(container, isRequired) {
             const fields = container.querySelectorAll('[data-required-group]');
             fields.forEach(function (field) {
                 if (field.type === 'radio' || field.type === 'checkbox') {
-                    // Radios are validated manually (custom logic below)
                     return;
                 }
                 if (isRequired) {
                     field.setAttribute('required', 'required');
                 } else {
                     field.removeAttribute('required');
-                    field.value = '';
+                    // Don't wipe the value while a draft restore is in progress
+                    if (!restoringDraft) {
+                        field.value = '';
+                    }
                     field.classList.remove('is-valid', 'is-invalid');
                 }
             });
@@ -602,17 +781,14 @@
            SHOW SECTION BASED ON SELECTED SERVICE
         ========================================================= */
         serviceSelect.addEventListener('change', function () {
-
-            console.log("Selected:", this.value);
-
             hideAllServiceSections();
             hideAllEmployeeCategorySections();
-            resetEmployeeCategorySelection();
+            if (!restoringDraft) {
+                resetEmployeeCategorySelection();
+            }
             formAlert.classList.add('d-none');
 
             const targetSection = document.getElementById('section-' + this.value);
-
-            console.log(targetSection);
 
             if (targetSection) {
                 targetSection.classList.add('active');
@@ -628,14 +804,16 @@
                 radio.checked = false;
             });
             empCategoryError.style.setProperty('display', 'none', 'important');
+            if (employmentError) employmentError.style.display = 'none';
         }
 
         employeeCategoryRadios.forEach(function (radio) {
             radio.addEventListener('change', function () {
                 hideAllEmployeeCategorySections();
                 empCategoryError.style.setProperty('display', 'none', 'important');
+                if (employmentError) employmentError.style.display = 'none';
 
-                const chosen = this.value; // 'cos' or 'permanent'
+                const chosen = this.value;
                 const targetSection = document.getElementById('section-' + chosen);
                 if (targetSection) {
                     targetSection.classList.add('active');
@@ -673,6 +851,25 @@
         }
 
         /* =========================================================
+           CUSTOM VALIDATION: AT LEAST ONE EMPLOYMENT RECORD (COS)
+        ========================================================= */
+        function isEmploymentValid() {
+            if (serviceSelect.value !== 'service5') return true;
+            const category = document.querySelector('input[name="employee_category"]:checked');
+            if (!category || category.value !== 'cos') return true;
+            return document.querySelectorAll('.employment-card').length > 0;
+        }
+
+        /* =========================================================
+           HTML ESCAPE HELPER (for safely inserting user text into innerHTML)
+        ========================================================= */
+        function escapeHTML(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        /* =========================================================
            FORM SUBMISSION FLOW
         ========================================================= */
         form.addEventListener('submit', function (event) {
@@ -681,12 +878,10 @@
 
             let isValid = form.checkValidity();
 
-            // Custom check: a service must be selected
             if (!serviceSelect.value) {
                 isValid = false;
             }
 
-            // Custom check: employee category radio (Service 5 only)
             if (!isEmployeeCategoryValid()) {
                 isValid = false;
                 empCategoryError.style.setProperty('display', 'block', 'important');
@@ -694,7 +889,13 @@
                 empCategoryError.style.setProperty('display', 'none', 'important');
             }
 
-            // Custom check: certification checkboxes (Service 6 only)
+            if (!isEmploymentValid()) {
+                isValid = false;
+                if (employmentError) employmentError.style.display = 'block';
+            } else {
+                if (employmentError) employmentError.style.display = 'none';
+            }
+
             if (!isCertificationValid()) {
                 isValid = false;
                 certificationError.style.display = 'block';
@@ -707,7 +908,6 @@
             if (!isValid) {
                 formAlertText.textContent = 'Please complete all required fields before submitting.';
                 formAlert.classList.remove('d-none');
-                // Scroll to first invalid field
                 const firstInvalid = form.querySelector(':invalid, .is-invalid');
                 if (firstInvalid) {
                     firstInvalid.scrollIntoView({
@@ -725,6 +925,7 @@
 
         /* =========================================================
            BUILD CONFIRMATION MODAL SUMMARY
+           (single render pass — rows[2] === true means render as HTML)
         ========================================================= */
         function buildSummary() {
             summaryList.innerHTML = '';
@@ -760,38 +961,38 @@
                 case 'service4':
                     // No additional service-specific fields beyond the common ones.
                     break;
+
                 case 'service5': {
                     const category = document.querySelector('input[name="employee_category"]:checked');
                     const categoryValue = category ? category.value : '';
                     rows.push(['Employee Category', categoryValue === 'cos' ? 'COS Employee' : 'Permanent Employee']);
-                    if (categoryValue === 'cos') {
 
+                    if (categoryValue === 'cos') {
                         const periods = document.querySelectorAll('input[name="period_of_service[]"]');
                         const positions = document.querySelectorAll('input[name="position[]"]');
                         const offices = document.querySelectorAll('select[name="office_division[]"]');
 
-                        let history = '';
+                        let tableHTML = '<table class="summary-table"><thead><tr>' +
+                            '<th>#</th><th>Period of Service</th><th>Position</th><th>Office / Division</th>' +
+                            '</tr></thead><tbody>';
 
                         periods.forEach((item, index) => {
-
-                            history +=
-                                (index + 1) + '. ' +
-                                item.value + ' | ' +
-                                positions[index].value + ' | ' +
-                                offices[index].value +
-                                '<br>';
-
+                            tableHTML += '<tr>' +
+                                '<td>' + (index + 1) + '</td>' +
+                                '<td>' + escapeHTML(item.value) + '</td>' +
+                                '<td>' + escapeHTML(positions[index].value) + '</td>' +
+                                '<td>' + escapeHTML(offices[index].value) + '</td>' +
+                                '</tr>';
                         });
 
+                        tableHTML += '</tbody></table>';
 
-                        rows.push([
-                            'Employment History',
-                            history
-                        ]);
-
+                        // Third element = true -> tells the render loop below to use innerHTML
+                        rows.push(['Employment History', tableHTML, true]);
                     }
                     break;
                 }
+
                 case 'service6': {
                     const checked = Array.from(certificationCheckboxes)
                         .filter(function (cb) {
@@ -803,8 +1004,8 @@
                     rows.push(['Certification Needed', checked.join(', ')]);
                     break;
                 }
-                case 'service7': {
 
+                case 'service7': {
                     const from =
                         document.getElementById('ipcrFromMonth').value +
                         ' ' +
@@ -818,9 +1019,11 @@
                     rows.push(['IPCR Period', from + ' to ' + to]);
                     break;
                 }
+
                 case 'service8':
                     rows.push(['Please Specify', document.getElementById('specify201').value]);
                     break;
+
                 case 'service9':
                     rows.push([
                         'Request',
@@ -832,19 +1035,39 @@
                     break;
             }
 
+            // Single render pass — plain text fields use textContent (escaped/safe),
+            // the employment history table (flagged with true) uses innerHTML.
             rows.forEach(function (pair) {
                 const dt = document.createElement('dt');
                 dt.textContent = pair[0];
                 const dd = document.createElement('dd');
-                dd.textContent = pair[1] || '—';
+
+                if (pair[2] === true) {
+                    dd.innerHTML = pair[1] || '—';
+                } else {
+                    dd.textContent = pair[1] || '—';
+                }
+
                 summaryList.appendChild(dt);
                 summaryList.appendChild(dd);
             });
         }
 
+        /* =========================================================
+           CONFIRM & SUBMIT -> CLEAR DRAFT -> SHOW LOADING OVERLAY -> SUBMIT FORM
+        ========================================================= */
         confirmSubmitBtn.addEventListener('click', function () {
             confirmModal.hide();
-            form.submit();
+            confirmSubmitBtn.disabled = true;
+            loadingOverlay.classList.remove('d-none');
+
+            // The request is actually being sent now — clear the saved draft
+            // so a future visit to this form starts fresh.
+            clearDraft();
+
+            setTimeout(function () {
+                form.submit();
+            }, 150);
         });
 
         /* =========================================================
@@ -854,14 +1077,13 @@
             window.location.href = "<?= site_url('eportal') ?>";
         });
 
-        const otherRequest = document.getElementById('otherRequest');
-
+        /* =========================================================
+           SERVICE 9: RESTRICT ALLOWED CHARACTERS
+        ========================================================= */
         if (otherRequest) {
-
             const allowedPattern = /^[A-Za-z0-9\s.,()\/-]*$/;
 
             otherRequest.addEventListener('input', function () {
-
                 if (!allowedPattern.test(this.value)) {
                     this.setCustomValidity(
                         'Only letters, numbers, spaces, commas, periods, hyphens, parentheses, and slashes are allowed.'
@@ -871,118 +1093,150 @@
                     this.setCustomValidity('');
                     this.classList.remove('is-invalid');
                 }
-
             });
-
         }
 
+        /* =========================================================
+           SERVICE 8: RESTRICT ALLOWED CHARACTERS
+        ========================================================= */
+        if (specify201) {
+            const allowedPattern = /^[A-Za-z0-9\s.,()\/-]*$/;
+
+            specify201.addEventListener('input', function () {
+                if (!allowedPattern.test(this.value)) {
+                    this.setCustomValidity(
+                        'Only letters, numbers, spaces, commas, periods, hyphens, parentheses, and slashes are allowed.'
+                    );
+                    this.classList.add('is-invalid');
+                } else {
+                    this.setCustomValidity('');
+                    this.classList.remove('is-invalid');
+                }
+            });
+        }
+
+        /* =========================================================
+           EMPLOYMENT HISTORY: ADD / REMOVE / DELETE-ALL RECORDS
+           Cards are cloned from the inert <template id="employmentCardTemplate">.
+           The section starts empty — a "No records found" placeholder is
+           shown until at least one card exists.
+        ========================================================= */
+        function updateEmploymentNumbers() {
+            const cards = document.querySelectorAll('.employment-card');
+
+            cards.forEach(function (card, index) {
+                const numberEl = card.querySelector('.employment-card-number');
+                if (numberEl) numberEl.textContent = '#' + (index + 1);
+            });
+
+            const hasRecords = cards.length > 0;
+
+            if (noEmploymentRecords) {
+                noEmploymentRecords.classList.toggle('d-none', hasRecords);
+            }
+            if (deleteAllEmploymentBtn) {
+                deleteAllEmploymentBtn.classList.toggle('d-none', !hasRecords);
+            }
+            if (employmentError && isEmploymentValid()) {
+                employmentError.style.display = 'none';
+            }
+        }
+
+        // Applies (or removes) the "required" attribute on a single card's
+        // fields, based on whether the COS section is currently active.
+        function applyEmploymentCardRequired(card) {
+            const cosSection = document.getElementById('section-cos');
+            const isRequired = cosSection && cosSection.classList.contains('active');
+
+            card.querySelectorAll('[data-required-group="cos"]').forEach(function (field) {
+                if (isRequired) {
+                    field.setAttribute('required', 'required');
+                } else {
+                    field.removeAttribute('required');
+                }
+            });
+        }
+
+        if (employmentContainer && addEmploymentBtn && employmentTemplate) {
+            addEmploymentBtn.addEventListener('click', function () {
+                const fragment = employmentTemplate.content.cloneNode(true);
+                const card = fragment.querySelector('.employment-card');
+
+                employmentContainer.appendChild(fragment);
+
+                applyEmploymentCardRequired(card);
+                updateEmploymentNumbers();
+
+                if (!restoringDraft) {
+                    saveDraft();
+                }
+            });
+
+            employmentContainer.addEventListener('click', function (e) {
+                const btn = e.target.closest('.removeEmployment');
+                if (!btn) return;
+
+                btn.closest('.employment-card').remove();
+
+                updateEmploymentNumbers();
+                saveDraft();
+            });
+
+            if (deleteAllEmploymentBtn) {
+                deleteAllEmploymentBtn.addEventListener('click', function () {
+                    if (document.querySelectorAll('.employment-card').length === 0) return;
+                    if (!window.confirm('Remove all employment records? This cannot be undone.')) return;
+
+                    employmentContainer.innerHTML = '';
+                    updateEmploymentNumbers();
+                    saveDraft();
+                });
+            }
+        }
+
+        /* =========================================================
+           RESET FORM (available for future use, e.g. a reset button)
+        ========================================================= */
         function resetForm() {
             form.reset();
             form.classList.remove('was-validated');
             hideAllServiceSections();
             hideAllEmployeeCategorySections();
+            employmentContainer.innerHTML = '';
+            updateEmploymentNumbers();
             certificationError.style.display = 'none';
             empCategoryError.style.setProperty('display', 'none', 'important');
+            if (employmentError) employmentError.style.display = 'none';
             formAlert.classList.add('d-none');
             document.querySelectorAll('.form-control, .form-select').forEach(function (el) {
                 el.classList.remove('is-valid', 'is-invalid');
             });
             setDateRequested();
+            clearDraft();
         }
 
-        /* Initialize: make sure everything is hidden on page load, date requested is set once */
-        document.addEventListener("DOMContentLoaded", function () {
+        /* =========================================================
+           INITIALIZE ON PAGE LOAD
+        ========================================================= */
+        document.addEventListener('DOMContentLoaded', function () {
             hideAllServiceSections();
             hideAllEmployeeCategorySections();
+            updateEmploymentNumbers();
             setDateRequested();
+            restoreDraft();
         });
     })();
-
-    const specify201 = document.getElementById('specify201');
-
-    if (specify201) {
-
-        const allowedPattern = /^[A-Za-z0-9\s.,()\/-]*$/;
-
-        specify201.addEventListener('input', function () {
-
-            if (!allowedPattern.test(this.value)) {
-                this.setCustomValidity(
-                    'Only letters, numbers, spaces, commas, periods, hyphens, parentheses, and slashes are allowed.'
-                );
-                this.classList.add('is-invalid');
-            } else {
-                this.setCustomValidity('');
-                this.classList.remove('is-invalid');
-            }
-
-        });
-
-    }
-
-    const employmentContainer = document.getElementById('employmentContainer');
-    const addEmploymentBtn = document.getElementById('addEmployment');
-
-    if (employmentContainer && addEmploymentBtn) {
-
-        addEmploymentBtn.addEventListener('click', function () {
-
-            const card = employmentContainer.firstElementChild.cloneNode(true);
-
-            card.querySelectorAll('input').forEach(input => {
-                input.value = '';
-            });
-
-            card.querySelectorAll('select').forEach(select => {
-                select.selectedIndex = 0;
-            });
-
-            card.querySelector('.removeEmployment').classList.remove('d-none');
-
-            employmentContainer.appendChild(card);
-
-            updateEmploymentNumbers();
-
-        });
-
-        employmentContainer.addEventListener('click', function (e) {
-
-            const btn = e.target.closest('.removeEmployment');
-
-            if (!btn) return;
-
-            btn.closest('.employment-card').remove();
-
-            updateEmploymentNumbers();
-
-        });
-
-        function updateEmploymentNumbers() {
-
-            document.querySelectorAll('.employment-card').forEach((card, index) => {
-
-                card.querySelector('.card-header strong').textContent =
-                    '#' + (index + 1);
-
-                const removeBtn = card.querySelector('.removeEmployment');
-
-                if (index === 0) {
-                    removeBtn.classList.add('d-none');
-                } else {
-                    removeBtn.classList.remove('d-none');
-                }
-
-            });
-
-        }
-
-    }
 </script>
-
 
 <?php if (session()->getFlashdata('success')): ?>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Request was successfully saved server-side — make sure no stale
+            // draft lingers for next time, then show the success modal.
+            try {
+                localStorage.removeItem('doleHrRequestFormDraft');
+            } catch (e) { }
+
             const modal = new bootstrap.Modal(document.getElementById('successModal'));
             modal.show();
         });

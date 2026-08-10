@@ -235,6 +235,8 @@ input[type="date"][readonly] {
 .employment-card .card-header {
   gap: 0.5rem;
   flex-wrap: wrap;
+  white-space: pre-line;
+  
 }
 
 /* Buttons */
@@ -327,6 +329,34 @@ input[type="date"][readonly] {
   font-weight: 600;
   margin-bottom: 0.65rem;
   word-break: break-word;
+  white-space: pre-line;
+}
+.summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 0.75rem;
+    font-size: 0.85rem;
+}
+
+.summary-table th,
+.summary-table td {
+    border: 1px solid var(--border-soft);
+    padding: 0.4rem 0.6rem;
+    text-align: left;
+    word-break: break-word;
+}
+
+.summary-table th {
+    background: var(--dole-blue-softer);
+    color: var(--dole-blue);
+    font-weight: 700;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.summary-table tbody tr:nth-child(even) {
+    background: var(--dole-blue-softer);
 }
 
 .alert-dole {
@@ -465,3 +495,27 @@ textarea:focus-visible {
     padding: 1.25rem 1rem;
   }
 }
+
+
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.85);
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .loading-box {
+        text-align: center;
+        padding: 2rem 3rem;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+
