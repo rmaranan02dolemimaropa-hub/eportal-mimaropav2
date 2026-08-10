@@ -28,7 +28,6 @@
     <a href="feedback" class="nav-link<?= $isActive('feedback') ?>" <?= $dismiss ?>>
       <i class="bi bi-chat-right-text-fill"></i><span>Feedback</span>
     </a>
-  
 
     <div class="nav-divider"></div>
 
@@ -55,11 +54,9 @@
     </div>
     <div class="offcanvas-body p-0">
       <nav class="sidebar-nav">
-        <?= $navLinks(true) ?>
+        <?= $navLinks(false) ?>
       </nav>
     </div>
   </div>
-
-  
 
   <!-- ...rest of app-body (main content) continues here... -->
