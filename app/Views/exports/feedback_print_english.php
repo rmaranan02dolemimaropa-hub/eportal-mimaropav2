@@ -108,7 +108,8 @@
 
     .page {
       background: #fff;
-      width: 816px;
+      width: min(816px, calc(100vw - 32px));
+      max-width: 816px;
       /* 8.5in @ 96dpi */
       min-height: 1056px;
       /* 11in @ 96dpi */
@@ -351,6 +352,317 @@
       font-weight: 700;
       margin-top: 12px;
       font-size: 11px;
+    }
+
+
+    /* ===================== RESPONSIVE SCREEN RULES ===================== */
+
+    /* Keep the paper preview responsive without changing the print layout */
+    .page {
+      width: min(816px, 100%);
+      max-width: 816px;
+    }
+
+    .page img {
+      max-width: 100%;
+    }
+
+    /* Prevent long text/values from forcing horizontal overflow */
+    .page,
+    .page table,
+    .page td,
+    .page th {
+      overflow-wrap: anywhere;
+      word-break: normal;
+    }
+
+    @media screen and (max-width: 850px) {
+      body {
+        background: #eef0f4;
+      }
+
+      .toolbar {
+        position: sticky;
+        padding: 12px 14px;
+      }
+
+      .toolbar>div:first-child {
+        min-width: 0;
+        flex: 1 1 100%;
+      }
+
+      .toolbar h1 {
+        font-size: .95rem;
+      }
+
+      .toolbar .sub {
+        font-size: .7rem;
+        line-height: 1.35;
+      }
+
+      .toolbar-actions {
+        width: 100%;
+      }
+
+      .tbtn {
+        flex: 1 1 0;
+        justify-content: center;
+        min-height: 42px;
+      }
+
+      .sheets {
+        padding: 16px 8px 40px;
+        gap: 18px;
+      }
+
+      .sheet-label {
+        margin-bottom: -8px;
+      }
+
+      .page {
+        padding: 24px;
+        font-size: 10px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, .18);
+      }
+
+      .ctrl-row {
+        font-size: 10px;
+        gap: 10px;
+      }
+
+      table.top-table td {
+        padding: 5px 6px;
+        font-size: 9.5px;
+      }
+
+      table.top-table td.dole-cell {
+        width: 95px;
+      }
+
+      .brand-logo {
+        width: 38px;
+        height: 38px;
+      }
+
+      .brand-row .logos {
+        gap: 10px;
+      }
+
+      .brand-text .agency {
+        font-size: 9.5px;
+      }
+
+      .brand-text .tagline {
+        font-size: 11px;
+      }
+
+      .intro-text,
+      .instructions {
+        font-size: 9px;
+        line-height: 1.35;
+      }
+
+      table.cc-table {
+        font-size: 9px;
+      }
+
+      table.cc-table td {
+        padding: 5px 6px;
+      }
+
+      table.sqd-table {
+        font-size: 8px;
+        table-layout: fixed;
+      }
+
+      table.sqd-table th,
+      table.sqd-table td {
+        padding: 3px 3px;
+      }
+
+      table.sqd-table thead th {
+        font-size: 7.2px;
+        line-height: 1.15;
+      }
+
+      table.sqd-table tbody td:not(:first-child) {
+        font-size: 9px;
+      }
+
+      table.sqd-table .emoji {
+        font-size: 12px;
+      }
+    }
+
+    @media screen and (max-width: 600px) {
+      .toolbar {
+        align-items: stretch;
+      }
+
+      .toolbar-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 7px;
+      }
+
+      .tbtn {
+        width: 100%;
+        padding: 8px 10px;
+        font-size: .78rem;
+      }
+
+      .sheets {
+        padding: 10px 4px 30px;
+      }
+
+      .page {
+        padding: 16px 12px;
+        font-size: 9px;
+        border-radius: 2px;
+      }
+
+      .ctrl-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 3px;
+        margin-bottom: 7px;
+      }
+
+      .ctrl-row .ver {
+        align-self: flex-end;
+      }
+
+      table.top-table {
+        table-layout: fixed;
+      }
+
+      table.top-table td {
+        padding: 4px;
+        font-size: 8.2px;
+        line-height: 1.25;
+      }
+
+      table.top-table td.dole-cell {
+        width: 78px;
+        font-size: 7.8px;
+      }
+
+      .brand-row {
+        margin: 5px 0 8px;
+      }
+
+      .brand-row .logos {
+        gap: 7px;
+      }
+
+      .brand-logo {
+        width: 32px;
+        height: 32px;
+      }
+
+      .brand-text .agency {
+        font-size: 8px;
+      }
+
+      .brand-text .tagline {
+        font-size: 9.5px;
+      }
+
+      .intro-text,
+      .instructions,
+      .inline-field {
+        font-size: 8.2px;
+        line-height: 1.3;
+      }
+
+      .inline-field {
+        margin-bottom: 5px;
+      }
+
+      .fill-line {
+        min-width: 55px;
+      }
+
+      .box {
+        width: 9px;
+        height: 9px;
+        margin-left: 5px;
+        margin-right: 2px;
+        font-size: 7px;
+      }
+
+      .cc-two-col {
+        grid-template-columns: 1fr !important;
+        row-gap: 2px;
+      }
+
+      table.cc-table {
+        font-size: 8px;
+        table-layout: fixed;
+      }
+
+      table.cc-table td {
+        padding: 4px;
+        line-height: 1.25;
+      }
+
+      table.cc-table td.cc-code {
+        width: 28px;
+      }
+
+      table.sqd-table {
+        font-size: 7px;
+      }
+
+      table.sqd-table thead th {
+        font-size: 6.2px;
+        padding: 3px 1px;
+      }
+
+      table.sqd-table tbody td {
+        line-height: 1.2;
+      }
+
+      table.sqd-table tbody td:not(:first-child) {
+        font-size: 8px;
+      }
+
+      table.sqd-table .emoji {
+        font-size: 10px;
+        margin-bottom: 1px;
+      }
+
+      .suggestions-block,
+      .email-line,
+      .thank-you {
+        font-size: 8.2px;
+      }
+
+      .suggest-line {
+        min-height: 18px;
+      }
+    }
+
+    @media screen and (max-width: 380px) {
+      .toolbar-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .page {
+        padding: 12px 8px;
+      }
+
+      table.sqd-table thead th {
+        font-size: 5.6px;
+      }
+
+      table.sqd-table tbody td:not(:first-child) {
+        font-size: 7px;
+      }
+
+      table.sqd-table .emoji {
+        font-size: 9px;
+      }
     }
 
     /* ===================== PRINT RULES ===================== */
