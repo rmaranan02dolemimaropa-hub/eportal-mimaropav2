@@ -104,6 +104,7 @@ class EportalController extends BaseController
         ]);
     }
 
+
     public function dashboard()
     {
         $requestModel = new HrRequestModel();
@@ -177,9 +178,43 @@ class EportalController extends BaseController
 
     public function login()
     {
+        $session = session();
+
+        /*
+        |--------------------------------------------------------------------------
+        | IF ALREADY LOGGED IN, GO DIRECTLY TO DASHBOARD
+        |--------------------------------------------------------------------------
+        */
+
+        if ($session->get('logged_in') === true) {
+            return redirect()->to(site_url('dashboard'));
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | PREVENT BROWSER FROM CACHING LOGIN PAGE
+        |--------------------------------------------------------------------------
+        */
+
+        $response = service('response');
+
+        $response->setHeader(
+            'Cache-Control',
+            'no-store, no-cache, must-revalidate, max-age=0'
+        );
+
+        $response->setHeader(
+            'Pragma',
+            'no-cache'
+        );
+
+        $response->setHeader(
+            'Expires',
+            '0'
+        );
+
         return view('admin/login');
     }
-
 
 
     public function login_process()
@@ -202,7 +237,10 @@ class EportalController extends BaseController
         if ($user['status'] !== 'ACTIVE') {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Your account is inactive. Please contact the administrator.');
+                ->with(
+                    'error',
+                    'Your account is inactive. Please contact the administrator.'
+                );
         }
 
         // Verify hashed password
@@ -212,8 +250,19 @@ class EportalController extends BaseController
                 ->with('error', 'Invalid username or password.');
         }
 
-        // Regenerate session ID to prevent session fixation
-        session()->regenerate();
+        /*
+        |--------------------------------------------------------------------------
+        | REGENERATE SESSION
+        |--------------------------------------------------------------------------
+        */
+
+        session()->regenerate(true);
+
+        /*
+        |--------------------------------------------------------------------------
+        | SET LOGIN SESSION
+        |--------------------------------------------------------------------------
+        */
 
         session()->set([
             'user_id' => $user['id'],
@@ -223,7 +272,15 @@ class EportalController extends BaseController
             'logged_in' => true,
         ]);
 
-        return redirect()->to(site_url('dashboard'));
+        /*
+        |--------------------------------------------------------------------------
+        | GO TO DASHBOARD
+        |--------------------------------------------------------------------------
+        */
+
+        return redirect()->to(
+            site_url('dashboard')
+        );
     }
 
     public function logout()
@@ -967,6 +1024,46 @@ class EportalController extends BaseController
 
         return $this->response->setJSON([
             'success' => true
+        ]);
+    }
+
+    public function requestHistory($id)
+    {
+        $requestModel = new \App\Models\HrRequestModel();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Make sure user is still logged in
+        |--------------------------------------------------------------------------
+        */
+
+        if (!session()->get('logged_in')) {
+            return redirect()->to(site_url('login'));
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Get request
+        |--------------------------------------------------------------------------
+        */
+
+        $request = $requestModel->find($id);
+
+        if (!$request) {
+            return redirect()
+                ->to(site_url('dashboard'))
+                ->with('error', 'Request not found.');
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Send data to history view
+        |--------------------------------------------------------------------------
+        */
+
+        return view('request/history', [
+            'title' => 'Request History',
+            'request' => $request
         ]);
     }
 
