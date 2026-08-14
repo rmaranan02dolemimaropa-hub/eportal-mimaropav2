@@ -55,6 +55,7 @@
                     <input type="hidden" name="date_requested" id="dateRequestedHidden" value="<?= date('Y-m-d') ?>">
                 </div>
 
+                <!-- ---------- REQUESTER INFO (entered once, applies to all entries) ---------- -->
                 <div class="row g-3">
 
                     <div class="col-md-6">
@@ -85,381 +86,49 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-12 py-3">
-                    <div class="form-floating">
-
-                        <select class="form-select" name="service_availed" id="serviceAvailed" required>
-                            <option value="" selected disabled>Select a service</option>
-                            <option value="service1">Service Record</option>
-                            <option value="service5">Certificate of Employment</option>
-                            <option value="service2">Certificate with Compensation</option>
-                            <option value="service6">Certification</option>
-                            <option value="service7">IPCR</option>
-                            <option value="service8">201 Documents</option>
-                            <option value="service3">Loan Assistance</option>
-                            <option value="service4">Inquiry of Leave Balance</option>
-                            <option value="service9">Others</option>
-                        </select>
-                        <label for="serviceAvailed">Service Availed <span class="required-mark">*</span></label>
-                        <div class="invalid-feedback">Please select a service.</div>
-                    </div>
-                </div>
-                <!-- ---------- SERVICE PURPOSE ---------- -->
-                <div class="col-12 py-3">
-                    <div class="form-floating">
-
-                        <textarea class="form-control" name="service_purpose" id="servicePurpose"
-                            placeholder="Please state your purpose" maxlength="500" style="height: 140px;"></textarea>
-
-                        <label for="servicePurpose">
-                            Purpose / Request Details
-                        </label>
-
-                        <div class="invalid-feedback">
-                            Please specify the purpose of your request.
-                        </div>
-
-                        <div class="form-text">
-                            Please provide the reason why you need this HR service.
-                        </div>
-
-                    </div>
-                </div>
-
-                <!-- ================================================= -->
-                <!-- SERVICE-SPECIFIC SECTIONS (shown/hidden by JS)     -->
-                <!-- ================================================= -->
-
-                <!-- ---------- SERVICE 5: Certificate of Employment ---------- -->
-                <div class="dynamic-section" id="section-service5" data-service="service5">
-                    <hr class="section-divider">
-                    <p class="section-label"><i class="bi bi-person-badge"></i>Certificate of Employment</p>
-
+                <!-- ---------- EMPLOYEE CATEGORY (entered once, shared by all entries) ---------- -->
+                <div class="col-12 mt-3">
                     <label class="form-label fw-semibold mb-2">Employee Category <span
                             class="required-mark">*</span></label>
-                    <div class="row g-3 mb-3">
+                    <div class="row g-3">
                         <div class="col-md-6">
                             <div class="choice-card">
                                 <input class="form-check-input mt-0" type="radio" name="employee_category"
-                                    id="empCategoryCOS" value="cos" data-required-group="service5">
-                                <label for="empCategoryCOS">COS Employee</label>
+                                    id="employeeCategoryCOS" value="cos" required>
+                                <label for="employeeCategoryCOS">COS Employee</label>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="choice-card">
                                 <input class="form-check-input mt-0" type="radio" name="employee_category"
-                                    id="empCategoryPermanent" value="permanent" data-required-group="service5">
-                                <label for="empCategoryPermanent">Permanent Employee</label>
+                                    id="employeeCategoryPermanent" value="permanent" required>
+                                <label for="employeeCategoryPermanent">Permanent Employee</label>
                             </div>
                         </div>
                     </div>
-                    <div class="invalid-feedback d-block" id="empCategoryError" style="display:none !important;">Please
-                        select an employee category.</div>
-
-                    <!-- COS Employee fields -->
-                    <div class="dynamic-section" id="section-cos" data-employee-category="cos">
-
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="mb-0 fw-bold">
-                                <i class="bi bi-briefcase me-2"></i>Employment History
-                            </h6>
-
-                            <div class="d-flex gap-2">
-                                <button type="button" class="btn btn-sm btn-outline-danger d-none"
-                                    id="deleteAllEmployment">
-                                    <i class="bi bi-trash3"></i> Delete All
-                                </button>
-                                <button type="button" class="btn btn-sm btn-outline-primary" id="addEmployment">
-                                    <i class="bi bi-plus-circle"></i> Add Employment Record
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Employment cards are appended here dynamically, cloned from
-                             #employmentCardTemplate. Starts empty by design. -->
-                        <div id="employmentContainer"></div>
-
-                        <div id="noEmploymentRecords" class="text-center text-muted py-4 border rounded-3 bg-light">
-                            <i class="bi bi-inbox fs-3 d-block mb-1"></i>
-                            No records found. Click "Add Employment Record" to add one.
-                        </div>
-
-                        <div class="text-danger small mt-2" id="employmentError" style="display:none;">
-                            <i class="bi bi-exclamation-circle me-1"></i>Please add at least one employment record.
-                        </div>
-
-                        <!-- Inert template used to clone new employment cards from.
-                             Content inside <template> is never rendered or submitted. -->
-                        <template id="employmentCardTemplate">
-                            <div class="employment-card card border-0 shadow-sm mb-3">
-
-                                <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                                    <strong class="employment-card-number">#1</strong>
-
-                                    <button type="button" class="btn btn-sm btn-outline-danger removeEmployment">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </div>
-
-                                <div class="card-body">
-
-                                    <div class="row g-3">
-
-                                        <div class="col-md-4">
-                                            <div class="form-floating">
-                                                <input type="text" class="form-control" name="period_of_service[]"
-                                                    placeholder="Period of Service" data-required-group="cos">
-
-                                                <label>
-                                                    Period of Service
-                                                    <span class="required-mark">*</span>
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-4">
-                                            <div class="form-floating">
-                                                <input type="text" class="form-control" name="position[]"
-                                                    placeholder="Position" data-required-group="cos">
-
-                                                <label>
-                                                    Position
-                                                    <span class="required-mark">*</span>
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-4">
-                                            <div class="form-floating">
-
-                                                <select class="form-select" name="office_division[]"
-                                                    data-required-group="cos">
-
-                                                    <option value="" selected disabled>Select Office</option>
-
-                                                    <option value="Regional Office">Regional Office</option>
-                                                    <option value="Occidental Mindoro">Occidental Mindoro</option>
-                                                    <option value="Oriental Mindoro">Oriental Mindoro</option>
-                                                    <option value="Marinduque">Marinduque</option>
-                                                    <option value="Romblon">Romblon</option>
-                                                    <option value="Palawan">Palawan</option>
-                                                    <option value="IMSD">IMSD</option>
-                                                    <option value="TSSD">TSSD</option>
-                                                    <option value="MALSU">MALSU</option>
-                                                    <option value="ORD">ORD</option>
-
-                                                </select>
-
-                                                <label>
-                                                    Office / Division
-                                                    <span class="required-mark">*</span>
-                                                </label>
-
-                                            </div>
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-                        </template>
-
-                    </div>
-
-                    <!-- Permanent Employee fields -->
-                    <div class="dynamic-section" id="section-permanent" data-employee-category="permanent">
-                        <!-- No additional fields required -->
+                    <div class="invalid-feedback d-block" id="employeeCategoryError" style="display:none !important;">
+                        Please select your employee category.
                     </div>
                 </div>
 
-                <!-- ---------- SERVICE 6: Certification ---------- -->
-                <div class="dynamic-section" id="section-service6" data-service="service6">
-                    <hr class="section-divider">
-                    <p class="section-label"><i class="bi bi-patch-check"></i>Certification</p>
-
-                    <label class="form-label fw-semibold mb-2">Certification Needed <span class="required-mark">*</span>
-                        <span class="text-muted fw-normal">(select at least one)</span></label>
-                    <div class="row g-3" id="certificationChecks">
-                        <div class="col-md-6">
-                            <div class="choice-card">
-                                <input class="form-check-input mt-0" type="checkbox" name="certification[]"
-                                    id="certNoPending" value="No Pending Case">
-                                <label for="certNoPending">No Pending Case</label>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="choice-card">
-                                <input class="form-check-input mt-0" type="checkbox" name="certification[]"
-                                    id="certLastSalary" value="Last Salary Received">
-                                <label for="certLastSalary">Last Salary Received</label>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="choice-card">
-                                <input class="form-check-input mt-0" type="checkbox" name="certification[]"
-                                    id="certLeaveCredits" value="Leave Credits">
-                                <label for="certLeaveCredits">Leave Credits</label>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="choice-card">
-                                <input class="form-check-input mt-0" type="checkbox" name="certification[]"
-                                    id="certLeaveWithoutPay" value="Leave Without Pay (LWOP)">
-                                <label for="certLeaveWithoutPay">Leave Without Pay (LWOP)</label>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="choice-card">
-                                <input class="form-check-input mt-0" type="checkbox" name="certification[]"
-                                    id="certLeaveWithoutPayno" value="Leave Without Pay (NO LWOP)">
-                                <label for="certLeaveWithoutPayno">Leave Without Pay (NO LWOP)</label>
-                            </div>
-                        </div>
+                <!-- ---------- REPEATABLE ENTRIES ---------- -->
+                <div class="d-flex justify-content-between align-items-center mt-4 mb-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="selectAllEntries">
+                        <label class="form-check-label small text-muted" for="selectAllEntries">Select all</label>
                     </div>
-                    <div class="text-danger small mt-2" id="certificationError" style="display:none;">
-                        <i class="bi bi-exclamation-circle me-1"></i>Please select at least one certification.
-                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-danger d-none" id="deleteSelectedEntriesBtn">
+                        <i class="bi bi-trash3 me-1"></i>Delete Selected
+                    </button>
                 </div>
 
-                <!-- ---------- SERVICE 7: IPCR ---------- -->
-                <div class="dynamic-section" id="section-service7" data-service="service7">
-                    <hr class="section-divider">
-                    <p class="section-label">
-                        <i class="bi bi-bar-chart-line"></i> IPCR
-                    </p>
-
-                    <div class="row g-3">
-
-                        <!-- FROM MONTH -->
-                        <div class="col-md-3">
-                            <div class="form-floating">
-                                <select class="form-select" name="ipcr_from_month" id="ipcrFromMonth"
-                                    data-required-group="service7">
-                                    <option value="" selected disabled>Select Month</option>
-                                    <option>January</option>
-                                    <option>February</option>
-                                    <option>March</option>
-                                    <option>April</option>
-                                    <option>May</option>
-                                    <option>June</option>
-                                    <option>July</option>
-                                    <option>August</option>
-                                    <option>September</option>
-                                    <option>October</option>
-                                    <option>November</option>
-                                    <option>December</option>
-                                </select>
-                                <label>From Month <span class="required-mark">*</span></label>
-                            </div>
-                        </div>
-
-                        <!-- FROM YEAR -->
-                        <div class="col-md-3">
-                            <div class="form-floating">
-                                <select class="form-select" name="ipcr_from_year" id="ipcrFromYear"
-                                    data-required-group="service7">
-                                    <option value="" selected disabled>Select Year</option>
-                                    <?php
-                                    for ($year = date('Y'); $year >= 2000; $year--) {
-                                        echo "<option value='{$year}'>{$year}</option>";
-                                    }
-                                    ?>
-                                </select>
-                                <label>From Year <span class="required-mark">*</span></label>
-                            </div>
-                        </div>
-
-                        <!-- TO MONTH -->
-                        <div class="col-md-3">
-                            <div class="form-floating">
-                                <select class="form-select" name="ipcr_to_month" id="ipcrToMonth"
-                                    data-required-group="service7">
-                                    <option value="" selected disabled>Select Month</option>
-                                    <option>January</option>
-                                    <option>February</option>
-                                    <option>March</option>
-                                    <option>April</option>
-                                    <option>May</option>
-                                    <option>June</option>
-                                    <option>July</option>
-                                    <option>August</option>
-                                    <option>September</option>
-                                    <option>October</option>
-                                    <option>November</option>
-                                    <option>December</option>
-                                </select>
-                                <label>To Month <span class="required-mark">*</span></label>
-                            </div>
-                        </div>
-
-                        <!-- TO YEAR -->
-                        <div class="col-md-3">
-                            <div class="form-floating">
-                                <select class="form-select" name="ipcr_to_year" id="ipcrToYear"
-                                    data-required-group="service7">
-                                    <option value="" selected disabled>Select Year</option>
-                                    <?php
-                                    for ($year = date('Y'); $year >= 2000; $year--) {
-                                        echo "<option value='{$year}'>{$year}</option>";
-                                    }
-                                    ?>
-                                </select>
-                                <label>To Year <span class="required-mark">*</span></label>
-                            </div>
-                        </div>
-
-                    </div>
+                <div id="entriesContainer"><!-- entry blocks are appended here by JS, cloned from #entryTemplate -->
                 </div>
 
-                <!-- ---------- SERVICE 8: 201 Documents ---------- -->
-                <div class="dynamic-section" id="section-service8" data-service="service8">
-                    <hr class="section-divider">
-                    <p class="section-label"><i class="bi bi-folder2-open"></i>201 Documents</p>
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <div class="form-floating">
-                                <textarea class="form-control" id="specify201" name="specify_201"
-                                    placeholder="Please specify" data-required-group="service8" maxlength="255"
-                                    style="height: 140px;"></textarea>
-
-                                <label for="specify201">
-                                    Please Specify <span class="required-mark">*</span>
-                                </label>
-
-                                <div class="invalid-feedback">
-                                    Only letters, numbers, spaces, commas (,), periods (.), hyphens (-), parentheses (
-                                    ), and slashes (/) are allowed.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ---------- SERVICE 9: Others ---------- -->
-                <div class="dynamic-section" id="section-service9" data-service="service9">
-                    <hr class="section-divider">
-                    <p class="section-label">
-                        <i class="bi bi-chat-square-text"></i> Others
-                    </p>
-
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <div class="form-floating">
-                                <textarea class="form-control" id="otherRequest" name="other_request"
-                                    placeholder="Please specify" data-required-group="service9" maxlength="255"
-                                    style="height: 140px;"></textarea>
-
-                                <label for="otherRequest">
-                                    Please Specify <span class="required-mark">*</span>
-                                </label>
-
-                                <div class="invalid-feedback">
-                                    Please specify your request.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="text-center my-3">
+                    <button type="button" class="btn btn-outline-dole-outline" id="addEntryBtn">
+                        <i class="bi bi-plus-circle me-1"></i>Add Another
+                    </button>
                 </div>
 
                 <!-- ---------- ACTION BUTTONS ---------- -->
@@ -473,7 +142,430 @@
                 </div>
 
             </form>
+
+            <!-- =================================================================== -->
+            <!-- ENTRY TEMPLATE                                                       -->
+            <!-- Inert <template> content is never rendered or submitted as-is.       -->
+            <!-- __IDX__  -> replaced with the entry's numeric index (0, 1, 2, ...)   -->
+            <!-- __NUM__  -> replaced with the human-facing entry number (index + 1)  -->
+            <!-- =================================================================== -->
+            <template id="entryTemplate">
+                <div class="entry-block card border-0 shadow-sm mb-4" data-entry-index="__IDX__">
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between align-items-center mb-3 entry-header">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="form-check mb-0 entrySelectWrap d-none">
+                                    <input class="form-check-input entrySelectCheckbox" type="checkbox"
+                                        aria-label="Select this entry">
+                                </div>
+                                <h6 class="fw-bold mb-0"><i class="bi bi-file-earmark-text me-2"></i>Request Entry
+                                    #<span class="entry-number">__NUM__</span></h6>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-danger removeEntryBtn d-none">
+                                <i class="bi bi-x-lg"></i> Remove
+                            </button>
+                        </div>
+
+                        <div class="col-12 py-3">
+                            <div class="form-floating">
+
+                                <select class="form-select" name="entries[__IDX__][service_availed]"
+                                    id="serviceAvailed__IDX__" required>
+                                    <option value="" selected disabled>Select a service</option>
+                                    <option value="service1" data-category="permanent">Service Record</option>
+                                    <option value="service5" data-category="cos,permanent">Certificate of Employment
+                                    </option>
+                                    <option value="service2" data-category="permanent">Certificate with Compensation
+                                    </option>
+                                    <option value="service6" data-category="permanent">Certification</option>
+                                    <option value="service7" data-category="permanent">IPCR</option>
+                                    <option value="service8" data-category="permanent">201 Documents</option>
+                                    <option value="service10" data-category="cos">Performance Evaluation</option>
+                                    <option value="service11" data-category="cos">Payslip</option>
+                                    <option value="service12" data-category="cos">Contract of Service</option>
+                                    <option value="service9" data-category="cos,permanent">Others</option>
+                                </select>
+                                <label for="serviceAvailed__IDX__">Service Availed <span
+                                        class="required-mark">*</span></label>
+                                <div class="invalid-feedback">Please select a service.</div>
+                            </div>
+                        </div>
+                        <!-- ---------- SERVICE PURPOSE ---------- -->
+                        <div class="col-12 py-3">
+                            <div class="form-floating">
+
+                                <textarea class="form-control" name="entries[__IDX__][service_purpose]"
+                                    id="servicePurpose__IDX__" placeholder="Please state your purpose" maxlength="500"
+                                    style="height: 140px;"></textarea>
+
+                                <label for="servicePurpose__IDX__">
+                                    Purpose / Request Details
+                                </label>
+
+                                <div class="invalid-feedback">
+                                    Please specify the purpose of your request.
+                                </div>
+
+                                <div class="form-text">
+                                    Please provide the reason why you need this HR service.
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- ================================================= -->
+                        <!-- SERVICE-SPECIFIC SECTIONS (shown/hidden by JS)     -->
+                        <!-- ================================================= -->
+
+                        <!-- ---------- SERVICE 5: Certificate of Employment ---------- -->
+                        <div class="dynamic-section" id="section-service5__IDX__" data-service="service5">
+                            <!-- COS Employee fields -->
+                            <div class="dynamic-section" id="section-cos__IDX__" data-employee-category="cos">
+
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0 fw-bold">
+                                        <i class="bi bi-briefcase me-2"></i>Employment History <span
+                                            class="required-mark">*</span>
+                                    </h6>
+
+                                    <div class="d-flex gap-2">
+                                        <button type="button" class="btn btn-sm btn-outline-danger d-none"
+                                            id="deleteAllEmployment__IDX__">
+                                            <i class="bi bi-trash3"></i> Delete All
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-primary"
+                                            id="addEmployment__IDX__">
+                                            <i class="bi bi-plus-circle"></i> Add Employment Record
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Employment cards are appended here dynamically, cloned from
+                                     #employmentCardTemplate__IDX__. Starts empty by design. -->
+                                <div id="employmentContainer__IDX__"></div>
+
+                                <div id="noEmploymentRecords__IDX__"
+                                    class="text-center text-muted py-4 border rounded-3 bg-light">
+                                    <i class="bi bi-inbox fs-3 d-block mb-1"></i>
+                                    No records found. Click "Add Employment Record" to add one.
+                                </div>
+
+                                <div class="text-danger small mt-2" id="employmentError__IDX__" style="display:none;">
+                                    <i class="bi bi-exclamation-circle me-1"></i>Please add at least one employment
+                                    record.
+                                </div>
+
+                                <!-- Inert template used to clone new employment cards from.
+                                     Content inside <template> is never rendered or submitted. -->
+                                <template id="employmentCardTemplate__IDX__">
+                                    <div class="employment-card card border-0 shadow-sm mb-3">
+
+                                        <div
+                                            class="card-header bg-light d-flex justify-content-between align-items-center">
+                                            <strong class="employment-card-number">#1</strong>
+
+                                            <button type="button"
+                                                class="btn btn-sm btn-outline-danger removeEmployment">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+
+                                        <div class="card-body">
+
+                                            <div class="row g-3">
+
+                                                <div class="col-md-4">
+                                                    <div class="form-floating">
+                                                        <input type="text" class="form-control"
+                                                            name="entries[__IDX__][period_of_service][]"
+                                                            placeholder="Period of Service" data-required-group="cos">
+
+                                                        <label>
+                                                            Period of Service
+                                                            <span class="required-mark">*</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-floating">
+                                                        <input type="text" class="form-control"
+                                                            name="entries[__IDX__][position][]" placeholder="Position"
+                                                            data-required-group="cos">
+
+                                                        <label>
+                                                            Position
+                                                            <span class="required-mark">*</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-floating">
+
+                                                        <select class="form-select"
+                                                            name="entries[__IDX__][office_division][]"
+                                                            data-required-group="cos">
+
+                                                            <option value="" selected disabled>Select Office</option>
+
+                                                            <option value="Regional Office">Regional Office</option>
+                                                            <option value="Occidental Mindoro">Occidental Mindoro
+                                                            </option>
+                                                            <option value="Oriental Mindoro">Oriental Mindoro</option>
+                                                            <option value="Marinduque">Marinduque</option>
+                                                            <option value="Romblon">Romblon</option>
+                                                            <option value="Palawan">Palawan</option>
+                                                            <option value="IMSD">IMSD</option>
+                                                            <option value="TSSD">TSSD</option>
+                                                            <option value="MALSU">MALSU</option>
+                                                            <option value="ORD">ORD</option>
+
+                                                        </select>
+
+                                                        <label>
+                                                            Office / Division
+                                                            <span class="required-mark">*</span>
+                                                        </label>
+
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </template>
+
+                            </div>
+                        </div>
+
+                        <!-- ---------- SERVICE 6: Certification ---------- -->
+                        <div class="dynamic-section" id="section-service6__IDX__" data-service="service6">
+                            <hr class="section-divider">
+                            <p class="section-label"><i class="bi bi-patch-check"></i>Certification</p>
+
+                            <label class="form-label fw-semibold mb-2">Certification Needed <span
+                                    class="required-mark">*</span>
+                                <span class="text-muted fw-normal">(select at least one)</span></label>
+                            <div class="row g-3" id="certificationChecks__IDX__">
+                                <div class="col-md-6">
+                                    <div class="choice-card">
+                                        <input class="form-check-input mt-0" type="checkbox"
+                                            name="entries[__IDX__][certification][]" id="certNoPending__IDX__"
+                                            value="No Pending Case">
+                                        <label for="certNoPending__IDX__">No Pending Case</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="choice-card">
+                                        <input class="form-check-input mt-0" type="checkbox"
+                                            name="entries[__IDX__][certification][]" id="certLastSalary__IDX__"
+                                            value="Last Salary Received">
+                                        <label for="certLastSalary__IDX__">Last Salary Received</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="choice-card">
+                                        <input class="form-check-input mt-0" type="checkbox"
+                                            name="entries[__IDX__][certification][]" id="certLeaveCredits__IDX__"
+                                            value="Leave Credits">
+                                        <label for="certLeaveCredits__IDX__">Leave Credits</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="choice-card">
+                                        <input class="form-check-input mt-0" type="checkbox"
+                                            name="entries[__IDX__][certification][]" id="certLeaveWithoutPay__IDX__"
+                                            value="Leave Without Pay (LWOP)">
+                                        <label for="certLeaveWithoutPay__IDX__">Leave Without Pay (LWOP)</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="choice-card">
+                                        <input class="form-check-input mt-0" type="checkbox"
+                                            name="entries[__IDX__][certification][]" id="certLeaveWithoutPayno__IDX__"
+                                            value="Leave Without Pay (NO LWOP)">
+                                        <label for="certLeaveWithoutPayno__IDX__">Leave Without Pay (NO LWOP)</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-danger small mt-2" id="certificationError__IDX__" style="display:none;">
+                                <i class="bi bi-exclamation-circle me-1"></i>Please select at least one certification.
+                            </div>
+                        </div>
+
+                        <!-- ---------- SERVICE 7: IPCR ---------- -->
+                        <div class="dynamic-section" id="section-service7__IDX__" data-service="service7">
+                            <hr class="section-divider">
+                            <p class="section-label">
+                                <i class="bi bi-bar-chart-line"></i> IPCR
+                            </p>
+
+                            <div class="row g-3">
+
+                                <!-- FROM MONTH -->
+                                <div class="col-md-3">
+                                    <div class="form-floating">
+                                        <select class="form-select" name="entries[__IDX__][ipcr_from_month]"
+                                            id="ipcrFromMonth__IDX__" data-required-group="service7">
+                                            <option value="" selected disabled>Select Month</option>
+                                            <option>January</option>
+                                            <option>February</option>
+                                            <option>March</option>
+                                            <option>April</option>
+                                            <option>May</option>
+                                            <option>June</option>
+                                            <option>July</option>
+                                            <option>August</option>
+                                            <option>September</option>
+                                            <option>October</option>
+                                            <option>November</option>
+                                            <option>December</option>
+                                        </select>
+                                        <label>From Month <span class="required-mark">*</span></label>
+                                    </div>
+                                </div>
+
+                                <!-- FROM YEAR -->
+                                <div class="col-md-3">
+                                    <div class="form-floating">
+                                        <select class="form-select" name="entries[__IDX__][ipcr_from_year]"
+                                            id="ipcrFromYear__IDX__" data-required-group="service7">
+                                            <option value="" selected disabled>Select Year</option>
+                                            <?php
+                                            for ($year = date('Y'); $year >= 2000; $year--) {
+                                                echo "<option value='{$year}'>{$year}</option>";
+                                            }
+                                            ?>
+                                        </select>
+                                        <label>From Year <span class="required-mark">*</span></label>
+                                    </div>
+                                </div>
+
+                                <!-- TO MONTH -->
+                                <div class="col-md-3">
+                                    <div class="form-floating">
+                                        <select class="form-select" name="entries[__IDX__][ipcr_to_month]"
+                                            id="ipcrToMonth__IDX__" data-required-group="service7">
+                                            <option value="" selected disabled>Select Month</option>
+                                            <option>January</option>
+                                            <option>February</option>
+                                            <option>March</option>
+                                            <option>April</option>
+                                            <option>May</option>
+                                            <option>June</option>
+                                            <option>July</option>
+                                            <option>August</option>
+                                            <option>September</option>
+                                            <option>October</option>
+                                            <option>November</option>
+                                            <option>December</option>
+                                        </select>
+                                        <label>To Month <span class="required-mark">*</span></label>
+                                    </div>
+                                </div>
+
+                                <!-- TO YEAR -->
+                                <div class="col-md-3">
+                                    <div class="form-floating">
+                                        <select class="form-select" name="entries[__IDX__][ipcr_to_year]"
+                                            id="ipcrToYear__IDX__" data-required-group="service7">
+                                            <option value="" selected disabled>Select Year</option>
+                                            <?php
+                                            for ($year = date('Y'); $year >= 2000; $year--) {
+                                                echo "<option value='{$year}'>{$year}</option>";
+                                            }
+                                            ?>
+                                        </select>
+                                        <label>To Year <span class="required-mark">*</span></label>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- ---------- SERVICE 8: 201 Documents ---------- -->
+                        <div class="dynamic-section" id="section-service8__IDX__" data-service="service8">
+                            <hr class="section-divider">
+                            <p class="section-label"><i class="bi bi-folder2-open"></i>201 Documents</p>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <textarea class="form-control" id="specify201__IDX__"
+                                            name="entries[__IDX__][specify_201]" placeholder="Please specify"
+                                            data-required-group="service8" maxlength="255"
+                                            style="height: 140px;"></textarea>
+
+                                        <label for="specify201__IDX__">
+                                            Please Specify <span class="required-mark">*</span>
+                                        </label>
+
+                                        <div class="invalid-feedback">
+                                            Only letters, numbers, spaces, commas (,), periods (.), hyphens (-),
+                                            parentheses (
+                                            ), and slashes (/) are allowed.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ---------- SERVICE 9: Others ---------- -->
+                        <div class="dynamic-section" id="section-service9__IDX__" data-service="service9">
+                            <hr class="section-divider">
+                            <p class="section-label">
+                                <i class="bi bi-chat-square-text"></i> Others
+                            </p>
+
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <textarea class="form-control" id="otherRequest__IDX__"
+                                            name="entries[__IDX__][other_request]" placeholder="Please specify"
+                                            data-required-group="service9" maxlength="255"
+                                            style="height: 140px;"></textarea>
+
+                                        <label for="otherRequest__IDX__">
+                                            Please Specify <span class="required-mark">*</span>
+                                        </label>
+
+                                        <div class="invalid-feedback">
+                                            Please specify your request.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- ---------- SERVICE 12: Contract of Service (COS only) ---------- -->
+                        <div class="dynamic-section" id="section-service12__IDX__" data-service="service12">
+                            <hr class="section-divider">
+                            <p class="section-label"><i class="bi bi-file-earmark-ruled"></i>Contract of Service</p>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <select class="form-select" name="entries[__IDX__][contract_of_service_year]"
+                                            id="contractYear__IDX__" data-required-group="service12">
+                                            <option value="" selected disabled>Select Year</option>
+                                            <?php for ($year = date('Y'); $year >= 2000; $year--): ?>
+                                                <option value="<?= $year ?>"><?= $year ?></option>
+                                            <?php endfor; ?>
+                                        </select>
+                                        <label for="contractYear__IDX__">Contract Year <span
+                                                class="required-mark">*</span></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </template>
+
         </div>
+
 
         <p class="footer-note">DOLE MIMAROPA ePortal &middot; Human Resource Unit &middot; For assistance, contact your
             HR focal person.</p>
@@ -536,10 +628,18 @@
         'use strict';
 
         /* =========================================================
-           ELEMENT REFERENCES
+           ELEMENT REFERENCES (shared, not per-entry)
         ========================================================= */
         const form = document.getElementById('hrRequestForm');
-        const serviceSelect = document.getElementById('serviceAvailed');
+        const entriesContainer = document.getElementById('entriesContainer');
+        const entryTemplate = document.getElementById('entryTemplate');
+        const addEntryBtn = document.getElementById('addEntryBtn');
+        const selectAllEntries = document.getElementById('selectAllEntries');
+        const deleteSelectedEntriesBtn = document.getElementById('deleteSelectedEntriesBtn');
+        const fullNameField = document.getElementById('fullName');
+        const contactNumberField = document.getElementById('contactNumber');
+        const emailAddressField = document.getElementById('emailAddress');
+        const employeeCategoryError = document.getElementById('employeeCategoryError');
         const cancelBtn = document.getElementById('cancelBtn');
         const confirmModalEl = document.getElementById('confirmModal');
         const confirmModal = new bootstrap.Modal(confirmModalEl);
@@ -547,67 +647,107 @@
         const confirmSubmitBtn = document.getElementById('confirmSubmitBtn');
         const loadingOverlay = document.getElementById('loadingOverlay');
         const summaryList = document.getElementById('summaryList');
-        const certificationError = document.getElementById('certificationError');
-        const empCategoryError = document.getElementById('empCategoryError');
         const formAlert = document.getElementById('formAlert');
         const formAlertText = document.getElementById('formAlertText');
         const dateRequestedDisplay = document.getElementById('dateRequestedDisplay');
         const dateRequestedHidden = document.getElementById('dateRequestedHidden');
         const draftRestoredAlert = document.getElementById('draftRestoredAlert');
         const clearDraftBtn = document.getElementById('clearDraftBtn');
-        const employmentContainer = document.getElementById('employmentContainer');
-        const employmentTemplate = document.getElementById('employmentCardTemplate');
-        const addEmploymentBtn = document.getElementById('addEmployment');
-        const deleteAllEmploymentBtn = document.getElementById('deleteAllEmployment');
-        const noEmploymentRecords = document.getElementById('noEmploymentRecords');
-        const employmentError = document.getElementById('employmentError');
-        const otherRequest = document.getElementById('otherRequest');
-        const specify201 = document.getElementById('specify201');
 
-        // All service-specific sections keyed by service value
-        const serviceSections = document.querySelectorAll('.dynamic-section[data-service]');
-        // Employee-category sub-sections (only inside Service 5)
-        const employeeCategorySections = document.querySelectorAll('.dynamic-section[data-employee-category]');
-        const employeeCategoryRadios = document.querySelectorAll('input[name="employee_category"]');
-        const certificationCheckboxes = document.querySelectorAll('#certificationChecks input[type="checkbox"]');
+
+        const allowedPattern = /^[A-Za-z0-9\s.,()\/-]*$/;
+        let entryCount = 0;
+        let restoringDraft = false; // guards against saving while we are restoring
+
+        const serviceLabels = {
+            service1: 'Service Record',
+            service2: 'Certificate with Compensation',
+            service5: 'Certificate of Employment',
+            service6: 'Certification',
+            service7: 'IPCR',
+            service8: '201 Documents',
+            service9: 'Others',
+            service10: 'Performance Evaluation',
+            service11: 'Payslip',
+            service12: 'Contract of Service'
+        };
+
+        /* =========================================================
+           SMALL SCOPED-QUERY HELPERS
+           Every lookup below takes an .entry-block element and finds
+           fields by id-PREFIX, so it works no matter what index that
+           entry ended up with.
+        ========================================================= */
+        function entries() {
+            return Array.from(entriesContainer.querySelectorAll('.entry-block'));
+        }
+        function byPrefix(entryEl, prefix) {
+            return entryEl.querySelector('[id^="' + prefix + '"]');
+        }
+        function serviceSelectOf(entryEl) { return byPrefix(entryEl, 'serviceAvailed'); }
+        function servicePurposeOf(entryEl) { return byPrefix(entryEl, 'servicePurpose'); }
+        function empCategoryErrorOf(entryEl) { return byPrefix(entryEl, 'empCategoryError'); }
+        function employmentErrorOf(entryEl) { return byPrefix(entryEl, 'employmentError'); }
+        function certificationErrorOf(entryEl) { return byPrefix(entryEl, 'certificationError'); }
+        function employmentContainerOf(entryEl) { return byPrefix(entryEl, 'employmentContainer'); }
+        function employmentTemplateOf(entryEl) { return byPrefix(entryEl, 'employmentCardTemplate'); }
+        function noEmploymentRecordsOf(entryEl) { return byPrefix(entryEl, 'noEmploymentRecords'); }
+        function deleteAllEmploymentBtnOf(entryEl) { return byPrefix(entryEl, 'deleteAllEmployment'); }
+        function addEmploymentBtnOf(entryEl) { return byPrefix(entryEl, 'addEmployment'); }
+        function otherRequestOf(entryEl) { return byPrefix(entryEl, 'otherRequest'); }
+        function specify201Of(entryEl) { return byPrefix(entryEl, 'specify201'); }
+        function serviceSectionsOf(entryEl) { return entryEl.querySelectorAll('.dynamic-section[data-service]'); }
+        function employeeCategorySectionsOf(entryEl) { return entryEl.querySelectorAll('.dynamic-section[data-employee-category]'); }
+        function employeeCategoryRadiosOf(entryEl) { return entryEl.querySelectorAll('input[id^="empCategory"]'); }
+        function certificationCheckboxesOf(entryEl) { return entryEl.querySelectorAll('input[type="checkbox"][name*="[certification]"]'); }
+        function checkedEmployeeCategoryOf(entryEl) { return entryEl.querySelector('input[id^="empCategory"]:checked'); }
 
         /* =========================================================
            DRAFT PERSISTENCE (localStorage) — keeps user-entered data
            across page reloads/refreshes until the form is submitted
-           or the user clears it manually.
+           or the user clears it manually. Now stores an ARRAY of
+           entries.
         ========================================================= */
         const DRAFT_KEY = 'doleHrRequestFormDraft';
-        let restoringDraft = false; // guards against saving while we are restoring
 
-        function collectDraftData() {
+        function collectEntryData(entryEl) {
             const employment = [];
-            document.querySelectorAll('.employment-card').forEach(function (card) {
+            entryEl.querySelectorAll('.employment-card').forEach(function (card) {
                 employment.push({
-                    period: card.querySelector('input[name="period_of_service[]"]').value,
-                    position: card.querySelector('input[name="position[]"]').value,
-                    office: card.querySelector('select[name="office_division[]"]').value
+                    period: card.querySelector('input[name*="[period_of_service]"]').value,
+                    position: card.querySelector('input[name*="[position]"]').value,
+                    office: card.querySelector('select[name*="[office_division]"]').value
                 });
             });
 
-            const category = document.querySelector('input[name="employee_category"]:checked');
+            const category = checkedEmployeeCategoryOf(entryEl);
+            const otherRequest = otherRequestOf(entryEl);
+            const specify201 = specify201Of(entryEl);
 
             return {
-                fullname: document.getElementById('fullName').value,
-                contact_number: document.getElementById('contactNumber').value,
-                email_address: document.getElementById('emailAddress').value,
-                service_availed: serviceSelect.value,
-                service_purpose: document.getElementById('servicePurpose').value,
-                employee_category: category ? category.value : '',
+                service_availed: serviceSelectOf(entryEl).value,
+                service_purpose: servicePurposeOf(entryEl).value,
                 employment: employment,
-                certification: Array.from(certificationCheckboxes)
+                certification: Array.from(certificationCheckboxesOf(entryEl))
                     .filter(function (cb) { return cb.checked; })
                     .map(function (cb) { return cb.value; }),
-                ipcr_from_month: document.getElementById('ipcrFromMonth').value,
-                ipcr_from_year: document.getElementById('ipcrFromYear').value,
-                ipcr_to_month: document.getElementById('ipcrToMonth').value,
-                ipcr_to_year: document.getElementById('ipcrToYear').value,
+                contract_of_service_year: byPrefix(entryEl, 'contractYear') ? byPrefix(entryEl, 'contractYear').value : '',
+                ipcr_from_month: byPrefix(entryEl, 'ipcrFromMonth').value,
+                ipcr_from_year: byPrefix(entryEl, 'ipcrFromYear').value,
+                ipcr_to_month: byPrefix(entryEl, 'ipcrToMonth').value,
+                ipcr_to_year: byPrefix(entryEl, 'ipcrToYear').value,
                 specify_201: specify201 ? specify201.value : '',
                 other_request: otherRequest ? otherRequest.value : ''
+            };
+        }
+
+        function collectDraftData() {
+            return {
+                fullname: fullNameField.value,
+                contact_number: contactNumberField.value,
+                email_address: emailAddressField.value,
+                employee_category: getGlobalCategory(),
+                entries: entries().map(collectEntryData)
             };
         }
 
@@ -626,6 +766,56 @@
             } catch (e) { }
         }
 
+        function entryHasContent(data) {
+            return !!(data.service_availed || data.service_purpose ||
+                (data.employment && data.employment.some(function (r) { return r.period || r.position || r.office; })) ||
+                (data.certification && data.certification.length) ||
+                data.specify_201 || data.other_request);
+        }
+
+        function fillEntryFromData(entryEl, data) {
+            servicePurposeOf(entryEl).value = data.service_purpose || '';
+
+            const serviceSelect = serviceSelectOf(entryEl);
+            if (data.service_availed) {
+                serviceSelect.value = data.service_availed;
+                serviceSelect.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            const contractYear = byPrefix(entryEl, 'contractYear');
+            if (contractYear && data.contract_of_service_year) contractYear.value = data.contract_of_service_year;
+
+            const addEmploymentBtn = addEmploymentBtnOf(entryEl);
+            if (data.employment && data.employment.length > 0 && addEmploymentBtn) {
+                while (entryEl.querySelectorAll('.employment-card').length < data.employment.length) {
+                    addEmploymentBtn.click();
+                }
+                const cards = entryEl.querySelectorAll('.employment-card');
+                data.employment.forEach(function (rec, index) {
+                    if (!cards[index]) return;
+                    cards[index].querySelector('input[name*="[period_of_service]"]').value = rec.period || '';
+                    cards[index].querySelector('input[name*="[position]"]').value = rec.position || '';
+                    cards[index].querySelector('select[name*="[office_division]"]').value = rec.office || '';
+                });
+            }
+
+            if (data.certification && data.certification.length) {
+                certificationCheckboxesOf(entryEl).forEach(function (cb) {
+                    cb.checked = data.certification.indexOf(cb.value) !== -1;
+                });
+            }
+
+            if (data.ipcr_from_month) byPrefix(entryEl, 'ipcrFromMonth').value = data.ipcr_from_month;
+            if (data.ipcr_from_year) byPrefix(entryEl, 'ipcrFromYear').value = data.ipcr_from_year;
+            if (data.ipcr_to_month) byPrefix(entryEl, 'ipcrToMonth').value = data.ipcr_to_month;
+            if (data.ipcr_to_year) byPrefix(entryEl, 'ipcrToYear').value = data.ipcr_to_year;
+
+            const otherRequest = otherRequestOf(entryEl);
+            const specify201 = specify201Of(entryEl);
+            if (specify201 && data.specify_201) specify201.value = data.specify_201;
+            if (otherRequest && data.other_request) otherRequest.value = data.other_request;
+        }
+
         function restoreDraft() {
             let data;
             try {
@@ -637,65 +827,34 @@
             }
 
             if (!data) return;
-
-            // Only show the "restored" banner if there's actually something meaningful saved
-            const hasContent =
-                data.fullname || data.contact_number || data.email_address ||
-                data.service_availed || data.service_purpose ||
-                (data.employment && data.employment.some(function (r) { return r.period || r.position || r.office; })) ||
-                (data.certification && data.certification.length) ||
-                data.specify_201 || data.other_request;
-
-            if (!hasContent) return;
+            const savedEntries = Array.isArray(data.entries) ? data.entries : [];
+            const meaningfulEntries = savedEntries.filter(entryHasContent);
+            const hasCommonContent = !!(data.fullname || data.contact_number || data.email_address);
+            if (meaningfulEntries.length === 0 && !hasCommonContent) return;
 
             restoringDraft = true;
 
-            document.getElementById('fullName').value = data.fullname || '';
-            document.getElementById('contactNumber').value = data.contact_number || '';
-            document.getElementById('emailAddress').value = data.email_address || '';
-            document.getElementById('servicePurpose').value = data.service_purpose || '';
-
-            if (data.service_availed) {
-                serviceSelect.value = data.service_availed;
-                serviceSelect.dispatchEvent(new Event('change'));
-            }
+            fullNameField.value = data.fullname || '';
+            contactNumberField.value = data.contact_number || '';
+            emailAddressField.value = data.email_address || '';
 
             if (data.employee_category) {
-                const radio = document.querySelector(
-                    'input[name="employee_category"][value="' + data.employee_category + '"]'
-                );
+                const radio = document.querySelector('input[name="employee_category"][value="' + data.employee_category + '"]');
                 if (radio) {
                     radio.checked = true;
-                    radio.dispatchEvent(new Event('change'));
+                    radio.dispatchEvent(new Event('change', { bubbles: true }));
                 }
             }
 
-            if (data.employment && data.employment.length > 0 && addEmploymentBtn) {
-                while (document.querySelectorAll('.employment-card').length < data.employment.length) {
-                    addEmploymentBtn.click();
-                }
-                const cards = document.querySelectorAll('.employment-card');
-                data.employment.forEach(function (rec, index) {
-                    if (!cards[index]) return;
-                    cards[index].querySelector('input[name="period_of_service[]"]').value = rec.period || '';
-                    cards[index].querySelector('input[name="position[]"]').value = rec.position || '';
-                    cards[index].querySelector('select[name="office_division[]"]').value = rec.office || '';
-                });
+            // Ensure we have exactly as many entry blocks as saved entries.
+            while (entries().length < savedEntries.length) {
+                addEntry();
             }
 
-            if (data.certification && data.certification.length) {
-                certificationCheckboxes.forEach(function (cb) {
-                    cb.checked = data.certification.indexOf(cb.value) !== -1;
-                });
-            }
-
-            if (data.ipcr_from_month) document.getElementById('ipcrFromMonth').value = data.ipcr_from_month;
-            if (data.ipcr_from_year) document.getElementById('ipcrFromYear').value = data.ipcr_from_year;
-            if (data.ipcr_to_month) document.getElementById('ipcrToMonth').value = data.ipcr_to_month;
-            if (data.ipcr_to_year) document.getElementById('ipcrToYear').value = data.ipcr_to_year;
-
-            if (specify201 && data.specify_201) specify201.value = data.specify_201;
-            if (otherRequest && data.other_request) otherRequest.value = data.other_request;
+            const entryEls = entries();
+            savedEntries.forEach(function (entryData, i) {
+                if (entryEls[i]) fillEntryFromData(entryEls[i], entryData);
+            });
 
             restoringDraft = false;
 
@@ -705,16 +864,13 @@
         if (clearDraftBtn) {
             clearDraftBtn.addEventListener('click', function () {
                 clearDraft();
-                form.reset();
-                hideAllServiceSections();
-                hideAllEmployeeCategorySections();
-                employmentContainer.innerHTML = '';
-                updateEmploymentNumbers();
+                resetForm();
                 draftRestoredAlert.classList.add('d-none');
             });
         }
 
-        // Autosave on every field change/input across the whole form
+        // Autosave on every field change/input across the whole form.
+        // Delegated on the form, so dynamically added entries are covered automatically.
         form.addEventListener('input', saveDraft);
         form.addEventListener('change', saveDraft);
 
@@ -742,17 +898,17 @@
         }
 
         /* =========================================================
-           HIDE ALL DYNAMIC SECTIONS INITIALLY
+           SHOW/HIDE DYNAMIC SECTIONS (scoped to one entry)
         ========================================================= */
-        function hideAllServiceSections() {
-            serviceSections.forEach(function (section) {
+        function hideAllServiceSections(entryEl) {
+            serviceSectionsOf(entryEl).forEach(function (section) {
                 section.classList.remove('active');
                 toggleRequiredGroup(section, false);
             });
         }
 
-        function hideAllEmployeeCategorySections() {
-            employeeCategorySections.forEach(function (section) {
+        function hideAllEmployeeCategorySections(entryEl) {
+            employeeCategorySectionsOf(entryEl).forEach(function (section) {
                 section.classList.remove('active');
                 toggleRequiredGroup(section, false);
             });
@@ -777,87 +933,33 @@
             });
         }
 
-        /* =========================================================
-           SHOW SECTION BASED ON SELECTED SERVICE
-        ========================================================= */
-        serviceSelect.addEventListener('change', function () {
-            hideAllServiceSections();
-            hideAllEmployeeCategorySections();
-            if (!restoringDraft) {
-                resetEmployeeCategorySelection();
-            }
-            formAlert.classList.add('d-none');
-
-            const targetSection = document.getElementById('section-' + this.value);
-
-            if (targetSection) {
-                targetSection.classList.add('active');
-                toggleRequiredGroup(targetSection, true);
-            }
-        });
-
-        /* =========================================================
-           SERVICE 5: EMPLOYEE CATEGORY SWITCH (COS vs PERMANENT)
-        ========================================================= */
-        function resetEmployeeCategorySelection() {
-            employeeCategoryRadios.forEach(function (radio) {
+        function resetEmployeeCategorySelection(entryEl) {
+            employeeCategoryRadiosOf(entryEl).forEach(function (radio) {
                 radio.checked = false;
             });
-            empCategoryError.style.setProperty('display', 'none', 'important');
+            const empCategoryError = empCategoryErrorOf(entryEl);
+            const employmentError = employmentErrorOf(entryEl);
+            if (empCategoryError) empCategoryError.style.setProperty('display', 'none', 'important');
             if (employmentError) employmentError.style.display = 'none';
         }
 
-        employeeCategoryRadios.forEach(function (radio) {
-            radio.addEventListener('change', function () {
-                hideAllEmployeeCategorySections();
-                empCategoryError.style.setProperty('display', 'none', 'important');
-                if (employmentError) employmentError.style.display = 'none';
-
-                const chosen = this.value;
-                const targetSection = document.getElementById('section-' + chosen);
-                if (targetSection) {
-                    targetSection.classList.add('active');
-                    toggleRequiredGroup(targetSection, true);
-                }
-            });
-        });
-
         /* =========================================================
-           SERVICE 6: AT LEAST ONE CERTIFICATION CHECKBOX
+           CUSTOM VALIDATION (scoped to one entry)
         ========================================================= */
-        function isCertificationValid() {
-            if (serviceSelect.value !== 'service6') return true;
-            return Array.from(certificationCheckboxes).some(function (cb) {
-                return cb.checked;
-            });
+        function isCertificationValid(entryEl) {
+            if (serviceSelectOf(entryEl).value !== 'service6') return true;
+            return Array.from(certificationCheckboxesOf(entryEl)).some(function (cb) { return cb.checked; });
         }
 
-        certificationCheckboxes.forEach(function (cb) {
-            cb.addEventListener('change', function () {
-                if (isCertificationValid()) {
-                    certificationError.style.display = 'none';
-                }
-            });
-        });
-
-        /* =========================================================
-           CUSTOM VALIDATION: EMPLOYEE CATEGORY RADIO (SERVICE 5)
-        ========================================================= */
-        function isEmployeeCategoryValid() {
-            if (serviceSelect.value !== 'service5') return true;
-            return Array.from(employeeCategoryRadios).some(function (r) {
-                return r.checked;
-            });
+        function isEmployeeCategoryValid(entryEl) {
+            if (serviceSelectOf(entryEl).value !== 'service5') return true;
+            return Array.from(employeeCategoryRadiosOf(entryEl)).some(function (r) { return r.checked; });
         }
 
-        /* =========================================================
-           CUSTOM VALIDATION: AT LEAST ONE EMPLOYMENT RECORD (COS)
-        ========================================================= */
-        function isEmploymentValid() {
-            if (serviceSelect.value !== 'service5') return true;
-            const category = document.querySelector('input[name="employee_category"]:checked');
-            if (!category || category.value !== 'cos') return true;
-            return document.querySelectorAll('.employment-card').length > 0;
+        function isEmploymentValid(entryEl) {
+            if (serviceSelectOf(entryEl).value !== 'service5') return true;
+            if (getGlobalCategory() !== 'cos') return true;
+            return entryEl.querySelectorAll('.employment-card').length > 0;
         }
 
         /* =========================================================
@@ -870,6 +972,312 @@
         }
 
         /* =========================================================
+           EMPLOYMENT HISTORY: numbering / empty-state (scoped)
+        ========================================================= */
+        function updateEmploymentNumbers(entryEl) {
+            const cards = entryEl.querySelectorAll('.employment-card');
+
+            cards.forEach(function (card, index) {
+                const numberEl = card.querySelector('.employment-card-number');
+                if (numberEl) numberEl.textContent = '#' + (index + 1);
+            });
+
+            const hasRecords = cards.length > 0;
+            const noEmploymentRecords = noEmploymentRecordsOf(entryEl);
+            const deleteAllEmploymentBtn = deleteAllEmploymentBtnOf(entryEl);
+            const employmentError = employmentErrorOf(entryEl);
+
+            if (noEmploymentRecords) noEmploymentRecords.classList.toggle('d-none', hasRecords);
+            if (deleteAllEmploymentBtn) deleteAllEmploymentBtn.classList.toggle('d-none', !hasRecords);
+            if (employmentError && isEmploymentValid(entryEl)) employmentError.style.display = 'none';
+        }
+
+        function applyEmploymentCardRequired(entryEl, card) {
+            const cosSection = entryEl.querySelector('[id^="section-cos"]');
+            const isRequired = cosSection && cosSection.classList.contains('active');
+
+            card.querySelectorAll('[data-required-group="cos"]').forEach(function (field) {
+                if (isRequired) {
+                    field.setAttribute('required', 'required');
+                } else {
+                    field.removeAttribute('required');
+                }
+            });
+        }
+
+        function addEmploymentCard(entryEl) {
+            const employmentTemplate = employmentTemplateOf(entryEl);
+            const employmentContainer = employmentContainerOf(entryEl);
+            if (!employmentTemplate || !employmentContainer) return;
+
+            const fragment = employmentTemplate.content.cloneNode(true);
+            const card = fragment.querySelector('.employment-card');
+
+            employmentContainer.appendChild(fragment);
+
+            applyEmploymentCardRequired(entryEl, card);
+            updateEmploymentNumbers(entryEl);
+
+            if (!restoringDraft) saveDraft();
+        }
+
+        /* =========================================================
+           CHARACTER RESTRICTION (Service 8 / Service 9 textareas)
+        ========================================================= */
+        function applyCharRestriction(field) {
+            if (!allowedPattern.test(field.value)) {
+                field.setCustomValidity(
+                    'Only letters, numbers, spaces, commas, periods, hyphens, parentheses, and slashes are allowed.'
+                );
+                field.classList.add('is-invalid');
+            } else {
+                field.setCustomValidity('');
+                field.classList.remove('is-invalid');
+            }
+        }
+
+        function getGlobalCategory() {
+            const checked = document.querySelector('input[name="employee_category"]:checked');
+            return checked ? checked.value : '';
+        }
+
+        function filterServiceOptionsForCategory(category) {
+            entries().forEach(function (entryEl) {
+                const select = serviceSelectOf(entryEl);
+                Array.from(select.options).forEach(function (opt) {
+                    if (!opt.value) return; // keep the placeholder option
+                    const cats = (opt.dataset.category || '').split(',');
+                    const allowed = !!category && cats.indexOf(category) !== -1;
+                    opt.hidden = !allowed;
+                    opt.disabled = !allowed;
+                });
+                if (select.value && select.selectedOptions[0] && select.selectedOptions[0].disabled) {
+                    select.value = '';
+                    select.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
+        }
+
+        /* =========================================================
+           Email Category
+        ========================================================= */
+
+        function updateCosSectionVisibility(entryEl) {
+            const cosSection = entryEl.querySelector('[id^="section-cos"]');
+            if (!cosSection) return;
+            const shouldShow = serviceSelectOf(entryEl).value === 'service5' && getGlobalCategory() === 'cos';
+            cosSection.classList.toggle('active', shouldShow);
+            toggleRequiredGroup(cosSection, shouldShow);
+            if (!shouldShow) {
+                const employmentError = employmentErrorOf(entryEl);
+                if (employmentError) employmentError.style.display = 'none';
+            }
+        }
+
+        document.querySelectorAll('input[name="employee_category"]').forEach(function (radio) {
+            radio.addEventListener('change', function () {
+                employeeCategoryError.style.setProperty('display', 'none', 'important');
+                filterServiceOptionsForCategory(getGlobalCategory());
+                entries().forEach(updateCosSectionVisibility);
+                if (!restoringDraft) saveDraft();
+            });
+        });
+
+        /* =========================================================
+           ADD / REMOVE ENTRIES
+        ========================================================= */
+        function initEntryInitialState(entryEl) {
+            hideAllServiceSections(entryEl);
+            updateCosSectionVisibility(entryEl);
+            updateEmploymentNumbers(entryEl);
+        }
+
+        filterServiceOptionsForCategory(getGlobalCategory());
+
+        function renumberEntries() {
+            entries().forEach(function (entryEl, i) {
+                const numEl = entryEl.querySelector('.entry-number');
+                if (numEl) numEl.textContent = i + 1;
+            });
+            updateBulkDeleteUI();
+        }
+
+        function updateBulkDeleteUI() {
+            const checked = entriesContainer.querySelectorAll('.entrySelectCheckbox:checked').length;
+            deleteSelectedEntriesBtn.classList.toggle('d-none', checked === 0);
+            if (checked > 0) {
+                deleteSelectedEntriesBtn.innerHTML =
+                    '<i class="bi bi-trash3 me-1"></i>Delete Selected (' + checked + ')';
+            }
+
+            const selectable = entriesContainer.querySelectorAll('.entrySelectCheckbox');
+            selectAllEntries.checked = selectable.length > 0 && checked === selectable.length;
+            selectAllEntries.indeterminate = checked > 0 && checked < selectable.length;
+        }
+
+        function addEntry() {
+            const idx = entryCount++;
+            const html = entryTemplate.innerHTML
+                .split('__IDX__').join(idx)
+                .split('__NUM__').join(idx + 1);
+
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = html.trim();
+            const entryEl = wrapper.firstElementChild;
+
+            entriesContainer.appendChild(entryEl);
+
+            if (idx > 0) {
+                const removeBtn = entryEl.querySelector('.removeEntryBtn');
+                if (removeBtn) removeBtn.classList.remove('d-none');
+                const selectWrap = entryEl.querySelector('.entrySelectWrap');
+                if (selectWrap) selectWrap.classList.remove('d-none');
+            }
+
+            initEntryInitialState(entryEl);
+            filterServiceOptionsForCategory(getGlobalCategory());   // <-- ADD THIS
+            renumberEntries();
+            return entryEl;
+        }
+
+        addEntryBtn.addEventListener('click', function () {
+            addEntry();
+        });
+
+        selectAllEntries.addEventListener('change', function () {
+            entriesContainer.querySelectorAll('.entrySelectCheckbox').forEach(function (cb) {
+                cb.checked = selectAllEntries.checked;
+            });
+            updateBulkDeleteUI();
+        });
+
+        deleteSelectedEntriesBtn.addEventListener('click', function () {
+            const selected = Array.from(entriesContainer.querySelectorAll('.entrySelectCheckbox:checked'))
+                .map(function (cb) { return cb.closest('.entry-block'); })
+                .filter(Boolean);
+
+            if (selected.length === 0) return;
+            if (!window.confirm('Remove ' + selected.length + ' selected entr' +
+                (selected.length === 1 ? 'y' : 'ies') + '? This cannot be undone.')) return;
+
+            selected.forEach(function (entryEl) { entryEl.remove(); });
+            renumberEntries();
+            saveDraft();
+        });
+
+        /* =========================================================
+           EVENT DELEGATION — handles all entries, including ones
+           added after page load, with a single set of listeners.
+        ========================================================= */
+        form.addEventListener('change', function (e) {
+            const target = e.target;
+            const entryEl = target.closest('.entry-block');
+            if (!entryEl) return;
+
+            // Service Availed change
+            if (target.matches('select[id^="serviceAvailed"]')) {
+                hideAllServiceSections(entryEl);
+                formAlert.classList.add('d-none');
+
+                const targetSection = entryEl.querySelector('[id^="section-' + target.value + '"][data-service]');
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                    toggleRequiredGroup(targetSection, true);
+                }
+                updateCosSectionVisibility(entryEl);
+                return;
+            }
+
+            // Employee category radio change
+            if (target.matches('input[id^="empCategory"]')) {
+                hideAllEmployeeCategorySections(entryEl);
+                const empCategoryError = empCategoryErrorOf(entryEl);
+                const employmentError = employmentErrorOf(entryEl);
+                if (empCategoryError) empCategoryError.style.setProperty('display', 'none', 'important');
+                if (employmentError) employmentError.style.display = 'none';
+
+                const targetSection = entryEl.querySelector('[id^="section-' + target.value + '"][data-employee-category]');
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                    toggleRequiredGroup(targetSection, true);
+                }
+                return;
+            }
+
+            // Certification checkbox change
+            if (target.matches('input[type="checkbox"]') && target.name.indexOf('[certification]') !== -1) {
+                if (isCertificationValid(entryEl)) {
+                    const certificationError = certificationErrorOf(entryEl);
+                    if (certificationError) certificationError.style.display = 'none';
+                }
+                return;
+            }
+
+            // Entry select checkbox (bulk delete)
+            if (target.matches('.entrySelectCheckbox')) {
+                updateBulkDeleteUI();
+            }
+        });
+
+        form.addEventListener('input', function (e) {
+            const target = e.target;
+
+            if (target.matches('textarea[id^="otherRequest"]') || target.matches('textarea[id^="specify201"]')) {
+                applyCharRestriction(target);
+            }
+        });
+
+        form.addEventListener('click', function (e) {
+            const target = e.target;
+
+            // Remove an entire entry
+            const removeEntryBtn = target.closest('.removeEntryBtn');
+            if (removeEntryBtn) {
+                const entryEl = removeEntryBtn.closest('.entry-block');
+                if (entryEl) {
+                    entryEl.remove();
+                    renumberEntries();
+                    saveDraft();
+                }
+                return;
+            }
+
+            // Add employment record
+            const addEmploymentBtn = target.closest('[id^="addEmployment"]');
+            if (addEmploymentBtn) {
+                const entryEl = addEmploymentBtn.closest('.entry-block');
+                if (entryEl) addEmploymentCard(entryEl);
+                return;
+            }
+
+            // Remove a single employment record
+            const removeEmploymentBtn = target.closest('.removeEmployment');
+            if (removeEmploymentBtn) {
+                const entryEl = removeEmploymentBtn.closest('.entry-block');
+                removeEmploymentBtn.closest('.employment-card').remove();
+                if (entryEl) {
+                    updateEmploymentNumbers(entryEl);
+                    saveDraft();
+                }
+                return;
+            }
+
+            // Delete all employment records
+            const deleteAllBtn = target.closest('[id^="deleteAllEmployment"]');
+            if (deleteAllBtn) {
+                const entryEl = deleteAllBtn.closest('.entry-block');
+                if (!entryEl) return;
+                const employmentContainer = employmentContainerOf(entryEl);
+                if (!employmentContainer || employmentContainer.querySelectorAll('.employment-card').length === 0) return;
+                if (!window.confirm('Remove all employment records? This cannot be undone.')) return;
+
+                employmentContainer.innerHTML = '';
+                updateEmploymentNumbers(entryEl);
+                saveDraft();
+            }
+        });
+
+        /* =========================================================
            FORM SUBMISSION FLOW
         ========================================================= */
         form.addEventListener('submit', function (event) {
@@ -877,43 +1285,45 @@
             event.stopPropagation();
 
             let isValid = form.checkValidity();
+            let firstInvalidEntry = null;
 
-            if (!serviceSelect.value) {
+            if (!getGlobalCategory()) {
                 isValid = false;
-            }
-
-            if (!isEmployeeCategoryValid()) {
-                isValid = false;
-                empCategoryError.style.setProperty('display', 'block', 'important');
+                employeeCategoryError.style.setProperty('display', 'block', 'important');
             } else {
-                empCategoryError.style.setProperty('display', 'none', 'important');
+                employeeCategoryError.style.setProperty('display', 'none', 'important');
             }
 
-            if (!isEmploymentValid()) {
-                isValid = false;
-                if (employmentError) employmentError.style.display = 'block';
-            } else {
-                if (employmentError) employmentError.style.display = 'none';
-            }
+            entries().forEach(function (entryEl) {
+                if (!serviceSelectOf(entryEl).value) isValid = false;
 
-            if (!isCertificationValid()) {
-                isValid = false;
-                certificationError.style.display = 'block';
-            } else {
-                certificationError.style.display = 'none';
-            }
+                const employmentError = employmentErrorOf(entryEl);
+                if (!isEmploymentValid(entryEl)) {
+                    isValid = false;
+                    if (employmentError) employmentError.style.display = 'block';
+                    if (!firstInvalidEntry) firstInvalidEntry = entryEl;
+                } else if (employmentError) {
+                    employmentError.style.display = 'none';
+                }
+
+                const certificationError = certificationErrorOf(entryEl);
+                if (!isCertificationValid(entryEl)) {
+                    isValid = false;
+                    if (certificationError) certificationError.style.display = 'block';
+                    if (!firstInvalidEntry) firstInvalidEntry = entryEl;
+                } else if (certificationError) {
+                    certificationError.style.display = 'none';
+                }
+            });
 
             form.classList.add('was-validated');
 
             if (!isValid) {
                 formAlertText.textContent = 'Please complete all required fields before submitting.';
                 formAlert.classList.remove('d-none');
-                const firstInvalid = form.querySelector(':invalid, .is-invalid');
+                const firstInvalid = form.querySelector(':invalid, .is-invalid') || firstInvalidEntry;
                 if (firstInvalid) {
-                    firstInvalid.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center'
-                    });
+                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
                 return;
             }
@@ -925,131 +1335,128 @@
 
         /* =========================================================
            BUILD CONFIRMATION MODAL SUMMARY
-           (single render pass — rows[2] === true means render as HTML)
+           Iterates every entry and renders it as its own subsection.
+           (rows[2] === true means render that value as HTML)
         ========================================================= */
-        function buildSummary() {
-            summaryList.innerHTML = '';
-
-            const serviceLabels = {
-                service1: 'Service Record',
-                service2: 'Certificate with Compensation',
-                service3: 'Loan Assistance',
-                service4: 'Inquiry of Leave Balance',
-                service5: 'Certificate of Employment',
-                service6: 'Certification',
-                service7: 'IPCR',
-                service8: '201 Documents',
-                service9: 'Others'
-            };
-
+        function buildEntryRows(entryEl) {
+            const serviceValue = serviceSelectOf(entryEl).value;
             const rows = [];
 
-            rows.push(['Service Availed', serviceLabels[serviceSelect.value] || '—']);
-            rows.push(['Name', document.getElementById('fullName').value]);
-            rows.push(['Contact Number', document.getElementById('contactNumber').value]);
-            rows.push(['Email Address', document.getElementById('emailAddress').value]);
-            rows.push(['Date Requested', dateRequestedHidden.value]);
-            rows.push([
-                'Purpose / Request Details',
-                document.getElementById('servicePurpose').value
-            ]);
+            rows.push(['Service Availed', serviceLabels[serviceValue] || '—']);
+            rows.push(['Purpose / Request Details', servicePurposeOf(entryEl).value]);
 
-            switch (serviceSelect.value) {
+            switch (serviceValue) {
                 case 'service1':
                 case 'service2':
-                case 'service3':
-                case 'service4':
                     // No additional service-specific fields beyond the common ones.
                     break;
 
                 case 'service5': {
-                    const category = document.querySelector('input[name="employee_category"]:checked');
-                    const categoryValue = category ? category.value : '';
-                    rows.push(['Employee Category', categoryValue === 'cos' ? 'COS Employee' : 'Permanent Employee']);
-
-                    if (categoryValue === 'cos') {
-                        const periods = document.querySelectorAll('input[name="period_of_service[]"]');
-                        const positions = document.querySelectorAll('input[name="position[]"]');
-                        const offices = document.querySelectorAll('select[name="office_division[]"]');
+                    if (getGlobalCategory() === 'cos') {
+                        const periods = entryEl.querySelectorAll('input[name*="[period_of_service]"]');
+                        const positions = entryEl.querySelectorAll('input[name*="[position]"]');
+                        const offices = entryEl.querySelectorAll('select[name*="[office_division]"]');
 
                         let tableHTML = '<table class="summary-table"><thead><tr>' +
                             '<th>#</th><th>Period of Service</th><th>Position</th><th>Office / Division</th>' +
                             '</tr></thead><tbody>';
 
                         periods.forEach((item, index) => {
-                            tableHTML += '<tr>' +
-                                '<td>' + (index + 1) + '</td>' +
-                                '<td>' + escapeHTML(item.value) + '</td>' +
+                            tableHTML += '<tr><td>' + (index + 1) + '</td><td>' + escapeHTML(item.value) + '</td>' +
                                 '<td>' + escapeHTML(positions[index].value) + '</td>' +
-                                '<td>' + escapeHTML(offices[index].value) + '</td>' +
-                                '</tr>';
+                                '<td>' + escapeHTML(offices[index].value) + '</td></tr>';
                         });
 
                         tableHTML += '</tbody></table>';
-
-                        // Third element = true -> tells the render loop below to use innerHTML
                         rows.push(['Employment History', tableHTML, true]);
                     }
                     break;
                 }
 
                 case 'service6': {
-                    const checked = Array.from(certificationCheckboxes)
-                        .filter(function (cb) {
-                            return cb.checked;
-                        })
-                        .map(function (cb) {
-                            return cb.value;
-                        });
+                    const checked = Array.from(certificationCheckboxesOf(entryEl))
+                        .filter(function (cb) { return cb.checked; })
+                        .map(function (cb) { return cb.value; });
                     rows.push(['Certification Needed', checked.join(', ')]);
                     break;
                 }
 
                 case 'service7': {
-                    const from =
-                        document.getElementById('ipcrFromMonth').value +
-                        ' ' +
-                        document.getElementById('ipcrFromYear').value;
-
-                    const to =
-                        document.getElementById('ipcrToMonth').value +
-                        ' ' +
-                        document.getElementById('ipcrToYear').value;
-
+                    const from = byPrefix(entryEl, 'ipcrFromMonth').value + ' ' + byPrefix(entryEl, 'ipcrFromYear').value;
+                    const to = byPrefix(entryEl, 'ipcrToMonth').value + ' ' + byPrefix(entryEl, 'ipcrToYear').value;
                     rows.push(['IPCR Period', from + ' to ' + to]);
                     break;
                 }
 
                 case 'service8':
-                    rows.push(['Please Specify', document.getElementById('specify201').value]);
+                    rows.push(['Please Specify', specify201Of(entryEl).value]);
                     break;
 
                 case 'service9':
-                    rows.push([
-                        'Request',
-                        document.getElementById('otherRequest').value
-                    ]);
+                    rows.push(['Request', otherRequestOf(entryEl).value]);
+                    break;
+
+                case 'service10':
+                case 'service11':
+                    // No additional fields beyond the common Service Purpose.
+                    break;
+
+                case 'service12':
+                    rows.push(['Contract Year', byPrefix(entryEl, 'contractYear').value]);
                     break;
 
                 default:
                     break;
             }
 
-            // Single render pass — plain text fields use textContent (escaped/safe),
-            // the employment history table (flagged with true) uses innerHTML.
-            rows.forEach(function (pair) {
+            return rows;
+        }
+
+        function buildSummary() {
+            summaryList.innerHTML = '';
+
+            const category = getGlobalCategory();
+
+            [
+                ['Name', fullNameField.value],
+                ['Contact Number', contactNumberField.value],
+                ['Email Address', emailAddressField.value],
+                ['Employee Category', category === 'cos' ? 'COS Employee' : (category === 'permanent' ? 'Permanent Employee' : '—')],
+                ['Date Requested', dateRequestedHidden.value]
+            ].forEach(function (pair) {
                 const dt = document.createElement('dt');
                 dt.textContent = pair[0];
                 const dd = document.createElement('dd');
-
-                if (pair[2] === true) {
-                    dd.innerHTML = pair[1] || '—';
-                } else {
-                    dd.textContent = pair[1] || '—';
-                }
-
+                dd.textContent = pair[1] || '—';
                 summaryList.appendChild(dt);
                 summaryList.appendChild(dd);
+            });
+
+            const entryEls = entries();
+            const multiple = entryEls.length > 1;
+
+            entryEls.forEach(function (entryEl, i) {
+                if (multiple) {
+                    const heading = document.createElement('div');
+                    heading.className = 'fw-bold mt-3 mb-1 summary-entry-heading';
+                    heading.textContent = 'Request Entry #' + (i + 1);
+                    summaryList.appendChild(heading);
+                }
+
+                buildEntryRows(entryEl).forEach(function (pair) {
+                    const dt = document.createElement('dt');
+                    dt.textContent = pair[0];
+                    const dd = document.createElement('dd');
+
+                    if (pair[2] === true) {
+                        dd.innerHTML = pair[1] || '—';
+                    } else {
+                        dd.textContent = pair[1] || '—';
+                    }
+
+                    summaryList.appendChild(dt);
+                    summaryList.appendChild(dd);
+                });
             });
         }
 
@@ -1061,8 +1468,6 @@
             confirmSubmitBtn.disabled = true;
             loadingOverlay.classList.remove('d-none');
 
-            // The request is actually being sent now — clear the saved draft
-            // so a future visit to this form starts fresh.
             clearDraft();
 
             setTimeout(function () {
@@ -1078,135 +1483,14 @@
         });
 
         /* =========================================================
-           SERVICE 9: RESTRICT ALLOWED CHARACTERS
-        ========================================================= */
-        if (otherRequest) {
-            const allowedPattern = /^[A-Za-z0-9\s.,()\/-]*$/;
-
-            otherRequest.addEventListener('input', function () {
-                if (!allowedPattern.test(this.value)) {
-                    this.setCustomValidity(
-                        'Only letters, numbers, spaces, commas, periods, hyphens, parentheses, and slashes are allowed.'
-                    );
-                    this.classList.add('is-invalid');
-                } else {
-                    this.setCustomValidity('');
-                    this.classList.remove('is-invalid');
-                }
-            });
-        }
-
-        /* =========================================================
-           SERVICE 8: RESTRICT ALLOWED CHARACTERS
-        ========================================================= */
-        if (specify201) {
-            const allowedPattern = /^[A-Za-z0-9\s.,()\/-]*$/;
-
-            specify201.addEventListener('input', function () {
-                if (!allowedPattern.test(this.value)) {
-                    this.setCustomValidity(
-                        'Only letters, numbers, spaces, commas, periods, hyphens, parentheses, and slashes are allowed.'
-                    );
-                    this.classList.add('is-invalid');
-                } else {
-                    this.setCustomValidity('');
-                    this.classList.remove('is-invalid');
-                }
-            });
-        }
-
-        /* =========================================================
-           EMPLOYMENT HISTORY: ADD / REMOVE / DELETE-ALL RECORDS
-           Cards are cloned from the inert <template id="employmentCardTemplate">.
-           The section starts empty — a "No records found" placeholder is
-           shown until at least one card exists.
-        ========================================================= */
-        function updateEmploymentNumbers() {
-            const cards = document.querySelectorAll('.employment-card');
-
-            cards.forEach(function (card, index) {
-                const numberEl = card.querySelector('.employment-card-number');
-                if (numberEl) numberEl.textContent = '#' + (index + 1);
-            });
-
-            const hasRecords = cards.length > 0;
-
-            if (noEmploymentRecords) {
-                noEmploymentRecords.classList.toggle('d-none', hasRecords);
-            }
-            if (deleteAllEmploymentBtn) {
-                deleteAllEmploymentBtn.classList.toggle('d-none', !hasRecords);
-            }
-            if (employmentError && isEmploymentValid()) {
-                employmentError.style.display = 'none';
-            }
-        }
-
-        // Applies (or removes) the "required" attribute on a single card's
-        // fields, based on whether the COS section is currently active.
-        function applyEmploymentCardRequired(card) {
-            const cosSection = document.getElementById('section-cos');
-            const isRequired = cosSection && cosSection.classList.contains('active');
-
-            card.querySelectorAll('[data-required-group="cos"]').forEach(function (field) {
-                if (isRequired) {
-                    field.setAttribute('required', 'required');
-                } else {
-                    field.removeAttribute('required');
-                }
-            });
-        }
-
-        if (employmentContainer && addEmploymentBtn && employmentTemplate) {
-            addEmploymentBtn.addEventListener('click', function () {
-                const fragment = employmentTemplate.content.cloneNode(true);
-                const card = fragment.querySelector('.employment-card');
-
-                employmentContainer.appendChild(fragment);
-
-                applyEmploymentCardRequired(card);
-                updateEmploymentNumbers();
-
-                if (!restoringDraft) {
-                    saveDraft();
-                }
-            });
-
-            employmentContainer.addEventListener('click', function (e) {
-                const btn = e.target.closest('.removeEmployment');
-                if (!btn) return;
-
-                btn.closest('.employment-card').remove();
-
-                updateEmploymentNumbers();
-                saveDraft();
-            });
-
-            if (deleteAllEmploymentBtn) {
-                deleteAllEmploymentBtn.addEventListener('click', function () {
-                    if (document.querySelectorAll('.employment-card').length === 0) return;
-                    if (!window.confirm('Remove all employment records? This cannot be undone.')) return;
-
-                    employmentContainer.innerHTML = '';
-                    updateEmploymentNumbers();
-                    saveDraft();
-                });
-            }
-        }
-
-        /* =========================================================
-           RESET FORM (available for future use, e.g. a reset button)
+           RESET FORM (also used by "Clear and start over")
         ========================================================= */
         function resetForm() {
             form.reset();
             form.classList.remove('was-validated');
-            hideAllServiceSections();
-            hideAllEmployeeCategorySections();
-            employmentContainer.innerHTML = '';
-            updateEmploymentNumbers();
-            certificationError.style.display = 'none';
-            empCategoryError.style.setProperty('display', 'none', 'important');
-            if (employmentError) employmentError.style.display = 'none';
+            entriesContainer.innerHTML = '';
+            entryCount = 0;
+            addEntry();
             formAlert.classList.add('d-none');
             document.querySelectorAll('.form-control, .form-select').forEach(function (el) {
                 el.classList.remove('is-valid', 'is-invalid');
@@ -1219,10 +1503,8 @@
            INITIALIZE ON PAGE LOAD
         ========================================================= */
         document.addEventListener('DOMContentLoaded', function () {
-            hideAllServiceSections();
-            hideAllEmployeeCategorySections();
-            updateEmploymentNumbers();
             setDateRequested();
+            addEntry();
             restoreDraft();
         });
     })();

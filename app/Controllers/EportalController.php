@@ -31,18 +31,16 @@ class EportalController extends BaseController
             );
 
 
-
-
         // Search
         if ($search = $this->request->getGet('search')) {
 
             $query->groupStart()
-                ->like('reference_no', $search)
-                ->orLike('fullname', $search)
-                ->orLike('email_address', $search)
-                ->orLike('contact_number', $search)
-                ->orLike('service_availed', $search)
-                ->orLike('status', $search)
+                ->like('hr_requests.reference_no', $search)
+                ->orLike('hr_requests.fullname', $search)
+                ->orLike('hr_requests.email_address', $search)
+                ->orLike('hr_requests.contact_number', $search)
+                ->orLike('hr_requests.service_availed', $search)
+                ->orLike('hr_requests.status', $search)
                 ->groupEnd();
 
         }
@@ -50,41 +48,41 @@ class EportalController extends BaseController
 
         // Filters
         if ($year = $this->request->getGet('year')) {
-            $query->like('date_requested', $year, 'after');
+            $query->like('hr_requests.date_requested', $year, 'after');
         }
 
 
         if ($status = $this->request->getGet('status')) {
-            $query->where('status', $status);
+            $query->where('hr_requests.status', $status);
         }
 
 
         if ($service = $this->request->getGet('service_availed')) {
-            $query->where('service_availed', $service);
+            $query->where('hr_requests.service_availed', $service);
         }
 
 
         $requests = $query
             ->orderBy("
-        CASE
-            WHEN status = 'New Application' THEN 1
-            WHEN status = 'Processing' THEN 2
-            WHEN status = 'For Released' THEN 3
-            WHEN status = 'Completed' THEN 4
-            WHEN status = 'Rejected' THEN 5
-            ELSE 6
-        END
-    ", '', false)
+    CASE
+        WHEN hr_requests.status = 'New Application' THEN 1
+        WHEN hr_requests.status = 'Processing' THEN 2
+        WHEN hr_requests.status = 'For Released' THEN 3
+        WHEN hr_requests.status = 'Completed' THEN 4
+        WHEN hr_requests.status = 'Rejected' THEN 5
+        ELSE 6
+    END
+", '', false)
             ->orderBy("
-        CASE
-            WHEN status = 'New Application' THEN date_requested
-            WHEN status = 'Processing' THEN date_processing
-            WHEN status = 'For Released' THEN date_released
-            WHEN status = 'Completed' THEN date_completed
-            WHEN status = 'Rejected' THEN date_rejected
-            ELSE date_requested
-        END
-    ", 'DESC', false)
+    CASE
+        WHEN hr_requests.status = 'New Application' THEN hr_requests.date_requested
+        WHEN hr_requests.status = 'Processing' THEN hr_requests.date_processing
+        WHEN hr_requests.status = 'For Released' THEN hr_requests.date_released
+        WHEN hr_requests.status = 'Completed' THEN hr_requests.date_completed
+        WHEN hr_requests.status = 'Rejected' THEN hr_requests.date_rejected
+        ELSE hr_requests.date_requested
+    END
+", 'DESC', false)
             ->paginate(10);
 
 
@@ -295,85 +293,116 @@ class EportalController extends BaseController
         $model = new HrRequestModel();
         $historyModel = new HrEmploymentHistoryModel();
 
-        // Generate Reference Number
+        // One reference number for the whole submission (all entries share this)
         $referenceNo = 'HR-' . date('YmdHis');
 
         // Service List
         $services = [
             'service1' => 'Service Record',
             'service2' => 'Certificate with Compensation',
-            'service3' => 'Loan Assistance',
-            'service4' => 'Inquiry of Leave Balance',
             'service5' => 'Certificate of Employment',
             'service6' => 'Certification',
             'service7' => 'IPCR',
             'service8' => '201 Documents',
             'service9' => 'Others',
+            'service10' => 'Performance Evaluation',
+            'service11' => 'Payslip',
+            'service12' => 'Contract of Service',
         ];
 
-        $serviceAvailed = $services[$this->request->getPost('service_availed')] ?? 'Unknown Service';
+        // Employee category is now ONE shared choice for the whole submission
+        $employeeCategory = $this->request->getPost('employee_category');
 
-        // Certification
-        $certification = $this->request->getPost('certification');
+        // Requester info is entered once, shared by every entry
+        $fullname = trim($this->request->getPost('fullname') ?? '');
+        $contactNumber = trim($this->request->getPost('contact_number') ?? '');
+        $emailAddress = trim($this->request->getPost('email_address') ?? '');
+        $dateRequested = date('Y-m-d');
 
-        if (is_array($certification)) {
-            $certification = implode(', ', $certification);
+        $entries = $this->request->getPost('entries');
+        log_message('debug', 'ENTRIES RECEIVED: ' . print_r($entries, true));
+
+        if (!is_array($entries) || count($entries) === 0) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'No request entries were submitted.');
         }
 
-        // IPCR Period
-        $ipcrPeriod =
-            $this->request->getPost('ipcr_from_month') . ' ' .
-            $this->request->getPost('ipcr_from_year') .
-            ' to ' .
-            $this->request->getPost('ipcr_to_month') . ' ' .
-            $this->request->getPost('ipcr_to_year');
+        $savedServiceLabels = []; // for the confirmation/admin emails
+        $insertedAny = false;
 
-        // Main Request Data
-        $data = [
+        foreach ($entries as $entry) {
 
-            'reference_no' => $referenceNo,
-            'service_availed' => $serviceAvailed,
-            'service_purpose' => trim($this->request->getPost('service_purpose') ?? ''),
-            'fullname' => trim($this->request->getPost('fullname') ?? ''),
-            'contact_number' => trim($this->request->getPost('contact_number') ?? ''),
-            'email_address' => trim($this->request->getPost('email_address') ?? ''),
-            'employee_category' => $this->request->getPost('employee_category'),
+            $serviceKey = $entry['service_availed'] ?? '';
+            $serviceAvailed = $services[$serviceKey] ?? 'Unknown Service';
 
-            // Employment history is stored in another table
-            'period_of_service' => null,
-            'position' => null,
-            'office_division' => null,
+            // Certification (checkbox array)
+            $certification = $entry['certification'] ?? null;
+            if (is_array($certification)) {
+                $certification = implode(', ', $certification);
+            }
 
-            'certification' => $certification,
-            'ipcr_period' => $ipcrPeriod,
-            'specify_201' => $this->request->getPost('specify_201'),
-            'other_request' => $this->request->getPost('other_request'),
+            // IPCR Period
+            $ipcrPeriod =
+                ($entry['ipcr_from_month'] ?? '') . ' ' .
+                ($entry['ipcr_from_year'] ?? '') .
+                ' to ' .
+                ($entry['ipcr_to_month'] ?? '') . ' ' .
+                ($entry['ipcr_to_year'] ?? '');
 
-            'date_requested' => date('Y-m-d'),
+            $employeeCategory = $entry['employee_category'] ?? null;
 
-            'status' => 'New Application',
-            'remarks' => '',
+            $data = [
+                'reference_no' => $referenceNo,
+                'service_availed' => $serviceAvailed,
+                'service_purpose' => trim($entry['service_purpose'] ?? ''),
+                'fullname' => $fullname,
+                'contact_number' => $contactNumber,
+                'email_address' => $emailAddress,
+                'employee_category' => $employeeCategory,               // now shared
+                'contract_of_service_year' => $entry['contract_of_service_year'] ?? null, // NEW
 
-            'date_received' => null,
-            'received_by' => null,
-            'date_released' => null,
-            'released_by' => null,
-        ];
+                'period_of_service' => null,
+                'position' => null,
+                'office_division' => null,
 
-        // Save Main Request
-        if ($model->insert($data)) {
+                'certification' => $certification,
+                'ipcr_period' => $ipcrPeriod,
+                'specify_201' => $entry['specify_201'] ?? null,
+                'other_request' => $entry['other_request'] ?? null,
+
+                'date_requested' => $dateRequested,
+                'status' => 'New Application',
+                'remarks' => '',
+
+                'date_received' => null,
+                'received_by' => null,
+                'date_released' => null,
+                'released_by' => null,
+            ];
+
+            // if (!$model->insert($data)) {
+            //     continue;
+            // }
+            if (!$model->insert($data)) {
+                log_message('error', 'INSERT FAILED: ' . print_r($model->errors(), true));
+                continue;
+            }
+
+            $insertedAny = true;
+            $savedServiceLabels[] = $serviceAvailed;
 
             /*
             |--------------------------------------------------------------------------
-            | SAVE EMPLOYMENT HISTORY (COS ONLY)
+            | SAVE EMPLOYMENT HISTORY FOR THIS ENTRY (COS ONLY)
             |--------------------------------------------------------------------------
             */
+            if ($employeeCategory === 'cos' && $serviceKey === 'service5') {
 
-            if ($this->request->getPost('employee_category') === 'cos') {
-
-                $periods = $this->request->getPost('period_of_service');
-                $positions = $this->request->getPost('position');
-                $offices = $this->request->getPost('office_division');
+                $periods = $entry['period_of_service'] ?? null;
+                $positions = $entry['position'] ?? null;
+                $offices = $entry['office_division'] ?? null;
 
                 if (is_array($periods)) {
 
@@ -391,90 +420,87 @@ class EportalController extends BaseController
                         ]);
                     }
 
-                } else {
+                } elseif (!empty($periods)) {
 
                     // Backward compatibility (single employment history)
-
-                    if (!empty($periods)) {
-
-                        $historyModel->insert([
-                            'reference_no' => $referenceNo,
-                            'period_of_service' => trim($periods),
-                            'position' => trim($positions),
-                            'office_division' => trim($offices),
-                        ]);
-
-                    }
+                    $historyModel->insert([
+                        'reference_no' => $referenceNo,
+                        'period_of_service' => trim($periods),
+                        'position' => trim($positions),
+                        'office_division' => trim($offices),
+                    ]);
                 }
             }
+        }
 
-            /*
-            |--------------------------------------------------------------------------
-            | SEND EMAIL USING PHPMailer
-            |--------------------------------------------------------------------------
-            */
+        if (!$insertedAny) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Unable to submit your request.');
+        }
 
-            $mailer = new Mailer();
+        /*
+        |--------------------------------------------------------------------------
+        | SEND EMAIL USING PHPMailer (one email for the whole reference number)
+        |--------------------------------------------------------------------------
+        */
+        $mailer = new Mailer();
 
-            // Client Email
-            $clientEmail = view(
-                'emails/hr_request_confirmation',
+        $servicesSummary = implode(', ', array_unique($savedServiceLabels));
+
+        // Client Email
+        $clientEmail = view(
+            'emails/hr_request_confirmation',
+            [
+                'fullname' => $fullname,
+                'reference_no' => $referenceNo,
+                'service' => $servicesSummary,
+                'date_requested' => $dateRequested,
+            ]
+        );
+
+        $mailer->send(
+            $emailAddress,
+            'HR Request Submitted Successfully',
+            $clientEmail
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | SEND EMAIL TO HR ADMINISTRATORS
+        |--------------------------------------------------------------------------
+        */
+        $userModel = new UserModel();
+
+        $hrAdmins = $userModel
+            ->where('role', 'HR Administrator')
+            ->where('status', 'ACTIVE')
+            ->findAll();
+
+        foreach ($hrAdmins as $admin) {
+
+            $adminEmail = view(
+                'emails/hr_request_admin_notification',
                 [
-                    'fullname' => $data['fullname'],
                     'reference_no' => $referenceNo,
-                    'service' => $serviceAvailed,
-                    'date_requested' => $data['date_requested']
+                    'fullname' => $fullname,
+                    'service' => $servicesSummary,
+                    'date_requested' => $dateRequested,
                 ]
             );
 
             $mailer->send(
-                $data['email_address'],
-                'HR Request Submitted Successfully',
-                $clientEmail
+                $admin['email'],
+                'New HR Request Submitted',
+                $adminEmail
             );
-
-            /*
-            |--------------------------------------------------------------------------
-            | SEND EMAIL TO HR ADMINISTRATORS
-            |--------------------------------------------------------------------------
-            */
-
-            $userModel = new UserModel();
-
-            $hrAdmins = $userModel
-                ->where('role', 'HR Administrator')
-                ->where('status', 'ACTIVE')
-                ->findAll();
-
-            foreach ($hrAdmins as $admin) {
-
-                $adminEmail = view(
-                    'emails/hr_request_admin_notification',
-                    [
-                        'reference_no' => $referenceNo,
-                        'fullname' => $data['fullname'],
-                        'service' => $serviceAvailed,
-                        'date_requested' => $data['date_requested']
-                    ]
-                );
-
-                $mailer->send(
-                    $admin['email'],
-                    'New HR Request Submitted',
-                    $adminEmail
-                );
-            }
-
-            return redirect()
-                ->back()
-                ->with('success', 'Your request has been submitted successfully.')
-                ->with('reference_no', $referenceNo);
         }
 
         return redirect()
             ->back()
-            ->withInput()
-            ->with('error', 'Unable to submit your request.');
+            ->with('success', 'Your request has been submitted successfully.')
+            ->with('reference_no', $referenceNo);
     }
 
     public function users()
