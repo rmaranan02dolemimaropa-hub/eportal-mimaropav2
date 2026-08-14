@@ -493,20 +493,163 @@
                             <p class="section-label"><i class="bi bi-folder2-open"></i>201 Documents</p>
                             <div class="row g-3">
                                 <div class="col-12">
+                                    <label class="form-label">
+                                        Select Document/s Needed <span class="required-mark">*</span>
+                                    </label>
+
+                                    <div class="document-tag-group" data-required-group="service8">
+                                        <label class="document-tag">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="Appointment (CSC33)">
+                                            <span>Appointment (CSC33)</span>
+                                        </label>
+                                        <label class="document-tag">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="Assumption of Duty">
+                                            <span>Assumption of Duty</span>
+                                        </label>
+                                        <label class="document-tag">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="Oath of Office">
+                                            <span>Oath of Office</span>
+                                        </label>
+                                        <label class="document-tag">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="Personal Data Sheet (CSC Form 212)">
+                                            <span>Personal Data Sheet (CSC Form 212)</span>
+                                        </label>
+                                        <label class="document-tag">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="Position Description Form">
+                                            <span>Position Description Form</span>
+                                        </label>
+                                        <label class="document-tag">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="Certificate of Eligibilities/License">
+                                            <span>Certificate of Eligibilities/License</span>
+                                        </label>
+                                        <label class="document-tag">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="Designation Orders (If Applicable)">
+                                            <span>Designation Orders (If Applicable)</span>
+                                        </label>
+                                        <label class="document-tag">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="Statement of Assets, Liabilities and Net Worth (SALN)">
+                                            <span>Statement of Assets, Liabilities and Net Worth (SALN)</span>
+                                        </label>
+                                        <label class="document-tag">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="Notices of Salary Adjustments/Step Increments">
+                                            <span>Notices of Salary Adjustments/Step Increments</span>
+                                        </label>
+                                        <label class="document-tag">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="Medical Certificate (CSC Form 211)">
+                                            <span>Medical Certificate (CSC Form 211)</span>
+                                        </label>
+                                        <label class="document-tag">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="Psychiatric Test/Drugs Test (If Applicable)">
+                                            <span>Psychiatric Test/Drugs Test (If Applicable)</span>
+                                        </label>
+                                        <label class="document-tag">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="NBI Clearance">
+                                            <span>NBI Clearance</span>
+                                        </label>
+                                        <label class="document-tag">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="School Diploma and Transcript of Records">
+                                            <span>School Diploma and Transcript of Records</span>
+                                        </label>
+                                        <label class="document-tag">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="Marriage Contract/Certificate">
+                                            <span>Marriage Contract/Certificate</span>
+                                        </label>
+                                        <label class="document-tag">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="Certificate of Leave Balances (For Transferees)">
+                                            <span>Certificate of Leave Balances (For Transferees)</span>
+                                        </label>
+                                        <label class="document-tag">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="Clearance from Property and Accountabilities (For Transferees)">
+                                            <span>Clearance from Property and Accountabilities (For Transferees)</span>
+                                        </label>
+                                        <label class="document-tag">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="Commendations/Awards or Copies of Disciplinary Actions (If Any)">
+                                            <span>Commendations/Awards or Copies of Disciplinary Actions (If Any)</span>
+                                        </label>
+                                        <label class="document-tag">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="Contract of Service (If Applicable)">
+                                            <span>Contract of Service (If Applicable)</span>
+                                        </label>
+                                        <label class="document-tag">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="Individual Performance Commitment and Review (IPCR)">
+                                            <span>Individual Performance Commitment and Review (IPCR)</span>
+                                        </label>
+                                        <label class="document-tag">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="BIR (2316)">
+                                            <span>BIR (2316)</span>
+                                        </label>
+                                        <label class="document-tag">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="Ombudsman">
+                                            <span>Ombudsman</span>
+                                        </label>
+                                        <label class="document-tag">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="Service Record">
+                                            <span>Service Record</span>
+                                        </label>
+                                        <label class="document-tag">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="Office Order as OIC">
+                                            <span>Office Order as OIC</span>
+                                        </label>
+                                        <label class="document-tag">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="Certificate of Trainings">
+                                            <span>Certificate of Trainings</span>
+                                        </label>
+                                        <label class="document-tag">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="Certification">
+                                            <span>Certification</span>
+                                        </label>
+                                        <label class="document-tag document-tag-other"
+                                            data-other-toggle="specify201__IDX__">
+                                            <input type="checkbox" name="entries[__IDX__][documents_201][]"
+                                                value="Other Files" data-other-checkbox>
+                                            <span>Other Files</span>
+                                        </label>
+                                    </div>
+
+                                    <div class="invalid-feedback d-block" id="documents201Error__IDX__"
+                                        style="display:none;">
+                                        Please select at least one document.
+                                    </div>
+                                </div>
+
+                                <div class="col-12" id="specify201Wrapper__IDX__" style="display:none;">
                                     <div class="form-floating">
                                         <textarea class="form-control" id="specify201__IDX__"
                                             name="entries[__IDX__][specify_201]" placeholder="Please specify"
-                                            data-required-group="service8" maxlength="255"
-                                            style="height: 140px;"></textarea>
+                                            maxlength="255" style="height: 100px;"></textarea>
 
                                         <label for="specify201__IDX__">
-                                            Please Specify <span class="required-mark">*</span>
+                                            Please Specify Other Document/s
                                         </label>
 
                                         <div class="invalid-feedback">
                                             Only letters, numbers, spaces, commas (,), periods (.), hyphens (-),
-                                            parentheses (
-                                            ), and slashes (/) are allowed.
+                                            parentheses ( ), and slashes (/) are allowed.
                                         </div>
                                     </div>
                                 </div>
@@ -695,7 +838,7 @@
         function deleteAllEmploymentBtnOf(entryEl) { return byPrefix(entryEl, 'deleteAllEmployment'); }
         function addEmploymentBtnOf(entryEl) { return byPrefix(entryEl, 'addEmployment'); }
         function otherRequestOf(entryEl) { return byPrefix(entryEl, 'otherRequest'); }
-        function specify201Of(entryEl) { return byPrefix(entryEl, 'specify201'); }
+        function specify201Of(entryEl) { return entryEl.querySelector('textarea[id^="specify201"]'); }
         function serviceSectionsOf(entryEl) { return entryEl.querySelectorAll('.dynamic-section[data-service]'); }
         function employeeCategorySectionsOf(entryEl) { return entryEl.querySelectorAll('.dynamic-section[data-employee-category]'); }
         function employeeCategoryRadiosOf(entryEl) { return entryEl.querySelectorAll('input[id^="empCategory"]'); }
@@ -1388,9 +1531,27 @@
                     break;
                 }
 
-                case 'service8':
-                    rows.push(['Please Specify', specify201Of(entryEl).value]);
+                case 'service8': {
+                    const checkedDocs = Array.from(
+                        entryEl.querySelectorAll('input[name*="[documents_201][]"]:checked')
+                    ).map(function (cb) { return cb.value; });
+
+                    const otherText = specify201Of(entryEl).value.trim();
+
+                    // Replace generic "Other Files" label with the actual specified text, if provided
+                    const displayDocs = checkedDocs.map(function (doc) {
+                        return (doc === 'Other Files' && otherText) ? otherText : doc;
+                    });
+
+                    const listHtml = displayDocs.length
+                        ? '<ul class="mb-0 ps-3">' + displayDocs.map(function (d) {
+                            return '<li>' + d.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</li>';
+                        }).join('') + '</ul>'
+                        : '—';
+
+                    rows.push(['201 Documents', listHtml, true]);
                     break;
+                }
 
                 case 'service9':
                     rows.push(['Request', otherRequestOf(entryEl).value]);
