@@ -365,26 +365,60 @@
 
     <div class="modal fade" id="viewRequestModal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">HR Request Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-content request-modal">
+
+                <div class="modal-header request-modal-header d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="request-modal-eyebrow">HR Request Details</div>
+                        <h5 class="modal-title request-modal-ref" id="modalReferenceNo">—</h5>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="status-pill" id="modalStatusPill">—</span>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close request details"></button>
+                    </div>
                 </div>
 
-                <div class="modal-body">
-                    <div id="requestDetails" class="row g-3"></div>
+                <!-- Status stepper -->
+                <div class="request-stepper" id="requestStepper">
+                    <div class="stepper-track">
+                        <div class="stepper-fill" id="stepperFill"></div>
+                    </div>
+                    <div class="stepper-steps">
+                        <div class="stepper-step" data-step="New Application">
+                            <span class="stepper-dot"></span>
+                            <span class="stepper-label">Received</span>
+                        </div>
+                        <div class="stepper-step" data-step="Processing">
+                            <span class="stepper-dot"></span>
+                            <span class="stepper-label">Processing</span>
+                        </div>
+                        <div class="stepper-step" data-step="For Released">
+                            <span class="stepper-dot"></span>
+                            <span class="stepper-label">For Release</span>
+                        </div>
+                        <div class="stepper-step" data-step="Completed">
+                            <span class="stepper-dot"></span>
+                            <span class="stepper-label">Completed</span>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                <div class="modal-body request-modal-body">
+                    <div id="requestDetails"><!-- populated by JS --></div>
+                </div>
+
+                <div class="modal-footer request-modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         Close
                     </button>
 
-                    <button type="button" id="startProcessingBtn" class="btn btn-primary d-none">
-                        <i class="bi bi-play-circle"></i>
+                    <button type="button" id="startProcessingBtn" class="btn btn-dole-primary d-none">
+                        <i class="bi bi-play-circle me-1"></i>
                         Start Processing
                     </button>
                 </div>
+
             </div>
         </div>
     </div>
@@ -827,294 +861,184 @@
     const viewRequestModal = document.getElementById('viewRequestModal');
     const requestDetails = document.getElementById('requestDetails');
 
-
-    function addDetail(label, value) {
-
-        const column = document.createElement('div');
-
-        column.className = 'col-md-6 mb-3';
-
-
-        column.innerHTML = `
-            <small class="text-muted d-block">
-                ${label}
-            </small>
-
-            <div class="fw-semibold">
-                ${value || '-'}
-            </div>
-        `;
-
-
-        requestDetails.appendChild(column);
-
+    function detailItem(label, value) {
+        return `
+        <div class="detail-item">
+            <dt>${escapeHTML(label)}</dt>
+            <dd>${escapeHTML(value) || '—'}</dd>
+        </div>
+    `;
     }
 
-
-
-    function addEmploymentHistory(histories) {
-
-
+    function buildEmploymentHistoryHTML(histories) {
         if (!Array.isArray(histories) || histories.length === 0) {
-
-            addDetail(
-                'Employment History',
-                'No employment records found.'
-            );
-
-            return;
-
+            return detailItem('Employment History', 'No employment records found.');
         }
 
+        const rows = histories.map(function (history, index) {
+            return `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${escapeHTML(history.period_of_service)}</td>
+                <td>${escapeHTML(history.position)}</td>
+                <td>${escapeHTML(history.office_division)}</td>
+            </tr>
+        `;
+        }).join('');
 
-
-        histories.forEach((history, index) => {
-
-
-            const wrapper = document.createElement('div');
-
-            wrapper.className = 'col-12 mb-3';
-
-
-
-            wrapper.innerHTML = `
-
-                <div class="card border shadow-sm">
-
-                    <div class="card-header bg-light fw-bold">
-
-                        #${index + 1}
-
-                    </div>
-
-
-                    <div class="card-body">
-
-
-                        <div class="row g-3">
-
-
-                            <div class="col-md-4">
-
-                                <small class="text-muted">
-                                    Period of Service
-                                </small>
-
-                                <div class="fw-semibold">
-                                    ${history.period_of_service ?? '-'}
-                                </div>
-
-                            </div>
-
-
-
-                            <div class="col-md-4">
-
-                                <small class="text-muted">
-                                    Position
-                                </small>
-
-                                <div class="fw-semibold">
-                                    ${history.position ?? '-'}
-                                </div>
-
-                            </div>
-
-
-
-                            <div class="col-md-4">
-
-                                <small class="text-muted">
-                                    Office / Division
-                                </small>
-
-                                <div class="fw-semibold">
-                                    ${history.office_division ?? '-'}
-                                </div>
-
-                            </div>
-
-
-                        </div>
-
-
-                    </div>
-
-                </div>
-
-            `;
-
-
-            requestDetails.appendChild(wrapper);
-
-
-        });
-
-
+        return `
+        <div class="detail-item" style="grid-column: 1 / -1;">
+    <dt>Employment History</dt>
+    <dd>
+        ${rows && rows.trim() ? `
+        <div class="summary-table-wrapper">
+            <table class="summary-table mt-2" aria-label="Employment history">
+                <caption class="visually-hidden">
+                    List of past positions held, including period of service, position title, and office or division.
+                </caption>
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Period of Service</th>
+                        <th scope="col">Position</th>
+                        <th scope="col">Office / Division</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </div>
+        ` : `
+        <div class="summary-table-empty">
+            <i class="bi bi-clock-history me-1"></i>
+            No employment history on record.
+        </div>
+        `}
+    </dd>
+</div>
+    `;
     }
 
-
-
+    function escapeHTML(str) {
+        if (str === undefined || str === null) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
 
     viewRequestModal.addEventListener('show.bs.modal', function (event) {
 
-
         const button = event.relatedTarget;
-
         const data = button.dataset;
 
+        /* =========================================================
+           HEADER + STATUS PILL
+        ========================================================= */
+        document.getElementById('modalReferenceNo').textContent = data.reference || '—';
 
-        requestDetails.innerHTML = '';
+        const pill = document.getElementById('modalStatusPill');
+        pill.textContent = data.status || '—';
+        pill.setAttribute('data-status', data.status || '');
 
+        /* =========================================================
+           STEPPER
+        ========================================================= */
+        const steps = ['New Application', 'Processing', 'For Released', 'Completed'];
+        const currentIndex = steps.indexOf(data.status);
+        const isRejected = data.status === 'Rejected';
 
+        document.querySelectorAll('.stepper-step').forEach(function (stepEl, i) {
+            stepEl.classList.toggle('active', !isRejected && i <= currentIndex);
+            stepEl.classList.toggle('rejected', isRejected);
+        });
 
-        addDetail('Reference No.', data.reference);
+        document.getElementById('stepperFill').style.width =
+            isRejected ? '0%' : (currentIndex >= 0 ? (currentIndex / (steps.length - 1)) * 100 + '%' : '0%');
 
-        addDetail('Service Availed', data.service);
+        /* =========================================================
+           SERVICE-SPECIFIC FIELDS
+        ========================================================= */
+        let serviceFieldsHTML = '';
 
-        addDetail('Name', data.fullname);
-
-        addDetail('Contact Number', data.contact);
-
-        addDetail('Email Address', data.email);
-
-        addDetail('Date Requested', data.dateRequested);
-
-        addDetail('Status', data.status);
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Certificate of Employment
-        |--------------------------------------------------------------------------
-        */
-
+        // Certificate of Employment
         if (data.service === 'Certificate of Employment') {
+            const category = (data.category || '').trim().toLowerCase();
 
-
-            addDetail(
-                'Employee Category',
-                data.category
-            );
-
-
-            const category = (data.category || '')
-                .trim()
-                .toLowerCase();
-
-
+            serviceFieldsHTML += detailItem('Employee Category', data.category);
 
             if (category === 'cos' || category === 'cos employee') {
-
-
                 let histories = [];
-
-
                 try {
-
                     histories = JSON.parse(data.history || '[]');
-
                 } catch (error) {
-
-                    console.error(
-                        'Employment history error:',
-                        error
-                    );
-
+                    console.error('Employment history error:', error);
                 }
-
-
-
-                addEmploymentHistory(histories);
-
-
+                serviceFieldsHTML += buildEmploymentHistoryHTML(histories);
             } else {
-
-
-                addDetail(
-                    'Position',
-                    data.position
-                );
-
-
+                serviceFieldsHTML += detailItem('Position', data.position);
             }
-
-
-        }
-        const startBtn = document.getElementById("startProcessingBtn");
-
-        if (data.status === "New Application") {
-
-            startBtn.classList.remove("d-none");
-            startBtn.dataset.id = data.id;
-
-        } else {
-
-            startBtn.classList.add("d-none");
-
         }
 
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Certification
-        |--------------------------------------------------------------------------
-        */
-
+        // Certification
         if (data.service === 'Certification') {
-
-            addDetail(
-                'Certification Needed',
-                data.certification
-            );
-
+            serviceFieldsHTML += detailItem('Certification Needed', data.certification);
         }
 
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | IPCR
-        |--------------------------------------------------------------------------
-        */
-
+        // IPCR
         if (data.service === 'IPCR') {
-
-            addDetail(
-                'IPCR Period',
-                data.ipcrPeriod
-            );
-
+            serviceFieldsHTML += detailItem('IPCR Period', data.ipcrPeriod);
         }
 
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | 201 Documents
-        |--------------------------------------------------------------------------
-        */
-
+        // 201 Documents
         if (data.service === '201 Docs') {
-
-            addDetail(
-                'Specified Document',
-                data.specify201
-            );
-
+            serviceFieldsHTML += detailItem('Specified Document', data.specify201);
         }
 
+        /* =========================================================
+           RENDER
+        ========================================================= */
+        requestDetails.innerHTML = `
+        <div class="detail-section">
+            <div class="detail-section-title"><i class="bi bi-person-vcard"></i> Requester Information</div>
+            <div class="detail-grid">
+                ${detailItem('Name', data.fullname)}
+                ${detailItem('Contact Number', data.contact)}
+                ${detailItem('Email Address', data.email)}
+                ${detailItem('Date Requested', data.dateRequested)}
+            </div>
+        </div>
 
+        <div class="detail-section">
+            <div class="detail-section-title"><i class="bi bi-clipboard2-check"></i> Service Requested</div>
+            <div class="entry-card">
+                <div class="entry-card-header">
+                    <span class="entry-card-service">${escapeHTML(data.service) || '—'}</span>
+                </div>
+                <div class="detail-grid">
+                    ${serviceFieldsHTML}
+                </div>
+            </div>
+        </div>
 
-        addDetail(
-            'Remarks',
-            data.remarks
-        );
+        <div class="detail-section">
+            <div class="detail-section-title"><i class="bi bi-chat-left-text"></i> Remarks</div>
+            <div class="detail-grid">
+                ${detailItem('Remarks', data.remarks)}
+            </div>
+        </div>
+    `;
 
-
+        /* =========================================================
+           START PROCESSING BUTTON
+        ========================================================= */
+        const startBtn = document.getElementById('startProcessingBtn');
+        if (data.status === 'New Application') {
+            startBtn.classList.remove('d-none');
+            startBtn.dataset.id = data.id;
+        } else {
+            startBtn.classList.add('d-none');
+        }
     });
+
 
     setTimeout(() => {
         document.querySelectorAll('.alert').forEach(alert => {
@@ -1310,4 +1234,6 @@
         });
 
     });
+
+
 </script>

@@ -344,12 +344,9 @@ class EportalController extends BaseController
             }
 
             // IPCR Period
-            $ipcrPeriod =
-                ($entry['ipcr_from_month'] ?? '') . ' ' .
-                ($entry['ipcr_from_year'] ?? '') .
-                ' to ' .
-                ($entry['ipcr_to_month'] ?? '') . ' ' .
-                ($entry['ipcr_to_year'] ?? '');
+            $ipcrPeriod = trim(
+                ($entry['ipcr_semester'] ?? '') . ' ' . ($entry['ipcr_year'] ?? '')
+            );
 
             $employeeCategory = $entry['employee_category'] ?? null;
 

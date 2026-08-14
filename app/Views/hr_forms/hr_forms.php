@@ -197,10 +197,10 @@
 
                                 <textarea class="form-control" name="entries[__IDX__][service_purpose]"
                                     id="servicePurpose__IDX__" placeholder="Please state your purpose" maxlength="500"
-                                    style="height: 140px;"></textarea>
+                                    style="height: 140px;" required></textarea>
 
                                 <label for="servicePurpose__IDX__">
-                                    Purpose / Request Details
+                                    Purpose / Request Details <span class="required-mark">*</span>
                                 </label>
 
                                 <div class="invalid-feedback">
@@ -406,34 +406,25 @@
 
                             <div class="row g-3">
 
-                                <!-- FROM MONTH -->
-                                <div class="col-md-3">
+                                <!-- SEMESTER -->
+                                <div class="col-md-6">
                                     <div class="form-floating">
-                                        <select class="form-select" name="entries[__IDX__][ipcr_from_month]"
-                                            id="ipcrFromMonth__IDX__" data-required-group="service7">
-                                            <option value="" selected disabled>Select Month</option>
-                                            <option>January</option>
-                                            <option>February</option>
-                                            <option>March</option>
-                                            <option>April</option>
-                                            <option>May</option>
-                                            <option>June</option>
-                                            <option>July</option>
-                                            <option>August</option>
-                                            <option>September</option>
-                                            <option>October</option>
-                                            <option>November</option>
-                                            <option>December</option>
+                                        <select class="form-select" name="entries[__IDX__][ipcr_semester]"
+                                            id="ipcrSemester__IDX__" data-required-group="service7">
+                                            <option value="" selected disabled>Select Semester</option>
+                                            <option value="1st Semester">1st Semester (January - June)</option>
+                                            <option value="2nd Semester">2nd Semester (July - December)</option>
                                         </select>
-                                        <label>From Month <span class="required-mark">*</span></label>
+                                        <label for="ipcrSemester__IDX__">Semester <span
+                                                class="required-mark">*</span></label>
                                     </div>
                                 </div>
 
-                                <!-- FROM YEAR -->
-                                <div class="col-md-3">
+                                <!-- YEAR -->
+                                <div class="col-md-6">
                                     <div class="form-floating">
-                                        <select class="form-select" name="entries[__IDX__][ipcr_from_year]"
-                                            id="ipcrFromYear__IDX__" data-required-group="service7">
+                                        <select class="form-select" name="entries[__IDX__][ipcr_year]"
+                                            id="ipcrYear__IDX__" data-required-group="service7">
                                             <option value="" selected disabled>Select Year</option>
                                             <?php
                                             for ($year = date('Y'); $year >= 2000; $year--) {
@@ -441,46 +432,7 @@
                                             }
                                             ?>
                                         </select>
-                                        <label>From Year <span class="required-mark">*</span></label>
-                                    </div>
-                                </div>
-
-                                <!-- TO MONTH -->
-                                <div class="col-md-3">
-                                    <div class="form-floating">
-                                        <select class="form-select" name="entries[__IDX__][ipcr_to_month]"
-                                            id="ipcrToMonth__IDX__" data-required-group="service7">
-                                            <option value="" selected disabled>Select Month</option>
-                                            <option>January</option>
-                                            <option>February</option>
-                                            <option>March</option>
-                                            <option>April</option>
-                                            <option>May</option>
-                                            <option>June</option>
-                                            <option>July</option>
-                                            <option>August</option>
-                                            <option>September</option>
-                                            <option>October</option>
-                                            <option>November</option>
-                                            <option>December</option>
-                                        </select>
-                                        <label>To Month <span class="required-mark">*</span></label>
-                                    </div>
-                                </div>
-
-                                <!-- TO YEAR -->
-                                <div class="col-md-3">
-                                    <div class="form-floating">
-                                        <select class="form-select" name="entries[__IDX__][ipcr_to_year]"
-                                            id="ipcrToYear__IDX__" data-required-group="service7">
-                                            <option value="" selected disabled>Select Year</option>
-                                            <?php
-                                            for ($year = date('Y'); $year >= 2000; $year--) {
-                                                echo "<option value='{$year}'>{$year}</option>";
-                                            }
-                                            ?>
-                                        </select>
-                                        <label>To Year <span class="required-mark">*</span></label>
+                                        <label for="ipcrYear__IDX__">Year <span class="required-mark">*</span></label>
                                     </div>
                                 </div>
 
@@ -1524,10 +1476,10 @@
                     break;
                 }
 
-                case 'service7': {
-                    const from = byPrefix(entryEl, 'ipcrFromMonth').value + ' ' + byPrefix(entryEl, 'ipcrFromYear').value;
-                    const to = byPrefix(entryEl, 'ipcrToMonth').value + ' ' + byPrefix(entryEl, 'ipcrToYear').value;
-                    rows.push(['IPCR Period', from + ' to ' + to]);
+              case 'service7': {
+                    const semester = byPrefix(entryEl, 'ipcrSemester').value;
+                    const year = byPrefix(entryEl, 'ipcrYear').value;
+                    rows.push(['IPCR Period', semester && year ? semester + ' ' + year : '—']);
                     break;
                 }
 

@@ -672,6 +672,238 @@ button {
   font-size: 0.82rem;
 }
 
+/* ===== Request Details Modal ===== */
+.request-modal {
+  border: none;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.request-modal-header {
+  background: linear-gradient(135deg, #10058c 0%, #2a0fb8 100%);
+  color: #fff;
+  padding: 1.25rem 1.5rem;
+  border: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* or center, depending on your design */
+}
+
+.request-modal-eyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.75;
+  margin-bottom: 2px;
+}
+
+.request-modal-ref {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: #fff;
+  margin: 0;
+  font-family: "Courier New", monospace;
+  letter-spacing: 0.02em;
+}
+
+.status-pill {
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  white-space: nowrap;
+}
+
+.status-pill[data-status="New Application"] {
+  background: #ffe8b3;
+  color: #7a5200;
+}
+.status-pill[data-status="Processing"] {
+  background: #bee0ff;
+  color: #054a91;
+}
+.status-pill[data-status="For Released"] {
+  background: #d6c4ff;
+  color: #4b1fa6;
+}
+.status-pill[data-status="Completed"] {
+  background: #c8f0d8;
+  color: #10693b;
+}
+.status-pill[data-status="Rejected"] {
+  background: #ffd1d1;
+  color: #a31313;
+}
+
+/* Stepper */
+.request-stepper {
+  padding: 1.1rem 1.75rem 0.5rem;
+  background: #f7f7fb;
+  border-bottom: 1px solid #eee;
+}
+
+.stepper-track {
+  position: relative;
+  height: 3px;
+  background: #e2e2ee;
+  border-radius: 2px;
+  margin: 0 24px;
+}
+
+.stepper-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: #10058c;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+.stepper-steps {
+  display: flex;
+  justify-content: space-between;
+  margin-top: -9px;
+}
+
+.stepper-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 90px;
+}
+
+.stepper-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #cfcfe0;
+  margin-bottom: 6px;
+  transition: all 0.2s ease;
+}
+
+.stepper-step.active .stepper-dot {
+  border-color: #10058c;
+  background: #10058c;
+  box-shadow: 0 0 0 4px rgba(16, 5, 140, 0.15);
+}
+
+.stepper-step.rejected .stepper-dot {
+  border-color: #dc3545;
+  background: #dc3545;
+}
+
+.stepper-label {
+  font-size: 0.68rem;
+  color: #8a8a9a;
+  text-align: center;
+  font-weight: 600;
+}
+
+.stepper-step.active .stepper-label {
+  color: #10058c;
+}
+
+/* Body layout */
+.request-modal-body {
+  padding: 1.5rem;
+  background: #fff;
+}
+
+.detail-section {
+  margin-bottom: 1.5rem;
+}
+
+.detail-section:last-child {
+  margin-bottom: 0;
+}
+
+.detail-section-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #10058c;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.9rem 1.5rem;
+}
+
+.detail-item dt {
+  font-size: 0.72rem;
+  color: #9a9aab;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 2px;
+}
+
+.detail-item dd {
+  font-size: 0.92rem;
+  color: #222;
+  margin: 0;
+  font-weight: 500;
+}
+
+.entry-card {
+  background: #f9f9fd;
+  border: 1px solid #eceaf9;
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  margin-bottom: 0.9rem;
+}
+
+.entry-card:last-child {
+  margin-bottom: 0;
+}
+
+.entry-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.entry-card-badge {
+  background: #10058c;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 12px;
+}
+
+.entry-card-service {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #10058c;
+}
+
+@media (max-width: 576px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+  .stepper-label {
+    display: none;
+  }
+  .stepper-step {
+    width: auto;
+  }
+}
+
 /* -------------------- Status Badges -------------------- */
 .badge {
   font-weight: 700;
@@ -1403,9 +1635,15 @@ body:has(.offcanvas.show) .export-overlay {
   flex-shrink: 0;
 }
 
-.report-page .r-status.completed { color: var(--r-ok); }
-.report-page .r-status.pending   { color: var(--r-pending); }
-.report-page .r-status.cancelled { color: var(--r-cancelled); }
+.report-page .r-status.completed {
+  color: var(--r-ok);
+}
+.report-page .r-status.pending {
+  color: var(--r-pending);
+}
+.report-page .r-status.cancelled {
+  color: var(--r-cancelled);
+}
 
 /* -------------------- Empty state -------------------- */
 .report-page .r-empty {
@@ -1470,14 +1708,26 @@ body:has(.offcanvas.show) .export-overlay {
 
 /* -------------------- Print -------------------- */
 @media print {
-  .no-print { display: none !important; }
-  .topbar, .sidebar, .app-footer { display: none !important; }
-  .main-content { padding: 0 !important; }
-  .report-page .r-table thead th { border-bottom: 1px solid #000; }
-  .topbar, .sidebar, .app-footer { display: none !important; }
+  .no-print {
+    display: none !important;
+  }
+  .topbar,
+  .sidebar,
+  .app-footer {
+    display: none !important;
+  }
+  .main-content {
+    padding: 0 !important;
+  }
+  .report-page .r-table thead th {
+    border-bottom: 1px solid #000;
+  }
+  .topbar,
+  .sidebar,
+  .app-footer {
+    display: none !important;
+  }
 }
-
-
 
 /* -------------------- Responsive -------------------- */
 @media (max-width: 640px) {
@@ -1497,7 +1747,7 @@ body:has(.offcanvas.show) .export-overlay {
 
 /* ---------- Minimalist modal shell ---------- */
 #addUserModal .modal-content {
-  border: 1px solid #E5E7EB;
+  border: 1px solid #e5e7eb;
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
@@ -1506,7 +1756,7 @@ body:has(.offcanvas.show) .export-overlay {
 #addUserModal .modal-header {
   background: #fff !important;
   color: #111827 !important;
-  border-bottom: 1px solid #E5E7EB;
+  border-bottom: 1px solid #e5e7eb;
   padding: 20px 24px;
 }
 
@@ -1519,7 +1769,7 @@ body:has(.offcanvas.show) .export-overlay {
 }
 
 #addUserModal .modal-title i {
-  color: #6B7280;
+  color: #6b7280;
   font-size: 15px;
 }
 
@@ -1540,31 +1790,31 @@ body:has(.offcanvas.show) .export-overlay {
 #addUserModal label {
   font-size: 12.5px;
   font-weight: 500;
-  color: #6B7280;
+  color: #6b7280;
   margin-bottom: 6px;
   display: inline-block;
 }
 
 #addUserModal .form-control,
 #addUserModal .form-select {
-  border: 1px solid #E5E7EB;
+  border: 1px solid #e5e7eb;
   border-radius: 6px;
   font-size: 14px;
   padding: 9px 12px;
   color: #111827;
-  background: #FAFAFA;
+  background: #fafafa;
 }
 
 #addUserModal .form-control:focus,
 #addUserModal .form-select:focus {
-  border-color: #9CA3AF;
+  border-color: #9ca3af;
   box-shadow: none;
   background: #fff;
 }
 
 /* ---------- Footer ---------- */
 #addUserModal .modal-footer {
-  border-top: 1px solid #E5E7EB;
+  border-top: 1px solid #e5e7eb;
   padding: 16px 24px;
 }
 
@@ -1577,11 +1827,11 @@ body:has(.offcanvas.show) .export-overlay {
 
 #addUserModal .btn-secondary {
   background: #fff;
-  color: #6B7280;
-  border: 1px solid #E5E7EB;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
 }
 #addUserModal .btn-secondary:hover {
-  background: #F3F4F6;
+  background: #f3f4f6;
   color: #111827;
 }
 
@@ -1590,13 +1840,13 @@ body:has(.offcanvas.show) .export-overlay {
   border-color: #111827;
 }
 #addUserModal .btn-primary:hover {
-  background: #1F2937;
-  border-color: #1F2937;
+  background: #1f2937;
+  border-color: #1f2937;
 }
 
 /* ---------- Minimalist modal shell ---------- */
 .edit-user-modal .modal-content {
-  border: 1px solid #E5E7EB;
+  border: 1px solid #e5e7eb;
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
@@ -1604,7 +1854,7 @@ body:has(.offcanvas.show) .export-overlay {
 /* Kill the bootstrap bg-warning block header look */
 .edit-user-modal .modal-header {
   background: #fff !important;
-  border-bottom: 1px solid #E5E7EB;
+  border-bottom: 1px solid #e5e7eb;
   padding: 20px 24px;
 }
 
@@ -1622,7 +1872,7 @@ body:has(.offcanvas.show) .export-overlay {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #C97A25;
+  background: #c97a25;
   display: inline-block;
 }
 
@@ -1642,36 +1892,36 @@ body:has(.offcanvas.show) .export-overlay {
 .edit-user-modal label {
   font-size: 12.5px;
   font-weight: 500;
-  color: #6B7280;
+  color: #6b7280;
   margin-bottom: 6px;
   display: inline-block;
 }
 
 .edit-user-modal .form-control,
 .edit-user-modal .form-select {
-  border: 1px solid #E5E7EB;
+  border: 1px solid #e5e7eb;
   border-radius: 6px;
   font-size: 14px;
   padding: 9px 12px;
   color: #111827;
-  background: #FAFAFA;
+  background: #fafafa;
 }
 
 .edit-user-modal .form-control:focus,
 .edit-user-modal .form-select:focus {
-  border-color: #9CA3AF;
+  border-color: #9ca3af;
   box-shadow: none;
   background: #fff;
 }
 
 .edit-user-modal .form-control::placeholder {
-  color: #9CA3AF;
+  color: #9ca3af;
   font-size: 13px;
 }
 
 /* ---------- Footer ---------- */
 .edit-user-modal .modal-footer {
-  border-top: 1px solid #E5E7EB;
+  border-top: 1px solid #e5e7eb;
   padding: 16px 24px;
 }
 
@@ -1684,29 +1934,29 @@ body:has(.offcanvas.show) .export-overlay {
 
 .edit-user-modal .btn-secondary {
   background: #fff;
-  color: #6B7280;
-  border: 1px solid #E5E7EB;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
 }
 .edit-user-modal .btn-secondary:hover {
-  background: #F3F4F6;
+  background: #f3f4f6;
   color: #111827;
 }
 
 /* Flat amber instead of bootstrap's yellow-striped warning button */
 .edit-user-modal .btn-warning {
-  background: #C97A25;
-  border-color: #C97A25;
+  background: #c97a25;
+  border-color: #c97a25;
   color: #fff;
 }
 .edit-user-modal .btn-warning:hover {
-  background: #A8631C;
-  border-color: #A8631C;
+  background: #a8631c;
+  border-color: #a8631c;
   color: #fff;
 }
 
 /* ---------- Minimalist modal shell ---------- */
 .view-user-modal .modal-content {
-  border: 1px solid #E5E7EB;
+  border: 1px solid #e5e7eb;
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
@@ -1715,7 +1965,7 @@ body:has(.offcanvas.show) .export-overlay {
 .view-user-modal .modal-header {
   background: #fff !important;
   color: #111827 !important;
-  border-bottom: 1px solid #E5E7EB;
+  border-bottom: 1px solid #e5e7eb;
   padding: 20px 24px;
 }
 
@@ -1732,7 +1982,7 @@ body:has(.offcanvas.show) .export-overlay {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #2E5AAC;
+  background: #2e5aac;
   display: inline-block;
 }
 
@@ -1761,7 +2011,7 @@ body:has(.offcanvas.show) .export-overlay {
 .view-user-modal .table th,
 .view-user-modal .table td {
   border: none;
-  border-bottom: 1px solid #F0F1F3;
+  border-bottom: 1px solid #f0f1f3;
   padding: 12px 0;
   vertical-align: middle;
 }
@@ -1775,7 +2025,7 @@ body:has(.offcanvas.show) .export-overlay {
   width: 35%;
   font-size: 12.5px;
   font-weight: 500;
-  color: #6B7280;
+  color: #6b7280;
   text-transform: none;
 }
 
@@ -1795,18 +2045,18 @@ body:has(.offcanvas.show) .export-overlay {
 }
 
 .view-user-modal .badge.bg-success {
-  background: #E5F0E7 !important;
-  color: #2E7D4F;
+  background: #e5f0e7 !important;
+  color: #2e7d4f;
 }
 
 .view-user-modal .badge.bg-danger {
-  background: #FBEAE6 !important;
-  color: #B3432B;
+  background: #fbeae6 !important;
+  color: #b3432b;
 }
 
 /* ---------- Footer ---------- */
 .view-user-modal .modal-footer {
-  border-top: 1px solid #E5E7EB;
+  border-top: 1px solid #e5e7eb;
   padding: 16px 24px;
 }
 
@@ -1819,16 +2069,16 @@ body:has(.offcanvas.show) .export-overlay {
 
 .view-user-modal .btn-secondary {
   background: #fff;
-  color: #6B7280;
-  border: 1px solid #E5E7EB;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
 }
 .view-user-modal .btn-secondary:hover {
-  background: #F3F4F6;
+  background: #f3f4f6;
   color: #111827;
 }
 /* ---------- Minimalist modal shell ---------- */
 .delete-user-modal .modal-content {
-  border: 1px solid #E5E7EB;
+  border: 1px solid #e5e7eb;
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
@@ -1836,7 +2086,7 @@ body:has(.offcanvas.show) .export-overlay {
 .delete-user-modal .modal-header {
   background: #fff !important;
   color: #111827 !important;
-  border-bottom: 1px solid #E5E7EB;
+  border-bottom: 1px solid #e5e7eb;
   padding: 20px 24px;
 }
 
@@ -1853,7 +2103,7 @@ body:has(.offcanvas.show) .export-overlay {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #B3432B;
+  background: #b3432b;
   display: inline-block;
 }
 
@@ -1874,7 +2124,7 @@ body:has(.offcanvas.show) .export-overlay {
 .delete-user-modal .modal-body h5 {
   font-size: 14px;
   font-weight: 500;
-  color: #6B7280;
+  color: #6b7280;
   margin-bottom: 16px;
 }
 
@@ -1891,7 +2141,7 @@ body:has(.offcanvas.show) .export-overlay {
 
 /* ---------- Footer ---------- */
 .delete-user-modal .modal-footer {
-  border-top: 1px solid #E5E7EB;
+  border-top: 1px solid #e5e7eb;
   padding: 16px 24px;
   justify-content: center;
 }
@@ -1905,44 +2155,44 @@ body:has(.offcanvas.show) .export-overlay {
 
 .delete-user-modal .btn-secondary {
   background: #fff;
-  color: #6B7280;
-  border: 1px solid #E5E7EB;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
 }
 .delete-user-modal .btn-secondary:hover {
-  background: #F3F4F6;
+  background: #f3f4f6;
   color: #111827;
 }
 
 .delete-user-modal .btn-danger {
-  background: #B3432B;
-  border-color: #B3432B;
+  background: #b3432b;
+  border-color: #b3432b;
 }
 .delete-user-modal .btn-danger:hover {
-  background: #8F3320;
-  border-color: #8F3320;
+  background: #8f3320;
+  border-color: #8f3320;
 }
 
-.processing-overlay{
-    position:fixed;
-    inset:0;
-    background:rgba(255,255,255,.75);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    z-index:99999;
+.processing-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
 }
 
-.processing-overlay.d-none{
-    display:none;
+.processing-overlay.d-none {
+  display: none;
 }
 
-.processing-card{
-    width:340px;
-    background:#fff;
-    border-radius:12px;
-    padding:25px;
-    text-align:center;
-    box-shadow:0 10px 35px rgba(0,0,0,.15);
+.processing-card {
+  width: 340px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 25px;
+  text-align: center;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
 }
 
 /* ==========================================
@@ -1950,164 +2200,208 @@ body:has(.offcanvas.show) .export-overlay {
 ========================================== */
 
 #doleLoadingScreen {
-    position: fixed !important;
-    inset: 0 !important;
+  position: fixed !important;
+  inset: 0 !important;
 
-    width: 100vw !important;
-    height: 100vh !important;
+  width: 100vw !important;
+  height: 100vh !important;
 
-    /* LIGHT MODE */
-    background: #ffffff !important;
+  /* LIGHT MODE */
+  background: #ffffff !important;
 
-    z-index: 2147483647 !important;
+  z-index: 2147483647 !important;
 
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 
-    opacity: 0;
-    visibility: hidden;
+  opacity: 0;
+  visibility: hidden;
 
-    transition:
-        opacity .25s ease,
-        visibility .25s ease;
+  transition:
+    opacity 0.25s ease,
+    visibility 0.25s ease;
 }
 
 #doleLoadingScreen.show {
-    opacity: 1 !important;
-    visibility: visible !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
-
 
 /* CONTENT */
 
 #doleLoadingContent {
-    width: 380px;
-    max-width: 90vw;
+  width: 380px;
+  max-width: 90vw;
 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
-    text-align: center;
+  text-align: center;
 }
-
 
 /* ==========================================
    LOGO
 ========================================== */
 
 #doleLogoBox {
-    width: 170px;
-    height: 170px;
+  width: 170px;
+  height: 170px;
 
-    position: relative;
+  position: relative;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    margin-bottom: 22px;
+  margin-bottom: 22px;
 }
-
 
 /* Rotating DOLE BLUE ring */
 
 #doleLogoBox::before {
-    content: "";
+  content: "";
 
-    position: absolute;
+  position: absolute;
 
-    width: 165px;
-    height: 165px;
+  width: 165px;
+  height: 165px;
 
-    border-radius: 50%;
+  border-radius: 50%;
 
-    border: 4px solid #eeeeee;
+  border: 4px solid #eeeeee;
 
-    border-top-color: #10058C;
-    border-right-color: #10058C;
+  border-top-color: #10058c;
+  border-right-color: #10058c;
 
-    animation: doleLogoSpin 1.5s linear infinite;
+  animation: doleLogoSpin 1.5s linear infinite;
 }
-
 
 /* LOGO */
 
 #doleLoadingLogo {
-    position: relative !important;
+  position: relative !important;
 
-    z-index: 10 !important;
+  z-index: 10 !important;
 
-    display: block !important;
+  display: block !important;
 
-    width: 125px !important;
-    height: 125px !important;
+  width: 125px !important;
+  height: 125px !important;
 
-    object-fit: contain !important;
+  object-fit: contain !important;
 
-    opacity: 1 !important;
-    visibility: visible !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 
-    animation: doleLogoFloat 2s ease-in-out infinite;
+  animation: doleLogoFloat 2s ease-in-out infinite;
 }
-
 
 /* ==========================================
    TITLE
 ========================================== */
 
 #doleLoadingTitle {
-    color: #10058C;
+  color: #10058c;
 
-    font-size: 24px;
-    font-weight: 800;
+  font-size: 24px;
+  font-weight: 800;
 
-    letter-spacing: 1.5px;
+  letter-spacing: 1.5px;
 
-    text-transform: uppercase;
+  text-transform: uppercase;
 }
-
 
 #doleLoadingSubtitle {
-    color: #555555;
+  color: #555555;
 
-    font-size: 12px;
-    font-weight: 700;
+  font-size: 12px;
+  font-weight: 700;
 
-    letter-spacing: 5px;
+  letter-spacing: 5px;
 
-    margin-top: 4px;
+  margin-top: 4px;
 }
-
-
 
 /* ==========================================
    ANIMATION
 ========================================== */
 
 @keyframes doleLogoSpin {
+  from {
+    transform: rotate(0deg);
+  }
 
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
-
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes doleLogoFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
 
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-5px);
-    }
-
+  50% {
+    transform: translateY(-5px);
+  }
 }
 
+.summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.summary-table th,
+.summary-table td {
+    padding: 0.6rem 0.75rem;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.summary-table thead th {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #6b7280;
+    font-weight: 600;
+    border-bottom: 2px solid #d1d5db;
+    white-space: nowrap;
+}
+
+.summary-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.summary-table tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+/* Column widths so long content (e.g. long office names) doesn't
+   squeeze the "#" column or wrap awkwardly */
+.summary-table th:first-child,
+.summary-table td:first-child {
+    width: 36px;
+    text-align: center;
+    color: #6b7280;
+}
+
+.summary-table th:nth-child(2),
+.summary-table td:nth-child(2) {
+    width: 26%;
+    white-space: nowrap;
+}
+
+.summary-table th:nth-child(3),
+.summary-table td:nth-child(3) {
+    width: 22%;
+}
+
+.summary-table th:nth-child(4),
+.summary-table td:nth-child(4) {
+    width: auto;
+}

@@ -164,7 +164,7 @@
 
                 <div id="exportOverlay" class="export-overlay">
                     <div class="export-card">
-                        <h3>Preparing PDF Report</h3>
+                        <h3 id="exportTitle">Preparing PDF Report</h3>
                         <p id="exportText">Initializing...</p>
 
                         <div class="progress-track">
@@ -368,34 +368,23 @@
                 "_blank"
             );
         });
-
-        // CSV
-        document.getElementById('btnCsv').addEventListener('click', function () {
-            window.location.href =
-                "<?= site_url('reports/export/csv') ?>?" + getFilters();
-        });
-
-        // PDF
-        document.getElementById('exportButton').addEventListener('click', function () {
-            window.location.href =
-                "<?= site_url('reports/export/pdf') ?>?" + getFilters();
-        });
-
     });
 </script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
 
-        const button = document.getElementById("exportButton");
         const overlay = document.getElementById("exportOverlay");
         const bar = document.getElementById("progressBar");
         const percent = document.getElementById("progressValue");
         const text = document.getElementById("exportText");
-
-        button.addEventListener("click", async function () {
+        const title = document.getElementById("exportTitle");
+        async function exportReport(button, url, filename, format) {
 
             button.disabled = true;
             overlay.classList.add("is-visible");
+
+            document.getElementById("exportTitle").textContent =
+                format === "pdf" ? "Preparing PDF Report" : "Preparing CSV Report";
 
             let progress = 0;
 
@@ -407,7 +396,9 @@
 
                 if (progress < 90) {
 
-                    progress += Math.floor(Math.random() * 8) + 3;
+                    // Smaller, steadier steps so the bar doesn't rush to 90%
+                    // and then idle — paced to roughly match real generation time.
+                    progress += Math.floor(Math.random() * 3) + 1; // was: * 8 + 3
 
                     if (progress > 90)
                         progress = 90;
@@ -419,22 +410,20 @@
                         text.textContent = "Collecting records...";
 
                     if (progress > 55)
-                        text.textContent = "Generating PDF...";
+                        text.textContent = format === "pdf" ? "Generating PDF..." : "Generating CSV...";
 
-                    if (progress > 80)
+                    if (progress > 80 && format === "pdf")
                         text.textContent = "Almost finished...";
                 }
 
-            }, 180);
+            }, 250); // was: 180
 
             try {
 
                 const form = document.querySelector(".r-filters");
                 const params = new URLSearchParams(new FormData(form));
 
-                const response = await fetch(
-                    "<?= site_url('export/reports-pdf') ?>?" + params.toString()
-                );
+                const response = await fetch(url + "?" + params.toString());
 
                 if (!response.ok)
                     throw new Error();
@@ -448,14 +437,14 @@
                 percent.textContent = "100%";
                 text.textContent = "Download ready.";
 
-                const url = URL.createObjectURL(blob);
+                const objectUrl = URL.createObjectURL(blob);
 
                 const a = document.createElement("a");
-                a.href = url;
-                a.download = "HR_Request_Report.pdf";
+                a.href = objectUrl;
+                a.download = filename;
                 a.click();
 
-                URL.revokeObjectURL(url);
+                URL.revokeObjectURL(objectUrl);
 
                 setTimeout(() => {
 
@@ -474,39 +463,42 @@
                 overlay.classList.remove("is-visible");
                 button.disabled = false;
 
-                alert("Unable to export PDF.");
+                alert("Unable to export " + format.toUpperCase() + ".");
 
             }
 
+        }
+
+        document.getElementById("exportButton").addEventListener("click", function () {
+            exportReport(this, "<?= site_url('export/reports-pdf') ?>", "HR_Request_Report.pdf", "pdf");
         });
 
-    });
-    document.getElementById("btnReset").addEventListener("click", function () {
-        window.location.href = "<?= site_url('reports') ?>";
-    });
-
-    document.getElementById("btnCsv").addEventListener("click", function () {
-
-        const params = new URLSearchParams(
-            new FormData(document.querySelector(".r-filters"))
-        );
-
-        window.location.href =
-            "<?= site_url('export/reports-csv') ?>?" + params.toString();
+        document.getElementById("btnCsv").addEventListener("click", function () {
+            exportReport(this, "<?= site_url('export/reports-csv') ?>", "HR_Request_Report.csv", "csv");
+        });
 
     });
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
 
-        const loadingScreen =
-            document.getElementById('doleLoadingScreen');
+        const loadingScreen = document.getElementById('doleLoadingScreen');
 
         if (!loadingScreen) return;
 
-        const sidebarLinks =
-            document.querySelectorAll('.nav-link');
+        const sidebarLinks = document.querySelectorAll('.nav-link');
 
+        let isNavigating = false;
+
+        function showLoadingScreen() {
+            loadingScreen.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideLoadingScreen() {
+            loadingScreen.classList.remove('show');
+            document.body.style.overflow = '';
+        }
 
         sidebarLinks.forEach(function (link) {
 
@@ -517,11 +509,32 @@
                 if (
                     !href ||
                     href === '#' ||
+                    href.startsWith('#') ||
                     href === 'javascript:void(0)'
                 ) {
                     return;
                 }
 
+                // Skip external links and anything opening in a new tab
+                if (
+                    this.target === '_blank' ||
+                    this.hasAttribute('download') ||
+                    this.getAttribute('rel') === 'external'
+                ) {
+                    return;
+                }
+
+                // Skip if link points to the current page (no real navigation happening)
+                let resolvedHref;
+                try {
+                    resolvedHref = new URL(href, window.location.href).href;
+                } catch (e) {
+                    resolvedHref = null;
+                }
+
+                if (resolvedHref && resolvedHref === window.location.href) {
+                    return;
+                }
 
                 /* Allow Ctrl / CMD / Shift / Middle Click */
 
@@ -534,18 +547,21 @@
                     return;
                 }
 
+                // Guard against rapid double-clicks queuing multiple navigations
+                if (isNavigating) {
+                    event.preventDefault();
+                    return;
+                }
+
+                isNavigating = true;
 
                 /* Stop normal navigation temporarily */
 
                 event.preventDefault();
 
-
                 /* Show loading screen */
 
-                loadingScreen.classList.add('show');
-
-                document.body.style.overflow = 'hidden';
-
+                showLoadingScreen();
 
                 /*
                  * Navigate immediately.
@@ -555,19 +571,33 @@
 
                 window.location.href = href;
 
+                // Fallback: if navigation stalls (offline, server error,
+                // blocked request) don't leave the user stuck behind the
+                // overlay forever.
+                setTimeout(function () {
+                    isNavigating = false;
+                    hideLoadingScreen();
+                }, 15000);
+
             });
 
         });
 
-
-        /* Back / Forward */
+        /* Back / Forward, including bfcache restores */
 
         window.addEventListener('pageshow', function () {
+            isNavigating = false;
+            hideLoadingScreen();
+        });
 
-            loadingScreen.classList.remove('show');
-
-            document.body.style.overflow = '';
-
+        // Belt-and-suspenders: if the page is somehow still visible
+        // with the overlay up (e.g. blocked navigation), clear it once
+        // the tab regains focus.
+        document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'visible') {
+                isNavigating = false;
+                hideLoadingScreen();
+            }
         });
 
     });
