@@ -39,6 +39,8 @@ class HrRequestModel extends Model
         'date_processing',
         'date_completed',
         'date_rejected',
+        'date_canceled',
+        'cancellation_reason'
         
 
     ];

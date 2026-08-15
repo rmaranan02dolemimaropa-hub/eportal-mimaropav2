@@ -17,6 +17,10 @@ class EportalController extends BaseController
     }
     public function request()
     {
+        $response = service('response');
+        $response->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        $response->setHeader('Pragma', 'no-cache');
+        $response->setHeader('Expires', '0');
 
         $historyModel = new HrEmploymentHistoryModel();
 
@@ -105,6 +109,10 @@ class EportalController extends BaseController
 
     public function dashboard()
     {
+        $response = service('response');
+        $response->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        $response->setHeader('Pragma', 'no-cache');
+        $response->setHeader('Expires', '0');
         $requestModel = new HrRequestModel();
 
         $data = [
@@ -124,7 +132,8 @@ class EportalController extends BaseController
             WHEN status = 'For Released' THEN 3
             WHEN status = 'Completed' THEN 4
             WHEN status = 'Rejected' THEN 5
-            ELSE 6
+            WHEN status = 'Canceled' THEN 6
+            ELSE 7
         END
     ", '', false)
             ->orderBy("
@@ -134,6 +143,7 @@ class EportalController extends BaseController
             WHEN status = 'For Released' THEN date_released
             WHEN status = 'Completed' THEN date_completed
             WHEN status = 'Rejected' THEN date_rejected
+            WHEN status = 'Canceled' THEN date_canceled
         END
     ", 'DESC', false)
             ->paginate(10);
@@ -165,6 +175,12 @@ class EportalController extends BaseController
             ->where('status', 'Rejected')
             ->where('YEAR(date_rejected)', date('Y'))
             ->where('MONTH(date_rejected)', date('m'))
+            ->countAllResults();
+
+        $data['canceled_month'] = $requestModel
+            ->where('status', 'Canceled')
+            ->where('YEAR(date_canceled)', date('Y'))
+            ->where('MONTH(date_canceled)', date('m'))
             ->countAllResults();
 
         return view('dashboard/dashboard', $data);
@@ -377,6 +393,8 @@ class EportalController extends BaseController
                 'received_by' => null,
                 'date_released' => null,
                 'released_by' => null,
+                'date_canceled' => null,
+                'cancellation_reason' => null,
             ];
 
             // if (!$model->insert($data)) {
@@ -658,6 +676,7 @@ class EportalController extends BaseController
             'date_requested' => $this->request->getPost('date_requested'),
             'status' => $status,
             'remarks' => $this->request->getPost('remarks'),
+            'cancellation_reason' => $this->request->getPost('cancellation_reason'),
         ];
 
 
@@ -688,6 +707,12 @@ class EportalController extends BaseController
             case 'Rejected':
 
                 $data['date_rejected'] = date('Y-m-d H:i:s');
+
+                break;
+
+            case 'Canceled':
+
+                $data['date_canceled'] = date('Y-m-d H:i:s');
 
                 break;
 
@@ -820,7 +845,7 @@ class EportalController extends BaseController
             ->with('success', 'HR request updated successfully.');
     }
 
-    public function deleteRequest($id)
+    public function cancelRequest($id)
     {
         $requestModel = new HrRequestModel();
 
@@ -832,11 +857,15 @@ class EportalController extends BaseController
                 ->with('error', 'Request not found.');
         }
 
-        $requestModel->delete($id);
+        $requestModel->update($id, [
+            'status' => 'Canceled', // capital C para consistent sa buong system
+            'date_canceled' => date('Y-m-d H:i:s'),
+            'cancellation_reason' => $this->request->getPost('cancellation_reason'),
+        ]);
 
         return redirect()
             ->to(site_url('request'))
-            ->with('success', 'HR request deleted successfully.');
+            ->with('success', 'HR request canceled successfully.');
     }
 
     public function saveRequest()

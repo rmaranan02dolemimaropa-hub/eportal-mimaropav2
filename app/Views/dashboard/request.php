@@ -138,6 +138,11 @@
                 Rejected
             </a>
 
+            <a href="<?= current_url() ?>?status=Canceled"
+                class="status-pill <?= $status == 'Canceled' ? 'active' : '' ?>">
+                Canceled
+            </a>
+
         </div>
 
 
@@ -196,6 +201,10 @@
 
                                         $displayDate = $row['date_rejected'];
 
+                                    } elseif ($row['status'] == 'Canceled' && $row['date_canceled']) {
+
+                                        $displayDate = $row['date_canceled'];
+
                                     }
 
                                     ?>
@@ -213,6 +222,7 @@
                                         'Completed' => 'badge-completed',
                                         'For Released' => 'badge-for-released',
                                         'Rejected' => 'badge-rejected',
+                                        'Canceled' => 'badge-canceled',
                                     ];
 
                                     ?>
@@ -268,7 +278,9 @@
                                             data-certification="<?= esc($row['certification'] ?? '', 'attr') ?>"
                                             data-ipcr-period="<?= esc($row['ipcr_period'] ?? '', 'attr') ?>"
                                             data-specify-201="<?= esc($row['specify_201'] ?? '', 'attr') ?>"
-                                            data-remarks="<?= esc($row['remarks'] ?? '', 'attr') ?>">
+                                            data-remarks="<?= esc($row['remarks'] ?? '', 'attr') ?>"
+                                            data-cancellation-reason="<?= esc($row['cancellation_reason'] ?? '', 'attr') ?>">
+
 
                                             <i class="bi bi-eye"></i>
 
@@ -283,10 +295,10 @@
                                                 <i class="bi bi-pencil"></i>
                                             </button>
 
-                                            <!-- Delete -->
-                                            <button class="row-action-btn row-action-danger" title="Delete" data-bs-toggle="modal"
-                                                data-bs-target="#delete<?= $row['id'] ?>">
-                                                <i class="bi bi-trash"></i>
+                                            <!-- Cancel -->
+                                            <button class="row-action-btn row-action-warning" title="Cancel" data-bs-toggle="modal"
+                                                data-bs-target="#cancel<?= $row['id'] ?>">
+                                                <i class="bi bi-x-circle"></i>
                                             </button>
 
                                         <?php endif; ?>
@@ -511,33 +523,39 @@
     <?php endforeach; ?>
 
     <?php foreach ($requests as $row): ?>
-        <div class="modal fade" id="delete<?= $row['id'] ?>" tabindex="-1">
+        <div class="modal fade" id="cancel<?= $row['id'] ?>" tabindex="-1">
             <div class="modal-dialog">
-                <form method="post" action="<?= site_url('request/delete/' . $row['id']) ?>" class="modal-content">
+                <form method="post" action="<?= site_url('request/cancel/' . $row['id']) ?>" class="modal-content">
 
                     <?= csrf_field() ?>
 
                     <div class="modal-header">
-                        <h5 class="modal-title text-danger">Delete HR Request</h5>
+                        <h5 class="modal-title text-warning">Cancel HR Request</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
 
+
                     <div class="modal-body">
-                        Are you sure you want to delete the request for
+                        Are you sure you want to cancel the request for
                         <strong><?= esc($row['fullname']) ?></strong>?
 
-                        <p class="text-danger mt-2 mb-0">
-                            This action cannot be undone.
+                        <div class="col-md-12">
+                            <label class="form-label">Cancellation Reason (Optional)</label>
+                            <textarea name="cancellation_reason" class="form-control" rows="2"></textarea>
+                        </div>
+
+                        <p class="text-muted mt-2 mb-0">
+                            The request will be marked as canceled.
                         </p>
                     </div>
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            Cancel
+                            Back
                         </button>
 
-                        <button type="submit" class="btn btn-danger">
-                            <i class="bi bi-trash"></i> Delete
+                        <button type="submit" class="btn btn-warning">
+                            <i class="bi bi-x-circle"></i> Cancel Request
                         </button>
                     </div>
                 </form>
@@ -994,31 +1012,26 @@
         }
 
         /* =========================================================
-           RENDER
-        ========================================================= */
-        requestDetails.innerHTML = `
+   CANCELLATION DETAILS (only if status is Canceled)
+========================================================= */
+        let cancellationHTML = '';
+        if (data.status === 'Canceled') {
+            cancellationHTML = `
         <div class="detail-section">
-            <div class="detail-section-title"><i class="bi bi-person-vcard"></i> Requester Information</div>
+            <div class="detail-section-title"><i class="bi bi-x-circle"></i> Cancellation Details</div>
             <div class="detail-grid">
-                ${detailItem('Name', data.fullname)}
-                ${detailItem('Contact Number', data.contact)}
-                ${detailItem('Email Address', data.email)}
-                ${detailItem('Date Requested', data.dateRequested)}
+                ${detailItem('Cancellation Reason', data.cancellationReason)}
             </div>
         </div>
+    `;
+        }
 
-        <div class="detail-section">
-            <div class="detail-section-title"><i class="bi bi-clipboard2-check"></i> Service Requested</div>
-            <div class="entry-card">
-                <div class="entry-card-header">
-                    <span class="entry-card-service">${escapeHTML(data.service) || '—'}</span>
-                </div>
-                <div class="detail-grid">
-                    ${serviceFieldsHTML}
-                </div>
-            </div>
-        </div>
-
+        /* =========================================================
+           REMARKS (hidden when status is Canceled)
+        ========================================================= */
+        let remarksHTML = '';
+        if (data.status !== 'Canceled') {
+            remarksHTML = `
         <div class="detail-section">
             <div class="detail-section-title"><i class="bi bi-chat-left-text"></i> Remarks</div>
             <div class="detail-grid">
@@ -1026,17 +1039,52 @@
             </div>
         </div>
     `;
+        }
+
+        /* =========================================================
+           RENDER
+        ========================================================= */
+        requestDetails.innerHTML = `
+    <div class="detail-section">
+        <div class="detail-section-title"><i class="bi bi-person-vcard"></i> Requester Information</div>
+        <div class="detail-grid">
+            ${detailItem('Name', data.fullname)}
+            ${detailItem('Contact Number', data.contact)}
+            ${detailItem('Email Address', data.email)}
+            ${detailItem('Date Requested', data.dateRequested)}
+        </div>
+    </div>
+
+    <div class="detail-section">
+        <div class="detail-section-title"><i class="bi bi-clipboard2-check"></i> Service Requested</div>
+        <div class="entry-card">
+            <div class="entry-card-header">
+                <span class="entry-card-service">${escapeHTML(data.service) || '—'}</span>
+            </div>
+            <div class="detail-grid">
+                ${serviceFieldsHTML}
+            </div>
+        </div>
+    </div>
+
+    ${remarksHTML}
+
+    ${cancellationHTML}
+`;
+
+
+    
 
         /* =========================================================
            START PROCESSING BUTTON
         ========================================================= */
         const startBtn = document.getElementById('startProcessingBtn');
-        if (data.status === 'New Application') {
-            startBtn.classList.remove('d-none');
-            startBtn.dataset.id = data.id;
-        } else {
-            startBtn.classList.add('d-none');
-        }
+    if (data.status === 'New Application') {
+        startBtn.classList.remove('d-none');
+        startBtn.dataset.id = data.id;
+    } else {
+        startBtn.classList.add('d-none');
+    }
     });
 
 
@@ -1139,6 +1187,11 @@
                 case "Rejected":
                     updateText.innerHTML =
                         "Rejecting request...<br><small>Sending rejection email...</small>";
+                    break;
+
+                case "Canceled":
+                    updateText.innerHTML =
+                        "Canceling request...<br><small>Sending cancellation email...</small>";
                     break;
 
                 default:

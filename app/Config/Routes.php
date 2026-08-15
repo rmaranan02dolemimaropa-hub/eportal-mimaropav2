@@ -1,4 +1,3 @@
-
 <?php
 
 use CodeIgniter\Router\RouteCollection;
@@ -83,10 +82,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
         'EportalController::updateRequest/$1'
     );
 
-    $routes->post(
-        'request/delete/(:num)',
-        'EportalController::deleteRequest/$1'
-    );
+    $routes->post('request/cancel/(:num)', 'EportalController::cancelRequest/$1');
 
 
     /*

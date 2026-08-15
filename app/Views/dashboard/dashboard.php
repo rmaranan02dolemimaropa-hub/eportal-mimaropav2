@@ -71,8 +71,9 @@
             <div class="stat-icon stat-icon-orange"><i class="bi bi-hourglass-split"></i></div>
             <div class="stat-body">
                 <span class="stat-number" data-target="<?= $new_application ?>">0</span>
-                <span class="stat-label">New Applications</span>
-                <span class="stat-trend trend-up"><i class="bi bi-calendar-check me-1"></i> <?= $new_today ?> received today</span>
+                <span class="stat-label">New Request</span>
+                <span class="stat-trend trend-up"><i class="bi bi-calendar-check me-1"></i> <?= $new_today ?> received
+                    today</span>
             </div>
         </div>
 
@@ -81,7 +82,8 @@
             <div class="stat-body">
                 <span class="stat-number" data-target="<?= $processing ?>">0</span>
                 <span class="stat-label">Processing</span>
-                <span class="stat-trend trend-up"><i class="bi bi-arrow-repeat me-1"></i><?= $processing_today ?> updated today</span>
+                <span class="stat-trend trend-up"><i class="bi bi-arrow-repeat me-1"></i><?= $processing_today ?>
+                    updated today</span>
             </div>
         </div>
 
@@ -90,7 +92,8 @@
             <div class="stat-body">
                 <span class="stat-number" data-target="<?= $for_released ?>">0</span>
                 <span class="stat-label">For Released</span>
-                <span class="stat-trend trend-up"><i class="bi bi-box-seam me-1"></i><?= $released_today ?> ready today </span>
+                <span class="stat-trend trend-up"><i class="bi bi-box-seam me-1"></i><?= $released_today ?> ready today
+                </span>
             </div>
         </div>
 
@@ -99,18 +102,20 @@
             <div class="stat-body">
                 <span class="stat-number" data-target="<?= $completed ?>">0</span>
                 <span class="stat-label">Completed</span>
-                <span class="stat-trend trend-up"><i class="bi bi-calendar-month me-1"></i><?= $completed_month ?> completed this month</span>
+                <span class="stat-trend trend-up"><i class="bi bi-calendar-month me-1"></i><?= $completed_month ?>
+                    completed this month</span>
             </div>
         </div>
 
-        
+
 
         <div class="stat-card">
             <div class="stat-icon stat-icon-red"><i class="bi bi-x-circle"></i></div>
             <div class="stat-body">
                 <span class="stat-number" data-target="<?= $rejected ?>">0</span>
                 <span class="stat-label">Rejected</span>
-                <span class="stat-trend trend-down"><i class="bi bi-calendar-x me-1"></i><?= $rejected_month ?> rejected this month</span>
+                <span class="stat-trend trend-down"><i class="bi bi-calendar-x me-1"></i><?= $rejected_month ?> rejected
+                    this month</span>
             </div>
         </div>
 
@@ -141,7 +146,7 @@
                             <th>Service</th>
                             <th>Date Requested</th>
                             <th>Status</th>
-                            
+
                         </tr>
                     </thead>
 
@@ -156,8 +161,8 @@
 
                         $statusClass = [
                             'New Application' => 'badge-new-application',
-                            'Processing'      => 'badge-processing',
-                            'For Released'    => 'badge-for-released',
+                            'Processing' => 'badge-processing',
+                            'For Released' => 'badge-for-released',
                         ];
 
                         $hasData = false;
@@ -167,7 +172,8 @@
 
                             <?php foreach ($requests as $row): ?>
 
-                                <?php if (!in_array($row['status'], $allowedStatus)) continue; ?>
+                                <?php if (!in_array($row['status'], $allowedStatus))
+                                    continue; ?>
 
                                 <?php $hasData = true; ?>
 
@@ -188,35 +194,29 @@
                                     <td>
                                         <?php
 
-                                    $displayDate = $row['date_requested'];
+                                        $displayDate = $row['date_requested'];
 
-                                    if ($row['status'] == 'Processing' && $row['date_processing']) {
+                                        if ($row['status'] == 'Processing' && $row['date_processing']) {
 
-                                        $displayDate = $row['date_processing'];
+                                            $displayDate = $row['date_processing'];
 
-                                    }
+                                        } elseif ($row['status'] == 'For Released' && $row['date_released']) {
 
-                                    elseif ($row['status'] == 'For Released' && $row['date_released']) {
+                                            $displayDate = $row['date_released'];
 
-                                        $displayDate = $row['date_released'];
+                                        } elseif ($row['status'] == 'Completed' && $row['date_completed']) {
 
-                                    }
+                                            $displayDate = $row['date_completed'];
 
-                                    elseif ($row['status'] == 'Completed' && $row['date_completed']) {
+                                        } elseif ($row['status'] == 'Rejected' && $row['date_rejected']) {
 
-                                        $displayDate = $row['date_completed'];
+                                            $displayDate = $row['date_rejected'];
 
-                                    }
+                                        }
 
-                                    elseif ($row['status'] == 'Rejected' && $row['date_rejected']) {
+                                        ?>
 
-                                        $displayDate = $row['date_rejected'];
-
-                                    }
-
-                                    ?>
-
-                                    <?= date('F d, Y', strtotime($displayDate)) ?>
+                                        <?= date('F d, Y', strtotime($displayDate)) ?>
                                     </td>
 
                                     <td>
@@ -299,7 +299,8 @@
                         <i class="bi bi-plus-circle"></i>
                         <span>New Request</span>
                     </button>
-                    <button class="quick-action-btn" type="button">
+                    <button class="quick-action-btn" type="button"
+                        onclick="window.location.href='<?= site_url('reports') ?>'">
                         <i class="bi bi-bar-chart"></i>
                         <span>Generate Report</span>
                     </button>
@@ -312,160 +313,158 @@
                 </div>
             </section>
 
+            <div class="modal fade" id="serviceDetailsModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                    <form id="serviceRequestForm" method="post" action="<?= site_url('request/save') ?>"
+                        class="modal-content">
 
+                        <?= csrf_field() ?>
+
+                        <div class="modal-header">
+                            <h5 class="modal-title">HR Service Request</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="serviceAvailed" class="form-label">
+                                    Service Availed <span class="text-danger">*</span>
+                                </label>
+
+                                <select id="serviceAvailed" name="service_availed" class="form-select" required>
+                                    <option value="" selected disabled>Select a service</option>
+                                    <option value="Service Record">Service Record</option>
+                                    <option value="Certificate with Compensation">Certificate with Compensation</option>
+                                    <option value="Loan Assistance">Loan Assistance</option>
+                                    <option value="Inquiry of Leave Balance">Inquiry of Leave Balance</option>
+                                    <option value="Certificate of Employment">Certificate of Employment</option>
+                                    <option value="Certification">Certification</option>
+                                    <option value="IPCR">IPCR</option>
+                                    <option value="201 Docs">201 Docs</option>
+                                </select>
+                            </div>
+
+                            <!-- Shown for every selected service -->
+                            <div id="basicFields" class="row g-3 d-none">
+                                <div class="col-md-6">
+                                    <label class="form-label">Name <span class="text-danger">*</span></label>
+                                    <input type="text" name="fullname" class="form-control" placeholder="Full name"
+                                        required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Contact Number <span class="text-danger">*</span></label>
+                                    <input type="tel" name="contact_number" class="form-control"
+                                        placeholder="Contact number" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Email Address <span class="text-danger">*</span></label>
+                                    <input type="email" name="email_address" class="form-control"
+                                        placeholder="Email address" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Date Requested <span class="text-danger">*</span></label>
+                                    <input type="date" name="date_requested" class="form-control"
+                                        value="<?= date('Y-m-d') ?>" required>
+                                </div>
+                            </div>
+
+                            <!-- Certificate of Employment -->
+                            <div id="coeFields" class="row g-3 mt-2 d-none">
+                                <div class="col-md-6">
+                                    <label class="form-label">Employee Category <span
+                                            class="text-danger">*</span></label>
+                                    <select id="employeeCategory" name="employee_category" class="form-select">
+                                        <option value="">Select category</option>
+                                        <option value="COS Employee">COS Employee</option>
+                                        <option value="Permanent Employee">Permanent Employee</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Position <span class="text-danger">*</span></label>
+                                    <input type="text" id="position" name="position" class="form-control">
+                                </div>
+                            </div>
+
+                            <!-- COS Employee only -->
+                            <div id="cosFields" class="row g-3 mt-2 d-none">
+                                <div class="col-md-6">
+                                    <label class="form-label">Period of Service <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" id="periodOfService" name="period_of_service"
+                                        class="form-control" placeholder="Example: January 2024 to December 2024">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Office / Division Assigned <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" id="officeDivision" name="office_division" class="form-control">
+                                </div>
+                            </div>
+
+                            <!-- Certification -->
+                            <div id="certificationFields" class="mt-4 d-none">
+                                <label class="form-label d-block">
+                                    Certification Needed <span class="text-danger">*</span>
+                                </label>
+
+                                <div class="form-check">
+                                    <input class="form-check-input certification-option" type="checkbox"
+                                        name="certification[]" value="No pending case" id="noPendingCase">
+                                    <label class="form-check-label" for="noPendingCase">No pending case</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input certification-option" type="checkbox"
+                                        name="certification[]" value="Last Salary Received" id="lastSalary">
+                                    <label class="form-check-label" for="lastSalary">Last Salary Received</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input certification-option" type="checkbox"
+                                        name="certification[]" value="Leave Credits" id="leaveCredits">
+                                    <label class="form-check-label" for="leaveCredits">Leave Credits</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input certification-option" type="checkbox"
+                                        name="certification[]" value="Leave without pay" id="leaveWithoutPay">
+                                    <label class="form-check-label" for="leaveWithoutPay">Leave without pay</label>
+                                </div>
+                            </div>
+
+                            <!-- IPCR -->
+                            <div id="ipcrFields" class="mt-3 d-none">
+                                <label class="form-label">Please Indicate Period <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" id="ipcrPeriod" name="ipcr_period" class="form-control"
+                                    placeholder="Example: January to June 2025">
+                            </div>
+
+                            <!-- 201 Documents -->
+                            <div id="docs201Fields" class="mt-3 d-none">
+                                <label class="form-label">Please Specify <span class="text-danger">*</span></label>
+                                <textarea id="specify201" name="specify_201" class="form-control" rows="3"
+                                    placeholder="Specify the 201 document needed"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                Close
+                            </button>
+
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Submit Request
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="modal fade" id="serviceDetailsModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <form id="serviceRequestForm" method="post"
-            action="<?= site_url('request/save') ?>"
-            class="modal-content">
-
-            <?= csrf_field() ?>
-
-            <div class="modal-header">
-                <h5 class="modal-title">HR Service Request</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label for="serviceAvailed" class="form-label">
-                        Service Availed <span class="text-danger">*</span>
-                    </label>
-
-                    <select id="serviceAvailed" name="service_availed" class="form-select" required>
-                        <option value="" selected disabled>Select a service</option>
-                        <option value="Service Record">Service Record</option>
-                        <option value="Certificate with Compensation">Certificate with Compensation</option>
-                        <option value="Loan Assistance">Loan Assistance</option>
-                        <option value="Inquiry of Leave Balance">Inquiry of Leave Balance</option>
-                        <option value="Certificate of Employment">Certificate of Employment</option>
-                        <option value="Certification">Certification</option>
-                        <option value="IPCR">IPCR</option>
-                        <option value="201 Docs">201 Docs</option>
-                    </select>
-                </div>
-
-                <!-- Shown for every selected service -->
-                <div id="basicFields" class="row g-3 d-none">
-                    <div class="col-md-6">
-                        <label class="form-label">Name <span class="text-danger">*</span></label>
-                        <input type="text" name="fullname" class="form-control"
-                            placeholder="Full name" required>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Contact Number <span class="text-danger">*</span></label>
-                        <input type="tel" name="contact_number" class="form-control"
-                            placeholder="Contact number" required>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Email Address <span class="text-danger">*</span></label>
-                        <input type="email" name="email_address" class="form-control"
-                            placeholder="Email address" required>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Date Requested <span class="text-danger">*</span></label>
-                        <input type="date" name="date_requested" class="form-control"
-                            value="<?= date('Y-m-d') ?>" required>
-                    </div>
-                </div>
-
-                <!-- Certificate of Employment -->
-                <div id="coeFields" class="row g-3 mt-2 d-none">
-                    <div class="col-md-6">
-                        <label class="form-label">Employee Category <span class="text-danger">*</span></label>
-                        <select id="employeeCategory" name="employee_category" class="form-select">
-                            <option value="">Select category</option>
-                            <option value="COS Employee">COS Employee</option>
-                            <option value="Permanent Employee">Permanent Employee</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Position <span class="text-danger">*</span></label>
-                        <input type="text" id="position" name="position" class="form-control">
-                    </div>
-                </div>
-
-                <!-- COS Employee only -->
-                <div id="cosFields" class="row g-3 mt-2 d-none">
-                    <div class="col-md-6">
-                        <label class="form-label">Period of Service <span class="text-danger">*</span></label>
-                        <input type="text" id="periodOfService" name="period_of_service"
-                            class="form-control"
-                            placeholder="Example: January 2024 to December 2024">
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Office / Division Assigned <span class="text-danger">*</span></label>
-                        <input type="text" id="officeDivision" name="office_division"
-                            class="form-control">
-                    </div>
-                </div>
-
-                <!-- Certification -->
-                <div id="certificationFields" class="mt-4 d-none">
-                    <label class="form-label d-block">
-                        Certification Needed <span class="text-danger">*</span>
-                    </label>
-
-                    <div class="form-check">
-                        <input class="form-check-input certification-option" type="checkbox"
-                            name="certification[]" value="No pending case" id="noPendingCase">
-                        <label class="form-check-label" for="noPendingCase">No pending case</label>
-                    </div>
-
-                    <div class="form-check">
-                        <input class="form-check-input certification-option" type="checkbox"
-                            name="certification[]" value="Last Salary Received" id="lastSalary">
-                        <label class="form-check-label" for="lastSalary">Last Salary Received</label>
-                    </div>
-
-                    <div class="form-check">
-                        <input class="form-check-input certification-option" type="checkbox"
-                            name="certification[]" value="Leave Credits" id="leaveCredits">
-                        <label class="form-check-label" for="leaveCredits">Leave Credits</label>
-                    </div>
-
-                    <div class="form-check">
-                        <input class="form-check-input certification-option" type="checkbox"
-                            name="certification[]" value="Leave without pay" id="leaveWithoutPay">
-                        <label class="form-check-label" for="leaveWithoutPay">Leave without pay</label>
-                    </div>
-                </div>
-
-                <!-- IPCR -->
-                <div id="ipcrFields" class="mt-3 d-none">
-                    <label class="form-label">Please Indicate Period <span class="text-danger">*</span></label>
-                    <input type="text" id="ipcrPeriod" name="ipcr_period" class="form-control"
-                        placeholder="Example: January to June 2025">
-                </div>
-
-                <!-- 201 Documents -->
-                <div id="docs201Fields" class="mt-3 d-none">
-                    <label class="form-label">Please Specify <span class="text-danger">*</span></label>
-                    <textarea id="specify201" name="specify_201" class="form-control" rows="3"
-                        placeholder="Specify the 201 document needed"></textarea>
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    Close
-                </button>
-
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-save"></i> Submit Request
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-    </div>
 </main>
 </div>
 
@@ -683,80 +682,78 @@
     });
 </script>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function () {
 
-    const loadingScreen =
-        document.getElementById('doleLoadingScreen');
+        const loadingScreen =
+            document.getElementById('doleLoadingScreen');
 
-    if (!loadingScreen) return;
+        if (!loadingScreen) return;
 
-    const sidebarLinks =
-        document.querySelectorAll('.nav-link');
-
-
-    sidebarLinks.forEach(function (link) {
-
-        link.addEventListener('click', function (event) {
-
-            const href = this.getAttribute('href');
-
-            if (
-                !href ||
-                href === '#' ||
-                href === 'javascript:void(0)'
-            ) {
-                return;
-            }
+        const sidebarLinks =
+            document.querySelectorAll('.nav-link');
 
 
-            /* Allow Ctrl / CMD / Shift / Middle Click */
+        sidebarLinks.forEach(function (link) {
 
-            if (
-                event.ctrlKey ||
-                event.metaKey ||
-                event.shiftKey ||
-                event.button === 1
-            ) {
-                return;
-            }
+            link.addEventListener('click', function (event) {
 
+                const href = this.getAttribute('href');
 
-            /* Stop normal navigation temporarily */
-
-            event.preventDefault();
+                if (
+                    !href ||
+                    href === '#' ||
+                    href === 'javascript:void(0)'
+                ) {
+                    return;
+                }
 
 
-            /* Show loading screen */
+                /* Allow Ctrl / CMD / Shift / Middle Click */
 
-            loadingScreen.classList.add('show');
+                if (
+                    event.ctrlKey ||
+                    event.metaKey ||
+                    event.shiftKey ||
+                    event.button === 1
+                ) {
+                    return;
+                }
 
-            document.body.style.overflow = 'hidden';
+
+                /* Stop normal navigation temporarily */
+
+                event.preventDefault();
 
 
-            /*
-             * Navigate immediately.
-             * The loading screen will remain visible
-             * while the next page is loading.
-             */
+                /* Show loading screen */
 
-            window.location.href = href;
+                loadingScreen.classList.add('show');
+
+                document.body.style.overflow = 'hidden';
+
+
+                /*
+                 * Navigate immediately.
+                 * The loading screen will remain visible
+                 * while the next page is loading.
+                 */
+
+                window.location.href = href;
+
+            });
+
+        });
+
+
+        /* Back / Forward */
+
+        window.addEventListener('pageshow', function () {
+
+            loadingScreen.classList.remove('show');
+
+            document.body.style.overflow = '';
 
         });
 
     });
-
-
-    /* Back / Forward */
-
-    window.addEventListener('pageshow', function () {
-
-        loadingScreen.classList.remove('show');
-
-        document.body.style.overflow = '';
-
-    });
-
-});
 </script>
-
-

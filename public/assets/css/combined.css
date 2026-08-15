@@ -736,6 +736,10 @@ button {
   background: #ffd1d1;
   color: #a31313;
 }
+.status-pill[data-status="Canceled"] {
+  background: #ffdccc;
+  color: #ff6721;
+}
 
 /* Stepper */
 .request-stepper {
@@ -795,6 +799,20 @@ button {
 .stepper-step.rejected .stepper-dot {
   border-color: #dc3545;
   background: #dc3545;
+}
+
+/* Stepper canceled state */
+.stepper-step.canceled .stepper-dot {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.stepper-step.canceled .stepper-label {
+    color: #6c757d;
+}
+
+.stepper-step.canceled.active .stepper-dot {
+    background-color: #6c757d;
 }
 
 .stepper-label {
@@ -936,6 +954,12 @@ button {
   background: #fee2e2;
   color: #b91c1c;
 }
+
+.badge-canceled {
+  background: #ffeae1;
+  color: #ff5100;
+}
+
 
 /* -------------------- Row Actions -------------------- */
 .row-actions {
