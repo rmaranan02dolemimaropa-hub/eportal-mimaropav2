@@ -857,11 +857,40 @@ class EportalController extends BaseController
                 ->with('error', 'Request not found.');
         }
 
+        $cancellationReason = $this->request->getPost('cancellation_reason');
+
         $requestModel->update($id, [
             'status' => 'Canceled', // capital C para consistent sa buong system
             'date_canceled' => date('Y-m-d H:i:s'),
-            'cancellation_reason' => $this->request->getPost('cancellation_reason'),
+            'cancellation_reason' => $cancellationReason,
         ]);
+
+        //===================================================
+        // SEND CANCELLATION EMAIL TO CLIENT
+        //===================================================
+
+        if (!empty($request['email_address'])) {
+
+            $mailer = new Mailer();
+
+            $subject = "Your HR Request Has Been Canceled";
+
+            $message = view('emails/hr_status_update', [
+                'fullname' => $request['fullname'],
+                'reference_no' => $request['reference_no'],
+                'service' => $request['service_availed'],
+                'status' => 'Canceled',
+                'remarks' => $cancellationReason,
+                'message' =>
+                    'Your HR request has been canceled. If you believe this was a mistake or you wish to submit a new request, please contact the Human Resource Unit.'
+            ]);
+
+            $mailer->send(
+                $request['email_address'],
+                $subject,
+                $message
+            );
+        }
 
         return redirect()
             ->to(site_url('request'))
