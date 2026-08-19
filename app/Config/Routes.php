@@ -31,6 +31,10 @@ $routes->get('csmtagalog/(:any)', 'EportalController::csmtagalog/$1');
 
 $routes->post('submit-csm', 'EportalController::submitCSM');
 
+$routes->get('feedback/hr/(:segment)', 'EportalController::feedback_form/$1');
+$routes->post('feedback/save', 'EportalController::save_feedback');
+$routes->get('feedback/print/hr/(:segment)', 'EportalController::print_hr/$1');
+
 $routes->get(
     'feedback/print/english/(:num)',
     'EportalController::printEnglish/$1'

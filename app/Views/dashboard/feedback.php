@@ -136,22 +136,19 @@
                                 <?php
 
                                 $scores = [
-                                    $row['sqd0'],
-                                    $row['sqd1'],
-                                    $row['sqd2'],
-                                    $row['sqd3'],
-                                    $row['sqd4'],
-                                    $row['sqd5'],
-                                    $row['sqd6'],
-                                    $row['sqd7'],
-                                    $row['sqd8'],
+                                    $row['rating_1'],
+                                    $row['rating_2'],
+                                    $row['rating_3'],
+                                    $row['rating_6'],
+                                    $row['rating_7'],
+                                    $row['rating_8'],
                                 ];
 
                                 $count = array_count_values($scores);
 
-                                if (($count['strongly_agree'] ?? 0) >= 5) {
+                                if (($count['Strongly agree'] ?? 0) >= 4) {
                                     echo '<span class="badge bg-success">Excellent</span>';
-                                } elseif (($count['agree'] ?? 0) >= 5) {
+                                } elseif (($count['Agree'] ?? 0) >= 4) {
                                     echo '<span class="badge bg-primary">Very Satisfied</span>';
                                 } else {
                                     echo '<span class="badge bg-warning text-dark">Needs Review</span>';
@@ -163,15 +160,9 @@
 
                             <td>
 
-
-                                <a href="<?= site_url('feedback/print/english/' . $row['id']) ?>" target="_blank"
-                                    class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-printer"></i> EN
-                                </a>
-
-                                <a href="<?= base_url('feedback/print/tagalog/' . $row['id']) ?>" target="_blank"
-                                    class="btn btn-sm btn-outline-success">
-                                    <i class="bi bi-printer"></i> TL
+                                <a href="<?= base_url('feedback/print/hr/' . $row['reference_no']) ?>" target="_blank"
+                                    class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-printer"></i> 
                                 </a>
 
                             </td>

@@ -759,6 +759,7 @@ class EportalController extends BaseController
 
                     $csmLink = base_url('csm/' . $request['reference_no']);
                     $csmtagalog_Link = base_url('csmtagalog/' . $request['reference_no']);
+                    $feedbackHr_Link = base_url('feedback/hr/' . $request['reference_no']);
 
                     $message = view('emails/hr_status_update', [
                         'fullname' => $request['fullname'],
@@ -771,7 +772,8 @@ class EportalController extends BaseController
                             'Your requested document is now ready for release. Please coordinate with the Human Resource Unit for claiming.',
 
                         'csm_link' => $csmLink,
-                        'csmtagalog_Link' => $csmtagalog_Link
+                        'csmtagalog_Link' => $csmtagalog_Link,
+                        'feedbackHr_link' => $feedbackHr_Link
                     ]);
 
                     break;
@@ -1032,6 +1034,101 @@ class EportalController extends BaseController
             'request' => $request,
         ]);
     }
+
+    public function feedback_form($reference_no)
+    {
+        $requestModel = new HrRequestModel();
+
+        $request = $requestModel
+            ->where('reference_no', $reference_no)
+            ->first();
+
+        if (!$request) {
+            return redirect()->back()
+                ->with('error', 'Reference number not found');
+        }
+
+        return view('feedback/feedback_form_hr', [
+            'reference_no' => $request['reference_no'],
+            'service_availed' => $request['service_availed'],
+            'request' => $request,
+        ]);
+    }
+
+    public function save_feedback()
+    {
+        $model = new \App\Models\FeedbackFormModel();
+        $requestModel = new HrRequestModel();
+
+        $rules = [
+            'reference_no' => 'required',
+            'clientType' => 'required',
+            'name' => 'required',
+            'date' => 'required',
+        ];
+
+        if (!$this->validate($rules)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'errors' => $this->validator->getErrors(),
+            ]);
+        }
+
+        $reference_no = $this->request->getPost('reference_no');
+
+        // check kung valid pa rin ang reference number
+        $request = $requestModel->where('reference_no', $reference_no)->first();
+        if (!$request) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Invalid reference number',
+            ]);
+        }
+
+        // check kung na-submit na dati (avoid duplicate feedback sa same reference)
+        $existing = $model->where('reference_no', $reference_no)->first();
+        if ($existing) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Feedback for this reference number was already submitted',
+            ]);
+        }
+
+        $services = $this->request->getPost('service') ?? [];
+        $service_availed = is_array($services) ? implode(', ', $services) : $services;
+
+        $data = [
+            'reference_no' => $reference_no,
+            'client_type' => $this->request->getPost('clientType'),
+            'business_name' => $this->request->getPost('businessName'),
+            'government_agency' => $this->request->getPost('govAgency'),
+            'name' => $this->request->getPost('name'),
+            'contact_number' => $this->request->getPost('contact'),
+            'email_address' => $this->request->getPost('email'),
+            'office_visited' => $this->request->getPost('office'),
+            'date' => $this->request->getPost('date'),
+            'sex' => $this->request->getPost('sex'),
+            'service_availed' => $service_availed,
+            'other_service' => $this->request->getPost('otherService'),
+            'rating_1' => $this->request->getPost('q0'),
+            'rating_2' => $this->request->getPost('q1'),
+            'rating_3' => $this->request->getPost('q2'),
+            'rating_4' => 'N/A',
+            'rating_5' => 'N/A',
+            'rating_6' => $this->request->getPost('q5'),
+            'rating_7' => $this->request->getPost('q6'),
+            'rating_8' => $this->request->getPost('q7'),
+            'complaint' => $this->request->getPost('complaint'),
+            'suggestions' => $this->request->getPost('comment'),
+        ];
+
+        $model->insert($data);
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'reference_no' => $reference_no,
+        ]);
+    }
     public function csmtagalog($reference_no)
     {
         $requestModel = new HrRequestModel();
@@ -1050,6 +1147,24 @@ class EportalController extends BaseController
             'service_availed' => $request['service_availed'],
             'request' => $request,
         ]);
+    }
+
+    public function print_hr($reference_no)
+    {
+        $model = new \App\Models\FeedbackFormModel();
+        $feedback = $model->where('reference_no', $reference_no)->first();
+
+        if (!$feedback) {
+            return redirect()->back()->with('error', 'No HR feedback found for this reference number');
+        }
+
+        // DEBUG: Log the rating values to see what's actually stored
+        for ($i = 1; $i <= 8; $i++) {
+            $val = $feedback['rating_' . $i] ?? 'NULL';
+            log_message('debug', "rating_$i = [$val]");
+        }
+
+        return view('exports/feedback_print_hr', ['feedback' => $feedback]);
     }
 
     public function startProcessing()
