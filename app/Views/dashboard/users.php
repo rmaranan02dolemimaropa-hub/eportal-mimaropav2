@@ -10,30 +10,8 @@
 
 <!-- ============ MAIN CONTENT ============ -->
 <main class="main-content">
-    <!-- ==========================================
-     DOLE MIMAROPA LOADING SCREEN
-========================================== -->
-    <div id="doleLoadingScreen">
 
-        <div id="doleLoadingContent">
-
-            <!-- LOGO -->
-            <div id="doleLogoBox">
-                <img id="doleLoadingLogo" src="<?= base_url('assets/img/dole_blogo.png') ?>" alt="DOLE MIMAROPA Logo">
-            </div>
-
-            <!-- TITLE -->
-            <div id="doleLoadingTitle">
-                DOLE MIMAROPA
-            </div>
-
-            <div id="doleLoadingSubtitle">
-                E-PORTAL
-            </div>
-
-        </div>
-
-    </div>
+   
     <!-- Page Header -->
     <div class="page-header">
         <div>
@@ -826,3 +804,5 @@
 
     });
 </script>
+
+<?= $this->include('dashboard_layout/loading') ?>
