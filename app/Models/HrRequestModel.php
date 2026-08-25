@@ -26,6 +26,7 @@ class HrRequestModel extends Model
         'office_division',
         'certification',
         'ipcr_period',
+        'performance_evaluation_period',
         'specify_201',
         'contract_of_service_year',
         'other_request',

@@ -634,6 +634,50 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- ---------- SERVICE 10: Performance Evaluation ---------- -->
+                        <div class="dynamic-section" id="section-service10__IDX__" data-service="service10">
+                            <hr class="section-divider">
+                            <p class="section-label">
+                                <i class="bi bi-chart-bar"></i> Performance Evaluation
+                            </p>
+
+                            <div class="row g-3">
+
+                                <!-- SEMESTER -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <select class="form-select"
+                                            name="entries[__IDX__][performance_evaluation_semester]"
+                                            id="performanceEvaluationSemester__IDX__" data-required-group="service10">
+                                            <option value="" selected disabled>Select Semester</option>
+                                            <option value="1st Semester">1st Semester (January - June)</option>
+                                            <option value="2nd Semester">2nd Semester (July - December)</option>
+                                        </select>
+                                        <label for="performanceEvaluationSemester__IDX__">Semester <span
+                                                class="required-mark">*</span></label>
+                                    </div>
+                                </div>
+
+                                <!-- YEAR -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <select class="form-select" name="entries[__IDX__][performance_evaluation_year]"
+                                            id="performanceEvaluationYear__IDX__" data-required-group="service10">
+                                            <option value="" selected disabled>Select Year</option>
+                                            <?php
+                                            for ($year = date('Y'); $year >= 2000; $year--) {
+                                                echo "<option value='{$year}'>{$year}</option>";
+                                            }
+                                            ?>
+                                        </select>
+                                        <label for="performanceEvaluationYear__IDX__">Year <span
+                                                class="required-mark">*</span></label>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
                         <!-- ---------- SERVICE 12: Contract of Service (COS only) ---------- -->
                         <div class="dynamic-section" id="section-service12__IDX__" data-service="service12">
                             <hr class="section-divider">
@@ -827,10 +871,14 @@
                     .filter(function (cb) { return cb.checked; })
                     .map(function (cb) { return cb.value; }),
                 contract_of_service_year: byPrefix(entryEl, 'contractYear') ? byPrefix(entryEl, 'contractYear').value : '',
-                ipcr_from_month: byPrefix(entryEl, 'ipcrFromMonth').value,
-                ipcr_from_year: byPrefix(entryEl, 'ipcrFromYear').value,
-                ipcr_to_month: byPrefix(entryEl, 'ipcrToMonth').value,
-                ipcr_to_year: byPrefix(entryEl, 'ipcrToYear').value,
+                ipcr_from_month: byPrefix(entryEl, 'ipcrFromMonth') ? byPrefix(entryEl, 'ipcrFromMonth').value : '',
+                ipcr_from_year: byPrefix(entryEl, 'ipcrFromYear') ? byPrefix(entryEl, 'ipcrFromYear').value : '',
+                ipcr_to_month: byPrefix(entryEl, 'ipcrToMonth') ? byPrefix(entryEl, 'ipcrToMonth').value : '',
+                ipcr_to_year: byPrefix(entryEl, 'ipcrToYear') ? byPrefix(entryEl, 'ipcrToYear').value : '',
+                ipcr_semester: byPrefix(entryEl, 'ipcrSemester') ? byPrefix(entryEl, 'ipcrSemester').value : '',
+                ipcr_year: byPrefix(entryEl, 'ipcrYear') ? byPrefix(entryEl, 'ipcrYear').value : '',
+                performance_evaluation_semester: byPrefix(entryEl, 'performanceEvaluationSemester') ? byPrefix(entryEl, 'performanceEvaluationSemester').value : '',
+                performance_evaluation_year: byPrefix(entryEl, 'performanceEvaluationYear') ? byPrefix(entryEl, 'performanceEvaluationYear').value : '',
                 specify_201: specify201 ? specify201.value : '',
                 other_request: otherRequest ? otherRequest.value : ''
             };
@@ -904,6 +952,9 @@
             if (data.ipcr_from_year) byPrefix(entryEl, 'ipcrFromYear').value = data.ipcr_from_year;
             if (data.ipcr_to_month) byPrefix(entryEl, 'ipcrToMonth').value = data.ipcr_to_month;
             if (data.ipcr_to_year) byPrefix(entryEl, 'ipcrToYear').value = data.ipcr_to_year;
+            // Performance Evaluation restoration
+            if (data.performance_evaluation_semester) byPrefix(entryEl, 'performanceEvaluationSemester').value = data.performance_evaluation_semester;
+            if (data.performance_evaluation_year) byPrefix(entryEl, 'performanceEvaluationYear').value = data.performance_evaluation_year;
 
             const otherRequest = otherRequestOf(entryEl);
             const specify201 = specify201Of(entryEl);
@@ -1476,7 +1527,7 @@
                     break;
                 }
 
-              case 'service7': {
+                case 'service7': {
                     const semester = byPrefix(entryEl, 'ipcrSemester').value;
                     const year = byPrefix(entryEl, 'ipcrYear').value;
                     rows.push(['IPCR Period', semester && year ? semester + ' ' + year : '—']);
@@ -1509,7 +1560,12 @@
                     rows.push(['Request', otherRequestOf(entryEl).value]);
                     break;
 
-                case 'service10':
+                case 'service10': {
+                    const semester = byPrefix(entryEl, 'performanceEvaluationSemester').value;
+                    const year = byPrefix(entryEl, 'performanceEvaluationYear').value;
+                    rows.push(['Performance Evaluation Period', semester && year ? semester + ' ' + year : '—']);
+                    break;
+                }
                 case 'service11':
                     // No additional fields beyond the common Service Purpose.
                     break;

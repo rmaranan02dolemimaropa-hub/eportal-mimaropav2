@@ -163,43 +163,6 @@
                                             </p>
 
                                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-                                                <?php if (isset($csm_link)): ?>
-                                                    <tr>
-                                                        <td align="center" style="padding:6px 6px;">
-                                                            <a href="<?= $csm_link ?>" style="
-                                                    background-color:#10058C;
-                                                    color:#ffffff;
-                                                    font-size:14px;
-                                                    font-weight:bold;
-                                                    text-decoration:none;
-                                                    padding:13px 22px;
-                                                    border-radius:8px;
-                                                    display:inline-block;
-                                                ">
-                                                                Answer Feedback Form &mdash; English
-                                                            </a>
-                                                        </td>
-                                                    </tr>
-                                                <?php endif; ?>
-                                                <?php if (isset($csmtagalog_Link)): ?>
-                                                    <tr>
-                                                        <td align="center" style="padding:6px 6px;">
-                                                            <a href="<?= $csmtagalog_Link ?>" style="
-                                                    background-color:#ffffff;
-                                                    color:#10058C;
-                                                    font-size:14px;
-                                                    font-weight:bold;
-                                                    text-decoration:none;
-                                                    padding:12px 22px;
-                                                    border-radius:8px;
-                                                    display:inline-block;
-                                                    border:2px solid #10058C;
-                                                ">
-                                                                Sagutin ang Feedback Form &mdash; Tagalog
-                                                            </a>
-                                                        </td>
-                                                    </tr>
-                                                <?php endif; ?>
                                                 <?php if (isset($feedbackHr_link)): ?>
                                                     <tr>
                                                         <td align="center" style="padding:6px 6px;">

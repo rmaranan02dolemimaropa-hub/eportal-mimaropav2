@@ -117,59 +117,103 @@
                 </thead>
                 <tbody>
 
-                    <?php foreach ($feedbacks as $row): ?>
+                    <?php if (!empty($feedbacks)): ?>
+
+                        <?php foreach ($feedbacks as $row): ?>
+
+                            <tr>
+
+                                <td>
+                                    <?= esc($row['reference_no']) ?>
+                                </td>
+
+                                <td>
+                                    <?= esc($row['service_availed']) ?>
+                                </td>
+
+                                <td>
+                                    <?= esc($row['name'] ?: 'Anonymous') ?>
+                                </td>
+
+                                <td>
+                                    <?= esc($row['client_type']) ?>
+                                </td>
+
+                                <td>
+                                    <?= date('F d, Y', strtotime($row['created_at'])) ?>
+                                </td>
+
+                                <td>
+
+                                    <?php
+
+                                    $scores = [
+                                        $row['rating_1'],
+                                        $row['rating_2'],
+                                        $row['rating_3'],
+                                        $row['rating_6'],
+                                        $row['rating_7'],
+                                        $row['rating_8'],
+                                    ];
+
+                                    $count = array_count_values($scores);
+
+                                    if (($count['Strongly agree'] ?? 0) >= 4) {
+
+                                        echo '<span class="badge bg-success">Excellent</span>';
+
+                                    } elseif (($count['Agree'] ?? 0) >= 4) {
+
+                                        echo '<span class="badge bg-primary">Very Satisfied</span>';
+
+                                    } else {
+
+                                        echo '<span class="badge bg-warning text-dark">Needs Review</span>';
+
+                                    }
+
+                                    ?>
+
+                                </td>
+
+                                <td>
+
+                                    <a href="<?= base_url('feedback/print/hr/' . $row['reference_no']) ?>" target="_blank"
+                                        class="btn btn-sm btn-outline-secondary">
+
+                                        <i class="bi bi-printer"></i>
+
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                        <?php endforeach; ?>
+
+                    <?php else: ?>
 
                         <tr>
+                            <td colspan="7" class="text-center py-5">
 
-                            <td><?= esc($row['reference_no']) ?></td>
+                                <div class="text-muted">
 
-                            <td><?= esc($row['service_availed']) ?></td>
+                                    <i class="bi bi-inbox" style="font-size: 2.5rem;"></i>
 
-                            <td><?= esc($row['name'] ?: 'Anonymous') ?></td>
+                                    <div class="mt-2 fw-semibold">
+                                        No Feedback found.
+                                    </div>
 
-                            <td><?= esc($row['client_type']) ?></td>
+                                    <small>
+                                        There are currently no client satisfaction responses available.
+                                    </small>
 
-                            <td><?= date('F d, Y', strtotime($row['created_at'])) ?></td>
-
-                            <td>
-
-                                <?php
-
-                                $scores = [
-                                    $row['rating_1'],
-                                    $row['rating_2'],
-                                    $row['rating_3'],
-                                    $row['rating_6'],
-                                    $row['rating_7'],
-                                    $row['rating_8'],
-                                ];
-
-                                $count = array_count_values($scores);
-
-                                if (($count['Strongly agree'] ?? 0) >= 4) {
-                                    echo '<span class="badge bg-success">Excellent</span>';
-                                } elseif (($count['Agree'] ?? 0) >= 4) {
-                                    echo '<span class="badge bg-primary">Very Satisfied</span>';
-                                } else {
-                                    echo '<span class="badge bg-warning text-dark">Needs Review</span>';
-                                }
-
-                                ?>
+                                </div>
 
                             </td>
-
-                            <td>
-
-                                <a href="<?= base_url('feedback/print/hr/' . $row['reference_no']) ?>" target="_blank"
-                                    class="btn btn-sm btn-outline-secondary">
-                                    <i class="bi bi-printer"></i> 
-                                </a>
-
-                            </td>
-
                         </tr>
 
-                    <?php endforeach; ?>
+                    <?php endif; ?>
 
                 </tbody>
             </table>

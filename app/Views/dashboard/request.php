@@ -277,6 +277,7 @@
                                             data-history="<?= htmlspecialchars(json_encode($row['employment_history'] ?? []), ENT_QUOTES, 'UTF-8') ?>"
                                             data-certification="<?= esc($row['certification'] ?? '', 'attr') ?>"
                                             data-ipcr-period="<?= esc($row['ipcr_period'] ?? '', 'attr') ?>"
+                                            data-performance-evaluation-period="<?= esc($row['performance_evaluation_period'] ?? '', 'attr') ?>"
                                             data-specify-201="<?= esc($row['specify_201'] ?? '', 'attr') ?>"
                                             data-remarks="<?= esc($row['remarks'] ?? '', 'attr') ?>"
                                             data-cancellation-reason="<?= esc($row['cancellation_reason'] ?? '', 'attr') ?>">
@@ -1004,6 +1005,10 @@
         // IPCR
         if (data.service === 'IPCR') {
             serviceFieldsHTML += detailItem('IPCR Period', data.ipcrPeriod);
+        }
+        // Performance Evaluation
+        if (data.service === 'Performance Evaluation') {
+            serviceFieldsHTML += detailItem('Performance Evaluation Period', data.performanceEvaluationPeriod);
         }
 
         // 201 Documents

@@ -364,6 +364,12 @@ class EportalController extends BaseController
                 ($entry['ipcr_semester'] ?? '') . ' ' . ($entry['ipcr_year'] ?? '')
             );
 
+            // Performance Evaluation Period
+            $performanceEvaluationPeriod = trim(
+                 ($entry['performance_evaluation_semester'] ?? '') . ' ' . ($entry['performance_evaluation_year'] ?? '')
+            );
+
+
             $employeeCategory = $entry['employee_category'] ?? null;
 
             $data = [
@@ -373,22 +379,20 @@ class EportalController extends BaseController
                 'fullname' => $fullname,
                 'contact_number' => $contactNumber,
                 'email_address' => $emailAddress,
-                'employee_category' => $employeeCategory,               // now shared
-                'contract_of_service_year' => $entry['contract_of_service_year'] ?? null, // NEW
-
+                'employee_category' => $employeeCategory,
+                'contract_of_service_year' => $entry['contract_of_service_year'] ?? null,
+                
                 'period_of_service' => null,
                 'position' => null,
                 'office_division' => null,
-
                 'certification' => $certification,
                 'ipcr_period' => $ipcrPeriod,
+                'performance_evaluation_period' => $performanceEvaluationPeriod,
                 'specify_201' => $entry['specify_201'] ?? null,
                 'other_request' => $entry['other_request'] ?? null,
-
                 'date_requested' => $dateRequested,
                 'status' => 'New Application',
                 'remarks' => '',
-
                 'date_received' => null,
                 'received_by' => null,
                 'date_released' => null,

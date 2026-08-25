@@ -51,7 +51,7 @@ html {
 
 body {
   margin: 0;
-  font-family: "Manrope", "Segoe UI", Arial, sans-serif;
+  font-family: "Manrope";
   color: var(--color-text);
   background-color: var(--color-bg);
   min-height: 100vh;
