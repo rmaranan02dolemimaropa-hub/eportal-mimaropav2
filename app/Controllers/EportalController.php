@@ -366,7 +366,7 @@ class EportalController extends BaseController
 
             // Performance Evaluation Period
             $performanceEvaluationPeriod = trim(
-                 ($entry['performance_evaluation_semester'] ?? '') . ' ' . ($entry['performance_evaluation_year'] ?? '')
+                ($entry['performance_evaluation_semester'] ?? '') . ' ' . ($entry['performance_evaluation_year'] ?? '')
             );
 
 
@@ -381,7 +381,7 @@ class EportalController extends BaseController
                 'email_address' => $emailAddress,
                 'employee_category' => $employeeCategory,
                 'contract_of_service_year' => $entry['contract_of_service_year'] ?? null,
-                
+
                 'period_of_service' => null,
                 'position' => null,
                 'office_division' => null,
@@ -907,8 +907,27 @@ class EportalController extends BaseController
     {
         $requestModel = new HrRequestModel();
 
+        // Service mapping
+        $services = [
+            'service1' => 'Service Record',
+            'service2' => 'Certificate with Compensation',
+            'service5' => 'Certificate of Employment',
+            'service6' => 'Certification',
+            'service7' => 'IPCR',
+            'service8' => '201 Documents',
+            'service9' => 'Others',
+            'service10' => 'Performance Evaluation',
+            'service11' => 'Payslip',
+            'service12' => 'Contract of Service',
+        ];
+
+        // Get selected service key
+        $serviceKey = $this->request->getPost('service_availed');
+
+        // Convert service7 → IPCR
+        $serviceAvailed = $services[$serviceKey] ?? $serviceKey;
+
         $data = $this->request->getPost([
-            'service_availed',
             'fullname',
             'contact_number',
             'email_address',
@@ -921,9 +940,17 @@ class EportalController extends BaseController
             'date_requested',
         ]);
 
+        // Use the converted service name
+        $data['service_availed'] = $serviceAvailed;
+
         $data['reference_no'] = 'HR-' . date('YmdHis');
         $data['status'] = 'New Application';
-        $data['certification'] = implode(', ', $this->request->getPost('certification') ?? []);
+
+        $certification = $this->request->getPost('certification') ?? [];
+
+        $data['certification'] = is_array($certification)
+            ? implode(', ', $certification)
+            : $certification;
 
         $requestModel->insert($data);
 
