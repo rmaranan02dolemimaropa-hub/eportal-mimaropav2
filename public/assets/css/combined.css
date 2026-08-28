@@ -803,16 +803,16 @@ button {
 
 /* Stepper canceled state */
 .stepper-step.canceled .stepper-dot {
-    background-color: #6c757d;
-    border-color: #6c757d;
+  background-color: #6c757d;
+  border-color: #6c757d;
 }
 
 .stepper-step.canceled .stepper-label {
-    color: #6c757d;
+  color: #6c757d;
 }
 
 .stepper-step.canceled.active .stepper-dot {
-    background-color: #6c757d;
+  background-color: #6c757d;
 }
 
 .stepper-label {
@@ -959,7 +959,6 @@ button {
   background: #ffeae1;
   color: #ff5100;
 }
-
 
 /* -------------------- Row Actions -------------------- */
 .row-actions {
@@ -1374,11 +1373,7 @@ body:has(.offcanvas.show) .export-overlay {
     -webkit-overflow-scrolling: touch;
     padding-bottom: 4px;
   }
-  .status-pill {
-    padding: 10px 16px;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
+
 }
 /* Vertical line */
 .status-pill:not(:last-child)::after {
@@ -2226,25 +2221,22 @@ body:has(.offcanvas.show) .export-overlay {
 #doleLoadingScreen {
   position: fixed !important;
   inset: 0 !important;
-
   width: 100vw !important;
   height: 100vh !important;
-
-  /* LIGHT MODE */
-  background: #ffffff !important;
-
-  z-index: 2147483647 !important;
 
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
 
+  background: #ffffff !important;
+
+  z-index: 2147483647 !important;
+
   opacity: 0;
   visibility: hidden;
 
-  transition:
-    opacity 0.25s ease,
-    visibility 0.25s ease;
+  /* INSTANT SHOW */
+  transition: none !important;
 }
 
 #doleLoadingScreen.show {
@@ -2252,7 +2244,9 @@ body:has(.offcanvas.show) .export-overlay {
   visibility: visible !important;
 }
 
-/* CONTENT */
+/* ==========================================
+   CONTENT
+========================================== */
 
 #doleLoadingContent {
   width: 380px;
@@ -2266,7 +2260,7 @@ body:has(.offcanvas.show) .export-overlay {
 }
 
 /* ==========================================
-   LOGO
+   LOGO BOX
 ========================================== */
 
 #doleLogoBox {
@@ -2282,7 +2276,9 @@ body:has(.offcanvas.show) .export-overlay {
   margin-bottom: 22px;
 }
 
-/* Rotating DOLE BLUE ring */
+/* ==========================================
+   ROTATING RING
+========================================== */
 
 #doleLogoBox::before {
   content: "";
@@ -2295,14 +2291,15 @@ body:has(.offcanvas.show) .export-overlay {
   border-radius: 50%;
 
   border: 4px solid #eeeeee;
-
   border-top-color: #10058c;
   border-right-color: #10058c;
 
   animation: doleLogoSpin 1.5s linear infinite;
 }
 
-/* LOGO */
+/* ==========================================
+   DOLE LOGO
+========================================== */
 
 #doleLoadingLogo {
   position: relative !important;
@@ -2349,7 +2346,7 @@ body:has(.offcanvas.show) .export-overlay {
 }
 
 /* ==========================================
-   ANIMATION
+   ANIMATIONS
 ========================================== */
 
 @keyframes doleLogoSpin {
@@ -2374,58 +2371,58 @@ body:has(.offcanvas.show) .export-overlay {
 }
 
 .summary-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.875rem;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
 }
 
 .summary-table th,
 .summary-table td {
-    padding: 0.6rem 0.75rem;
-    text-align: left;
-    vertical-align: top;
-    border-bottom: 1px solid #e5e7eb;
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .summary-table thead th {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    color: #6b7280;
-    font-weight: 600;
-    border-bottom: 2px solid #d1d5db;
-    white-space: nowrap;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #6b7280;
+  font-weight: 600;
+  border-bottom: 2px solid #d1d5db;
+  white-space: nowrap;
 }
 
 .summary-table tbody tr:last-child td {
-    border-bottom: none;
+  border-bottom: none;
 }
 
 .summary-table tbody tr:hover {
-    background-color: #f9fafb;
+  background-color: #f9fafb;
 }
 
 /* Column widths so long content (e.g. long office names) doesn't
    squeeze the "#" column or wrap awkwardly */
 .summary-table th:first-child,
 .summary-table td:first-child {
-    width: 36px;
-    text-align: center;
-    color: #6b7280;
+  width: 36px;
+  text-align: center;
+  color: #6b7280;
 }
 
 .summary-table th:nth-child(2),
 .summary-table td:nth-child(2) {
-    width: 26%;
-    white-space: nowrap;
+  width: 26%;
+  white-space: nowrap;
 }
 
 .summary-table th:nth-child(3),
 .summary-table td:nth-child(3) {
-    width: 22%;
+  width: 22%;
 }
 
 .summary-table th:nth-child(4),
 .summary-table td:nth-child(4) {
-    width: auto;
+  width: auto;
 }

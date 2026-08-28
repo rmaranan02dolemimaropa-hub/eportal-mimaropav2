@@ -1,94 +1,102 @@
-    <!-- ==========================================
+<?= $this->include('dashboard_layout/head') ?>
+
+
+<!-- ==========================================
      DOLE MIMAROPA LOADING SCREEN
 ========================================== -->
-    <div id="doleLoadingScreen">
 
-        <div id="doleLoadingContent">
+<div id="doleLoadingScreen">
 
-            <!-- LOGO -->
-            <div id="doleLogoBox">
-                <img id="doleLoadingLogo" src="<?= base_url('assets/img/dole_blogo.png') ?>" alt="DOLE MIMAROPA Logo">
-            </div>
+    <div id="doleLoadingContent">
 
-            <!-- TITLE -->
-            <div id="doleLoadingTitle">
-                DOLE MIMAROPA
-            </div>
+        <div id="doleLogoBox">
 
-            <div id="doleLoadingSubtitle">
-                E-PORTAL
-            </div>
+            <img id="doleLoadingLogo" src="<?= base_url('assets/img/dole_blogo.png') ?>" width="125" height="125"
+                fetchpriority="high" decoding="sync" alt="DOLE MIMAROPA Logo">
 
+        </div>
+
+        <div id="doleLoadingTitle">
+            DOLE MIMAROPA
+        </div>
+
+        <div id="doleLoadingSubtitle">
+            E-PORTAL
         </div>
 
     </div>
 
+</div>
+
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    (function () {
 
         const loadingScreen =
             document.getElementById('doleLoadingScreen');
 
         if (!loadingScreen) return;
 
-        const sidebarLinks =
-            document.querySelectorAll('.nav-link');
+        document.addEventListener('click', function (event) {
 
+            const link = event.target.closest('.nav-link');
 
-        sidebarLinks.forEach(function (link) {
+            if (!link) return;
 
-            link.addEventListener('click', function (event) {
+            const href = link.href;
 
-                const href = this.getAttribute('href');
+            if (!href) return;
 
-                if (
-                    !href ||
-                    href === '#' ||
-                    href === 'javascript:void(0)'
-                ) {
-                    return;
-                }
+            /*
+             * Ignore special clicks
+             */
+            if (
+                event.ctrlKey ||
+                event.metaKey ||
+                event.shiftKey ||
+                event.altKey ||
+                event.button !== 0
+            ) {
+                return;
+            }
 
+            /*
+             * Ignore same page
+             */
+            if (link.href === window.location.href) {
+                return;
+            }
 
-                /* Allow Ctrl / CMD / Shift / Middle Click */
+            /*
+             * Prevent normal navigation temporarily
+             */
+            event.preventDefault();
 
-                if (
-                    event.ctrlKey ||
-                    event.metaKey ||
-                    event.shiftKey ||
-                    event.button === 1
-                ) {
-                    return;
-                }
+            /*
+             * SHOW LOADING SCREEN FIRST
+             */
+            loadingScreen.classList.add('show');
+            document.body.style.overflow = 'hidden';
 
+            /*
+             * Give browser one frame to render
+             * the loading screen BEFORE navigation.
+             */
+            requestAnimationFrame(function () {
 
-                /* Stop normal navigation temporarily */
+                requestAnimationFrame(function () {
 
-                event.preventDefault();
+                    window.location.href = href;
 
-
-                /* Show loading screen */
-
-                loadingScreen.classList.add('show');
-
-                document.body.style.overflow = 'hidden';
-
-
-                /*
-                 * Navigate immediately.
-                 * The loading screen will remain visible
-                 * while the next page is loading.
-                 */
-
-                window.location.href = href;
+                });
 
             });
 
-        });
+        }, true);
 
 
-        /* Back / Forward */
-
+        /*
+         * Hide when page is loaded/restored
+         */
         window.addEventListener('pageshow', function () {
 
             loadingScreen.classList.remove('show');
@@ -97,5 +105,5 @@
 
         });
 
-    });
+    })();
 </script>
