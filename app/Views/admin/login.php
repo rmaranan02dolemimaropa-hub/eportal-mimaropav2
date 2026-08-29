@@ -37,7 +37,7 @@
 
       <!-- Logo -->
       <div class="logo-circle">
-        <i class="bi bi-shield-check"></i>
+        <img src="<?= base_url('assets/img/dole_blogo.png') ?>" alt="DOLE MIMAROPA Logo">
       </div>
 
       <!-- Titles -->
@@ -142,7 +142,7 @@
     toggleButton = document.getElementById('passwordToggle'); const
       toggleIcon = document.getElementById('passwordToggleIcon'); toggleButton.addEventListener('click', function () {
         const
-        isHidden = passwordInput.type === 'password'; passwordInput.type = isHidden ? 'text' : 'password';
+          isHidden = passwordInput.type === 'password'; passwordInput.type = isHidden ? 'text' : 'password';
         toggleIcon.classList.toggle('bi-eye', !isHidden); toggleIcon.classList.toggle('bi-eye-slash', isHidden);
         this.setAttribute('aria-pressed', isHidden);
       }); </script>

@@ -145,17 +145,19 @@ body {
   width: 76px;
   height: 76px;
   margin: 0 auto 20px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 10px 22px -8px rgba(16, 5, 140, 0.45);
+
+  overflow: hidden;
 }
 
-.logo-circle i {
-  font-size: 32px;
-  color: #ffffff;
+.logo-circle img {
+  width: 76px;
+  height: 76px;
+  object-fit: contain;
+  display: block;
 }
 
 /* -------------------- Titles -------------------- */
