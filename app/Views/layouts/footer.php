@@ -6,7 +6,7 @@
     <div class="row g-4">
       <div class="col-lg-4">
         <div class="footer-brand">
-          <img src="assets/img/dole-logo.svg" alt="DOLE Logo">
+          <img src="assets/img/dole_logo.png" alt="DOLE Logo">
           <div>
             <strong>DOLE MIMAROPA</strong>
             <span>Department of Labor and Employment</span>
