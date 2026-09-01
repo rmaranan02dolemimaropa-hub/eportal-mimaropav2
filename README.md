@@ -1,117 +1,220 @@
-# DOLE MIMAROPA E-Portal System
+# DOLE MIMAROPA E-Portal
 
-> **Department of Labor and Employment – MIMAROPA Regional Office**
-> **Electronic Portal for Digital Service Requests and Client Assistance**
-
-The **DOLE MIMAROPA E-Portal System** is a web-based application developed to provide a centralized and efficient platform for managing digital service requests, client transactions, and internal Human Resource (HR) service processes of the **Department of Labor and Employment – MIMAROPA Regional Office**.
-
-The system aims to reduce manual processing, improve request monitoring, provide real-time status tracking, and streamline communication between clients and the responsible DOLE personnel.
+A web-based **Electronic Portal System** developed for the **Department of Labor and Employment – MIMAROPA Regional Office** to provide centralized access to digital services, HR service requests, client tracking, and administrative management.
 
 ---
 
-## 📌 System Overview
+## 📌 Project Overview
 
-The DOLE MIMAROPA E-Portal provides an online platform where users can:
+The **DOLE MIMAROPA E-Portal** is designed to streamline and digitize selected services and internal processes of the DOLE MIMAROPA Regional Office.
 
-* Submit requests for available DOLE services
-* Monitor the status of submitted requests
-* Receive request reference numbers
-* Receive email notifications regarding request updates
-* Allow authorized personnel to process and manage requests
-* Track processing, release, completion, and rejection dates
-* Manage users and system access
-* Generate reports
-* Collect client satisfaction feedback
-* Print service-related documents and reports
+The system provides a centralized platform where employees, clients, and authorized administrators can access services, submit requests, monitor request status, and manage service transactions.
 
-The system follows a centralized workflow:
+The portal aims to reduce manual processing, improve request monitoring, provide timely notifications, and maintain organized digital records.
+
+---
+
+## 🎯 Objectives
+
+* Digitize selected DOLE MIMAROPA services and processes.
+* Provide an accessible online portal for clients and employees.
+* Reduce manual and paper-based transactions.
+* Improve monitoring and tracking of service requests.
+* Provide automated email notifications.
+* Centralize HR service request records.
+* Generate reports for administrative monitoring.
+* Improve transparency and visibility of request status.
+* Provide a responsive and user-friendly interface.
+
+---
+
+## 🛠️ Technology Stack
+
+### Backend
+
+* **PHP**
+* **CodeIgniter 4**
+* **MySQL / MariaDB**
+
+### Frontend
+
+* **HTML5**
+* **CSS3**
+* **JavaScript**
+* **Bootstrap 5**
+* **Bootstrap Icons**
+* **Manrope Font**
+
+### Development Tools
+
+* **Visual Studio Code**
+* **WampServer**
+* **Git**
+* **GitHub**
+
+### Other Technologies
+
+* SMTP / Email Service
+* AJAX / Fetch API
+* PDF Generation
+* CSV Export
+* Session Authentication
+
+---
+
+## 🏗️ System Architecture
+
+The system follows the **Model-View-Controller (MVC)** architecture provided by CodeIgniter 4.
 
 ```text
-Client
-   │
-   ▼
-Submit Service Request
-   │
-   ▼
-Generate Reference Number
-   │
-   ▼
-HR/Admin Review
-   │
-   ▼
-Processing
-   │
-   ├──► Rejected
-   │
-   └──► For Released
-             │
-             ▼
-         Completed
-             │
-             ▼
-       Client Feedback
+┌─────────────────────────────────────────┐
+│             USER / CLIENT              │
+│         Employee / Client / HR         │
+└──────────────────┬──────────────────────┘
+                   │
+                   ▼
+┌─────────────────────────────────────────┐
+│              FRONTEND                  │
+│ HTML5 │ CSS3 │ Bootstrap 5 │ JavaScript│
+└──────────────────┬──────────────────────┘
+                   │
+                   ▼
+┌─────────────────────────────────────────┐
+│          CODEIGNITER 4                  │
+│                                         │
+│  Routes → Controllers → Models → Views │
+└──────────────────┬──────────────────────┘
+                   │
+                   ▼
+┌─────────────────────────────────────────┐
+│             DATABASE                   │
+│            MySQL / MariaDB             │
+└─────────────────────────────────────────┘
 ```
 
 ---
 
-# ✨ Features
+# 📂 Main System Modules
 
-## 👤 Client Portal
+## 1. Client Portal
 
-Clients can access the portal to submit and monitor their service requests.
+The client portal provides access to available digital services and allows clients to submit and monitor requests.
 
-### Available Functions
+### Features
 
-* Online service request submission
-* Personal information entry
-* Service selection
-* Employment information
-* Request date selection
-* Automatic reference number generation
-* Request status monitoring
+* Client login
+* Service request submission
+* Request reference number
+* Request status tracking
+* Client information management
 * Email notifications
 * Client Satisfaction Measurement (CSM)
-* Printable service documents
 
 ---
 
-## 🏢 HR / Administrator Portal
+## 2. Employee Portal
 
-Authorized personnel can manage and process submitted requests.
+The employee portal provides authorized DOLE personnel with access to internal services and information.
 
-### Dashboard
+### Features
 
-The dashboard provides an overview of requests categorized by status:
-
-* **New Application**
-* **Processing**
-* **For Released**
-* **Completed**
-* **Rejected**
-
-The dashboard allows administrators to quickly monitor the current workload and request status.
+* Employee authentication
+* Employee dashboard
+* HR service requests
+* Request monitoring
+* Service history
+* Account/session management
 
 ---
 
-## 📋 Service Request Management
+## 3. HR Service Request System
 
-Authorized users can:
+The HR module manages employee/client requests for HR-related services.
 
-* View submitted requests
-* Search requests
-* Filter requests
-* Update request status
-* Add processing remarks
-* Record processing dates
-* Record release dates
-* Record completion dates
-* Record rejection dates
-* Delete requests when authorized
-* View complete request information
+### Request Information
 
-### Searchable Information
+The system can manage information such as:
 
-Requests can be searched using:
+* Reference Number
+* Full Name
+* Contact Number
+* Email Address
+* Date Requested
+* Service Availed
+* Period of Service
+* Position
+* Office / Division
+* Certification Details
+* Date Received
+* Date Released
+* Status
+* Remarks
+
+---
+
+# 🔄 Request Status Workflow
+
+The HR request follows a structured processing workflow.
+
+```text
+                ┌─────────────┐
+                │    NEW      │
+                │ APPLICATION │
+                └──────┬──────┘
+                       │
+                       ▼
+                ┌─────────────┐
+                │ PROCESSING  │
+                └──────┬──────┘
+                       │
+             ┌─────────┴─────────┐
+             │                   │
+             ▼                   ▼
+      ┌──────────────┐    ┌─────────────┐
+      │ FOR RELEASE  │    │   REJECTED  │
+      └──────┬───────┘    └─────────────┘
+             │
+             ▼
+      ┌──────────────┐
+      │  COMPLETED   │
+      └──────────────┘
+```
+
+---
+
+# 🔢 Reference Number
+
+Each request is assigned a unique reference number.
+
+Example:
+
+```text
+HR-20260826143025
+```
+
+The reference number allows users and administrators to easily identify and track individual requests.
+
+---
+
+# 📊 Dashboard
+
+The administrative dashboard provides an overview of HR service requests.
+
+### Dashboard Metrics
+
+* New Applications
+* Processing
+* For Release
+* Completed
+* Rejected
+
+The dashboard allows authorized personnel to quickly monitor the current status of requests.
+
+---
+
+# 🔎 Search and Filtering
+
+The request management module supports searching and filtering by:
 
 * Reference Number
 * Full Name
@@ -119,178 +222,190 @@ Requests can be searched using:
 * Contact Number
 * Service Availed
 * Status
+* Year
+* Service Type
+
+Pagination is also implemented for better performance when displaying large numbers of records.
 
 ---
 
-# 📝 HR Services
+# 📧 Email Notification System
 
-The system supports various HR-related services, including:
+The system supports automated email notifications for important request events.
 
-* Service Record
-* Certificate of Employment
-* Certificate of Employment with Compensation
-* Certification of No Pending Case
-* Certification of Last Salary Received
-* Certification of Leave Credits
-* Certification of Leave Without Pay (LWOP)
-* Individual Performance Commitment and Review (IPCR)
-* 201 Files / Documents
-* Loan Assistance
-* Leave Balance Inquiry
-* Other HR-related requests
+### Notifications include:
 
-Additional services can be added through the system configuration and database.
+* Request submission confirmation
+* Request processing notification
+* For Release notification
+* Completion notification
+* Rejection notification
+
+Email notifications help clients stay informed about the progress of their requests.
 
 ---
 
-# 📊 Reports
+# 🔐 Authentication & Security
 
-The system includes a reporting module for monitoring and analyzing service requests.
+The system implements session-based authentication using CodeIgniter 4.
 
-### Report Filters
+### Security features include:
 
-Reports can be filtered by:
+* User authentication
+* Password hashing
+* Password verification
+* Session management
+* Session regeneration
+* Account status validation
+* Role-based access
+* Protected administrative functions
+* Server-side validation
+* Client-side form validation
+
+Passwords are stored using secure password hashing rather than plain text.
+
+---
+
+# 🗄️ Database
+
+The system uses **MySQL / MariaDB** as its relational database.
+
+The database stores information related to:
+
+```text
+Users
+  │
+  ├── Accounts
+  ├── Roles
+  └── Status
+       
+HR Requests
+  │
+  ├── Request Information
+  ├── Employment History
+  ├── Status
+  ├── Remarks
+  └── Processing Dates
+
+Client Satisfaction
+  │
+  ├── Feedback
+  ├── Ratings
+  └── Service Evaluation
+```
+
+---
+
+# 📈 Reports
+
+The system provides reporting functionality for administrative monitoring.
+
+### Available Reports
+
+* HR Service Request Reports
+* Filtered Request Reports
+* PDF Reports
+* CSV Export
+* Printable Reports
+
+Reports can be filtered according to:
 
 * Year
 * Month
 * Service Availed
 * Search Keyword
 
-### Export Functions
+---
 
-The system supports:
+# 🖨️ PDF & CSV Export
 
-* PDF Export
-* CSV Export
-* Printable reports
+Authorized users can export filtered records for documentation and reporting purposes.
 
-This allows authorized personnel to generate reports for monitoring, documentation, and administrative purposes.
+### PDF
+
+Used for:
+
+* Official reports
+* Printing
+* Documentation
+* Administrative records
+
+### CSV
+
+Used for:
+
+* Data analysis
+* Spreadsheet processing
+* Record management
+* Data archiving
 
 ---
 
-# 📧 Email Notification
+# 📝 Client Satisfaction Measurement
 
-The system can send email notifications to clients when important changes occur in their request.
+The portal includes a **Client Satisfaction Measurement (CSM)** component.
 
-Notifications may be sent for:
+Clients can provide feedback regarding the service they received.
 
-### New Request
+The CSM functionality supports the collection of:
 
-Confirmation that the request has been successfully submitted.
+* Client information
+* Service information
+* Satisfaction ratings
+* Feedback
+* Comments
 
-### Processing
-
-Notification that the request is currently being processed.
-
-### For Release
-
-Notification that the requested document/service is ready for release.
-
-### Completed
-
-Notification that the request has been completed.
-
-### Rejected
-
-Notification that the request has been rejected, including applicable remarks.
+This can help the office evaluate service delivery and identify areas for improvement.
 
 ---
 
-# ⭐ Client Satisfaction Measurement
+# 📱 Responsive Design
 
-After completion of a service request, clients may be provided with a **Client Satisfaction Measurement (CSM)** form.
+The portal uses responsive web design principles to support different screen sizes.
 
-The system supports:
+Supported devices include:
 
-* Client feedback submission
-* Satisfaction rating
-* Comments and suggestions
-* English CSM form
-* Tagalog CSM form
-* Printable CSM questionnaire
+* Desktop computers
+* Laptops
+* Tablets
+* Mobile devices
 
-The collected feedback can be used for service improvement and monitoring.
+The interface uses **Bootstrap 5** together with custom CSS for responsive layouts.
 
 ---
 
-# 🔐 User Management
+# 🎨 User Interface
 
-The administrator module provides user account management.
+The system follows a minimalist government/corporate design approach using DOLE-inspired branding.
 
-Authorized administrators can:
+### Design characteristics
 
-* Create users
-* Update users
-* Delete users
-* Activate/deactivate accounts
-* Assign user roles
-* Manage account access
+* Clean interface
+* Responsive layout
+* Minimalist components
+* Consistent typography
+* Bootstrap components
+* Modal dialogs
+* Loading screens
+* Confirmation dialogs
+* Status indicators
+* Responsive tables
 
-### Example Roles
+Primary interface color:
 
 ```text
-Administrator
-HR Administrator
-HR Personnel
-Client
+DOLE Blue
+#10058C
 ```
-
-Access to system functions should be restricted according to the user's assigned role.
-
----
-
-# 🔑 Authentication & Security
-
-The system implements authentication and session management for protected pages.
-
-Security mechanisms include:
-
-* Username and password authentication
-* Password hashing
-* Password verification
-* Active/inactive account checking
-* Session regeneration after login
-* Protected administrative pages
-* Role-based access
-* Server-side validation
-* Client-side form validation
-* Database query protection through CodeIgniter's database layer
-
-Passwords should never be stored in plain text.
-
----
-
-# 🛠️ Technology Stack
-
-## Backend
-
-* **PHP**
-* **CodeIgniter 4**
-* **MySQL / MariaDB**
-
-## Frontend
-
-* **HTML5**
-* **CSS3**
-* **JavaScript**
-* **Bootstrap 5**
-* **Bootstrap Icons**
-
-## Development Tools
-
-* Visual Studio Code
-* WampServer
-* Git
-* GitHub
 
 ---
 
 # 📁 Project Structure
 
-The project follows the standard CodeIgniter 4 structure.
+The project follows the CodeIgniter 4 structure.
 
 ```text
-eportal-mimaropa/
+eportal-mimaropav2/
 │
 ├── app/
 │   ├── Config/
@@ -308,12 +423,14 @@ eportal-mimaropa/
 │   │   ├── css/
 │   │   ├── js/
 │   │   ├── images/
-│   │   └── vendor/
+│   │   └── fonts/
 │   └── index.php
 │
-├── system/
-│
 ├── writable/
+│   ├── cache/
+│   ├── logs/
+│   ├── session/
+│   └── uploads/
 │
 ├── tests/
 │
@@ -325,25 +442,38 @@ eportal-mimaropa/
 
 ---
 
-# 💻 Installation
+# ⚙️ Installation
+
+## Requirements
+
+Before installing the system, make sure the following are available:
+
+* PHP 8.x or compatible version
+* MySQL / MariaDB
+* Apache
+* Composer
+* Git
+* WampServer or another PHP development environment
+
+---
 
 ## 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-organization/eportal-mimaropa.git
+git clone https://github.com/rmaranan02dolemimaropa-hub/eportal-mimaropav2.git
 ```
 
 Navigate to the project directory:
 
 ```bash
-cd eportal-mimaropa
+cd eportal-mimaropav2
 ```
 
 ---
 
 ## 2. Install Dependencies
 
-Install the required PHP dependencies using Composer:
+Run:
 
 ```bash
 composer install
@@ -353,23 +483,33 @@ composer install
 
 ## 3. Configure Environment
 
-Copy the environment template:
-
-```bash
-copy env .env
-```
-
-For Linux/macOS:
+Copy the environment file:
 
 ```bash
 cp env .env
 ```
 
-Open the `.env` file and configure the application.
+For Windows, you can manually copy:
+
+```text
+env
+```
+
+and rename the copy to:
+
+```text
+.env
+```
+
+---
+
+## 4. Configure Application
+
+Edit `.env` and configure the application settings.
 
 Example:
 
-```env
+```ini
 CI_ENVIRONMENT = development
 
 app.baseURL = 'http://eportal.test:8080/'
@@ -379,68 +519,45 @@ app.baseURL = 'http://eportal.test:8080/'
 
 # 🗄️ Database Configuration
 
-Create a database in MySQL/MariaDB.
+Configure the database connection in `.env`.
 
 Example:
 
-```sql
-CREATE DATABASE eportal_mimaropa;
-```
-
-Configure the database connection in `.env`:
-
-```env
+```ini
 database.default.hostname = localhost
-database.default.database = eportal_mimaropa
+database.default.database = eportal
 database.default.username = root
 database.default.password =
 database.default.DBDriver = MySQLi
+database.default.DBPrefix =
 database.default.port = 3306
 ```
 
----
+Create the database first:
 
-# 🧱 Database Migration
-
-If migrations are configured, run:
-
-```bash
-php spark migrate
+```sql
+CREATE DATABASE eportal;
 ```
 
-To view migration status:
-
-```bash
-php spark migrate:status
-```
-
----
-
-# 🌱 Database Seeding
-
-If database seeders are available:
-
-```bash
-php spark db:seed DatabaseSeeder
-```
+Then configure the database credentials according to your environment.
 
 ---
 
 # 🚀 Running the Application
 
-The application can be started using CodeIgniter's development server:
+Using CodeIgniter's development server:
 
 ```bash
 php spark serve
 ```
 
-The system will normally be available at:
+The application will normally be available at:
 
 ```text
 http://localhost:8080
 ```
 
-For a local virtual host configuration, the project may be accessed through:
+For the local WampServer configuration, the project may be accessed through:
 
 ```text
 http://eportal.test:8080/
@@ -448,480 +565,187 @@ http://eportal.test:8080/
 
 ---
 
-# 🌐 Production Deployment
+# 🔑 User Roles
 
-For production deployment, the web server's document root must point to the **public** directory.
+The system supports different levels of access.
+
+Example roles include:
+
+```text
+Administrator
+HR Administrator
+Employee
+Client
+```
+
+Access to certain modules and functions is controlled according to the user's role and account status.
+
+---
+
+# 🧩 Important Components
+
+### Controller
 
 Example:
 
 ```text
-C:/wamp64/www/eportal-mimaropa/public
+EportalController
 ```
 
-Do not expose the entire CodeIgniter project directory publicly.
+Handles major portal operations such as:
 
-The recommended structure is:
-
-```text
-Web Server
-     │
-     ▼
-public/
-     │
-     ├── index.php
-     ├── assets/
-     └── ...
-     
-Application files
-     │
-     ├── app/
-     ├── system/
-     └── writable/
-```
-
----
-
-# ⚙️ Configuration
-
-Important configuration files include:
-
-```text
-app/Config/App.php
-app/Config/Database.php
-app/Config/Email.php
-app/Config/Routes.php
-```
-
-Environment-specific settings should preferably be placed in:
-
-```text
-.env
-```
-
-Do not commit sensitive credentials to GitHub.
-
----
-
-# 📧 Email Configuration
-
-The system can be configured to send email notifications through an SMTP server.
-
-Example configuration:
-
-```env
-email.protocol = smtp
-email.SMTPHost = smtp.example.com
-email.SMTPUser = noreply@example.com
-email.SMTPPass = your-password
-email.SMTPPort = 587
-email.SMTPCrypto = tls
-```
-
-> **Security Notice:** Never commit SMTP passwords, API keys, credentials, or other secrets to the repository.
-
----
-
-# 🔄 Request Status Workflow
-
-A service request follows the following workflow:
-
-```text
-NEW APPLICATION
-       │
-       ▼
-   PROCESSING
-       │
-       ├──────────────► REJECTED
-       │
-       ▼
-  FOR RELEASE
-       │
-       ▼
-   COMPLETED
-       │
-       ▼
-CLIENT FEEDBACK
-```
-
-### Status Description
-
-| Status          | Description                             |
-| --------------- | --------------------------------------- |
-| New Application | Newly submitted request                 |
-| Processing      | Request is currently being processed    |
-| For Released    | Document/service is ready for release   |
-| Completed       | Request has been successfully completed |
-| Rejected        | Request was rejected                    |
-
----
-
-# 🔢 Reference Number
-
-Each submitted request receives a unique reference number.
-
-Example format:
-
-```text
-HR-20260829143025
-```
-
-The reference number can be used by the client and authorized personnel to identify and monitor a request.
-
----
-
-# 🔎 Request Search & Filtering
-
-The request management page supports filtering using:
-
-```text
-Year
-Status
-Service Availed
-```
-
-It also supports keyword searching for:
-
-```text
-Reference Number
-Full Name
-Email Address
-Contact Number
-Service Availed
-Status
-```
-
----
-
-# 🖨️ Printing
-
-The system provides printable documents and reports for authorized users.
-
-Supported outputs may include:
-
-* Service documents
-* CSM questionnaires
+* Dashboard
+* Login
+* Request submission
+* Request processing
+* Request updates
 * Reports
-* Request details
-* English forms
-* Tagalog forms
+* PDF export
+* CSV export
 
----
-
-# 📱 Responsive Design
-
-The E-Portal uses a responsive interface designed to work across:
-
-* Desktop computers
-* Laptops
-* Tablets
-* Mobile devices
-
-The frontend uses Bootstrap responsive utilities together with custom CSS.
-
----
-
-# 🎨 Design
-
-The system follows a minimalist government/corporate interface inspired by the visual identity of DOLE MIMAROPA.
-
-Primary system color:
-
-```css
---dole-blue: #10058C;
-```
-
-The interface emphasizes:
-
-* Clean layouts
-* Readability
-* Accessibility
-* Consistent spacing
-* Responsive components
-* Simple navigation
-* Clear status indicators
-
----
-
-# 🧪 Development
-
-During development, use:
-
-```env
-CI_ENVIRONMENT = development
-```
-
-For production:
-
-```env
-CI_ENVIRONMENT = production
-```
-
-Before deployment, make sure:
-
-* Debug mode is disabled
-* Production environment is enabled
-* Database credentials are secured
-* SMTP credentials are secured
-* Writable permissions are configured
-* Error logs are protected
-* `.env` is not publicly accessible
-
----
-
-# 🧹 Cache & Troubleshooting
-
-Clear CodeIgniter cache when necessary:
-
-```bash
-php spark cache:clear
-```
-
-Check available Spark commands:
-
-```bash
-php spark
-```
-
-Check routes:
-
-```bash
-php spark routes
-```
-
-Check migration status:
-
-```bash
-php spark migrate:status
-```
-
----
-
-# 🐛 Common Issues
-
-## 404 Page Not Found
-
-Check the configured routes:
-
-```text
-app/Config/Routes.php
-```
-
-Then run:
-
-```bash
-php spark routes
-```
-
-Make sure the web server document root points to:
-
-```text
-public/
-```
-
----
-
-## Database Connection Error
-
-Verify:
-
-```text
-Database Host
-Database Name
-Database Username
-Database Password
-Database Port
-```
-
-in `.env`.
-
----
-
-## Email Not Sending
-
-Check:
-
-```text
-SMTP Host
-SMTP Username
-SMTP Password
-SMTP Port
-SMTP Encryption
-```
-
-Also check the CodeIgniter logs:
-
-```text
-writable/logs/
-```
-
----
-
-# 🔒 Production Security Checklist
-
-Before deploying the system:
-
-* [ ] Set `CI_ENVIRONMENT=production`
-* [ ] Disable debug mode
-* [ ] Use HTTPS
-* [ ] Secure database credentials
-* [ ] Secure SMTP credentials
-* [ ] Do not commit `.env`
-* [ ] Use strong administrator passwords
-* [ ] Restrict administrative access
-* [ ] Configure proper file permissions
-* [ ] Enable regular database backups
-* [ ] Protect `writable/`
-* [ ] Keep CodeIgniter and dependencies updated
-* [ ] Review user roles and permissions
-* [ ] Review server and application logs
-
----
-
-# 💾 Backup & Recovery
-
-Regular backups should be maintained for:
-
-### Database
-
-```text
-eportal_mimaropa
-```
-
-### Application
-
-```text
-app/
-public/
-```
-
-### Configuration
-
-```text
-.env
-```
-
-Sensitive configuration files should be backed up securely and must not be published in the repository.
-
----
-
-# 🔀 Git Workflow
-
-Recommended workflow:
-
-```bash
-git status
-```
-
-Create a feature branch:
-
-```bash
-git checkout -b feature/request-management
-```
-
-Commit changes:
-
-```bash
-git add .
-git commit -m "Add request management improvements"
-```
-
-Push the branch:
-
-```bash
-git push origin feature/request-management
-```
-
-Merge changes into the main branch after testing.
-
----
-
-# 📌 Recommended Commit Messages
-
-Use clear and descriptive commit messages.
+### Models
 
 Examples:
 
 ```text
-feat: add service request tracking
-fix: resolve request modal data issue
-fix: correct login session handling
-feat: add PDF report export
-feat: add client satisfaction measurement
-refactor: improve request controller
-style: update eportal dashboard UI
-docs: update README
+HrRequestModel
+HrEmploymentHistoryModel
+ClientSatisfactionModel
+UserModel
+```
+
+These models handle database operations for their respective modules.
+
+### Mailer
+
+The system includes mail functionality for sending:
+
+```text
+Request Confirmation
+Processing Updates
+Release Notifications
+Completion Notifications
+Rejection Notifications
 ```
 
 ---
 
-# 🧑‍💻 Development Guidelines
+# 🔒 Security Recommendations
 
-When modifying the system:
+For production deployment:
 
-1. Follow the CodeIgniter 4 MVC structure.
-2. Keep business logic inside controllers/services where appropriate.
-3. Use models for database operations.
-4. Validate all user input.
-5. Avoid exposing sensitive information.
-6. Use parameterized/database-builder queries.
-7. Keep frontend JavaScript modular.
-8. Maintain responsive design.
-9. Test changes before deployment.
-10. Document significant system changes.
-
----
-
-# 📈 Future Enhancements
-
-Potential future improvements include:
-
-* [ ] Online client account registration
-* [ ] SMS notifications
-* [ ] QR-code request tracking
-* [ ] Advanced analytics dashboard
-* [ ] Digital document release
-* [ ] Electronic signatures
-* [ ] Automated document generation
-* [ ] Expanded HR services
-* [ ] Audit trail
-* [ ] Two-factor authentication
-* [ ] API integration
-* [ ] Mobile application
-* [ ] Enhanced reporting and analytics
+* Use HTTPS.
+* Never commit `.env` to GitHub.
+* Use strong database credentials.
+* Use strong administrator passwords.
+* Restrict database access.
+* Keep CodeIgniter and dependencies updated.
+* Configure appropriate file permissions.
+* Disable development mode.
+* Regularly back up the database.
+* Protect uploaded files.
+* Configure production error handling.
 
 ---
 
-# 👥 User Roles
+# 🌐 Deployment
 
-| Role             | Access                                     |
-| ---------------- | ------------------------------------------ |
-| Client           | Submit and monitor service requests        |
-| HR Personnel     | Process assigned requests                  |
-| HR Administrator | Manage HR requests and users               |
-| Administrator    | Manage system-wide configuration and users |
+The application can be deployed on a PHP-compatible web server.
 
-Access should be implemented according to the principle of **least privilege**.
+Recommended production environment:
+
+```text
+Internet
+    │
+    ▼
+Apache / Web Server
+    │
+    ▼
+CodeIgniter 4
+    │
+    ├── Controllers
+    ├── Models
+    ├── Views
+    └── Libraries
+    │
+    ▼
+MySQL / MariaDB
+```
+
+The web server's document root should point to the CodeIgniter:
+
+```text
+/public
+```
+
+directory.
 
 ---
 
-# 📞 Support
+# 🧪 Development Environment
 
-For technical concerns, system maintenance, or account-related issues, contact the designated **DOLE MIMAROPA IT/System Administrator**.
+The project was developed and tested using:
+
+```text
+Operating System : Windows
+Web Server       : Apache
+PHP              : 8.x
+Framework        : CodeIgniter 4
+Database         : MySQL / MariaDB
+IDE              : Visual Studio Code
+Local Server     : WampServer
+Version Control  : Git
+Repository       : GitHub
+```
+
+---
+
+# 📌 Project Status
+
+```text
+Development / Continuous Improvement
+```
+
+The system may continue to receive:
+
+* Bug fixes
+* Security improvements
+* UI improvements
+* Additional services
+* Additional reports
+* Performance improvements
+* New administrative features
+
+---
+
+# 👨‍💻 Developer
+
+**DOLE MIMAROPA IT Development**
+
+Department of Labor and Employment
+MIMAROPA Regional Office
 
 ---
 
 # 📄 License
 
-This system is developed for the internal and official use of the:
+This project is intended for **DOLE MIMAROPA internal and official use**.
 
-**Department of Labor and Employment – MIMAROPA Regional Office**
-
-Unauthorized reproduction, distribution, modification, or use outside the authorized purpose of the system should be subject to applicable agency policies and regulations.
+Unauthorized copying, redistribution, modification, or deployment outside the intended environment may be restricted.
 
 ---
 
-# 🏛️ DOLE MIMAROPA E-Portal
+# 📞 Support
+
+For system-related concerns, configuration issues, bug reports, or feature requests, coordinate with the designated **IT/System Administrator** of DOLE MIMAROPA.
+
+---
+
+## ⭐ DOLE MIMAROPA E-Portal
 
 **One Portal. Multiple Digital Services.**
 
-> Digitalizing service delivery through a centralized, efficient, and user-friendly electronic portal.
+```text
+DOLE MIMAROPA
+Electronic Portal System
+```
