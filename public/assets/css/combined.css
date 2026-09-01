@@ -2345,6 +2345,29 @@ body:has(.offcanvas.show) .export-overlay {
   margin-top: 4px;
 }
 
+.profile-modal-content {
+  border-radius: 12px;
+}
+
+
+
+.avatar-lg {
+  width: 80px;
+  height: 80px;
+  font-size: 1.75rem;
+}
+
+.profile-field {
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.profile-field:last-of-type {
+  border-bottom: none;
+}
+
+
+
 /* ==========================================
    ANIMATIONS
 ========================================== */

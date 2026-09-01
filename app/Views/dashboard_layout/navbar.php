@@ -22,6 +22,7 @@
       <button class="user-menu-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
         <?php
         $fullname = session('fullname') ?? '';
+        $email = session('email') ?? '';
         $words = array_filter(explode(' ', trim($fullname)));
 
         $initials = '';
@@ -39,12 +40,41 @@
         <i class="bi bi-chevron-down small-chevron"></i>
       </button>
       <ul class="dropdown-menu dropdown-menu-end">
-        <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
         <li>
-          <hr class="dropdown-divider">
+          <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#profileModal">
+            <i class="bi bi-person me-2"></i>Profile
+          </a>
+        </li>
+        <hr class="dropdown-divider">
         </li>
         <li><a class="dropdown-item text-danger" href="logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
       </ul>
     </div>
+
+
+
   </div>
+
+
+
+
+
 </header>
+
+<!-- Profile Modal -->
+<div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-sm profile-modal-content">
+      <div class="modal-header border-0 pb-0">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body pt-0">
+        <div class="d-flex flex-column align-items-center mb-4">
+          <span class="avatar avatar-lg mb-3"><?= esc($initials) ?></span>
+          <h5 class="mb-0" id="profileModalLabel"><?= esc($fullname) ?></h5>
+          <p class="text-muted small mb-0"><?= esc(session('role')) ?></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
