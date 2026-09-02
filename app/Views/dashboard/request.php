@@ -357,37 +357,11 @@
                 <div class="modal-header request-modal-header d-flex justify-content-between align-items-start">
                     <div>
                         <div class="request-modal-eyebrow">HR Request Details</div>
-                        <h5 class="modal-title request-modal-ref" id="modalReferenceNo">—</h5>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="status-pill" id="modalStatusPill">—</span>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                            aria-label="Close request details"></button>
-                    </div>
-                </div>
-
-                <!-- Status stepper -->
-                <div class="request-stepper" id="requestStepper">
-                    <div class="stepper-track">
-                        <div class="stepper-fill" id="stepperFill"></div>
-                    </div>
-                    <div class="stepper-steps">
-                        <div class="stepper-step" data-step="New Application">
-                            <span class="stepper-dot"></span>
-                            <span class="stepper-label">Received</span>
-                        </div>
-                        <div class="stepper-step" data-step="Processing">
-                            <span class="stepper-dot"></span>
-                            <span class="stepper-label">Processing</span>
-                        </div>
-                        <div class="stepper-step" data-step="For Released">
-                            <span class="stepper-dot"></span>
-                            <span class="stepper-label">For Release</span>
-                        </div>
-                        <div class="stepper-step" data-step="Completed">
-                            <span class="stepper-dot"></span>
-                            <span class="stepper-label">Completed</span>
-                        </div>
+                        <h5 class="modal-title request-modal-ref d-flex align-items-center gap-2">
+                            <span id="modalReferenceNo">—</span>
+                            <span class="ref-status-divider">|</span>
+                            <span class="modal-status-pill" id="modalStatusPill">—</span>
+                        </h5>
                     </div>
                 </div>
 
@@ -414,20 +388,24 @@
         <div class="modal fade" id="edit<?= $row['id'] ?>" tabindex="-1">
             <div class="modal-dialog modal-lg">
                 <form method="post" action="<?= site_url('request/update/' . $row['id']) ?>"
-                    class="modal-content updateRequestForm">
+                    class="modal-content request-modal updateRequestForm">
 
                     <?= csrf_field() ?>
 
-                    <div class="modal-header">
-                        <h5 class="modal-title">Update HR Request</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <div class="modal-header request-modal-header d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="request-modal-eyebrow">Update HR Request</div>
+                            <h5 class="modal-title request-modal-ref">
+                                <?= esc($row['reference_no']) ?>
+                            </h5>
+                        </div>
                     </div>
 
-                    <div class="modal-body">
+                    <div class="modal-body request-modal-body">
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Reference No.</label>
-                                <input type="text" class="form-control" value="<?= esc($row['reference_no']) ?>" readonly>
+                                <input class="form-control" value="<?= esc($row['reference_no']) ?>" readonly>
                             </div>
 
                             <div class="col-md-6">
@@ -484,11 +462,11 @@
                         </div>
                     </div>
 
-                    <div class="modal-footer">
+                    <div class="modal-footer request-modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             Cancel
                         </button>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-dole-primary">
                             <i class="bi bi-check-circle"></i> Update Request
                         </button>
                     </div>
@@ -500,21 +478,23 @@
     <?php foreach ($requests as $row): ?>
         <div class="modal fade" id="cancel<?= $row['id'] ?>" tabindex="-1">
             <div class="modal-dialog">
-                <form method="post" action="<?= site_url('request/cancel/' . $row['id']) ?>" class="modal-content">
+                <form method="post" action="<?= site_url('request/cancel/' . $row['id']) ?>"
+                    class="modal-content request-modal">
 
                     <?= csrf_field() ?>
 
-                    <div class="modal-header">
-                        <h5 class="modal-title text-warning">Cancel HR Request</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <div class="modal-header request-modal-header-danger">
+                        <h5 class="modal-title text-white">
+                            <i class="bi bi-x-circle me-1"></i> Cancel HR Request
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
 
-
-                    <div class="modal-body">
+                    <div class="modal-body request-modal-body">
                         Are you sure you want to cancel the request for
                         <strong><?= esc($row['fullname']) ?></strong>?
 
-                        <div class="col-md-12">
+                        <div class="col-md-12 mt-3">
                             <label class="form-label">Cancellation Reason (Optional)</label>
                             <textarea name="cancellation_reason" class="form-control" rows="2"></textarea>
                         </div>
@@ -524,12 +504,12 @@
                         </p>
                     </div>
 
-                    <div class="modal-footer">
+                    <div class="modal-footer request-modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             Back
                         </button>
 
-                        <button type="submit" class="btn btn-warning">
+                        <button type="submit" class="btn btn-dole-danger">
                             <i class="bi bi-x-circle"></i> Cancel Request
                         </button>
                     </div>
@@ -932,20 +912,6 @@
         pill.textContent = data.status || '—';
         pill.setAttribute('data-status', data.status || '');
 
-        /* =========================================================
-           STEPPER
-        ========================================================= */
-        const steps = ['New Application', 'Processing', 'For Released', 'Completed'];
-        const currentIndex = steps.indexOf(data.status);
-        const isRejected = data.status === 'Rejected';
-
-        document.querySelectorAll('.stepper-step').forEach(function (stepEl, i) {
-            stepEl.classList.toggle('active', !isRejected && i <= currentIndex);
-            stepEl.classList.toggle('rejected', isRejected);
-        });
-
-        document.getElementById('stepperFill').style.width =
-            isRejected ? '0%' : (currentIndex >= 0 ? (currentIndex / (steps.length - 1)) * 100 + '%' : '0%');
 
         /* =========================================================
            SERVICE-SPECIFIC FIELDS

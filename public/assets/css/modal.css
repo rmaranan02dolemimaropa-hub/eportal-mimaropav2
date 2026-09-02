@@ -1,6 +1,6 @@
 /* ---------- Minimalist modal shell ---------- */
 #addUserModal .modal-content {
-  border: 1px solid #E5E7EB;
+  border: 1px solid #e5e7eb;
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
@@ -9,7 +9,7 @@
 #addUserModal .modal-header {
   background: #fff !important;
   color: #111827 !important;
-  border-bottom: 1px solid #E5E7EB;
+  border-bottom: 1px solid #e5e7eb;
   padding: 20px 24px;
 }
 
@@ -22,7 +22,7 @@
 }
 
 #addUserModal .modal-title i {
-  color: #6B7280;
+  color: #6b7280;
   font-size: 15px;
 }
 
@@ -43,31 +43,31 @@
 #addUserModal label {
   font-size: 12.5px;
   font-weight: 500;
-  color: #6B7280;
+  color: #6b7280;
   margin-bottom: 6px;
   display: inline-block;
 }
 
 #addUserModal .form-control,
 #addUserModal .form-select {
-  border: 1px solid #E5E7EB;
+  border: 1px solid #e5e7eb;
   border-radius: 6px;
   font-size: 14px;
   padding: 9px 12px;
   color: #111827;
-  background: #FAFAFA;
+  background: #fafafa;
 }
 
 #addUserModal .form-control:focus,
 #addUserModal .form-select:focus {
-  border-color: #9CA3AF;
+  border-color: #9ca3af;
   box-shadow: none;
   background: #fff;
 }
 
 /* ---------- Footer ---------- */
 #addUserModal .modal-footer {
-  border-top: 1px solid #E5E7EB;
+  border-top: 1px solid #e5e7eb;
   padding: 16px 24px;
 }
 
@@ -80,11 +80,11 @@
 
 #addUserModal .btn-secondary {
   background: #fff;
-  color: #6B7280;
-  border: 1px solid #E5E7EB;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
 }
 #addUserModal .btn-secondary:hover {
-  background: #F3F4F6;
+  background: #f3f4f6;
   color: #111827;
 }
 
@@ -93,13 +93,13 @@
   border-color: #111827;
 }
 #addUserModal .btn-primary:hover {
-  background: #1F2937;
-  border-color: #1F2937;
+  background: #1f2937;
+  border-color: #1f2937;
 }
 
 /* ---------- Minimalist modal shell ---------- */
 .edit-user-modal .modal-content {
-  border: 1px solid #E5E7EB;
+  border: 1px solid #e5e7eb;
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
@@ -107,7 +107,7 @@
 /* Kill the bootstrap bg-warning block header look */
 .edit-user-modal .modal-header {
   background: #fff !important;
-  border-bottom: 1px solid #E5E7EB;
+  border-bottom: 1px solid #e5e7eb;
   padding: 20px 24px;
 }
 
@@ -125,7 +125,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #C97A25;
+  background: #c97a25;
   display: inline-block;
 }
 
@@ -145,36 +145,36 @@
 .edit-user-modal label {
   font-size: 12.5px;
   font-weight: 500;
-  color: #6B7280;
+  color: #6b7280;
   margin-bottom: 6px;
   display: inline-block;
 }
 
 .edit-user-modal .form-control,
 .edit-user-modal .form-select {
-  border: 1px solid #E5E7EB;
+  border: 1px solid #e5e7eb;
   border-radius: 6px;
   font-size: 14px;
   padding: 9px 12px;
   color: #111827;
-  background: #FAFAFA;
+  background: #fafafa;
 }
 
 .edit-user-modal .form-control:focus,
 .edit-user-modal .form-select:focus {
-  border-color: #9CA3AF;
+  border-color: #9ca3af;
   box-shadow: none;
   background: #fff;
 }
 
 .edit-user-modal .form-control::placeholder {
-  color: #9CA3AF;
+  color: #9ca3af;
   font-size: 13px;
 }
 
 /* ---------- Footer ---------- */
 .edit-user-modal .modal-footer {
-  border-top: 1px solid #E5E7EB;
+  border-top: 1px solid #e5e7eb;
   padding: 16px 24px;
 }
 
@@ -187,29 +187,29 @@
 
 .edit-user-modal .btn-secondary {
   background: #fff;
-  color: #6B7280;
-  border: 1px solid #E5E7EB;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
 }
 .edit-user-modal .btn-secondary:hover {
-  background: #F3F4F6;
+  background: #f3f4f6;
   color: #111827;
 }
 
 /* Flat amber instead of bootstrap's yellow-striped warning button */
 .edit-user-modal .btn-warning {
-  background: #C97A25;
-  border-color: #C97A25;
+  background: #c97a25;
+  border-color: #c97a25;
   color: #fff;
 }
 .edit-user-modal .btn-warning:hover {
-  background: #A8631C;
-  border-color: #A8631C;
+  background: #a8631c;
+  border-color: #a8631c;
   color: #fff;
 }
 
 /* ---------- Minimalist modal shell ---------- */
 .view-user-modal .modal-content {
-  border: 1px solid #E5E7EB;
+  border: 1px solid #e5e7eb;
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
@@ -218,7 +218,7 @@
 .view-user-modal .modal-header {
   background: #fff !important;
   color: #111827 !important;
-  border-bottom: 1px solid #E5E7EB;
+  border-bottom: 1px solid #e5e7eb;
   padding: 20px 24px;
 }
 
@@ -235,7 +235,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #2E5AAC;
+  background: #2e5aac;
   display: inline-block;
 }
 
@@ -264,7 +264,7 @@
 .view-user-modal .table th,
 .view-user-modal .table td {
   border: none;
-  border-bottom: 1px solid #F0F1F3;
+  border-bottom: 1px solid #f0f1f3;
   padding: 12px 0;
   vertical-align: middle;
 }
@@ -278,7 +278,7 @@
   width: 35%;
   font-size: 12.5px;
   font-weight: 500;
-  color: #6B7280;
+  color: #6b7280;
   text-transform: none;
 }
 
@@ -298,18 +298,18 @@
 }
 
 .view-user-modal .badge.bg-success {
-  background: #E5F0E7 !important;
-  color: #2E7D4F;
+  background: #e5f0e7 !important;
+  color: #2e7d4f;
 }
 
 .view-user-modal .badge.bg-danger {
-  background: #FBEAE6 !important;
-  color: #B3432B;
+  background: #fbeae6 !important;
+  color: #b3432b;
 }
 
 /* ---------- Footer ---------- */
 .view-user-modal .modal-footer {
-  border-top: 1px solid #E5E7EB;
+  border-top: 1px solid #e5e7eb;
   padding: 16px 24px;
 }
 
@@ -322,25 +322,33 @@
 
 .view-user-modal .btn-secondary {
   background: #fff;
-  color: #6B7280;
-  border: 1px solid #E5E7EB;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
 }
 .view-user-modal .btn-secondary:hover {
-  background: #F3F4F6;
+  background: #f3f4f6;
   color: #111827;
 }
 /* ---------- Minimalist modal shell ---------- */
 .delete-user-modal .modal-content {
-  border: 1px solid #E5E7EB;
+  border: 1px solid #e5e7eb;
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
 .delete-user-modal .modal-header {
-  background: #fff !important;
-  color: #111827 !important;
-  border-bottom: 1px solid #E5E7EB;
-  padding: 20px 24px;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary),
+    var(--color-secondary)
+  );
+  color: #fff;
+  padding: 1.5rem 1.75rem;
+  border: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
 }
 
 .delete-user-modal .modal-title {
@@ -356,7 +364,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #B3432B;
+  background: #b3432b;
   display: inline-block;
 }
 
@@ -377,7 +385,7 @@
 .delete-user-modal .modal-body h5 {
   font-size: 14px;
   font-weight: 500;
-  color: #6B7280;
+  color: #6b7280;
   margin-bottom: 16px;
 }
 
@@ -394,7 +402,7 @@
 
 /* ---------- Footer ---------- */
 .delete-user-modal .modal-footer {
-  border-top: 1px solid #E5E7EB;
+  border-top: 1px solid #e5e7eb;
   padding: 16px 24px;
   justify-content: center;
 }
@@ -408,19 +416,19 @@
 
 .delete-user-modal .btn-secondary {
   background: #fff;
-  color: #6B7280;
-  border: 1px solid #E5E7EB;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
 }
 .delete-user-modal .btn-secondary:hover {
-  background: #F3F4F6;
+  background: #f3f4f6;
   color: #111827;
 }
 
 .delete-user-modal .btn-danger {
-  background: #B3432B;
-  border-color: #B3432B;
+  background: #b3432b;
+  border-color: #b3432b;
 }
 .delete-user-modal .btn-danger:hover {
-  background: #8F3320;
-  border-color: #8F3320;
+  background: #8f3320;
+  border-color: #8f3320;
 }
