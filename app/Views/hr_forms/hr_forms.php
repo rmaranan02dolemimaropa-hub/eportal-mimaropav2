@@ -387,8 +387,8 @@
                                     <div class="choice-card">
                                         <input class="form-check-input mt-0" type="checkbox"
                                             name="entries[__IDX__][certification][]" id="certLeaveWithoutPayno__IDX__"
-                                            value="Leave Without Pay (NO LWOP)">
-                                        <label for="certLeaveWithoutPayno__IDX__">Leave Without Pay (NO LWOP)</label>
+                                            value="No Leave Without Pay (NO LWOP)">
+                                        <label for="certLeaveWithoutPayno__IDX__">No Leave Without Pay (NO LWOP)</label>
                                     </div>
                                 </div>
                             </div>
