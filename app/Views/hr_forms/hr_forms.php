@@ -1096,6 +1096,15 @@
             if (serviceSelectOf(entryEl).value !== 'service6') return true;
             return Array.from(certificationCheckboxesOf(entryEl)).some(function (cb) { return cb.checked; });
         }
+        function is201DocumentsValid(entryEl) {
+            if (serviceSelectOf(entryEl).value !== 'service8') return true;
+
+            return Array.from(
+                entryEl.querySelectorAll('input[name*="[documents_201][]"]')
+            ).some(function (cb) {
+                return cb.checked;
+            });
+        }
 
         function isEmployeeCategoryValid(entryEl) {
             if (serviceSelectOf(entryEl).value !== 'service5') return true;
@@ -1459,6 +1468,26 @@
                     if (!firstInvalidEntry) firstInvalidEntry = entryEl;
                 } else if (certificationError) {
                     certificationError.style.display = 'none';
+                }
+                // 201 Documents validation
+                if (!is201DocumentsValid(entryEl)) {
+                    isValid = false;
+
+                    const documents201Error = byPrefix(entryEl, 'documents201Error');
+
+                    if (documents201Error) {
+                        documents201Error.style.display = 'block';
+                    }
+
+                    if (!firstInvalidEntry) {
+                        firstInvalidEntry = entryEl;
+                    }
+                } else {
+                    const documents201Error = byPrefix(entryEl, 'documents201Error');
+
+                    if (documents201Error) {
+                        documents201Error.style.display = 'none';
+                    }
                 }
             });
 

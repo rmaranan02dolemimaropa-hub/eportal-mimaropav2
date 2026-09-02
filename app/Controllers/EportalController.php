@@ -368,6 +368,18 @@ class EportalController extends BaseController
             $performanceEvaluationPeriod = trim(
                 ($entry['performance_evaluation_semester'] ?? '') . ' ' . ($entry['performance_evaluation_year'] ?? '')
             );
+            // 201 Documents (checkbox array)
+            $documents201 = $entry['documents_201'] ?? [];
+
+            if (is_array($documents201)) {
+                $documents201 = array_filter(array_map('trim', $documents201));
+
+                $documents201Value = !empty($documents201)
+                    ? implode(', ', $documents201)
+                    : null;
+            } else {
+                $documents201Value = null;
+            }
 
 
             $employeeCategory = $entry['employee_category'] ?? null;
@@ -388,6 +400,7 @@ class EportalController extends BaseController
                 'certification' => $certification,
                 'ipcr_period' => $ipcrPeriod,
                 'performance_evaluation_period' => $performanceEvaluationPeriod,
+                'documents_201' => $documents201Value,
                 'specify_201' => $entry['specify_201'] ?? null,
                 'other_request' => $entry['other_request'] ?? null,
                 'date_requested' => $dateRequested,
