@@ -678,6 +678,8 @@
 
                             </div>
                         </div>
+
+
                         <!-- ---------- SERVICE 12: Contract of Service (COS only) ---------- -->
                         <div class="dynamic-section" id="section-service12__IDX__" data-service="service12">
                             <hr class="section-divider">
@@ -1043,12 +1045,15 @@
             dateRequestedDisplay.textContent = formatDisplayDate(todayStr);
         }
 
+
         /* =========================================================
            SHOW/HIDE DYNAMIC SECTIONS (scoped to one entry)
+           *** KEY FIX: Always hide sections properly ***
         ========================================================= */
         function hideAllServiceSections(entryEl) {
             serviceSectionsOf(entryEl).forEach(function (section) {
                 section.classList.remove('active');
+                section.style.display = 'none';  // ✅ EXPLICIT HIDE
                 toggleRequiredGroup(section, false);
             });
         }
@@ -1056,6 +1061,7 @@
         function hideAllEmployeeCategorySections(entryEl) {
             employeeCategorySectionsOf(entryEl).forEach(function (section) {
                 section.classList.remove('active');
+                section.style.display = 'none';  // ✅ EXPLICIT HIDE
                 toggleRequiredGroup(section, false);
             });
         }
@@ -1214,7 +1220,7 @@
         }
 
         /* =========================================================
-           Email Category
+           Employee Category Changes
         ========================================================= */
 
         function updateCosSectionVisibility(entryEl) {
@@ -1222,6 +1228,7 @@
             if (!cosSection) return;
             const shouldShow = serviceSelectOf(entryEl).value === 'service5' && getGlobalCategory() === 'cos';
             cosSection.classList.toggle('active', shouldShow);
+            cosSection.style.display = shouldShow ? 'block' : 'none';  // ✅ EXPLICIT CONTROL
             toggleRequiredGroup(cosSection, shouldShow);
             if (!shouldShow) {
                 const employmentError = employmentErrorOf(entryEl);
@@ -1233,7 +1240,16 @@
             radio.addEventListener('change', function () {
                 employeeCategoryError.style.setProperty('display', 'none', 'important');
                 filterServiceOptionsForCategory(getGlobalCategory());
-                entries().forEach(updateCosSectionVisibility);
+
+                // Explicitly hide ALL dynamic sections when category changes
+                document.querySelectorAll('.dynamic-section').forEach(function (section) {
+                    section.style.display = 'none';
+                    section.classList.remove('active');
+                });
+
+                entries().forEach(function (entryEl) {
+                    updateCosSectionVisibility(entryEl);
+                });
                 if (!restoringDraft) saveDraft();
             });
         });
@@ -1289,8 +1305,14 @@
                 if (selectWrap) selectWrap.classList.remove('d-none');
             }
 
+            // CRITICAL: Explicitly hide all dynamic sections in this entry
+            entryEl.querySelectorAll('.dynamic-section').forEach(function (section) {
+                section.style.display = 'none';
+                section.classList.remove('active');
+            });
+
             initEntryInitialState(entryEl);
-            filterServiceOptionsForCategory(getGlobalCategory());   // <-- ADD THIS
+            filterServiceOptionsForCategory(getGlobalCategory());
             renumberEntries();
             return entryEl;
         }
@@ -1331,15 +1353,35 @@
 
             // Service Availed change
             if (target.matches('select[id^="serviceAvailed"]')) {
-                hideAllServiceSections(entryEl);
+                hideAllServiceSections(entryEl);  // ✅ HIDE ALL FIRST
                 formAlert.classList.add('d-none');
 
-                const targetSection = entryEl.querySelector('[id^="section-' + target.value + '"][data-service]');
+                const targetSection = entryEl.querySelector('[data-service="' + target.value + '"]');
                 if (targetSection) {
                     targetSection.classList.add('active');
+                    targetSection.style.display = 'block';  // ✅ THEN SHOW SELECTED
                     toggleRequiredGroup(targetSection, true);
                 }
                 updateCosSectionVisibility(entryEl);
+                return;
+            }
+
+            // "Other Files" checkbox toggle (Service 8 / 201 Documents)
+            if (target.matches('[data-other-checkbox]')) {
+                const specifyWrapper = entryEl.querySelector('[id^="specify201Wrapper"]');
+                const specifyField = specify201Of(entryEl);
+
+                if (specifyWrapper) {
+                    specifyWrapper.style.display = target.checked ? 'block' : 'none';
+                }
+
+                // Kapag na-uncheck, i-clear yung textarea para hindi masave yung
+                // dating laman kung sakaling i-re-check pa ito ulit nang mali.
+                if (!target.checked && specifyField) {
+                    specifyField.value = '';
+                    specifyField.classList.remove('is-invalid');
+                }
+
                 return;
             }
 
@@ -1354,6 +1396,7 @@
                 const targetSection = entryEl.querySelector('[id^="section-' + target.value + '"][data-employee-category]');
                 if (targetSection) {
                     targetSection.classList.add('active');
+                    targetSection.style.display = 'block';  // ✅ EXPLICIT SHOW
                     toggleRequiredGroup(targetSection, true);
                 }
                 return;
@@ -1702,6 +1745,13 @@
         ========================================================= */
         document.addEventListener('DOMContentLoaded', function () {
             setDateRequested();
+
+            // CRITICAL: Hide all dynamic sections globally first
+            document.querySelectorAll('.dynamic-section').forEach(function (section) {
+                section.style.display = 'none';
+                section.classList.remove('active');
+            });
+
             addEntry();
             restoreDraft();
         });

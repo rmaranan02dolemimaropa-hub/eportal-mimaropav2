@@ -278,11 +278,11 @@ input[type="date"][readonly] {
 
 /* Dynamic sections */
 .dynamic-section {
-  display: none;
+  display: none !important;
   max-width: 100%;
 }
 .dynamic-section.active {
-  display: block;
+  display: block !important;
 }
 
 .required-mark {
