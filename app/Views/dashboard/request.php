@@ -8,7 +8,7 @@
 <!-- ============ MAIN CONTENT ============ -->
 <main class="main-content">
 
-    
+
 
     <!-- Page Header -->
     <div class="page-header">
@@ -255,13 +255,10 @@
                                             data-certification="<?= esc($row['certification'] ?? '', 'attr') ?>"
                                             data-ipcr-period="<?= esc($row['ipcr_period'] ?? '', 'attr') ?>"
                                             data-performance-evaluation-period="<?= esc($row['performance_evaluation_period'] ?? '', 'attr') ?>"
-                                            data-specify-201="<?= esc($row['specify_201'] ?? '', 'attr') ?>"
+                                            data-documents-list="<?= esc($row['documents_201'] ?? '', 'attr') ?>"
                                             data-remarks="<?= esc($row['remarks'] ?? '', 'attr') ?>"
                                             data-cancellation-reason="<?= esc($row['cancellation_reason'] ?? '', 'attr') ?>">
-
-
                                             <i class="bi bi-eye"></i>
-
                                         </button>
 
 
@@ -988,9 +985,41 @@
             serviceFieldsHTML += detailItem('Performance Evaluation Period', data.performanceEvaluationPeriod);
         }
 
-        // 201 Documents
-        if (data.service === '201 Docs') {
-            serviceFieldsHTML += detailItem('Specified Document', data.specify201);
+
+        // 201 Documents - Updated JavaScript Handler
+        // Add this to your modal event listener
+
+        if (data.service === '201 Documents') {
+            const documentsList = data.documentsList || data.documents201 || '';
+
+            if (documentsList && documentsList.trim() !== '') {
+                // Split documents by comma and create list items
+                const documents = documentsList
+                    .split(',')
+                    .map(doc => doc.trim())
+                    .filter(doc => doc.length > 0);
+
+                if (documents.length > 0) {
+                    let documentsHTML = '<div class="documents-list">';
+
+                    documents.forEach(doc => {
+                        documentsHTML += `<div class="document-item">${escapeHTML(doc)}</div>`;
+                    });
+
+                    documentsHTML += '</div>';
+
+                    serviceFieldsHTML += `
+                <div class="detail-item">
+                    <dt>Required Documents</dt>
+                    <dd>${documentsHTML}</dd>
+                </div>
+            `;
+                } else {
+                    serviceFieldsHTML += detailItem('Required Documents', 'No documents specified');
+                }
+            } else {
+                serviceFieldsHTML += detailItem('Required Documents', 'No documents specified');
+            }
         }
 
         /* =========================================================
