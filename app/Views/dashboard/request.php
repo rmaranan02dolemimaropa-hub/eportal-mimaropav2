@@ -92,7 +92,7 @@
 
             <a href="<?= current_url() ?>?status=New+Application"
                 class="status-pill <?= $status == 'New Application' ? 'active' : '' ?>">
-                New Application
+                New Request
             </a>
 
             <a href="<?= current_url() ?>?status=Processing"
@@ -973,12 +973,41 @@
 
         // Certification
         if (data.service === 'Certification') {
-            serviceFieldsHTML += detailItem('Certification Needed', data.certification);
+            const certificationList = data.certification || '';
+
+            if (certificationList && certificationList.trim() !== '') {
+                const certifications = certificationList
+                    .split(',')
+                    .map(item => item.trim())
+                    .filter(item => item.length > 0);
+
+                if (certifications.length > 0) {
+                    let certificationHTML = '<div class="documents-list">';
+
+                    certifications.forEach(cert => {
+                        certificationHTML += `<div class="document-item">${escapeHTML(cert)}</div>`;
+                    });
+
+                    certificationHTML += '</div>';
+
+                    serviceFieldsHTML += `
+                <div class="detail-item">
+                    <dt>Certification Needed</dt>
+                    <dd>${certificationHTML}</dd>
+                </div>
+            `;
+                } else {
+                    serviceFieldsHTML += detailItem('Certification Needed', 'No certification specified');
+                }
+            } else {
+                serviceFieldsHTML += detailItem('Certification Needed', 'No certification specified');
+            }
         }
 
         // IPCR
         if (data.service === 'IPCR') {
-            serviceFieldsHTML += detailItem('IPCR Period', data.ipcrPeriod);
+            const ipcrPeriod = data.ipcrPeriod || '';
+            serviceFieldsHTML += detailItem('IPCR Period', ipcrPeriod ? escapeHTML(ipcrPeriod) : 'No period specified');
         }
         // Performance Evaluation
         if (data.service === 'Performance Evaluation') {
