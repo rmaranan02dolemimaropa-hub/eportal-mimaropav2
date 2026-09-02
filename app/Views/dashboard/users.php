@@ -11,7 +11,7 @@
 <!-- ============ MAIN CONTENT ============ -->
 <main class="main-content">
 
-   
+
     <!-- Page Header -->
     <div class="page-header">
         <div>
@@ -366,7 +366,7 @@
 
                             </div> -->
                             <div class="col-md-6">
-                                <label class="form-label d-block">Status</label>
+                                <label class="form-label">Status</label>
 
                                 <input type="hidden" name="status" value="INACTIVE">
 

@@ -2320,6 +2320,34 @@ body:has(.offcanvas.show) .export-overlay {
   flex-shrink: 0;
 }
 
+/* -------------------- Status Toggle (mobile-friendly tap area) -------------------- */
+.form-switch {
+  position: relative;
+  padding-left: 2.75em; /* mas malaking space para sa switch */
+  min-height: 1.75rem;
+  display: flex;
+  align-items: center;
+}
+
+.form-switch .form-check-input {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.5em;
+  height: 1.4em;
+  margin: 0;
+  cursor: pointer;
+  z-index: 2; /* siguraduhing nasa ibabaw ito, hindi na-cocover ng ibang element */
+}
+
+.form-switch .form-check-label {
+  cursor: pointer;
+  padding-left: 4px;
+  user-select: none;
+}
+
+
 
 
 /* -------------------- Close Button -------------------- */
@@ -2530,7 +2558,6 @@ body:has(.offcanvas.show) .export-overlay {
   transform: translateY(0);
 }
 
-/* -------------------- Responsive -------------------- */
 @media (max-width: 576px) {
   .request-modal-header {
     padding: 1.25rem 1.35rem;
@@ -2538,22 +2565,6 @@ body:has(.offcanvas.show) .export-overlay {
 
   .request-modal-ref {
     font-size: 1.1rem;
-  }
-
-  .request-stepper {
-    padding: 1.1rem 1.25rem 0.6rem;
-  }
-
-  .stepper-track {
-    margin: 0 18px;
-  }
-
-  .stepper-label {
-    display: none;
-  }
-
-  .stepper-step {
-    width: auto;
   }
 
   .request-modal-body {
@@ -2571,5 +2582,14 @@ body:has(.offcanvas.show) .export-overlay {
 
   .request-modal-footer .btn {
     width: 100%;
+  }
+    .form-switch {
+    padding-left: 3em;
+    min-height: 2rem; /* mas malaking touch target sa mobile */
+  }
+
+  .form-switch .form-check-input {
+    width: 2.75em;
+    height: 1.55em;
   }
 }
