@@ -245,6 +245,7 @@
                                             data-bs-target="#viewRequestModal" data-id="<?= $row['id'] ?>"
                                             data-reference="<?= esc($row['reference_no'], 'attr') ?>"
                                             data-service="<?= esc($row['service_availed'], 'attr') ?>"
+                                            data-service-purpose="<?= esc($row['service_purpose'] ?? '', 'attr') ?>"
                                             data-fullname="<?= esc($row['fullname'], 'attr') ?>"
                                             data-contact="<?= esc($row['contact_number'], 'attr') ?>"
                                             data-email="<?= esc($row['email_address'], 'attr') ?>"
@@ -918,6 +919,8 @@
         ========================================================= */
         let serviceFieldsHTML = '';
 
+        serviceFieldsHTML += detailItem('Purpose / Request Details', data.servicePurpose);
+
         // Certificate of Employment
         if (data.service === 'Certificate of Employment') {
             const category = (data.category || '').trim().toLowerCase();
@@ -1110,9 +1113,9 @@
 
             const id = this.dataset.id;
 
-            if (!confirm("Start processing this request?")) {
-                return;
-            }
+            // ✅ REMOVED: if (!confirm("Start processing this request?")) {
+            //                return;
+            //            }
 
             overlay.classList.remove("d-none");
 
