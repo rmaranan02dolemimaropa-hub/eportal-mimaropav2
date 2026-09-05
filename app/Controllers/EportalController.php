@@ -23,7 +23,6 @@ class EportalController extends BaseController
         $response->setHeader('Expires', '0');
 
         $historyModel = new HrEmploymentHistoryModel();
-
         $requestModel = new HrRequestModel();
 
         $query = $requestModel
@@ -34,10 +33,8 @@ class EportalController extends BaseController
                 'left'
             );
 
-
         // Search
         if ($search = $this->request->getGet('search')) {
-
             $query->groupStart()
                 ->like('hr_requests.reference_no', $search)
                 ->orLike('hr_requests.fullname', $search)
@@ -46,66 +43,47 @@ class EportalController extends BaseController
                 ->orLike('hr_requests.service_availed', $search)
                 ->orLike('hr_requests.status', $search)
                 ->groupEnd();
-
         }
-
 
         // Filters
         if ($year = $this->request->getGet('year')) {
             $query->like('hr_requests.date_requested', $year, 'after');
         }
 
-
         if ($status = $this->request->getGet('status')) {
             $query->where('hr_requests.status', $status);
         }
-
 
         if ($service = $this->request->getGet('service_availed')) {
             $query->where('hr_requests.service_availed', $service);
         }
 
-
         $requests = $query
             ->orderBy("
-    CASE
-        WHEN hr_requests.status = 'New Application' THEN 1
-        WHEN hr_requests.status = 'Processing' THEN 2
-        WHEN hr_requests.status = 'For Released' THEN 3
-        WHEN hr_requests.status = 'Completed' THEN 4
-        WHEN hr_requests.status = 'Rejected' THEN 5
-        ELSE 6
-    END
+CASE
+    WHEN hr_requests.status = 'New Application' THEN 1
+    WHEN hr_requests.status = 'Processing' THEN 2
+    WHEN hr_requests.status = 'For Released' THEN 3
+    WHEN hr_requests.status = 'Completed' THEN 4
+    WHEN hr_requests.status = 'Rejected' THEN 5
+    ELSE 6
+END
 ", '', false)
-            ->orderBy("
-    CASE
-        WHEN hr_requests.status = 'New Application' THEN hr_requests.date_requested
-        WHEN hr_requests.status = 'Processing' THEN hr_requests.date_processing
-        WHEN hr_requests.status = 'For Released' THEN hr_requests.date_released
-        WHEN hr_requests.status = 'Completed' THEN hr_requests.date_completed
-        WHEN hr_requests.status = 'Rejected' THEN hr_requests.date_rejected
-        ELSE hr_requests.date_requested
-    END
-", 'DESC', false)
+            ->orderBy('hr_requests.updated_at', 'DESC')
+            ->orderBy('hr_requests.created_at', 'DESC')
             ->paginate(10);
 
-
-
         foreach ($requests as &$row) {
-
             $row['employment_history'] = $historyModel
                 ->where('reference_no', $row['reference_no'])
                 ->findAll();
-
         }
-
 
         return view('dashboard/request', [
             'requests' => $requests,
             'pager' => $requestModel->pager
         ]);
     }
-
 
     public function dashboard()
     {
@@ -123,29 +101,20 @@ class EportalController extends BaseController
             'rejected' => $requestModel->where('status', 'Rejected')->countAllResults(),
         ];
 
-        // Load recent requests
         $data['requests'] = $requestModel
             ->orderBy("
-        CASE
-            WHEN status = 'New Application' THEN 1
-            WHEN status = 'Processing' THEN 2
-            WHEN status = 'For Released' THEN 3
-            WHEN status = 'Completed' THEN 4
-            WHEN status = 'Rejected' THEN 5
-            WHEN status = 'Canceled' THEN 6
-            ELSE 7
-        END
-    ", '', false)
-            ->orderBy("
-        CASE
-            WHEN status = 'New Application' THEN date_requested
-            WHEN status = 'Processing' THEN date_processing
-            WHEN status = 'For Released' THEN date_released
-            WHEN status = 'Completed' THEN date_completed
-            WHEN status = 'Rejected' THEN date_rejected
-            WHEN status = 'Canceled' THEN date_canceled
-        END
-    ", 'DESC', false)
+CASE
+    WHEN status = 'New Application' THEN 1
+    WHEN status = 'Processing' THEN 2
+    WHEN status = 'For Released' THEN 3
+    WHEN status = 'Completed' THEN 4
+    WHEN status = 'Rejected' THEN 5
+    WHEN status = 'Canceled' THEN 6
+    ELSE 7
+END
+", '', false)
+            ->orderBy('updated_at', 'DESC')
+            ->orderBy('created_at', 'DESC')
             ->paginate(10);
 
         $data['pager'] = $requestModel->pager;
