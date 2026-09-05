@@ -529,7 +529,7 @@ class EportalController extends BaseController
         }
 
         return redirect()
-            ->back()
+            ->to(site_url('service-record'))
             ->with('success', 'Your request has been submitted successfully.')
             ->with('reference_no', $referenceNo);
     }
