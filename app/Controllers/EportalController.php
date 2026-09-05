@@ -326,7 +326,7 @@ class EportalController extends BaseController
             'service12' => 'Contract of Service',
         ];
 
-        // Employee category is now ONE shared choice for the whole submission
+        // ✅ KEEP THIS - Employee category is ONE shared choice for the whole submission
         $employeeCategory = $this->request->getPost('employee_category');
 
         // Requester info is entered once, shared by every entry
@@ -368,6 +368,7 @@ class EportalController extends BaseController
             $performanceEvaluationPeriod = trim(
                 ($entry['performance_evaluation_semester'] ?? '') . ' ' . ($entry['performance_evaluation_year'] ?? '')
             );
+
             // 201 Documents (checkbox array)
             $documents201 = $entry['documents_201'] ?? [];
 
@@ -381,8 +382,8 @@ class EportalController extends BaseController
                 $documents201Value = null;
             }
 
-
-            $employeeCategory = $entry['employee_category'] ?? null;
+            // ✅ REMOVED: DON'T override the global $employeeCategory here!
+            // $employeeCategory = $entry['employee_category'] ?? null;  // ❌ DELETE THIS LINE
 
             $data = [
                 'reference_no' => $referenceNo,
@@ -391,7 +392,7 @@ class EportalController extends BaseController
                 'fullname' => $fullname,
                 'contact_number' => $contactNumber,
                 'email_address' => $emailAddress,
-                'employee_category' => $employeeCategory,
+                'employee_category' => $employeeCategory,  // ✅ Use the global one
                 'contract_of_service_year' => $entry['contract_of_service_year'] ?? null,
 
                 'period_of_service' => null,
@@ -414,9 +415,6 @@ class EportalController extends BaseController
                 'cancellation_reason' => null,
             ];
 
-            // if (!$model->insert($data)) {
-            //     continue;
-            // }
             if (!$model->insert($data)) {
                 log_message('error', 'INSERT FAILED: ' . print_r($model->errors(), true));
                 continue;
@@ -428,6 +426,7 @@ class EportalController extends BaseController
             /*
             |--------------------------------------------------------------------------
             | SAVE EMPLOYMENT HISTORY FOR THIS ENTRY (COS ONLY)
+            | ✅ Now this condition will work correctly!
             |--------------------------------------------------------------------------
             */
             if ($employeeCategory === 'cos' && $serviceKey === 'service5') {

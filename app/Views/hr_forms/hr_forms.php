@@ -309,8 +309,6 @@
                                                             data-required-group="cos">
 
                                                             <option value="" selected disabled>Select Office</option>
-
-                                                            <option value="Regional Office">Regional Office</option>
                                                             <option value="Occidental Mindoro">Occidental Mindoro
                                                             </option>
                                                             <option value="Oriental Mindoro">Oriental Mindoro</option>
