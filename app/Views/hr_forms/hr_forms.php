@@ -1718,7 +1718,7 @@
            CANCEL BUTTON
         ========================================================= */
         cancelBtn.addEventListener('click', function () {
-            window.location.href = "<?= site_url('eportal') ?>";
+            window.location.href = "<?= site_url('/') ?>";
         });
 
         /* =========================================================

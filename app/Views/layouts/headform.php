@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>DOLE MIMAROPA | Human Resource Request Form</title>
 
 <link rel="icon" type="image/png" sizes="32x32" href="assets/img/doleicon.png">
@@ -13,7 +14,7 @@
 <!-- Manrope Font -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/hr-request-form.css">
+<link rel="stylesheet" href="/assets/css/mobile-optimized-styles.css">
 
 </head>
 

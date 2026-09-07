@@ -1,0 +1,1013 @@
+:root {
+  --dole-blue: #10058c;
+  --dole-blue-dark: #0a0360;
+  --dole-blue-soft: #eeebfb;
+  --dole-blue-softer: #f6f5fd;
+  --surface: #ffffff;
+  --text-main: #1c1b29;
+  --text-muted: #6b6b7b;
+  --border-soft: #e3e1f2;
+  --radius-lg: 18px;
+  --radius-md: 12px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: hidden;
+}
+
+body {
+  font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: linear-gradient(
+    180deg,
+    var(--dole-blue-softer) 0%,
+    #ffffff 320px
+  );
+  color: var(--text-main);
+  min-height: 100vh;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+.page-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+  width: 100%;
+}
+
+/* ---------- Header card ---------- */
+.header-card {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 30px -18px rgba(16, 5, 140, 0.25);
+  padding: 1.75rem 1.25rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.header-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, var(--dole-blue) 0%, #4a3fd1 100%);
+}
+
+.header-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.logo-img {
+  width: 45px;
+  height: auto;
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+
+.agency-line {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dole-blue);
+  margin-bottom: 0.1rem;
+}
+
+.header-title {
+  font-weight: 800;
+  font-size: 1.35rem;
+  line-height: 1.2;
+  margin: 0;
+  color: var(--text-main);
+  word-break: break-word;
+}
+
+.header-subtitle {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+  line-height: 1.4;
+}
+
+/* ---------- Form card ---------- */
+.form-card {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 30px -20px rgba(16, 5, 140, 0.18);
+  padding: 1.5rem 1.25rem;
+  overflow: hidden;
+}
+
+/* ---------- Date requested box ---------- */
+#dateRequestedDisplay {
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.date-requested-box {
+  display: inline-block;
+  max-width: 100%;
+  background: var(--dole-blue-softer);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 1.25rem;
+  color: var(--dole-blue-dark);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* ---------- Form controls - better mobile touch targets ---------- */
+.form-floating {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.form-floating > label {
+  color: var(--text-muted);
+  padding: 1rem 0.75rem;
+  font-weight: 500;
+}
+
+.form-control,
+.form-select {
+  border-radius: var(--radius-md);
+  border: 1px solid #d8d6ec;
+  font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  width: 100%;
+  max-width: 100%;
+  padding: 0.85rem 0.95rem;
+  font-size: 1rem;
+  min-height: 48px;
+  /* Prevent auto-zoom on iOS focus */
+  font-size: 16px;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--dole-blue);
+  box-shadow: 0 0 0 3px rgba(16, 5, 140, 0.1);
+}
+
+textarea.form-control {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* ---------- Radio & Checkbox cards - larger touch targets ---------- */
+.choice-card {
+  border: 1.5px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+  background: var(--dole-blue-softer);
+  height: 100%;
+  min-height: 56px;
+}
+
+.choice-card:hover {
+  border-color: var(--dole-blue);
+  background: #e6e0f8;
+}
+
+.choice-card input {
+  cursor: pointer;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--dole-blue);
+}
+
+.choice-card input:checked ~ label,
+.choice-card:has(input:checked) {
+  border-color: var(--dole-blue);
+  background: #dcd2f0;
+}
+
+.choice-card label {
+  cursor: pointer;
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.95rem;
+  word-break: break-word;
+  line-height: 1.3;
+}
+
+.form-check-input {
+  width: 20px;
+  height: 20px;
+  margin-top: 0.3rem;
+  cursor: pointer;
+  accent-color: var(--dole-blue);
+}
+
+.form-check-input:checked {
+  background-color: var(--dole-blue);
+  border-color: var(--dole-blue);
+}
+
+.form-check-input:focus {
+  box-shadow: 0 0 0 3px rgba(16, 5, 140, 0.15);
+}
+
+/* ---------- Section styling ---------- */
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dole-blue);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1.5rem 0 1rem;
+  flex-wrap: wrap;
+}
+
+.section-label i {
+  font-size: 1.1rem;
+}
+
+.section-divider {
+  border: none;
+  border-top: 2px dashed var(--border-soft);
+  margin: 1.75rem 0;
+}
+
+/* ---------- Entry block styling ---------- */
+.entry-block {
+  border: 2px solid var(--border-soft) !important;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.75rem;
+}
+
+.entry-block .card-body {
+  padding: 1.5rem 1.25rem;
+}
+
+.entry-header {
+  margin-bottom: 1.25rem;
+}
+
+.entry-header h6 {
+  font-size: 1rem;
+  margin: 0;
+  flex-grow: 1;
+}
+
+/* ---------- Employment history cards ---------- */
+.employment-card {
+  margin-bottom: 1rem;
+}
+
+.employment-card .card-header {
+  padding: 0.85rem 1rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.employment-card .card-body {
+  padding: 1.25rem 1rem;
+}
+
+.employment-card-number {
+  font-size: 0.95rem;
+  min-width: 30px;
+}
+
+/* ---------- Mobile-friendly employment table ---------- */
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.summary-table th,
+.summary-table td {
+  border: 1px solid var(--border-soft);
+  padding: 0.65rem 0.85rem;
+  text-align: left;
+  word-break: break-word;
+}
+
+.summary-table th {
+  background: var(--dole-blue-softer);
+  color: var(--dole-blue);
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.summary-table tbody tr:nth-child(even) {
+  background: var(--dole-blue-softer);
+}
+
+/* ---------- Document tags - better for mobile ---------- */
+.document-tag-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.document-tag {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 16px;
+  border: 1.5px solid #ced4da;
+  border-radius: 24px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.15s ease;
+  user-select: none;
+  min-height: 44px;
+  background: var(--dole-blue-softer);
+}
+
+.document-tag input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.document-tag:hover {
+  border-color: var(--dole-blue);
+  background-color: #e6e0f8;
+}
+
+.document-tag:has(input:checked) {
+  background-color: var(--dole-blue);
+  border-color: var(--dole-blue);
+  color: #fff;
+  font-weight: 600;
+}
+
+.document-tag-other {
+  border-style: dashed;
+}
+
+/* ---------- Buttons - larger for touch ---------- */
+.btn {
+  min-height: 48px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 0.75rem 1.5rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-dole-primary {
+  background: var(--dole-blue);
+  border-color: var(--dole-blue);
+  color: #fff;
+  box-shadow: 0 8px 18px -8px rgba(16, 5, 140, 0.55);
+}
+
+.btn-dole-primary:hover,
+.btn-dole-primary:focus {
+  background: var(--dole-blue-dark);
+  border-color: var(--dole-blue-dark);
+  color: #fff;
+  box-shadow: 0 12px 24px -8px rgba(16, 5, 140, 0.65);
+}
+
+.btn-dole-primary:disabled {
+  background: #ccc;
+  border-color: #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-dole-outline {
+  border: 1.5px solid #c9c6e8;
+  color: var(--text-muted);
+  background: transparent;
+}
+
+.btn-dole-outline:hover {
+  border-color: var(--dole-blue);
+  color: var(--dole-blue);
+  background: var(--dole-blue-softer);
+}
+
+.btn-sm {
+  min-height: 40px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.85rem;
+}
+
+.btn-outline-danger {
+  border-color: #dc3545;
+  color: #dc3545;
+  background: transparent;
+}
+
+.btn-outline-danger:hover {
+  background: #ffe5e5;
+  border-color: #dc3545;
+}
+
+.btn-outline-primary {
+  border-color: var(--dole-blue);
+  color: var(--dole-blue);
+  background: transparent;
+}
+
+.btn-outline-primary:hover {
+  background: var(--dole-blue-softer);
+  border-color: var(--dole-blue);
+}
+
+/* ---------- Action buttons ---------- */
+.action-row {
+  display: flex;
+  justify-content: stretch;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  flex-direction: column-reverse;
+}
+
+.action-row .btn {
+  width: 100%;
+  text-align: center;
+}
+
+/* ---------- Dynamic sections ---------- */
+.dynamic-section {
+  display: none !important;
+  max-width: 100%;
+}
+
+.dynamic-section.active {
+  display: block !important;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.required-mark {
+  color: #d6336c;
+  font-weight: 700;
+}
+
+/* ---------- Alerts ---------- */
+.alert-dole {
+  background: var(--dole-blue-soft);
+  border: 1px solid #d6d1f5;
+  color: var(--dole-blue-dark);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.alert-dole i {
+  margin-right: 0.75rem;
+}
+
+.alert-dole .btn {
+  margin-top: 0.75rem;
+}
+
+/* ---------- Footer ---------- */
+.footer-note {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin-top: 2rem;
+  padding: 0 1rem;
+  line-height: 1.5;
+}
+
+/* ---------- Modal improvements ---------- */
+.modal-content {
+  border-radius: var(--radius-lg);
+  border: none;
+  font-size: 0.95rem;
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--border-soft);
+  padding: 1.5rem;
+}
+
+.modal-title {
+  font-weight: 800;
+  color: var(--dole-blue);
+  font-size: 1.15rem;
+}
+
+.modal-body {
+  padding: 1.5rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.modal-footer {
+  border-top: 1px solid var(--border-soft);
+  padding: 1.25rem;
+  gap: 0.75rem;
+  flex-direction: column-reverse;
+}
+
+.modal-footer .btn {
+  width: 100%;
+}
+
+#summaryList {
+  max-width: 100%;
+}
+
+#summaryList dt {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-top: 1rem;
+  margin-bottom: 0.35rem;
+}
+
+#summaryList dd {
+  font-weight: 500;
+  margin-bottom: 1rem;
+  word-break: break-word;
+  white-space: pre-line;
+  color: var(--text-main);
+}
+
+.summary-entry-heading {
+  margin-top: 1.25rem !important;
+  margin-bottom: 0.75rem !important;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-soft);
+  font-size: 1rem !important;
+}
+
+/* ---------- Loading overlay ---------- */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+}
+
+.loading-box {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  max-width: 90%;
+}
+
+.spinner-border {
+  display: inline-block;
+}
+
+.loading-box p {
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* ---------- Focus visibility for accessibility ---------- */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(16, 5, 140, 0.35);
+  outline-offset: 2px;
+}
+
+/* ========================================================================= */
+/* RESPONSIVE OVERRIDES                                                      */
+/* ========================================================================= */
+
+/* Desktop (≥768px) */
+@media (min-width: 768px) {
+  .page-wrap {
+    padding: 2.5rem 1rem 4rem;
+  }
+
+  .header-card,
+  .form-card {
+    padding: 2rem;
+  }
+
+  .header-card {
+    padding: 2.25rem 2rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .header-title {
+    font-size: 1.55rem;
+  }
+
+  .header-subtitle {
+    font-size: 0.98rem;
+  }
+
+  .header-top {
+    flex-wrap: nowrap;
+  }
+
+  .logo-img {
+    width: 50px;
+  }
+
+  .action-row {
+    justify-content: flex-end;
+    flex-direction: row;
+  }
+
+  .action-row .btn {
+    width: auto;
+  }
+
+  .modal-footer {
+    flex-direction: row;
+  }
+
+  .modal-footer .btn {
+    width: auto;
+  }
+
+  /* Allow columns on desktop */
+  .form-floating.col-md-6 {
+    display: inline-block;
+    width: calc(50% - 0.75rem);
+    margin-right: 1.5rem;
+  }
+
+  .form-floating.col-md-6:nth-child(even) {
+    margin-right: 0;
+  }
+
+  .choice-card {
+    min-height: auto;
+    padding: 0.85rem 1rem;
+  }
+
+  .entry-block {
+    border-width: 1px;
+  }
+}
+
+/* Tablet (576px - 767px) */
+@media (max-width: 767px) {
+  .page-wrap {
+    padding: 1.5rem 0.75rem 3rem;
+  }
+
+  .header-card,
+  .form-card {
+    padding: 1.5rem 1.25rem;
+    border-radius: 14px;
+  }
+
+  .header-title {
+    font-size: 1.25rem;
+  }
+
+  .header-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .form-control,
+  .form-select {
+    font-size: 16px;
+  }
+
+  .choice-card {
+    padding: 0.9rem;
+    min-height: 52px;
+    gap: 0.75rem;
+  }
+
+  .choice-card label {
+    font-size: 0.9rem;
+  }
+
+  .section-label {
+    font-size: 0.7rem;
+    margin: 1.25rem 0 0.85rem;
+  }
+}
+
+/* Mobile (≤575px) */
+@media (max-width: 575px) {
+  .page-wrap {
+    padding: 1.25rem 0.75rem 2.5rem;
+  }
+
+  .header-card {
+    padding: 1.25rem 1.15rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .form-card {
+    padding: 1.25rem 1.15rem;
+  }
+
+  .header-title {
+    font-size: 1.15rem;
+    line-height: 1.3;
+  }
+
+  .header-subtitle {
+    font-size: 0.85rem;
+    margin-top: 0.4rem;
+  }
+
+  .logo-img {
+    width: 40px;
+  }
+
+  .agency-line {
+    font-size: 0.65rem;
+  }
+
+  /* Stack form fields vertically */
+  .row.g-3 {
+    gap: 1rem !important;
+  }
+
+  .col-md-6,
+  .col-md-4 {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .form-floating {
+    margin-bottom: 0.85rem;
+  }
+
+  .form-control,
+  .form-select {
+    padding: 0.8rem 0.85rem;
+    font-size: 16px;
+    min-height: 46px;
+  }
+
+  .form-floating > label {
+    padding: 0.9rem 0.7rem;
+    font-size: 0.85rem;
+  }
+
+  textarea.form-control {
+    min-height: 110px;
+  }
+
+  .choice-card {
+    padding: 0.85rem 0.95rem;
+    min-height: 50px;
+    gap: 0.7rem;
+  }
+
+  .choice-card label {
+    font-size: 0.9rem;
+  }
+
+  .choice-card input {
+    width: 18px;
+    height: 18px;
+  }
+
+  .btn {
+    font-size: 0.9rem;
+    min-height: 46px;
+    padding: 0.7rem 1.4rem;
+  }
+
+  .btn-sm {
+    min-height: 38px;
+    padding: 0.55rem 1.1rem;
+  }
+
+  .section-divider {
+    margin: 1.25rem 0;
+  }
+
+  .entry-block .card-body {
+    padding: 1.25rem 1rem;
+  }
+
+  .employment-card .card-header {
+    padding: 0.75rem 0.9rem;
+    font-size: 0.85rem;
+  }
+
+  .employment-card .card-body {
+    padding: 1.1rem 0.9rem;
+  }
+
+  .employment-card-number {
+    font-size: 0.9rem;
+  }
+
+  .alert-dole {
+    padding: 0.9rem 1.1rem;
+    font-size: 0.9rem;
+  }
+
+  .alert-dole .btn {
+    margin-top: 0.85rem;
+  }
+
+  .document-tag {
+    padding: 9px 14px;
+    font-size: 0.85rem;
+    min-height: 42px;
+  }
+
+  .section-label {
+    font-size: 0.65rem;
+    margin: 1.1rem 0 0.75rem;
+    gap: 0.4rem;
+  }
+
+  .section-label i {
+    font-size: 0.95rem;
+  }
+
+  .modal-content {
+    border-radius: 12px;
+  }
+
+  .modal-header {
+    padding: 1.25rem;
+  }
+
+  .modal-title {
+    font-size: 1.05rem;
+  }
+
+  .modal-body {
+    padding: 1.25rem;
+    font-size: 0.9rem;
+  }
+
+  .modal-footer {
+    padding: 1rem;
+    gap: 0.6rem;
+  }
+
+  .modal-footer .btn {
+    width: 100%;
+    font-size: 0.9rem;
+    min-height: 44px;
+  }
+
+  #summaryList dt {
+    font-size: 0.75rem;
+    margin-top: 0.85rem;
+  }
+
+  #summaryList dd {
+    font-size: 0.9rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .summary-table {
+    font-size: 0.8rem;
+  }
+
+  .summary-table th,
+  .summary-table td {
+    padding: 0.55rem 0.65rem;
+  }
+
+  .loading-box {
+    padding: 1.75rem 1.5rem;
+  }
+
+  .loading-box p {
+    font-size: 0.9rem;
+  }
+
+  .footer-note {
+    font-size: 0.75rem;
+    margin-top: 1.5rem;
+  }
+}
+
+/* Extra small (≤400px) */
+@media (max-width: 400px) {
+  .page-wrap {
+    padding: 1rem 0.6rem 2rem;
+  }
+
+  .header-card,
+  .form-card {
+    padding: 1.1rem 1rem;
+  }
+
+  .header-title {
+    font-size: 1.05rem;
+  }
+
+  .header-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .logo-img {
+    width: 38px;
+  }
+
+  .form-control,
+  .form-select {
+    padding: 0.75rem 0.8rem;
+    font-size: 16px;
+  }
+
+  .form-floating > label {
+    padding: 0.85rem 0.65rem;
+    font-size: 0.8rem;
+  }
+
+  .choice-card {
+    padding: 0.8rem 0.9rem;
+    min-height: 48px;
+  }
+
+  .choice-card input {
+    width: 17px;
+    height: 17px;
+  }
+
+  .btn {
+    font-size: 0.85rem;
+    min-height: 44px;
+    padding: 0.65rem 1.25rem;
+  }
+
+  .entry-block .card-body {
+    padding: 1.1rem 0.95rem;
+  }
+
+  .alert-dole {
+    padding: 0.85rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .document-tag {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+
+  .modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+}
