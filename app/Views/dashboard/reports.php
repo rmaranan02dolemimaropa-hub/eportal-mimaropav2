@@ -2,13 +2,19 @@
 <?= $this->include('dashboard_layout/navbar') ?>
 <?= $this->include('dashboard_layout/sidebar') ?>
 
+<?php
+$month = $month ?? '';
+$service = $service ?? '';
+$requests = $requests ?? [];
+$pager = $pager ?? service('pager');
+?>
 
 
 
 <!-- ============ MAIN CONTENT ============ -->
 <main class="main-content">
 
-   
+
     <div class="report-page">
 
         <!-- ---------- Header ---------- -->
@@ -195,19 +201,15 @@
                                     if ($row['status'] == 'Processing' && $row['date_processing']) {
 
                                         $displayDate = $row['date_processing'];
-
                                     } elseif ($row['status'] == 'For Released' && $row['date_released']) {
 
                                         $displayDate = $row['date_released'];
-
                                     } elseif ($row['status'] == 'Completed' && $row['date_completed']) {
 
                                         $displayDate = $row['date_completed'];
-
                                     } elseif ($row['status'] == 'Rejected' && $row['date_rejected']) {
 
                                         $displayDate = $row['date_rejected'];
-
                                     }
 
                                     ?>
@@ -306,17 +308,16 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
 
         const searchInput = document.getElementById("fSearch");
         const tableRows = document.querySelectorAll(".requests-table tbody tr");
 
-        searchInput.addEventListener("keyup", function () {
+        searchInput.addEventListener("keyup", function() {
 
             const keyword = this.value.toLowerCase().trim();
 
-            tableRows.forEach(function (row) {
+            tableRows.forEach(function(row) {
 
                 const text = row.textContent.toLowerCase();
 
@@ -332,14 +333,14 @@
 
     });
 
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
 
         function getFilters() {
             return new URLSearchParams(window.location.search).toString();
         }
 
         // PRINT
-        document.getElementById('btnPrint').addEventListener('click', function () {
+        document.getElementById('btnPrint').addEventListener('click', function() {
             window.open(
                 "<?= site_url('reports/print') ?>?" + getFilters(),
                 "_blank"
@@ -348,7 +349,7 @@
     });
 </script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
 
         const overlay = document.getElementById("exportOverlay");
         const bar = document.getElementById("progressBar");
@@ -446,11 +447,11 @@
 
         }
 
-        document.getElementById("exportButton").addEventListener("click", function () {
+        document.getElementById("exportButton").addEventListener("click", function() {
             exportReport(this, "<?= site_url('export/reports-pdf') ?>", "HR_Request_Report.pdf", "pdf");
         });
 
-        document.getElementById("btnCsv").addEventListener("click", function () {
+        document.getElementById("btnCsv").addEventListener("click", function() {
             exportReport(this, "<?= site_url('export/reports-csv') ?>", "HR_Request_Report.csv", "csv");
         });
 

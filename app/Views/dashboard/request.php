@@ -2,6 +2,11 @@
 <?= $this->include('dashboard_layout/navbar') ?>
 <?= $this->include('dashboard_layout/sidebar') ?>
 
+<?php
+$requests = $requests ?? [];
+$pager = $pager ?? null;
+?>
+
 
 
 
@@ -310,6 +315,7 @@
                 </tbody>
             </table>
         </div>
+        <?php if ($pager): ?>
         <nav class="table-pagination">
 
             <span class="pagination-summary">
@@ -346,6 +352,13 @@
             </ul>
 
         </nav>
+        <?php else: ?>
+        <div class="table-pagination">
+            <span class="pagination-summary">
+                Showing <?= count($requests) ?> requests
+            </span>
+        </div>
+        <?php endif; ?>
 
     </section>
 

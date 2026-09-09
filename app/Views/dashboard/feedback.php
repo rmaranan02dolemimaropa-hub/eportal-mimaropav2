@@ -2,6 +2,10 @@
 <?= $this->include('dashboard_layout/navbar') ?>
 <?= $this->include('dashboard_layout/sidebar') ?>
 
+<?php
+$feedbacks = $feedbacks ?? [];
+$pager = $pager ?? null;
+?>
 
 
 
@@ -9,7 +13,7 @@
 <!-- ============ MAIN CONTENT ============ -->
 <main class="main-content">
 
-    
+
 
     <!-- Page Header -->
     <div class="page-header">
@@ -138,15 +142,12 @@
                                     if (($count['Strongly agree'] ?? 0) >= 4) {
 
                                         echo '<span class="badge bg-success">Excellent</span>';
-
                                     } elseif (($count['Agree'] ?? 0) >= 4) {
 
                                         echo '<span class="badge bg-primary">Very Satisfied</span>';
-
                                     } else {
 
                                         echo '<span class="badge bg-warning text-dark">Needs Review</span>';
-
                                     }
 
                                     ?>
@@ -195,42 +196,44 @@
                 </tbody>
             </table>
         </div>
-        <nav class="table-pagination">
+        <?php if ($pager !== null): ?>
+            <nav class="table-pagination">
 
-            <span class="pagination-summary">
-                Showing <?= count($feedbacks) ?> of <?= $pager->getTotal() ?> feedback(s)
-            </span>
+                <span class="pagination-summary">
+                    Showing <?= count($feedbacks) ?> of <?= $pager->getTotal() ?> feedback(s)
+                </span>
 
-            <ul class="pagination mb-0">
+                <ul class="pagination mb-0">
 
-                <!-- Previous -->
-                <li class="page-item <?= $pager->getCurrentPage() == 1 ? 'disabled' : '' ?>">
-                    <a class="page-link"
-                        href="<?= $pager->getCurrentPage() == 1 ? '#' : $pager->getPageURI($pager->getCurrentPage() - 1) ?>">
-                        <i class="bi bi-chevron-left"></i> Previous
-                    </a>
-                </li>
-
-                <!-- Page Numbers -->
-                <?php for ($i = 1; $i <= $pager->getPageCount(); $i++): ?>
-                    <li class="page-item <?= $i == $pager->getCurrentPage() ? 'active' : '' ?>">
-                        <a class="page-link" href="<?= $pager->getPageURI($i) ?>">
-                            <?= $i ?>
+                    <!-- Previous -->
+                    <li class="page-item <?= $pager->getCurrentPage() == 1 ? 'disabled' : '' ?>">
+                        <a class="page-link"
+                            href="<?= $pager->getCurrentPage() == 1 ? '#' : $pager->getPageURI($pager->getCurrentPage() - 1) ?>">
+                            <i class="bi bi-chevron-left"></i> Previous
                         </a>
                     </li>
-                <?php endfor; ?>
 
-                <!-- Next -->
-                <li class="page-item <?= $pager->getCurrentPage() == $pager->getPageCount() ? 'disabled' : '' ?>">
-                    <a class="page-link"
-                        href="<?= $pager->getCurrentPage() == $pager->getPageCount() ? '#' : $pager->getPageURI($pager->getCurrentPage() + 1) ?>">
-                        Next <i class="bi bi-chevron-right"></i>
-                    </a>
-                </li>
+                    <!-- Page Numbers -->
+                    <?php for ($i = 1; $i <= $pager->getPageCount(); $i++): ?>
+                        <li class="page-item <?= $i == $pager->getCurrentPage() ? 'active' : '' ?>">
+                            <a class="page-link" href="<?= $pager->getPageURI($i) ?>">
+                                <?= $i ?>
+                            </a>
+                        </li>
+                    <?php endfor; ?>
 
-            </ul>
+                    <!-- Next -->
+                    <li class="page-item <?= $pager->getCurrentPage() == $pager->getPageCount() ? 'disabled' : '' ?>">
+                        <a class="page-link"
+                            href="<?= $pager->getCurrentPage() == $pager->getPageCount() ? '#' : $pager->getPageURI($pager->getCurrentPage() + 1) ?>">
+                            Next <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
 
-        </nav>
+                </ul>
+
+            </nav>
+        <?php endif; ?>
 
     </section>
 
@@ -254,15 +257,15 @@
 
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         const searchInput = document.getElementById("searchRequest");
         const table = document.querySelector("table tbody");
 
-        searchInput.addEventListener("keyup", function () {
+        searchInput.addEventListener("keyup", function() {
             const filter = this.value.toLowerCase();
             const rows = table.querySelectorAll("tr");
 
-            rows.forEach(function (row) {
+            rows.forEach(function(row) {
                 const text = row.textContent.toLowerCase();
 
                 if (text.includes(filter)) {
@@ -274,7 +277,7 @@
         });
     });
 
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         setCurrentDate();
     });
 

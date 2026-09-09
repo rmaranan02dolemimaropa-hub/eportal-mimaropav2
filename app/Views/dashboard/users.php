@@ -2,10 +2,9 @@
 <?= $this->include('dashboard_layout/navbar') ?>
 <?= $this->include('dashboard_layout/sidebar') ?>
 
-
-
-
-
+<?php
+$users = $users ?? [];
+?>
 
 
 <!-- ============ MAIN CONTENT ============ -->
@@ -94,42 +93,44 @@
             </table>
         </div>
 
-        <nav class="table-pagination">
+        <?php if (isset($pager)): ?>
+            <nav class="table-pagination">
 
-            <span class="pagination-summary">
-                Showing <?= count($users) ?> of <?= $pager->getTotal() ?> users
-            </span>
+                <span class="pagination-summary">
+                    Showing <?= count($users) ?> of <?= $pager->getTotal() ?> users
+                </span>
 
-            <ul class="pagination mb-0">
+                <ul class="pagination mb-0">
 
-                <!-- Previous -->
-                <li class="page-item <?= $pager->getCurrentPage() == 1 ? 'disabled' : '' ?>">
-                    <a class="page-link"
-                        href="<?= $pager->getCurrentPage() == 1 ? '#' : $pager->getPageURI($pager->getCurrentPage() - 1) ?>">
-                        <i class="bi bi-chevron-left"></i> Previous
-                    </a>
-                </li>
-
-                <!-- Page Numbers -->
-                <?php for ($i = 1; $i <= $pager->getPageCount(); $i++): ?>
-                    <li class="page-item <?= $i == $pager->getCurrentPage() ? 'active' : '' ?>">
-                        <a class="page-link" href="<?= $pager->getPageURI($i) ?>">
-                            <?= $i ?>
+                    <!-- Previous -->
+                    <li class="page-item <?= $pager->getCurrentPage() == 1 ? 'disabled' : '' ?>">
+                        <a class="page-link"
+                            href="<?= $pager->getCurrentPage() == 1 ? '#' : $pager->getPageURI($pager->getCurrentPage() - 1) ?>">
+                            <i class="bi bi-chevron-left"></i> Previous
                         </a>
                     </li>
-                <?php endfor; ?>
 
-                <!-- Next -->
-                <li class="page-item <?= $pager->getCurrentPage() == $pager->getPageCount() ? 'disabled' : '' ?>">
-                    <a class="page-link"
-                        href="<?= $pager->getCurrentPage() == $pager->getPageCount() ? '#' : $pager->getPageURI($pager->getCurrentPage() + 1) ?>">
-                        Next <i class="bi bi-chevron-right"></i>
-                    </a>
-                </li>
+                    <!-- Page Numbers -->
+                    <?php for ($i = 1; $i <= $pager->getPageCount(); $i++): ?>
+                        <li class="page-item <?= $i == $pager->getCurrentPage() ? 'active' : '' ?>">
+                            <a class="page-link" href="<?= $pager->getPageURI($i) ?>">
+                                <?= $i ?>
+                            </a>
+                        </li>
+                    <?php endfor; ?>
 
-            </ul>
+                    <!-- Next -->
+                    <li class="page-item <?= $pager->getCurrentPage() == $pager->getPageCount() ? 'disabled' : '' ?>">
+                        <a class="page-link"
+                            href="<?= $pager->getCurrentPage() == $pager->getPageCount() ? '#' : $pager->getPageURI($pager->getCurrentPage() + 1) ?>">
+                            Next <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
 
-        </nav>
+                </ul>
+
+            </nav>
+        <?php endif; ?>
 
 
     </section>
@@ -552,7 +553,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
 
         /* ==========================================
            ACTIVE SIDEBAR MENU
@@ -560,7 +561,7 @@
 
         const currentPath = window.location.pathname.replace(/\/+$/, '');
 
-        document.querySelectorAll('.nav-link:not(.nav-link-logout)').forEach(function (link) {
+        document.querySelectorAll('.nav-link:not(.nav-link-logout)').forEach(function(link) {
 
             const href = link.getAttribute('href');
 
@@ -588,10 +589,10 @@
            MODAL FUNCTIONS
         ========================================== */
 
-        document.querySelectorAll('.modal').forEach(function (modal) {
+        document.querySelectorAll('.modal').forEach(function(modal) {
 
             // Focus first input when modal opens
-            modal.addEventListener('shown.bs.modal', function () {
+            modal.addEventListener('shown.bs.modal', function() {
 
                 const firstField = modal.querySelector(
                     'input:not([type="hidden"]), select, textarea'
@@ -613,7 +614,7 @@
 
         if (addUserModal) {
 
-            addUserModal.addEventListener('hidden.bs.modal', function () {
+            addUserModal.addEventListener('hidden.bs.modal', function() {
 
                 const form = this.querySelector('form');
 
@@ -621,11 +622,11 @@
 
                     form.reset();
 
-                    form.querySelectorAll('.is-invalid').forEach(function (input) {
+                    form.querySelectorAll('.is-invalid').forEach(function(input) {
                         input.classList.remove('is-invalid');
                     });
 
-                    form.querySelectorAll('.is-valid').forEach(function (input) {
+                    form.querySelectorAll('.is-valid').forEach(function(input) {
                         input.classList.remove('is-valid');
                     });
 
@@ -637,12 +638,12 @@
 
     });
 
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
 
         const successAlert = document.getElementById('successAlert');
 
         if (successAlert) {
-            setTimeout(function () {
+            setTimeout(function() {
                 const bsAlert = bootstrap.Alert.getOrCreateInstance(successAlert);
                 bsAlert.close();
             }, 3000); // Auto close after 3 seconds
@@ -650,16 +651,16 @@
 
     });
 
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         setCurrentDate();
         animateStatCounters();
         enableTableSearch();
     });
 
     /**
-  * Displays today's date in a readable, localized format
-  * inside the #currentDate element in the page header.
-  */
+     * Displays today's date in a readable, localized format
+     * inside the #currentDate element in the page header.
+     */
     function setCurrentDate() {
         const dateEl = document.getElementById("currentDate");
         if (!dateEl) return;
@@ -673,20 +674,19 @@
         };
         dateEl.textContent = today.toLocaleDateString("en-US", options);
     }
-
 </script>
 
 <script>
     const statusToggle = document.getElementById('statusToggle');
     const statusLabel = document.getElementById('statusLabel');
 
-    statusToggle.addEventListener('change', function () {
+    statusToggle.addEventListener('change', function() {
         statusLabel.textContent = this.checked ? 'ACTIVE' : 'INACTIVE';
     });
 
     document.querySelectorAll(".toggle-password").forEach(button => {
 
-        button.addEventListener("click", function () {
+        button.addEventListener("click", function() {
 
             const input = document.getElementById(this.dataset.target);
             const icon = this.querySelector("i");
@@ -702,10 +702,9 @@
         });
 
     });
-
 </script>
 <script>
-    document.getElementById('togglePassword').addEventListener('click', function () {
+    document.getElementById('togglePassword').addEventListener('click', function() {
 
         const password = document.getElementById('password');
         const icon = this.querySelector('i');
@@ -722,14 +721,14 @@
 
 <script>
     document.querySelectorAll('.status-toggle').forEach(toggle => {
-        toggle.addEventListener('change', function () {
+        toggle.addEventListener('change', function() {
             const label = this.closest('.form-switch').querySelector('.status-label');
             label.textContent = this.checked ? 'ACTIVE' : 'INACTIVE';
         });
     });
 </script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
 
         const loadingScreen =
             document.getElementById('doleLoadingScreen');
@@ -740,9 +739,9 @@
             document.querySelectorAll('.nav-link');
 
 
-        sidebarLinks.forEach(function (link) {
+        sidebarLinks.forEach(function(link) {
 
-            link.addEventListener('click', function (event) {
+            link.addEventListener('click', function(event) {
 
                 const href = this.getAttribute('href');
 
@@ -794,7 +793,7 @@
 
         /* Back / Forward */
 
-        window.addEventListener('pageshow', function () {
+        window.addEventListener('pageshow', function() {
 
             loadingScreen.classList.remove('show');
 
