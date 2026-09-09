@@ -42,9 +42,9 @@
         <div class="stat-card">
             <div class="stat-icon stat-icon-orange"><i class="bi bi-hourglass-split"></i></div>
             <div class="stat-body">
-                <span class="stat-number" data-target="<?= $new_application ?>">0</span>
+                <span class="stat-number" data-target="<?= $new_application ?? 0 ?>">0</span>
                 <span class="stat-label">New Request</span>
-                <span class="stat-trend trend-up"><i class="bi bi-calendar-check me-1"></i> <?= $new_today ?> received
+                <span class="stat-trend trend-up"><i class="bi bi-calendar-check me-1"></i> <?= $new_today ?? 0 ?> received
                     today</span>
             </div>
         </div>
@@ -52,9 +52,9 @@
         <div class="stat-card">
             <div class="stat-icon stat-icon-blue"><i class="bi bi-gear"></i></div>
             <div class="stat-body">
-                <span class="stat-number" data-target="<?= $processing ?>">0</span>
+                <span class="stat-number" data-target="<?= $processing ?? 0 ?>">0</span>
                 <span class="stat-label">Processing</span>
-                <span class="stat-trend trend-up"><i class="bi bi-arrow-repeat me-1"></i><?= $processing_today ?>
+                <span class="stat-trend trend-up"><i class="bi bi-arrow-repeat me-1"></i><?= $processing_today ?? 0 ?>
                     updated today</span>
             </div>
         </div>
@@ -62,9 +62,9 @@
         <div class="stat-card">
             <div class="stat-icon stat-icon-purple"><i class="bi bi-box-arrow-up-right"></i></div>
             <div class="stat-body">
-                <span class="stat-number" data-target="<?= $for_released ?>">0</span>
+                <span class="stat-number" data-target="<?= $for_released ?? 0 ?>">0</span>
                 <span class="stat-label">For Released</span>
-                <span class="stat-trend trend-up"><i class="bi bi-box-seam me-1"></i><?= $released_today ?> ready today
+                <span class="stat-trend trend-up"><i class="bi bi-box-seam me-1"></i><?= $released_today ?? 0 ?> ready today
                 </span>
             </div>
         </div>
@@ -72,9 +72,9 @@
         <div class="stat-card">
             <div class="stat-icon stat-icon-green"><i class="bi bi-check-circle"></i></div>
             <div class="stat-body">
-                <span class="stat-number" data-target="<?= $completed ?>">0</span>
+                <span class="stat-number" data-target="<?= $completed ?? 0 ?>">0</span>
                 <span class="stat-label">Completed</span>
-                <span class="stat-trend trend-up"><i class="bi bi-calendar-month me-1"></i><?= $completed_month ?>
+                <span class="stat-trend trend-up"><i class="bi bi-calendar-month me-1"></i><?= $completed_month ?? 0 ?>
                     completed this month</span>
             </div>
         </div>
@@ -84,9 +84,9 @@
         <div class="stat-card">
             <div class="stat-icon stat-icon-red"><i class="bi bi-x-circle"></i></div>
             <div class="stat-body">
-                <span class="stat-number" data-target="<?= $rejected ?>">0</span>
+                <span class="stat-number" data-target="<?= $rejected ?? 0 ?>">0</span>
                 <span class="stat-label">Rejected</span>
-                <span class="stat-trend trend-down"><i class="bi bi-calendar-x me-1"></i><?= $rejected_month ?> rejected
+                <span class="stat-trend trend-down"><i class="bi bi-calendar-x me-1"></i><?= $rejected_month ?? 0 ?> rejected
                     this month</span>
             </div>
         </div>
@@ -125,6 +125,7 @@
                     <tbody>
 
                         <?php
+                        $requests = $requests ?? [];
                         $allowedStatus = [
                             'New Application',
                             'Processing',
@@ -171,19 +172,15 @@
                                         if ($row['status'] == 'Processing' && $row['date_processing']) {
 
                                             $displayDate = $row['date_processing'];
-
                                         } elseif ($row['status'] == 'For Released' && $row['date_released']) {
 
                                             $displayDate = $row['date_released'];
-
                                         } elseif ($row['status'] == 'Completed' && $row['date_completed']) {
 
                                             $displayDate = $row['date_completed'];
-
                                         } elseif ($row['status'] == 'Rejected' && $row['date_rejected']) {
 
                                             $displayDate = $row['date_rejected'];
-
                                         }
 
                                         ?>
@@ -219,42 +216,44 @@
                     </tbody>
                 </table>
             </div>
-            <nav class="table-pagination">
+            <?php if (isset($pager)): ?>
+                <nav class="table-pagination">
 
-                <span class="pagination-summary">
-                    Showing <?= count($requests) ?> of <?= $pager->getTotal() ?> requests
-                </span>
+                    <span class="pagination-summary">
+                        Showing <?= count($requests) ?> of <?= $pager->getTotal() ?> requests
+                    </span>
 
-                <ul class="pagination mb-0">
+                    <ul class="pagination mb-0">
 
-                    <!-- Previous -->
-                    <li class="page-item <?= $pager->getCurrentPage() == 1 ? 'disabled' : '' ?>">
-                        <a class="page-link"
-                            href="<?= $pager->getCurrentPage() == 1 ? '#' : $pager->getPageURI($pager->getCurrentPage() - 1) ?>">
-                            <i class="bi bi-chevron-left"></i> Previous
-                        </a>
-                    </li>
-
-                    <!-- Page Numbers -->
-                    <?php for ($i = 1; $i <= $pager->getPageCount(); $i++): ?>
-                        <li class="page-item <?= $i == $pager->getCurrentPage() ? 'active' : '' ?>">
-                            <a class="page-link" href="<?= $pager->getPageURI($i) ?>">
-                                <?= $i ?>
+                        <!-- Previous -->
+                        <li class="page-item <?= $pager->getCurrentPage() == 1 ? 'disabled' : '' ?>">
+                            <a class="page-link"
+                                href="<?= $pager->getCurrentPage() == 1 ? '#' : $pager->getPageURI($pager->getCurrentPage() - 1) ?>">
+                                <i class="bi bi-chevron-left"></i> Previous
                             </a>
                         </li>
-                    <?php endfor; ?>
 
-                    <!-- Next -->
-                    <li class="page-item <?= $pager->getCurrentPage() == $pager->getPageCount() ? 'disabled' : '' ?>">
-                        <a class="page-link"
-                            href="<?= $pager->getCurrentPage() == $pager->getPageCount() ? '#' : $pager->getPageURI($pager->getCurrentPage() + 1) ?>">
-                            Next <i class="bi bi-chevron-right"></i>
-                        </a>
-                    </li>
+                        <!-- Page Numbers -->
+                        <?php for ($i = 1; $i <= $pager->getPageCount(); $i++): ?>
+                            <li class="page-item <?= $i == $pager->getCurrentPage() ? 'active' : '' ?>">
+                                <a class="page-link" href="<?= $pager->getPageURI($i) ?>">
+                                    <?= $i ?>
+                                </a>
+                            </li>
+                        <?php endfor; ?>
 
-                </ul>
+                        <!-- Next -->
+                        <li class="page-item <?= $pager->getCurrentPage() == $pager->getPageCount() ? 'disabled' : '' ?>">
+                            <a class="page-link"
+                                href="<?= $pager->getCurrentPage() == $pager->getPageCount() ? '#' : $pager->getPageURI($pager->getCurrentPage() + 1) ?>">
+                                Next <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
 
-            </nav>
+                    </ul>
+
+                </nav>
+            <?php endif; ?>
 
 
         </section>
@@ -1157,7 +1156,7 @@
     serviceAvailed.addEventListener('change', updateServiceFields);
     employeeCategory.addEventListener('change', updateServiceFields);
 
-    serviceRequestForm.addEventListener('submit', function (event) {
+    serviceRequestForm.addEventListener('submit', function(event) {
         if (serviceAvailed.value === 'Certification') {
             const selected = document.querySelectorAll('.certification-option:checked');
 
@@ -1181,7 +1180,7 @@
    No external dependencies beyond the Bootstrap bundle already loaded.
    ========================================================================== */
 
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         setCurrentDate();
         animateStatCounters();
         enableTableSearch();
@@ -1213,7 +1212,7 @@
         const counters = document.querySelectorAll(".stat-number");
         const duration = 900; // milliseconds
 
-        counters.forEach(function (counter) {
+        counters.forEach(function(counter) {
             const target = parseInt(counter.getAttribute("data-target"), 10) || 0;
             const startTime = performance.now();
 
@@ -1248,10 +1247,10 @@
 
         if (!searchInput || !tableRows.length) return;
 
-        searchInput.addEventListener("input", function () {
+        searchInput.addEventListener("input", function() {
             const query = searchInput.value.trim().toLowerCase();
 
-            tableRows.forEach(function (row) {
+            tableRows.forEach(function(row) {
                 const rowText = row.textContent.toLowerCase();
                 row.style.display = rowText.includes(query) ? "" : "none";
             });
@@ -1259,20 +1258,20 @@
     }
 </script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
 
-        ['loginAlert', 'loginSuccess'].forEach(function (id) {
+        ['loginAlert', 'loginSuccess'].forEach(function(id) {
 
             const alert = document.getElementById(id);
 
             if (alert) {
 
-                setTimeout(function () {
+                setTimeout(function() {
 
                     alert.style.transition = "opacity .5s";
                     alert.style.opacity = "0";
 
-                    setTimeout(function () {
+                    setTimeout(function() {
                         alert.remove();
                     }, 500);
 
@@ -1284,7 +1283,7 @@
 
     });
 
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
 
         const counters = document.querySelectorAll(".stat-number");
 
@@ -1315,414 +1314,414 @@
     });
 </script>
 <script>
-(function () {
-    'use strict';
+    (function() {
+        'use strict';
 
-    const modalForm = document.getElementById('serviceRequestForm');
+        const modalForm = document.getElementById('serviceRequestForm');
 
-    if (!modalForm) return;
+        if (!modalForm) return;
 
-    /* =========================================================
-       ELEMENTS
-    ========================================================= */
+        /* =========================================================
+           ELEMENTS
+        ========================================================= */
 
-    const categoryRadios = modalForm.querySelectorAll(
-        'input[name="employee_category"]'
-    );
-
-    const serviceSelect = document.getElementById('modalServiceAvailed');
-
-    const dateRequested = document.getElementById('modalDateRequested');
-
-    const coeSection = document.getElementById('modalCOESection');
-    const cosSection = document.getElementById('modalCOSSection');
-
-    const certificationSection =
-        document.getElementById('modalCertificationSection');
-
-    const ipcrSection =
-        document.getElementById('modalIPCRSection');
-
-    const documents201Section =
-        document.getElementById('modal201Section');
-
-    const performanceSection =
-        document.getElementById('modalPerformanceSection');
-
-    const contractSection =
-        document.getElementById('modalContractSection');
-
-    const othersSection =
-        document.getElementById('modalOthersSection');
-
-    const employeeCategoryError =
-        document.getElementById('modalEmployeeCategoryError');
-
-    const certificationError =
-        document.getElementById('modalCertificationError');
-
-    const documents201Error =
-        document.getElementById('modalDocuments201Error');
-
-    const otherFilesCheckbox =
-        document.getElementById('modalOtherFiles');
-
-    const specify201Wrapper =
-        document.getElementById('modalSpecify201Wrapper');
-
-    const specify201 =
-        document.getElementById('modalSpecify201');
-
-    const otherRequest =
-        document.getElementById('modalOtherRequest');
-
-    const employmentContainer =
-        document.getElementById('modalEmploymentContainer');
-
-    const noEmployment =
-        document.getElementById('modalNoEmployment');
-
-    const addEmploymentBtn =
-        document.getElementById('modalAddEmployment');
-
-
-    /* =========================================================
-       SERVICE LABELS
-    ========================================================= */
-
-    const serviceLabels = {
-        service1: 'Service Record',
-        service2: 'Certificate with Compensation',
-        service5: 'Certificate of Employment',
-        service6: 'Certification',
-        service7: 'IPCR',
-        service8: '201 Documents',
-        service9: 'Others',
-        service10: 'Performance Evaluation',
-        service11: 'Payslip',
-        service12: 'Contract of Service'
-    };
-
-
-    /* =========================================================
-       GET EMPLOYEE CATEGORY
-    ========================================================= */
-
-    function getEmployeeCategory() {
-
-        const checked = modalForm.querySelector(
-            'input[name="employee_category"]:checked'
+        const categoryRadios = modalForm.querySelectorAll(
+            'input[name="employee_category"]'
         );
 
-        return checked ? checked.value : '';
+        const serviceSelect = document.getElementById('modalServiceAvailed');
 
-    }
+        const dateRequested = document.getElementById('modalDateRequested');
+
+        const coeSection = document.getElementById('modalCOESection');
+        const cosSection = document.getElementById('modalCOSSection');
+
+        const certificationSection =
+            document.getElementById('modalCertificationSection');
+
+        const ipcrSection =
+            document.getElementById('modalIPCRSection');
+
+        const documents201Section =
+            document.getElementById('modal201Section');
+
+        const performanceSection =
+            document.getElementById('modalPerformanceSection');
+
+        const contractSection =
+            document.getElementById('modalContractSection');
+
+        const othersSection =
+            document.getElementById('modalOthersSection');
+
+        const employeeCategoryError =
+            document.getElementById('modalEmployeeCategoryError');
+
+        const certificationError =
+            document.getElementById('modalCertificationError');
+
+        const documents201Error =
+            document.getElementById('modalDocuments201Error');
+
+        const otherFilesCheckbox =
+            document.getElementById('modalOtherFiles');
+
+        const specify201Wrapper =
+            document.getElementById('modalSpecify201Wrapper');
+
+        const specify201 =
+            document.getElementById('modalSpecify201');
+
+        const otherRequest =
+            document.getElementById('modalOtherRequest');
+
+        const employmentContainer =
+            document.getElementById('modalEmploymentContainer');
+
+        const noEmployment =
+            document.getElementById('modalNoEmployment');
+
+        const addEmploymentBtn =
+            document.getElementById('modalAddEmployment');
 
 
-    /* =========================================================
-       RESET SERVICE SECTIONS
-    ========================================================= */
+        /* =========================================================
+           SERVICE LABELS
+        ========================================================= */
 
-    function hideAllSections() {
+        const serviceLabels = {
+            service1: 'Service Record',
+            service2: 'Certificate with Compensation',
+            service5: 'Certificate of Employment',
+            service6: 'Certification',
+            service7: 'IPCR',
+            service8: '201 Documents',
+            service9: 'Others',
+            service10: 'Performance Evaluation',
+            service11: 'Payslip',
+            service12: 'Contract of Service'
+        };
 
-        [
-            coeSection,
-            certificationSection,
-            ipcrSection,
-            documents201Section,
-            performanceSection,
-            contractSection,
-            othersSection
-        ].forEach(function (section) {
 
-            if (section) {
-                section.classList.add('d-none');
+        /* =========================================================
+           GET EMPLOYEE CATEGORY
+        ========================================================= */
+
+        function getEmployeeCategory() {
+
+            const checked = modalForm.querySelector(
+                'input[name="employee_category"]:checked'
+            );
+
+            return checked ? checked.value : '';
+
+        }
+
+
+        /* =========================================================
+           RESET SERVICE SECTIONS
+        ========================================================= */
+
+        function hideAllSections() {
+
+            [
+                coeSection,
+                certificationSection,
+                ipcrSection,
+                documents201Section,
+                performanceSection,
+                contractSection,
+                othersSection
+            ].forEach(function(section) {
+
+                if (section) {
+                    section.classList.add('d-none');
+                }
+
+            });
+
+            if (cosSection) {
+                cosSection.classList.add('d-none');
             }
 
-        });
-
-        if (cosSection) {
-            cosSection.classList.add('d-none');
-        }
-
-        clearSectionValidation();
-
-    }
-
-
-    /* =========================================================
-       CLEAR VALIDATION
-    ========================================================= */
-
-    function clearSectionValidation() {
-
-        if (employeeCategoryError) {
-            employeeCategoryError.style.display = 'none';
-        }
-
-        if (certificationError) {
-            certificationError.classList.add('d-none');
-        }
-
-        if (documents201Error) {
-            documents201Error.classList.add('d-none');
-        }
-
-        modalForm.querySelectorAll(
-            '.is-invalid'
-        ).forEach(function (element) {
-
-            element.classList.remove('is-invalid');
-
-        });
-
-    }
-
-
-    /* =========================================================
-       FILTER SERVICES BASED ON CATEGORY
-    ========================================================= */
-
-    function filterServices() {
-
-        const category = getEmployeeCategory();
-
-        Array.from(serviceSelect.options).forEach(function (option) {
-
-            if (!option.value) {
-                option.hidden = false;
-                option.disabled = false;
-                return;
-            }
-
-            const categories =
-                (option.dataset.category || '')
-                    .split(',')
-                    .map(function (item) {
-                        return item.trim();
-                    });
-
-            const allowed =
-                category &&
-                categories.includes(category);
-
-            option.hidden = !allowed;
-            option.disabled = !allowed;
-
-        });
-
-        /*
-         * If current selected service is no longer allowed,
-         * reset it.
-         */
-        if (
-            serviceSelect.value &&
-            serviceSelect.selectedOptions.length &&
-            serviceSelect.selectedOptions[0].disabled
-        ) {
-
-            serviceSelect.value = '';
-
-            hideAllSections();
-
-        }
-
-    }
-
-
-    /* =========================================================
-       SHOW SERVICE SECTION
-    ========================================================= */
-
-    function updateServiceSection() {
-
-        hideAllSections();
-
-        const service = serviceSelect.value;
-        const category = getEmployeeCategory();
-
-        if (!service) return;
-
-
-        /* -------------------------
-           Certificate of Employment
-        ------------------------- */
-
-        if (service === 'service5') {
-
-            coeSection.classList.remove('d-none');
-
-            if (category === 'cos') {
-                cosSection.classList.remove('d-none');
-            }
-
-            return;
+            clearSectionValidation();
 
         }
 
 
-        /* -------------------------
-           Certification
-        ------------------------- */
+        /* =========================================================
+           CLEAR VALIDATION
+        ========================================================= */
 
-        if (service === 'service6') {
-
-            certificationSection.classList.remove('d-none');
-
-            return;
-
-        }
-
-
-        /* -------------------------
-           IPCR
-        ------------------------- */
-
-        if (service === 'service7') {
-
-            ipcrSection.classList.remove('d-none');
-
-            return;
-
-        }
-
-
-        /* -------------------------
-           201 Documents
-        ------------------------- */
-
-        if (service === 'service8') {
-
-            documents201Section.classList.remove('d-none');
-
-            return;
-
-        }
-
-
-        /* -------------------------
-           Others
-        ------------------------- */
-
-        if (service === 'service9') {
-
-            othersSection.classList.remove('d-none');
-
-            return;
-
-        }
-
-
-        /* -------------------------
-           Performance Evaluation
-        ------------------------- */
-
-        if (service === 'service10') {
-
-            performanceSection.classList.remove('d-none');
-
-            return;
-
-        }
-
-
-        /* -------------------------
-           Contract of Service
-        ------------------------- */
-
-        if (service === 'service12') {
-
-            contractSection.classList.remove('d-none');
-
-            return;
-
-        }
-
-    }
-
-
-    /* =========================================================
-       EMPLOYEE CATEGORY CHANGE
-    ========================================================= */
-
-    categoryRadios.forEach(function (radio) {
-
-        radio.addEventListener('change', function () {
+        function clearSectionValidation() {
 
             if (employeeCategoryError) {
                 employeeCategoryError.style.display = 'none';
             }
 
-            filterServices();
+            if (certificationError) {
+                certificationError.classList.add('d-none');
+            }
+
+            if (documents201Error) {
+                documents201Error.classList.add('d-none');
+            }
+
+            modalForm.querySelectorAll(
+                '.is-invalid'
+            ).forEach(function(element) {
+
+                element.classList.remove('is-invalid');
+
+            });
+
+        }
+
+
+        /* =========================================================
+           FILTER SERVICES BASED ON CATEGORY
+        ========================================================= */
+
+        function filterServices() {
+
+            const category = getEmployeeCategory();
+
+            Array.from(serviceSelect.options).forEach(function(option) {
+
+                if (!option.value) {
+                    option.hidden = false;
+                    option.disabled = false;
+                    return;
+                }
+
+                const categories =
+                    (option.dataset.category || '')
+                    .split(',')
+                    .map(function(item) {
+                        return item.trim();
+                    });
+
+                const allowed =
+                    category &&
+                    categories.includes(category);
+
+                option.hidden = !allowed;
+                option.disabled = !allowed;
+
+            });
+
+            /*
+             * If current selected service is no longer allowed,
+             * reset it.
+             */
+            if (
+                serviceSelect.value &&
+                serviceSelect.selectedOptions.length &&
+                serviceSelect.selectedOptions[0].disabled
+            ) {
+
+                serviceSelect.value = '';
+
+                hideAllSections();
+
+            }
+
+        }
+
+
+        /* =========================================================
+           SHOW SERVICE SECTION
+        ========================================================= */
+
+        function updateServiceSection() {
+
+            hideAllSections();
+
+            const service = serviceSelect.value;
+            const category = getEmployeeCategory();
+
+            if (!service) return;
+
+
+            /* -------------------------
+               Certificate of Employment
+            ------------------------- */
+
+            if (service === 'service5') {
+
+                coeSection.classList.remove('d-none');
+
+                if (category === 'cos') {
+                    cosSection.classList.remove('d-none');
+                }
+
+                return;
+
+            }
+
+
+            /* -------------------------
+               Certification
+            ------------------------- */
+
+            if (service === 'service6') {
+
+                certificationSection.classList.remove('d-none');
+
+                return;
+
+            }
+
+
+            /* -------------------------
+               IPCR
+            ------------------------- */
+
+            if (service === 'service7') {
+
+                ipcrSection.classList.remove('d-none');
+
+                return;
+
+            }
+
+
+            /* -------------------------
+               201 Documents
+            ------------------------- */
+
+            if (service === 'service8') {
+
+                documents201Section.classList.remove('d-none');
+
+                return;
+
+            }
+
+
+            /* -------------------------
+               Others
+            ------------------------- */
+
+            if (service === 'service9') {
+
+                othersSection.classList.remove('d-none');
+
+                return;
+
+            }
+
+
+            /* -------------------------
+               Performance Evaluation
+            ------------------------- */
+
+            if (service === 'service10') {
+
+                performanceSection.classList.remove('d-none');
+
+                return;
+
+            }
+
+
+            /* -------------------------
+               Contract of Service
+            ------------------------- */
+
+            if (service === 'service12') {
+
+                contractSection.classList.remove('d-none');
+
+                return;
+
+            }
+
+        }
+
+
+        /* =========================================================
+           EMPLOYEE CATEGORY CHANGE
+        ========================================================= */
+
+        categoryRadios.forEach(function(radio) {
+
+            radio.addEventListener('change', function() {
+
+                if (employeeCategoryError) {
+                    employeeCategoryError.style.display = 'none';
+                }
+
+                filterServices();
+
+                updateServiceSection();
+
+            });
+
+        });
+
+
+        /* =========================================================
+           SERVICE CHANGE
+        ========================================================= */
+
+        serviceSelect.addEventListener('change', function() {
 
             updateServiceSection();
 
         });
 
-    });
+
+        /* =========================================================
+           201 DOCUMENTS - OTHER FILES
+        ========================================================= */
+
+        if (otherFilesCheckbox) {
+
+            otherFilesCheckbox.addEventListener('change', function() {
+
+                if (this.checked) {
+
+                    specify201Wrapper.classList.remove('d-none');
+
+                    specify201.setAttribute('required', 'required');
+
+                } else {
+
+                    specify201Wrapper.classList.add('d-none');
+
+                    specify201.removeAttribute('required');
+
+                    specify201.value = '';
+
+                    specify201.classList.remove(
+                        'is-valid',
+                        'is-invalid'
+                    );
+
+                }
+
+            });
+
+        }
 
 
-    /* =========================================================
-       SERVICE CHANGE
-    ========================================================= */
+        /* =========================================================
+           ADD COS EMPLOYMENT RECORD
+        ========================================================= */
 
-    serviceSelect.addEventListener('change', function () {
+        let employmentCount = 0;
 
-        updateServiceSection();
+        function addEmploymentRecord() {
 
-    });
+            employmentCount++;
 
+            const card = document.createElement('div');
 
-    /* =========================================================
-       201 DOCUMENTS - OTHER FILES
-    ========================================================= */
+            card.className =
+                'employment-card card border-0 shadow-sm mb-3';
 
-    if (otherFilesCheckbox) {
-
-        otherFilesCheckbox.addEventListener('change', function () {
-
-            if (this.checked) {
-
-                specify201Wrapper.classList.remove('d-none');
-
-                specify201.setAttribute('required', 'required');
-
-            } else {
-
-                specify201Wrapper.classList.add('d-none');
-
-                specify201.removeAttribute('required');
-
-                specify201.value = '';
-
-                specify201.classList.remove(
-                    'is-valid',
-                    'is-invalid'
-                );
-
-            }
-
-        });
-
-    }
-
-
-    /* =========================================================
-       ADD COS EMPLOYMENT RECORD
-    ========================================================= */
-
-    let employmentCount = 0;
-
-    function addEmploymentRecord() {
-
-        employmentCount++;
-
-        const card = document.createElement('div');
-
-        card.className =
-            'employment-card card border-0 shadow-sm mb-3';
-
-        card.innerHTML = `
+            card.innerHTML = `
 
             <div class="card-header bg-light
                         d-flex justify-content-between
@@ -1866,376 +1865,282 @@
             </div>
         `;
 
-        employmentContainer.appendChild(card);
-
-        updateEmploymentNumbers();
-
-    }
-
-
-    /* =========================================================
-       UPDATE EMPLOYMENT NUMBERS
-    ========================================================= */
-
-    function updateEmploymentNumbers() {
-
-        const cards =
-            employmentContainer.querySelectorAll(
-                '.employment-card'
-            );
-
-        cards.forEach(function (card, index) {
-
-            const number =
-                card.querySelector('.employment-number');
-
-            if (number) {
-                number.textContent = '#' + (index + 1);
-            }
-
-        });
-
-        if (noEmployment) {
-
-            noEmployment.classList.toggle(
-                'd-none',
-                cards.length > 0
-            );
-
-        }
-
-        employmentCount = cards.length;
-
-    }
-
-
-    /* =========================================================
-       ADD EMPLOYMENT BUTTON
-    ========================================================= */
-
-    if (addEmploymentBtn) {
-
-        addEmploymentBtn.addEventListener(
-            'click',
-            addEmploymentRecord
-        );
-
-    }
-
-
-    /* =========================================================
-       REMOVE EMPLOYMENT
-    ========================================================= */
-
-    employmentContainer.addEventListener(
-        'click',
-        function (event) {
-
-            const button =
-                event.target.closest(
-                    '.remove-modal-employment'
-                );
-
-            if (!button) return;
-
-            const card =
-                button.closest('.employment-card');
-
-            if (card) {
-                card.remove();
-            }
+            employmentContainer.appendChild(card);
 
             updateEmploymentNumbers();
 
         }
-    );
 
 
-    /* =========================================================
-       CERTIFICATION VALIDATION
-    ========================================================= */
+        /* =========================================================
+           UPDATE EMPLOYMENT NUMBERS
+        ========================================================= */
 
-    function validateCertification() {
+        function updateEmploymentNumbers() {
 
-        if (serviceSelect.value !== 'service6') {
-            return true;
-        }
+            const cards =
+                employmentContainer.querySelectorAll(
+                    '.employment-card'
+                );
 
-        const checked =
-            modalForm.querySelectorAll(
-                'input[name="certification[]"]:checked'
-            );
+            cards.forEach(function(card, index) {
 
-        if (checked.length === 0) {
+                const number =
+                    card.querySelector('.employment-number');
 
-            certificationError.classList.remove(
-                'd-none'
-            );
-
-            return false;
-
-        }
-
-        certificationError.classList.add(
-            'd-none'
-        );
-
-        return true;
-
-    }
-
-
-    /* =========================================================
-       201 DOCUMENT VALIDATION
-    ========================================================= */
-
-    function validate201Documents() {
-
-        if (serviceSelect.value !== 'service8') {
-            return true;
-        }
-
-        const checked =
-            modalForm.querySelectorAll(
-                'input[name="documents_201[]"]:checked'
-            );
-
-        if (checked.length === 0) {
-
-            documents201Error.classList.remove(
-                'd-none'
-            );
-
-            return false;
-
-        }
-
-        documents201Error.classList.add(
-            'd-none'
-        );
-
-        return true;
-
-    }
-
-
-    /* =========================================================
-       COS EMPLOYMENT VALIDATION
-    ========================================================= */
-
-    function validateEmployment() {
-
-        if (
-            serviceSelect.value !== 'service5' ||
-            getEmployeeCategory() !== 'cos'
-        ) {
-            return true;
-        }
-
-        const cards =
-            employmentContainer.querySelectorAll(
-                '.employment-card'
-            );
-
-        if (cards.length === 0) {
-
-            alert(
-                'Please add at least one employment record.'
-            );
-
-            return false;
-
-        }
-
-        return true;
-
-    }
-
-
-    /* =========================================================
-       CUSTOM FORM VALIDATION
-    ========================================================= */
-
-    modalForm.addEventListener(
-        'submit',
-        function (event) {
-
-            event.preventDefault();
-            event.stopPropagation();
-
-            let valid = true;
-
-
-            /* EMPLOYEE CATEGORY */
-
-            if (!getEmployeeCategory()) {
-
-                employeeCategoryError.style.display =
-                    'block';
-
-                valid = false;
-
-            } else {
-
-                employeeCategoryError.style.display =
-                    'none';
-
-            }
-
-
-            /* BOOTSTRAP VALIDATION */
-
-            if (!modalForm.checkValidity()) {
-                valid = false;
-            }
-
-
-            /* CERTIFICATION */
-
-            if (!validateCertification()) {
-                valid = false;
-            }
-
-
-            /* 201 DOCUMENTS */
-
-            if (!validate201Documents()) {
-                valid = false;
-            }
-
-
-            /* COS EMPLOYMENT */
-
-            if (!validateEmployment()) {
-                valid = false;
-            }
-
-
-            modalForm.classList.add(
-                'was-validated'
-            );
-
-
-            if (!valid) {
-
-                const firstInvalid =
-                    modalForm.querySelector(
-                        ':invalid'
-                    );
-
-                if (firstInvalid) {
-
-                    firstInvalid.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center'
-                    });
-
-                    firstInvalid.focus();
-
+                if (number) {
+                    number.textContent = '#' + (index + 1);
                 }
 
-                return;
+            });
 
-            }
+            if (noEmployment) {
 
-
-            /* =====================================================
-               SUBMIT
-            ===================================================== */
-
-            const submitButton =
-                modalForm.querySelector(
-                    'button[type="submit"]'
+                noEmployment.classList.toggle(
+                    'd-none',
+                    cards.length > 0
                 );
 
-            if (submitButton) {
-
-                submitButton.disabled = true;
-
-                submitButton.innerHTML =
-                    '<span class="spinner-border spinner-border-sm me-2"></span>' +
-                    'Submitting...';
-
             }
 
-
-            modalForm.submit();
+            employmentCount = cards.length;
 
         }
-    );
 
 
-    /* =========================================================
-       LIVE CERTIFICATION VALIDATION
-    ========================================================= */
+        /* =========================================================
+           ADD EMPLOYMENT BUTTON
+        ========================================================= */
 
-    modalForm.addEventListener(
-        'change',
-        function (event) {
+        if (addEmploymentBtn) {
 
-            if (
-                event.target.matches(
-                    'input[name="certification[]"]'
-                )
-            ) {
-
-                validateCertification();
-
-            }
-
-            if (
-                event.target.matches(
-                    'input[name="documents_201[]"]'
-                )
-            ) {
-
-                validate201Documents();
-
-            }
+            addEmploymentBtn.addEventListener(
+                'click',
+                addEmploymentRecord
+            );
 
         }
-    );
 
 
-    /* =========================================================
-       RESET MODAL WHEN CLOSED
-    ========================================================= */
+        /* =========================================================
+           REMOVE EMPLOYMENT
+        ========================================================= */
 
-    const serviceModal =
-        document.getElementById(
-            'serviceDetailsModal'
-        );
+        employmentContainer.addEventListener(
+            'click',
+            function(event) {
 
-    if (serviceModal) {
+                const button =
+                    event.target.closest(
+                        '.remove-modal-employment'
+                    );
 
-        serviceModal.addEventListener(
-            'hidden.bs.modal',
-            function () {
+                if (!button) return;
 
-                modalForm.reset();
+                const card =
+                    button.closest('.employment-card');
 
-                modalForm.classList.remove(
-                    'was-validated'
-                );
-
-                hideAllSections();
-
-                employmentContainer.innerHTML = '';
-
-                employmentCount = 0;
+                if (card) {
+                    card.remove();
+                }
 
                 updateEmploymentNumbers();
 
-                filterServices();
+            }
+        );
 
-                if (dateRequested) {
 
-                    dateRequested.value =
-                        new Date()
-                            .toISOString()
-                            .split('T')[0];
+        /* =========================================================
+           CERTIFICATION VALIDATION
+        ========================================================= */
+
+        function validateCertification() {
+
+            if (serviceSelect.value !== 'service6') {
+                return true;
+            }
+
+            const checked =
+                modalForm.querySelectorAll(
+                    'input[name="certification[]"]:checked'
+                );
+
+            if (checked.length === 0) {
+
+                certificationError.classList.remove(
+                    'd-none'
+                );
+
+                return false;
+
+            }
+
+            certificationError.classList.add(
+                'd-none'
+            );
+
+            return true;
+
+        }
+
+
+        /* =========================================================
+           201 DOCUMENT VALIDATION
+        ========================================================= */
+
+        function validate201Documents() {
+
+            if (serviceSelect.value !== 'service8') {
+                return true;
+            }
+
+            const checked =
+                modalForm.querySelectorAll(
+                    'input[name="documents_201[]"]:checked'
+                );
+
+            if (checked.length === 0) {
+
+                documents201Error.classList.remove(
+                    'd-none'
+                );
+
+                return false;
+
+            }
+
+            documents201Error.classList.add(
+                'd-none'
+            );
+
+            return true;
+
+        }
+
+
+        /* =========================================================
+           COS EMPLOYMENT VALIDATION
+        ========================================================= */
+
+        function validateEmployment() {
+
+            if (
+                serviceSelect.value !== 'service5' ||
+                getEmployeeCategory() !== 'cos'
+            ) {
+                return true;
+            }
+
+            const cards =
+                employmentContainer.querySelectorAll(
+                    '.employment-card'
+                );
+
+            if (cards.length === 0) {
+
+                alert(
+                    'Please add at least one employment record.'
+                );
+
+                return false;
+
+            }
+
+            return true;
+
+        }
+
+
+        /* =========================================================
+           CUSTOM FORM VALIDATION
+        ========================================================= */
+
+        modalForm.addEventListener(
+            'submit',
+            function(event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                let valid = true;
+
+
+                /* EMPLOYEE CATEGORY */
+
+                if (!getEmployeeCategory()) {
+
+                    employeeCategoryError.style.display =
+                        'block';
+
+                    valid = false;
+
+                } else {
+
+                    employeeCategoryError.style.display =
+                        'none';
 
                 }
+
+
+                /* BOOTSTRAP VALIDATION */
+
+                if (!modalForm.checkValidity()) {
+                    valid = false;
+                }
+
+
+                /* CERTIFICATION */
+
+                if (!validateCertification()) {
+                    valid = false;
+                }
+
+
+                /* 201 DOCUMENTS */
+
+                if (!validate201Documents()) {
+                    valid = false;
+                }
+
+
+                /* COS EMPLOYMENT */
+
+                if (!validateEmployment()) {
+                    valid = false;
+                }
+
+
+                modalForm.classList.add(
+                    'was-validated'
+                );
+
+
+                if (!valid) {
+
+                    const firstInvalid =
+                        modalForm.querySelector(
+                            ':invalid'
+                        );
+
+                    if (firstInvalid) {
+
+                        firstInvalid.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+
+                        firstInvalid.focus();
+
+                    }
+
+                    return;
+
+                }
+
+
+                /* =====================================================
+                   SUBMIT
+                ===================================================== */
 
                 const submitButton =
                     modalForm.querySelector(
@@ -2244,28 +2149,122 @@
 
                 if (submitButton) {
 
-                    submitButton.disabled = false;
+                    submitButton.disabled = true;
 
                     submitButton.innerHTML =
-                        '<i class="bi bi-send-check me-1"></i>' +
-                        'Submit Request';
+                        '<span class="spinner-border spinner-border-sm me-2"></span>' +
+                        'Submitting...';
+
+                }
+
+
+                modalForm.submit();
+
+            }
+        );
+
+
+        /* =========================================================
+           LIVE CERTIFICATION VALIDATION
+        ========================================================= */
+
+        modalForm.addEventListener(
+            'change',
+            function(event) {
+
+                if (
+                    event.target.matches(
+                        'input[name="certification[]"]'
+                    )
+                ) {
+
+                    validateCertification();
+
+                }
+
+                if (
+                    event.target.matches(
+                        'input[name="documents_201[]"]'
+                    )
+                ) {
+
+                    validate201Documents();
 
                 }
 
             }
         );
 
-    }
+
+        /* =========================================================
+           RESET MODAL WHEN CLOSED
+        ========================================================= */
+
+        const serviceModal =
+            document.getElementById(
+                'serviceDetailsModal'
+            );
+
+        if (serviceModal) {
+
+            serviceModal.addEventListener(
+                'hidden.bs.modal',
+                function() {
+
+                    modalForm.reset();
+
+                    modalForm.classList.remove(
+                        'was-validated'
+                    );
+
+                    hideAllSections();
+
+                    employmentContainer.innerHTML = '';
+
+                    employmentCount = 0;
+
+                    updateEmploymentNumbers();
+
+                    filterServices();
+
+                    if (dateRequested) {
+
+                        dateRequested.value =
+                            new Date()
+                            .toISOString()
+                            .split('T')[0];
+
+                    }
+
+                    const submitButton =
+                        modalForm.querySelector(
+                            'button[type="submit"]'
+                        );
+
+                    if (submitButton) {
+
+                        submitButton.disabled = false;
+
+                        submitButton.innerHTML =
+                            '<i class="bi bi-send-check me-1"></i>' +
+                            'Submit Request';
+
+                    }
+
+                }
+            );
+
+        }
 
 
-    /* =========================================================
-       INITIALIZE
-    ========================================================= */
+        /* =========================================================
+           INITIALIZE
+        ========================================================= */
 
-    filterServices();
-    hideAllSections();
+        filterServices();
+        hideAllSections();
 
-})();
+    })();
 </script>
 
 
