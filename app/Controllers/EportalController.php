@@ -158,6 +158,10 @@ END
     {
         return view('hr_forms/hr_forms');
     }
+    public function manual()
+    {
+        return view('dashboard/manual');
+    }
 
     public function login()
     {
@@ -419,7 +423,6 @@ END
                             'office_division' => trim($offices[$key] ?? ''),
                         ]);
                     }
-
                 } elseif (!empty($periods)) {
 
                     // Backward compatibility (single employment history)
@@ -700,7 +703,6 @@ END
                 $data['date_canceled'] = date('Y-m-d H:i:s');
 
                 break;
-
         }
 
 
@@ -708,8 +710,8 @@ END
 
 
         //===================================================
-// SEND STATUS UPDATE EMAIL TO CLIENT
-//===================================================
+        // SEND STATUS UPDATE EMAIL TO CLIENT
+        //===================================================
 
         $request = $requestModel->find($id);
 
@@ -731,7 +733,7 @@ END
                         'status' => 'Processing',
                         'remarks' => $request['remarks'],
                         'message' =>
-                            'Your request has been received and is currently being processed.'
+                        'Your request has been received and is currently being processed.'
                     ]);
 
                     break;
@@ -754,7 +756,7 @@ END
                         'remarks' => $request['remarks'],
 
                         'message' =>
-                            'Your requested document is now ready for release. Please coordinate with the Human Resource Unit for claiming.',
+                        'Your requested document is now ready for release. Please coordinate with the Human Resource Unit for claiming.',
 
                         'csm_link' => $csmLink,
                         'csmtagalog_Link' => $csmtagalog_Link,
@@ -776,7 +778,7 @@ END
                         'status' => 'Completed',
                         'remarks' => $request['remarks'],
                         'message' =>
-                            'Your HR request has been successfully completed. Thank you for using the DOLE MIMAROPA e-Client Portal.'
+                        'Your HR request has been successfully completed. Thank you for using the DOLE MIMAROPA e-Client Portal.'
                     ]);
 
                     break;
@@ -794,7 +796,7 @@ END
                         'status' => 'Rejected',
                         'remarks' => $request['remarks'],
                         'message' =>
-                            'We regret to inform you that your request cannot be processed at this time.'
+                        'We regret to inform you that your request cannot be processed at this time.'
                     ]);
 
                     break;
@@ -811,7 +813,7 @@ END
                         'status' => $status,
                         'remarks' => $request['remarks'],
                         'message' =>
-                            'Your request status has been updated.'
+                        'Your request status has been updated.'
                     ]);
 
                     break;
@@ -823,7 +825,6 @@ END
                 $subject,
                 $message
             );
-
         }
 
 
@@ -869,7 +870,7 @@ END
                 'status' => 'Canceled',
                 'remarks' => $cancellationReason,
                 'message' =>
-                    'Your HR request has been canceled. If you believe this was a mistake or you wish to submit a new request, please contact the Human Resource Unit.'
+                'Your HR request has been canceled. If you believe this was a mistake or you wish to submit a new request, please contact the Human Resource Unit.'
             ]);
 
             $mailer->send(
@@ -1274,7 +1275,4 @@ END
             'request' => $request
         ]);
     }
-
-
-
 }

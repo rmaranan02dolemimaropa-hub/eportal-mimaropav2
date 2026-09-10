@@ -61,6 +61,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     */
 
     $routes->get('dashboard', 'EportalController::dashboard');
+    $routes->get('manual', 'EportalController::manual');
 
 
     /*

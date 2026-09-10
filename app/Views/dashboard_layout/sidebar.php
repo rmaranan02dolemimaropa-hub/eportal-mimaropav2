@@ -8,11 +8,15 @@
   };
 
   // Reusable nav links so desktop + mobile always stay in sync
-  $navLinks = static function (bool $mobile = false) use ($isActive) {
+  $navLinks = static function (bool $mobile = false) use ($isActive): string {
+    ob_start();
     $dismiss = $mobile ? 'data-bs-dismiss="offcanvas"' : '';
-    ?>
+  ?>
     <a href="dashboard" class="nav-link<?= $isActive('dashboard') ?>" <?= $dismiss ?>>
       <i class="bi bi-grid-1x2"></i><span>Dashboard</span>
+    </a>
+    <a href="manual" class="nav-link<?= $isActive('manual') ?>" <?= $dismiss ?>>
+      <i class="bi bi-plus-circle-fill"></i><span>New Request</span>
     </a>
     <a href="request" class="nav-link<?= $isActive('request') ?>" <?= $dismiss ?>>
       <i class="bi bi-file-earmark-text"></i><span>Requests</span>
@@ -29,12 +33,14 @@
       <i class="bi bi-chat-right-text-fill"></i><span>Feedback</span>
     </a>
 
+
     <div class="nav-divider"></div>
 
     <a href="logout" class="nav-link nav-link-logout" <?= $dismiss ?>>
       <i class="bi bi-box-arrow-right"></i><span>Logout</span>
     </a>
-    <?php
+  <?php
+    return (string) ob_get_clean();
   };
   ?>
 
