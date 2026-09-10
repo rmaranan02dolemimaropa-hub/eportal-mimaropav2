@@ -28,6 +28,7 @@
           <li><a href="#services"><i class="bi bi-chevron-right"></i> Services</a></li>
           <li><a href="#mission"><i class="bi bi-chevron-right"></i> Mission &amp; Vision</a></li>
           <li><a href="#contact"><i class="bi bi-chevron-right"></i> Contact</a></li>
+          <li><a href="#hr-services"><i class="bi bi-chevron-right"></i> HR Services</a></li>
         </ul>
       </div>
 
