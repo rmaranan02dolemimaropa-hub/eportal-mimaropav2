@@ -2,17 +2,6 @@
      HERO SECTION
      ========================================================================== -->
 <section class="hero" id="home">
-  <div class="hero-blob b1" aria-hidden="true"></div>
-  <div class="hero-blob b2" aria-hidden="true"></div>
-  <div class="hero-blob b3" aria-hidden="true"></div>
-  <div class="hero-blob b4" aria-hidden="true"></div>
-  <div class="hero-particles" aria-hidden="true"></div>
-
-  <div class="hero-floating-icon fi-1" aria-hidden="true"><i class="bi bi-file-earmark-check"></i></div>
-  <div class="hero-floating-icon fi-2" aria-hidden="true"><i class="bi bi-briefcase"></i></div>
-  <div class="hero-floating-icon fi-3" aria-hidden="true"><i class="bi bi-shield-check"></i></div>
-  <div class="hero-floating-icon fi-4" aria-hidden="true"><i class="bi bi-cloud-check"></i></div>
-
   <div class="container-xl">
     <div class="row align-items-center gy-5">
       <div class="col-lg-6">
@@ -32,7 +21,7 @@
           Submit requests, access online services, monitor applications, and connect with DOLE MIMAROPA through one centralized digital portal.
         </p>
 
-        <div class="hero-stats-inline" data-aos="fade-up" style="--d:.4s">
+        <div class="hero-stats-inline" data-aos="fade-up" style="--d:.3s">
           <div class="stat-mini"><strong>5</strong><span>Provincial Offices</span></div>
           <div class="stat-mini"><strong>20+</strong><span>Online Services</span></div>
           <div class="stat-mini"><strong>24/7</strong><span>Portal Access</span></div>
@@ -40,16 +29,15 @@
       </div>
 
       <div class="col-lg-6">
-        <div class="hero-visual" data-aos="zoom-in" style="--d:.2s">
+        <div class="hero-visual" data-aos="fade-up" style="--d:.2s">
           <div class="visual-wrap">
             <img
               src="assets/img/eportal-img.png"
               alt="Illustration of digital services connecting the MIMAROPA islands"
-              width="560"
-              height="420"
+              width="480"
+              height="360"
               loading="eager"
-              fetchpriority="high"
-            >
+              fetchpriority="high">
           </div>
         </div>
       </div>

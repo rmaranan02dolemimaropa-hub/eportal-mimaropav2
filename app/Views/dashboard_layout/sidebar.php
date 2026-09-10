@@ -16,7 +16,7 @@
       <i class="bi bi-grid-1x2"></i><span>Dashboard</span>
     </a>
     <a href="manual" class="nav-link<?= $isActive('manual') ?>" <?= $dismiss ?>>
-      <i class="bi bi-plus-circle-fill"></i><span>New Request</span>
+      <i class="bi bi-plus-circle-fill"></i><span>Add New Request</span>
     </a>
     <a href="request" class="nav-link<?= $isActive('request') ?>" <?= $dismiss ?>>
       <i class="bi bi-file-earmark-text"></i><span>Requests</span>

@@ -44,9 +44,9 @@
       <div class="col-lg-4">
         <h4>Contact Information</h4>
         <ul class="footer-contact">
-          <li><i class="bi bi-geo-alt"></i> 2nd Flr. PPL Building, Calapan City, Oriental Mindoro</li>
-          <li><i class="bi bi-telephone"></i> (043) 288-2665</li>
-          <li><i class="bi bi-envelope"></i> mimaropa@dole.gov.ph</li>
+          <li><i class="bi bi-geo-alt"></i> Confil Building, Sampaguita, Calapan City, Oriental Mindoro</li>
+          <li><i class="bi bi-telephone"></i> (043) 288 6078</li>
+          <li><i class="bi bi-envelope"></i> r04b@dole.gov.ph</li>
         </ul>
         <div class="office-hours">
           <div><span>Mon–Fri</span><span>8:00 AM – 5:00 PM</span></div>
