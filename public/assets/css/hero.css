@@ -10,8 +10,37 @@
   padding-top: 7rem;
   padding-bottom: 4rem;
   overflow: hidden;
-  background: linear-gradient(135deg, #0a3d62 0%, #1e6fb8 50%, #2f9bd6 100%);
+  /* Brighter, punchier gradient — same family as --gradient-primary */
+  background: var(
+    --gradient-primary,
+    linear-gradient(135deg, #0a3d62 0%, #0088cc 45%, #00aeef 100%)
+  );
   background-size: 200% 200%;
+}
+
+/* Glassmorphism accent overlay, same treatment as .hr-section::before */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(
+      circle at 15% 15%,
+      rgba(255, 255, 255, 0.14),
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 85% 75%,
+      rgba(0, 174, 239, 0.35),
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 50% 100%,
+      rgba(94, 201, 242, 0.2),
+      transparent 55%
+    );
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -67,8 +96,11 @@
   gap: 0.6rem;
   padding: 0.4rem 1rem;
   border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  /* Glass chip */
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   color: var(--color-white);
   font-size: 0.8rem;
   font-weight: 700;
@@ -82,7 +114,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #5ec9f2;
+  background: #00aeef;
 }
 @media (prefers-reduced-motion: no-preference) {
   .hero-eyebrow .dot {
@@ -92,10 +124,10 @@
 @keyframes dotPulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(94, 201, 242, 0.6);
+    box-shadow: 0 0 0 0 rgba(0, 174, 239, 0.6);
   }
   50% {
-    box-shadow: 0 0 0 6px rgba(94, 201, 242, 0);
+    box-shadow: 0 0 0 6px rgba(0, 174, 239, 0);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -114,12 +146,12 @@
   margin-bottom: 1.1rem;
 }
 .hero-title .line-accent {
-  color: #5ec9f2;
+  color: #00aeef;
   display: inline-block;
 }
 @media (prefers-reduced-motion: no-preference) {
   .hero-title .line-accent {
-    background: linear-gradient(90deg, #5ec9f2, #ffffff, #5ec9f2);
+    background: linear-gradient(90deg, #00aeef, #ffffff, #00aeef);
     background-size: 200% auto;
     -webkit-background-clip: text;
     background-clip: text;
@@ -135,14 +167,14 @@
 }
 
 .hero-subtitle {
-  color: rgba(255, 255, 255, 0.92);
+  color: rgba(255, 255, 255, 0.95);
   font-size: clamp(1.05rem, 1.6vw, 1.3rem);
   font-weight: 700;
   margin-bottom: 1rem;
 }
 
 .hero-desc {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.85);
   font-size: 1.05rem;
   max-width: 520px;
   margin-bottom: 2rem;
@@ -161,7 +193,7 @@
   font-weight: 800;
 }
 .hero-stats-inline .stat-mini span {
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(255, 255, 255, 0.75);
   font-size: 0.82rem;
   font-weight: 600;
 }
@@ -181,6 +213,8 @@
   width: 100%;
   height: auto;
   display: block;
+  /* Soft glow to lift the visual off the darker gradient areas */
+  filter: drop-shadow(0 20px 40px rgba(0, 174, 239, 0.35));
 }
 @media (prefers-reduced-motion: no-preference) {
   .hero-visual .visual-wrap {
@@ -208,7 +242,7 @@
   flex-direction: column;
   align-items: center;
   gap: 0.35rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.85);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.08em;
