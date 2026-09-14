@@ -30,6 +30,8 @@ class HrRequestModel extends Model
         'documents_201',
         'specify_201',
         'contract_of_service_year',
+        'payslip_month',
+        'payslip_year',
         'other_request',
         'date_requested',
         'status',
@@ -43,7 +45,7 @@ class HrRequestModel extends Model
         'date_rejected',
         'date_canceled',
         'cancellation_reason'
-        
+
 
     ];
 

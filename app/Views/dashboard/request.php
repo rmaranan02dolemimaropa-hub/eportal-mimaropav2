@@ -170,23 +170,18 @@ $pager = $pager ?? null;
                                     if ($row['status'] == 'Processing' && $row['date_processing']) {
 
                                         $displayDate = $row['date_processing'];
-
                                     } elseif ($row['status'] == 'For Released' && $row['date_released']) {
 
                                         $displayDate = $row['date_released'];
-
                                     } elseif ($row['status'] == 'Completed' && $row['date_completed']) {
 
                                         $displayDate = $row['date_completed'];
-
                                     } elseif ($row['status'] == 'Rejected' && $row['date_rejected']) {
 
                                         $displayDate = $row['date_rejected'];
-
                                     } elseif ($row['status'] == 'Canceled' && $row['date_canceled']) {
 
                                         $displayDate = $row['date_canceled'];
-
                                     }
 
                                     ?>
@@ -260,6 +255,8 @@ $pager = $pager ?? null;
                                             data-history="<?= htmlspecialchars(json_encode($row['employment_history'] ?? []), ENT_QUOTES, 'UTF-8') ?>"
                                             data-certification="<?= esc($row['certification'] ?? '', 'attr') ?>"
                                             data-ipcr-period="<?= esc($row['ipcr_period'] ?? '', 'attr') ?>"
+                                            data-payslip-month="<?= esc($row['payslip_month'] ?? '', 'attr') ?>"
+                                            data-payslip-year="<?= esc($row['payslip_year'] ?? '', 'attr') ?>"
                                             data-performance-evaluation-period="<?= esc($row['performance_evaluation_period'] ?? '', 'attr') ?>"
                                             data-documents-list="<?= esc($row['documents_201'] ?? '', 'attr') ?>"
                                             data-remarks="<?= esc($row['remarks'] ?? '', 'attr') ?>"
@@ -316,48 +313,48 @@ $pager = $pager ?? null;
             </table>
         </div>
         <?php if ($pager): ?>
-        <nav class="table-pagination">
+            <nav class="table-pagination">
 
-            <span class="pagination-summary">
-                Showing <?= count($requests) ?> of <?= $pager->getTotal() ?> requests
-            </span>
+                <span class="pagination-summary">
+                    Showing <?= count($requests) ?> of <?= $pager->getTotal() ?> requests
+                </span>
 
-            <ul class="pagination mb-0">
+                <ul class="pagination mb-0">
 
-                <!-- Previous -->
-                <li class="page-item <?= $pager->getCurrentPage() == 1 ? 'disabled' : '' ?>">
-                    <a class="page-link"
-                        href="<?= $pager->getCurrentPage() == 1 ? '#' : $pager->getPageURI($pager->getCurrentPage() - 1) ?>">
-                        <i class="bi bi-chevron-left"></i> Previous
-                    </a>
-                </li>
-
-                <!-- Page Numbers -->
-                <?php for ($i = 1; $i <= $pager->getPageCount(); $i++): ?>
-                    <li class="page-item <?= $i == $pager->getCurrentPage() ? 'active' : '' ?>">
-                        <a class="page-link" href="<?= $pager->getPageURI($i) ?>">
-                            <?= $i ?>
+                    <!-- Previous -->
+                    <li class="page-item <?= $pager->getCurrentPage() == 1 ? 'disabled' : '' ?>">
+                        <a class="page-link"
+                            href="<?= $pager->getCurrentPage() == 1 ? '#' : $pager->getPageURI($pager->getCurrentPage() - 1) ?>">
+                            <i class="bi bi-chevron-left"></i> Previous
                         </a>
                     </li>
-                <?php endfor; ?>
 
-                <!-- Next -->
-                <li class="page-item <?= $pager->getCurrentPage() == $pager->getPageCount() ? 'disabled' : '' ?>">
-                    <a class="page-link"
-                        href="<?= $pager->getCurrentPage() == $pager->getPageCount() ? '#' : $pager->getPageURI($pager->getCurrentPage() + 1) ?>">
-                        Next <i class="bi bi-chevron-right"></i>
-                    </a>
-                </li>
+                    <!-- Page Numbers -->
+                    <?php for ($i = 1; $i <= $pager->getPageCount(); $i++): ?>
+                        <li class="page-item <?= $i == $pager->getCurrentPage() ? 'active' : '' ?>">
+                            <a class="page-link" href="<?= $pager->getPageURI($i) ?>">
+                                <?= $i ?>
+                            </a>
+                        </li>
+                    <?php endfor; ?>
 
-            </ul>
+                    <!-- Next -->
+                    <li class="page-item <?= $pager->getCurrentPage() == $pager->getPageCount() ? 'disabled' : '' ?>">
+                        <a class="page-link"
+                            href="<?= $pager->getCurrentPage() == $pager->getPageCount() ? '#' : $pager->getPageURI($pager->getCurrentPage() + 1) ?>">
+                            Next <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
 
-        </nav>
+                </ul>
+
+            </nav>
         <?php else: ?>
-        <div class="table-pagination">
-            <span class="pagination-summary">
-                Showing <?= count($requests) ?> requests
-            </span>
-        </div>
+            <div class="table-pagination">
+                <span class="pagination-summary">
+                    Showing <?= count($requests) ?> requests
+                </span>
+            </div>
         <?php endif; ?>
 
     </section>
@@ -575,7 +572,7 @@ $pager = $pager ?? null;
    No external dependencies beyond the Bootstrap bundle already loaded.
    ========================================================================== */
 
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         setCurrentDate();
         animateStatCounters();
         enableTableSearch();
@@ -607,7 +604,7 @@ $pager = $pager ?? null;
         const counters = document.querySelectorAll(".stat-number");
         const duration = 900; // milliseconds
 
-        counters.forEach(function (counter) {
+        counters.forEach(function(counter) {
             const target = parseInt(counter.getAttribute("data-target"), 10) || 0;
             const startTime = performance.now();
 
@@ -646,7 +643,7 @@ $pager = $pager ?? null;
         let timer;
 
 
-        searchInput.addEventListener("input", function () {
+        searchInput.addEventListener("input", function() {
 
 
             clearTimeout(timer);
@@ -685,20 +682,20 @@ $pager = $pager ?? null;
 
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
 
-        ['loginAlert', 'loginSuccess'].forEach(function (id) {
+        ['loginAlert', 'loginSuccess'].forEach(function(id) {
 
             const alert = document.getElementById(id);
 
             if (alert) {
 
-                setTimeout(function () {
+                setTimeout(function() {
 
                     alert.style.transition = "opacity .5s";
                     alert.style.opacity = "0";
 
-                    setTimeout(function () {
+                    setTimeout(function() {
                         alert.remove();
                     }, 500);
 
@@ -710,7 +707,7 @@ $pager = $pager ?? null;
 
     });
 
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
 
         const counters = document.querySelectorAll(".stat-number");
 
@@ -740,7 +737,7 @@ $pager = $pager ?? null;
 
     });
 
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
 
         const button = document.getElementById("exportButton");
         const overlay = document.getElementById("exportOverlay");
@@ -748,7 +745,7 @@ $pager = $pager ?? null;
         const percent = document.getElementById("progressValue");
         const text = document.getElementById("exportText");
 
-        button.addEventListener("click", async function () {
+        button.addEventListener("click", async function() {
 
             button.disabled = true;
             overlay.classList.add("is-visible");
@@ -788,8 +785,7 @@ $pager = $pager ?? null;
                 const currentParams = window.location.search;
 
                 const response = await fetch(
-                    "<?= site_url('export/hr-request') ?>" + currentParams,
-                    {
+                    "<?= site_url('export/hr-request') ?>" + currentParams, {
                         credentials: "same-origin"
                     }
                 );
@@ -862,7 +858,7 @@ $pager = $pager ?? null;
             return detailItem('Employment History', 'No employment records found.');
         }
 
-        const rows = histories.map(function (history, index) {
+        const rows = histories.map(function(history, index) {
             return `
             <tr>
                 <td>${index + 1}</td>
@@ -912,7 +908,7 @@ $pager = $pager ?? null;
         return div.innerHTML;
     }
 
-    viewRequestModal.addEventListener('show.bs.modal', function (event) {
+    viewRequestModal.addEventListener('show.bs.modal', function(event) {
 
         const button = event.relatedTarget;
         const data = button.dataset;
@@ -995,6 +991,24 @@ $pager = $pager ?? null;
         if (data.service === 'Performance Evaluation') {
             serviceFieldsHTML += detailItem('Performance Evaluation Period', data.performanceEvaluationPeriod);
         }
+        // Payslip
+        if (data.service === 'Payslip') {
+            const month = data.payslipMonth || '';
+            const year = data.payslipYear || '';
+
+            if (month && year) {
+                const monthNames = ['', 'January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'
+                ];
+                const monthName = monthNames[parseInt(month)] || '';
+                const payslipPeriod = monthName + ' ' + year;
+                serviceFieldsHTML += detailItem('Payslip Period', payslipPeriod);
+            } else {
+                serviceFieldsHTML += detailItem('Payslip Period', 'No period specified');
+            }
+        }
+
+
 
 
         // 201 Documents - Updated JavaScript Handler
@@ -1122,7 +1136,7 @@ $pager = $pager ?? null;
     const processingText = document.getElementById("processingText");
 
     document.getElementById("startProcessingBtn")
-        .addEventListener("click", function () {
+        .addEventListener("click", function() {
 
             const id = this.dataset.id;
 
@@ -1137,18 +1151,18 @@ $pager = $pager ?? null;
 
             fetch("<?= site_url('request/start-processing') ?>", {
 
-                method: "POST",
+                    method: "POST",
 
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Requested-With": "XMLHttpRequest"
-                },
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Requested-With": "XMLHttpRequest"
+                    },
 
-                body: JSON.stringify({
-                    id: id
+                    body: JSON.stringify({
+                        id: id
+                    })
+
                 })
-
-            })
                 .then(res => res.json())
                 .then(result => {
 
@@ -1185,7 +1199,7 @@ $pager = $pager ?? null;
 
     document.querySelectorAll(".updateRequestForm").forEach(form => {
 
-        form.addEventListener("submit", function () {
+        form.addEventListener("submit", function() {
 
             const status = form.querySelector(".requestStatus").value;
 

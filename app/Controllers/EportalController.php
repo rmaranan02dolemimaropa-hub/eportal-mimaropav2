@@ -342,6 +342,31 @@ END
                 ($entry['performance_evaluation_semester'] ?? '') . ' ' . ($entry['performance_evaluation_year'] ?? '')
             );
 
+            // NEW: Payslip Period
+            $payslipMonth = $entry['payslip_month'] ?? '';
+            $payslipYear = $entry['payslip_year'] ?? '';
+
+            $payslipPeriod = '';
+            if (!empty($payslipMonth) && !empty($payslipYear)) {
+                $monthNames = [
+                    '',
+                    'January',
+                    'February',
+                    'March',
+                    'April',
+                    'May',
+                    'June',
+                    'July',
+                    'August',
+                    'September',
+                    'October',
+                    'November',
+                    'December'
+                ];
+                $monthName = $monthNames[intval($payslipMonth)] ?? '';
+                $payslipPeriod = trim($monthName . ' ' . $payslipYear);
+            }
+
             // 201 Documents (checkbox array)
             $documents201 = $entry['documents_201'] ?? [];
 
@@ -365,9 +390,11 @@ END
                 'fullname' => $fullname,
                 'contact_number' => $contactNumber,
                 'email_address' => $emailAddress,
-                'employee_category' => $employeeCategory,  // ✅ Use the global one
+                'employee_category' => $employeeCategory,
                 'contract_of_service_year' => $entry['contract_of_service_year'] ?? null,
-
+                'payslip_month' => $entry['payslip_month'] ?? null,
+                'payslip_year' => $entry['payslip_year'] ?? null,
+                'payslipPeriod' => $payslipPeriod,
                 'period_of_service' => null,
                 'position' => null,
                 'office_division' => null,

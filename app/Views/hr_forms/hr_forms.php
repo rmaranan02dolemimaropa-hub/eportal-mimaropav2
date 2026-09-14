@@ -677,6 +677,56 @@
                             </div>
                         </div>
 
+                        <!-- ---------- SERVICE 11: Payslip ---------- -->
+                        <div class="dynamic-section" id="section-service11__IDX__" data-service="service11">
+                            <hr class="section-divider">
+                            <p class="section-label"><i class="bi bi-receipt"></i>Payslip</p>
+
+                            <div class="row g-3">
+
+                                <!-- MONTH -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <select class="form-select" name="entries[__IDX__][payslip_month]"
+                                            id="payslipMonth__IDX__" data-required-group="service11">
+                                            <option value="" selected disabled>Select Month</option>
+                                            <option value="01">January</option>
+                                            <option value="02">February</option>
+                                            <option value="03">March</option>
+                                            <option value="04">April</option>
+                                            <option value="05">May</option>
+                                            <option value="06">June</option>
+                                            <option value="07">July</option>
+                                            <option value="08">August</option>
+                                            <option value="09">September</option>
+                                            <option value="10">October</option>
+                                            <option value="11">November</option>
+                                            <option value="12">December</option>
+                                        </select>
+                                        <label for="payslipMonth__IDX__">Month <span
+                                                class="required-mark">*</span></label>
+                                    </div>
+                                </div>
+
+                                <!-- YEAR -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <select class="form-select" name="entries[__IDX__][payslip_year]"
+                                            id="payslipYear__IDX__" data-required-group="service11">
+                                            <option value="" selected disabled>Select Year</option>
+                                            <?php
+                                            for ($year = date('Y'); $year >= 2000; $year--) {
+                                                echo "<option value='{$year}'>{$year}</option>";
+                                            }
+                                            ?>
+                                        </select>
+                                        <label for="payslipYear__IDX__">Year <span class="required-mark">*</span></label>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
 
                         <!-- ---------- SERVICE 12: Contract of Service (COS only) ---------- -->
                         <div class="dynamic-section" id="section-service12__IDX__" data-service="service12">
@@ -763,7 +813,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    (function () {
+    (function() {
         'use strict';
 
         /* =========================================================
@@ -820,26 +870,79 @@
         function entries() {
             return Array.from(entriesContainer.querySelectorAll('.entry-block'));
         }
+
         function byPrefix(entryEl, prefix) {
             return entryEl.querySelector('[id^="' + prefix + '"]');
         }
-        function serviceSelectOf(entryEl) { return byPrefix(entryEl, 'serviceAvailed'); }
-        function servicePurposeOf(entryEl) { return byPrefix(entryEl, 'servicePurpose'); }
-        function empCategoryErrorOf(entryEl) { return byPrefix(entryEl, 'empCategoryError'); }
-        function employmentErrorOf(entryEl) { return byPrefix(entryEl, 'employmentError'); }
-        function certificationErrorOf(entryEl) { return byPrefix(entryEl, 'certificationError'); }
-        function employmentContainerOf(entryEl) { return byPrefix(entryEl, 'employmentContainer'); }
-        function employmentTemplateOf(entryEl) { return byPrefix(entryEl, 'employmentCardTemplate'); }
-        function noEmploymentRecordsOf(entryEl) { return byPrefix(entryEl, 'noEmploymentRecords'); }
-        function deleteAllEmploymentBtnOf(entryEl) { return byPrefix(entryEl, 'deleteAllEmployment'); }
-        function addEmploymentBtnOf(entryEl) { return byPrefix(entryEl, 'addEmployment'); }
-        function otherRequestOf(entryEl) { return byPrefix(entryEl, 'otherRequest'); }
-        function specify201Of(entryEl) { return entryEl.querySelector('textarea[id^="specify201"]'); }
-        function serviceSectionsOf(entryEl) { return entryEl.querySelectorAll('.dynamic-section[data-service]'); }
-        function employeeCategorySectionsOf(entryEl) { return entryEl.querySelectorAll('.dynamic-section[data-employee-category]'); }
-        function employeeCategoryRadiosOf(entryEl) { return entryEl.querySelectorAll('input[id^="empCategory"]'); }
-        function certificationCheckboxesOf(entryEl) { return entryEl.querySelectorAll('input[type="checkbox"][name*="[certification]"]'); }
-        function checkedEmployeeCategoryOf(entryEl) { return entryEl.querySelector('input[id^="empCategory"]:checked'); }
+
+        function serviceSelectOf(entryEl) {
+            return byPrefix(entryEl, 'serviceAvailed');
+        }
+
+        function servicePurposeOf(entryEl) {
+            return byPrefix(entryEl, 'servicePurpose');
+        }
+
+        function empCategoryErrorOf(entryEl) {
+            return byPrefix(entryEl, 'empCategoryError');
+        }
+
+        function employmentErrorOf(entryEl) {
+            return byPrefix(entryEl, 'employmentError');
+        }
+
+        function certificationErrorOf(entryEl) {
+            return byPrefix(entryEl, 'certificationError');
+        }
+
+        function employmentContainerOf(entryEl) {
+            return byPrefix(entryEl, 'employmentContainer');
+        }
+
+        function employmentTemplateOf(entryEl) {
+            return byPrefix(entryEl, 'employmentCardTemplate');
+        }
+
+        function noEmploymentRecordsOf(entryEl) {
+            return byPrefix(entryEl, 'noEmploymentRecords');
+        }
+
+        function deleteAllEmploymentBtnOf(entryEl) {
+            return byPrefix(entryEl, 'deleteAllEmployment');
+        }
+
+        function addEmploymentBtnOf(entryEl) {
+            return byPrefix(entryEl, 'addEmployment');
+        }
+
+        function otherRequestOf(entryEl) {
+            return byPrefix(entryEl, 'otherRequest');
+        }
+
+        function specify201Of(entryEl) {
+            return entryEl.querySelector('textarea[id^="specify201"]');
+        }
+
+        function serviceSectionsOf(entryEl) {
+            return entryEl.querySelectorAll('.dynamic-section[data-service]');
+        }
+
+        function employeeCategorySectionsOf(entryEl) {
+            return entryEl.querySelectorAll('.dynamic-section[data-employee-category]');
+        }
+
+        function employeeCategoryRadiosOf(entryEl) {
+            return entryEl.querySelectorAll('input[id^="empCategory"]');
+        }
+
+        function certificationCheckboxesOf(entryEl) {
+            return entryEl.querySelectorAll('input[type="checkbox"][name*="[certification]"]');
+        }
+
+        function checkedEmployeeCategoryOf(entryEl) {
+            return entryEl.querySelector('input[id^="empCategory"]:checked');
+        }
+
 
         /* =========================================================
            DRAFT PERSISTENCE (localStorage) — keeps user-entered data
@@ -851,7 +954,7 @@
 
         function collectEntryData(entryEl) {
             const employment = [];
-            entryEl.querySelectorAll('.employment-card').forEach(function (card) {
+            entryEl.querySelectorAll('.employment-card').forEach(function(card) {
                 employment.push({
                     period: card.querySelector('input[name*="[period_of_service]"]').value,
                     position: card.querySelector('input[name*="[position]"]').value,
@@ -868,9 +971,15 @@
                 service_purpose: servicePurposeOf(entryEl).value,
                 employment: employment,
                 certification: Array.from(certificationCheckboxesOf(entryEl))
-                    .filter(function (cb) { return cb.checked; })
-                    .map(function (cb) { return cb.value; }),
+                    .filter(function(cb) {
+                        return cb.checked;
+                    })
+                    .map(function(cb) {
+                        return cb.value;
+                    }),
                 contract_of_service_year: byPrefix(entryEl, 'contractYear') ? byPrefix(entryEl, 'contractYear').value : '',
+                payslip_month: byPrefix(entryEl, 'payslipMonth') ? byPrefix(entryEl, 'payslipMonth').value : '',
+                payslip_year: byPrefix(entryEl, 'payslipYear') ? byPrefix(entryEl, 'payslipYear').value : '',
                 ipcr_from_month: byPrefix(entryEl, 'ipcrFromMonth') ? byPrefix(entryEl, 'ipcrFromMonth').value : '',
                 ipcr_from_year: byPrefix(entryEl, 'ipcrFromYear') ? byPrefix(entryEl, 'ipcrFromYear').value : '',
                 ipcr_to_month: byPrefix(entryEl, 'ipcrToMonth') ? byPrefix(entryEl, 'ipcrToMonth').value : '',
@@ -906,12 +1015,14 @@
         function clearDraft() {
             try {
                 localStorage.removeItem(DRAFT_KEY);
-            } catch (e) { }
+            } catch (e) {}
         }
 
         function entryHasContent(data) {
             return !!(data.service_availed || data.service_purpose ||
-                (data.employment && data.employment.some(function (r) { return r.period || r.position || r.office; })) ||
+                (data.employment && data.employment.some(function(r) {
+                    return r.period || r.position || r.office;
+                })) ||
                 (data.certification && data.certification.length) ||
                 data.specify_201 || data.other_request);
         }
@@ -922,7 +1033,9 @@
             const serviceSelect = serviceSelectOf(entryEl);
             if (data.service_availed) {
                 serviceSelect.value = data.service_availed;
-                serviceSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                serviceSelect.dispatchEvent(new Event('change', {
+                    bubbles: true
+                }));
             }
 
             const contractYear = byPrefix(entryEl, 'contractYear');
@@ -934,7 +1047,7 @@
                     addEmploymentBtn.click();
                 }
                 const cards = entryEl.querySelectorAll('.employment-card');
-                data.employment.forEach(function (rec, index) {
+                data.employment.forEach(function(rec, index) {
                     if (!cards[index]) return;
                     cards[index].querySelector('input[name*="[period_of_service]"]').value = rec.period || '';
                     cards[index].querySelector('input[name*="[position]"]').value = rec.position || '';
@@ -943,10 +1056,17 @@
             }
 
             if (data.certification && data.certification.length) {
-                certificationCheckboxesOf(entryEl).forEach(function (cb) {
+                certificationCheckboxesOf(entryEl).forEach(function(cb) {
                     cb.checked = data.certification.indexOf(cb.value) !== -1;
                 });
             }
+
+
+            const payslipMonth = byPrefix(entryEl, 'payslipMonth');
+            if (payslipMonth && data.payslip_month) payslipMonth.value = data.payslip_month;
+
+            const payslipYear = byPrefix(entryEl, 'payslipYear');
+            if (payslipYear && data.payslip_year) payslipYear.value = data.payslip_year;
 
             if (data.ipcr_from_month) byPrefix(entryEl, 'ipcrFromMonth').value = data.ipcr_from_month;
             if (data.ipcr_from_year) byPrefix(entryEl, 'ipcrFromYear').value = data.ipcr_from_year;
@@ -960,6 +1080,8 @@
             const specify201 = specify201Of(entryEl);
             if (specify201 && data.specify_201) specify201.value = data.specify_201;
             if (otherRequest && data.other_request) otherRequest.value = data.other_request;
+
+
         }
 
         function restoreDraft() {
@@ -988,7 +1110,9 @@
                 const radio = document.querySelector('input[name="employee_category"][value="' + data.employee_category + '"]');
                 if (radio) {
                     radio.checked = true;
-                    radio.dispatchEvent(new Event('change', { bubbles: true }));
+                    radio.dispatchEvent(new Event('change', {
+                        bubbles: true
+                    }));
                 }
             }
 
@@ -998,7 +1122,7 @@
             }
 
             const entryEls = entries();
-            savedEntries.forEach(function (entryData, i) {
+            savedEntries.forEach(function(entryData, i) {
                 if (entryEls[i]) fillEntryFromData(entryEls[i], entryData);
             });
 
@@ -1008,7 +1132,7 @@
         }
 
         if (clearDraftBtn) {
-            clearDraftBtn.addEventListener('click', function () {
+            clearDraftBtn.addEventListener('click', function() {
                 clearDraft();
                 resetForm();
                 draftRestoredAlert.classList.add('d-none');
@@ -1034,7 +1158,11 @@
         function formatDisplayDate(isoDateStr) {
             const [y, m, d] = isoDateStr.split('-');
             const dateObj = new Date(Number(y), Number(m) - 1, Number(d));
-            return dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            return dateObj.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
         }
 
         function setDateRequested() {
@@ -1049,24 +1177,24 @@
            *** KEY FIX: Always hide sections properly ***
         ========================================================= */
         function hideAllServiceSections(entryEl) {
-            serviceSectionsOf(entryEl).forEach(function (section) {
+            serviceSectionsOf(entryEl).forEach(function(section) {
                 section.classList.remove('active');
-                section.style.display = 'none';  // ✅ EXPLICIT HIDE
+                section.style.display = 'none'; // ✅ EXPLICIT HIDE
                 toggleRequiredGroup(section, false);
             });
         }
 
         function hideAllEmployeeCategorySections(entryEl) {
-            employeeCategorySectionsOf(entryEl).forEach(function (section) {
+            employeeCategorySectionsOf(entryEl).forEach(function(section) {
                 section.classList.remove('active');
-                section.style.display = 'none';  // ✅ EXPLICIT HIDE
+                section.style.display = 'none'; // ✅ EXPLICIT HIDE
                 toggleRequiredGroup(section, false);
             });
         }
 
         function toggleRequiredGroup(container, isRequired) {
             const fields = container.querySelectorAll('[data-required-group]');
-            fields.forEach(function (field) {
+            fields.forEach(function(field) {
                 if (field.type === 'radio' || field.type === 'checkbox') {
                     return;
                 }
@@ -1084,7 +1212,7 @@
         }
 
         function resetEmployeeCategorySelection(entryEl) {
-            employeeCategoryRadiosOf(entryEl).forEach(function (radio) {
+            employeeCategoryRadiosOf(entryEl).forEach(function(radio) {
                 radio.checked = false;
             });
             const empCategoryError = empCategoryErrorOf(entryEl);
@@ -1098,21 +1226,26 @@
         ========================================================= */
         function isCertificationValid(entryEl) {
             if (serviceSelectOf(entryEl).value !== 'service6') return true;
-            return Array.from(certificationCheckboxesOf(entryEl)).some(function (cb) { return cb.checked; });
+            return Array.from(certificationCheckboxesOf(entryEl)).some(function(cb) {
+                return cb.checked;
+            });
         }
+
         function is201DocumentsValid(entryEl) {
             if (serviceSelectOf(entryEl).value !== 'service8') return true;
 
             return Array.from(
                 entryEl.querySelectorAll('input[name*="[documents_201][]"]')
-            ).some(function (cb) {
+            ).some(function(cb) {
                 return cb.checked;
             });
         }
 
         function isEmployeeCategoryValid(entryEl) {
             if (serviceSelectOf(entryEl).value !== 'service5') return true;
-            return Array.from(employeeCategoryRadiosOf(entryEl)).some(function (r) { return r.checked; });
+            return Array.from(employeeCategoryRadiosOf(entryEl)).some(function(r) {
+                return r.checked;
+            });
         }
 
         function isEmploymentValid(entryEl) {
@@ -1136,7 +1269,7 @@
         function updateEmploymentNumbers(entryEl) {
             const cards = entryEl.querySelectorAll('.employment-card');
 
-            cards.forEach(function (card, index) {
+            cards.forEach(function(card, index) {
                 const numberEl = card.querySelector('.employment-card-number');
                 if (numberEl) numberEl.textContent = '#' + (index + 1);
             });
@@ -1155,7 +1288,7 @@
             const cosSection = entryEl.querySelector('[id^="section-cos"]');
             const isRequired = cosSection && cosSection.classList.contains('active');
 
-            card.querySelectorAll('[data-required-group="cos"]').forEach(function (field) {
+            card.querySelectorAll('[data-required-group="cos"]').forEach(function(field) {
                 if (isRequired) {
                     field.setAttribute('required', 'required');
                 } else {
@@ -1201,9 +1334,9 @@
         }
 
         function filterServiceOptionsForCategory(category) {
-            entries().forEach(function (entryEl) {
+            entries().forEach(function(entryEl) {
                 const select = serviceSelectOf(entryEl);
-                Array.from(select.options).forEach(function (opt) {
+                Array.from(select.options).forEach(function(opt) {
                     if (!opt.value) return; // keep the placeholder option
                     const cats = (opt.dataset.category || '').split(',');
                     const allowed = !!category && cats.indexOf(category) !== -1;
@@ -1212,7 +1345,9 @@
                 });
                 if (select.value && select.selectedOptions[0] && select.selectedOptions[0].disabled) {
                     select.value = '';
-                    select.dispatchEvent(new Event('change', { bubbles: true }));
+                    select.dispatchEvent(new Event('change', {
+                        bubbles: true
+                    }));
                 }
             });
         }
@@ -1226,7 +1361,7 @@
             if (!cosSection) return;
             const shouldShow = serviceSelectOf(entryEl).value === 'service5' && getGlobalCategory() === 'cos';
             cosSection.classList.toggle('active', shouldShow);
-            cosSection.style.display = shouldShow ? 'block' : 'none';  // ✅ EXPLICIT CONTROL
+            cosSection.style.display = shouldShow ? 'block' : 'none'; // ✅ EXPLICIT CONTROL
             toggleRequiredGroup(cosSection, shouldShow);
             if (!shouldShow) {
                 const employmentError = employmentErrorOf(entryEl);
@@ -1234,18 +1369,18 @@
             }
         }
 
-        document.querySelectorAll('input[name="employee_category"]').forEach(function (radio) {
-            radio.addEventListener('change', function () {
+        document.querySelectorAll('input[name="employee_category"]').forEach(function(radio) {
+            radio.addEventListener('change', function() {
                 employeeCategoryError.style.setProperty('display', 'none', 'important');
                 filterServiceOptionsForCategory(getGlobalCategory());
 
                 // Explicitly hide ALL dynamic sections when category changes
-                document.querySelectorAll('.dynamic-section').forEach(function (section) {
+                document.querySelectorAll('.dynamic-section').forEach(function(section) {
                     section.style.display = 'none';
                     section.classList.remove('active');
                 });
 
-                entries().forEach(function (entryEl) {
+                entries().forEach(function(entryEl) {
                     updateCosSectionVisibility(entryEl);
                 });
                 if (!restoringDraft) saveDraft();
@@ -1264,7 +1399,7 @@
         filterServiceOptionsForCategory(getGlobalCategory());
 
         function renumberEntries() {
-            entries().forEach(function (entryEl, i) {
+            entries().forEach(function(entryEl, i) {
                 const numEl = entryEl.querySelector('.entry-number');
                 if (numEl) numEl.textContent = i + 1;
             });
@@ -1304,7 +1439,7 @@
             }
 
             // CRITICAL: Explicitly hide all dynamic sections in this entry
-            entryEl.querySelectorAll('.dynamic-section').forEach(function (section) {
+            entryEl.querySelectorAll('.dynamic-section').forEach(function(section) {
                 section.style.display = 'none';
                 section.classList.remove('active');
             });
@@ -1315,27 +1450,31 @@
             return entryEl;
         }
 
-        addEntryBtn.addEventListener('click', function () {
+        addEntryBtn.addEventListener('click', function() {
             addEntry();
         });
 
-        selectAllEntries.addEventListener('change', function () {
-            entriesContainer.querySelectorAll('.entrySelectCheckbox').forEach(function (cb) {
+        selectAllEntries.addEventListener('change', function() {
+            entriesContainer.querySelectorAll('.entrySelectCheckbox').forEach(function(cb) {
                 cb.checked = selectAllEntries.checked;
             });
             updateBulkDeleteUI();
         });
 
-        deleteSelectedEntriesBtn.addEventListener('click', function () {
+        deleteSelectedEntriesBtn.addEventListener('click', function() {
             const selected = Array.from(entriesContainer.querySelectorAll('.entrySelectCheckbox:checked'))
-                .map(function (cb) { return cb.closest('.entry-block'); })
+                .map(function(cb) {
+                    return cb.closest('.entry-block');
+                })
                 .filter(Boolean);
 
             if (selected.length === 0) return;
             if (!window.confirm('Remove ' + selected.length + ' selected entr' +
-                (selected.length === 1 ? 'y' : 'ies') + '? This cannot be undone.')) return;
+                    (selected.length === 1 ? 'y' : 'ies') + '? This cannot be undone.')) return;
 
-            selected.forEach(function (entryEl) { entryEl.remove(); });
+            selected.forEach(function(entryEl) {
+                entryEl.remove();
+            });
             renumberEntries();
             saveDraft();
         });
@@ -1344,20 +1483,20 @@
            EVENT DELEGATION — handles all entries, including ones
            added after page load, with a single set of listeners.
         ========================================================= */
-        form.addEventListener('change', function (e) {
+        form.addEventListener('change', function(e) {
             const target = e.target;
             const entryEl = target.closest('.entry-block');
             if (!entryEl) return;
 
             // Service Availed change
             if (target.matches('select[id^="serviceAvailed"]')) {
-                hideAllServiceSections(entryEl);  // ✅ HIDE ALL FIRST
+                hideAllServiceSections(entryEl); // ✅ HIDE ALL FIRST
                 formAlert.classList.add('d-none');
 
                 const targetSection = entryEl.querySelector('[data-service="' + target.value + '"]');
                 if (targetSection) {
                     targetSection.classList.add('active');
-                    targetSection.style.display = 'block';  // ✅ THEN SHOW SELECTED
+                    targetSection.style.display = 'block'; // ✅ THEN SHOW SELECTED
                     toggleRequiredGroup(targetSection, true);
                 }
                 updateCosSectionVisibility(entryEl);
@@ -1394,7 +1533,7 @@
                 const targetSection = entryEl.querySelector('[id^="section-' + target.value + '"][data-employee-category]');
                 if (targetSection) {
                     targetSection.classList.add('active');
-                    targetSection.style.display = 'block';  // ✅ EXPLICIT SHOW
+                    targetSection.style.display = 'block'; // ✅ EXPLICIT SHOW
                     toggleRequiredGroup(targetSection, true);
                 }
                 return;
@@ -1415,7 +1554,7 @@
             }
         });
 
-        form.addEventListener('input', function (e) {
+        form.addEventListener('input', function(e) {
             const target = e.target;
 
             if (target.matches('textarea[id^="otherRequest"]') || target.matches('textarea[id^="specify201"]')) {
@@ -1423,7 +1562,7 @@
             }
         });
 
-        form.addEventListener('click', function (e) {
+        form.addEventListener('click', function(e) {
             const target = e.target;
 
             // Remove an entire entry
@@ -1476,7 +1615,7 @@
         /* =========================================================
            FORM SUBMISSION FLOW
         ========================================================= */
-        form.addEventListener('submit', function (event) {
+        form.addEventListener('submit', function(event) {
             event.preventDefault();
             event.stopPropagation();
 
@@ -1490,7 +1629,7 @@
                 employeeCategoryError.style.setProperty('display', 'none', 'important');
             }
 
-            entries().forEach(function (entryEl) {
+            entries().forEach(function(entryEl) {
                 if (!serviceSelectOf(entryEl).value) isValid = false;
 
                 const employmentError = employmentErrorOf(entryEl);
@@ -1539,7 +1678,10 @@
                 formAlert.classList.remove('d-none');
                 const firstInvalid = form.querySelector(':invalid, .is-invalid') || firstInvalidEntry;
                 if (firstInvalid) {
-                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstInvalid.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
                 }
                 return;
             }
@@ -1591,8 +1733,12 @@
 
                 case 'service6': {
                     const checked = Array.from(certificationCheckboxesOf(entryEl))
-                        .filter(function (cb) { return cb.checked; })
-                        .map(function (cb) { return cb.value; });
+                        .filter(function(cb) {
+                            return cb.checked;
+                        })
+                        .map(function(cb) {
+                            return cb.value;
+                        });
                     rows.push(['Certification Needed', checked.join(', ')]);
                     break;
                 }
@@ -1607,20 +1753,22 @@
                 case 'service8': {
                     const checkedDocs = Array.from(
                         entryEl.querySelectorAll('input[name*="[documents_201][]"]:checked')
-                    ).map(function (cb) { return cb.value; });
+                    ).map(function(cb) {
+                        return cb.value;
+                    });
 
                     const otherText = specify201Of(entryEl).value.trim();
 
                     // Replace generic "Other Files" label with the actual specified text, if provided
-                    const displayDocs = checkedDocs.map(function (doc) {
+                    const displayDocs = checkedDocs.map(function(doc) {
                         return (doc === 'Other Files' && otherText) ? otherText : doc;
                     });
 
-                    const listHtml = displayDocs.length
-                        ? '<ul class="mb-0 ps-3">' + displayDocs.map(function (d) {
+                    const listHtml = displayDocs.length ?
+                        '<ul class="mb-0 ps-3">' + displayDocs.map(function(d) {
                             return '<li>' + d.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</li>';
-                        }).join('') + '</ul>'
-                        : '—';
+                        }).join('') + '</ul>' :
+                        '—';
 
                     rows.push(['201 Documents', listHtml, true]);
                     break;
@@ -1636,9 +1784,21 @@
                     rows.push(['Performance Evaluation Period', semester && year ? semester + ' ' + year : '—']);
                     break;
                 }
-                case 'service11':
-                    // No additional fields beyond the common Service Purpose.
+                case 'service11': {
+                    const month = byPrefix(entryEl, 'payslipMonth');
+                    const year = byPrefix(entryEl, 'payslipYear');
+
+                    if (month && year && month.value && year.value) {
+                        const monthNames = ['', 'January', 'February', 'March', 'April', 'May', 'June',
+                            'July', 'August', 'September', 'October', 'November', 'December'
+                        ];
+                        const monthName = monthNames[parseInt(month.value)];
+                        rows.push(['Payslip Period', monthName + ' ' + year.value]);
+                    } else {
+                        rows.push(['Payslip Period', '—']);
+                    }
                     break;
+                }
 
                 case 'service12':
                     rows.push(['Contract Year', byPrefix(entryEl, 'contractYear').value]);
@@ -1662,7 +1822,7 @@
                 ['Email Address', emailAddressField.value],
                 ['Employee Category', category === 'cos' ? 'COS Employee' : (category === 'permanent' ? 'Permanent Employee' : '—')],
                 ['Date Requested', dateRequestedHidden.value]
-            ].forEach(function (pair) {
+            ].forEach(function(pair) {
                 const dt = document.createElement('dt');
                 dt.textContent = pair[0];
                 const dd = document.createElement('dd');
@@ -1674,7 +1834,7 @@
             const entryEls = entries();
             const multiple = entryEls.length > 1;
 
-            entryEls.forEach(function (entryEl, i) {
+            entryEls.forEach(function(entryEl, i) {
                 if (multiple) {
                     const heading = document.createElement('div');
                     heading.className = 'fw-bold mt-3 mb-1 summary-entry-heading';
@@ -1682,7 +1842,7 @@
                     summaryList.appendChild(heading);
                 }
 
-                buildEntryRows(entryEl).forEach(function (pair) {
+                buildEntryRows(entryEl).forEach(function(pair) {
                     const dt = document.createElement('dt');
                     dt.textContent = pair[0];
                     const dd = document.createElement('dd');
@@ -1702,14 +1862,14 @@
         /* =========================================================
            CONFIRM & SUBMIT -> CLEAR DRAFT -> SHOW LOADING OVERLAY -> SUBMIT FORM
         ========================================================= */
-        confirmSubmitBtn.addEventListener('click', function () {
+        confirmSubmitBtn.addEventListener('click', function() {
             confirmModal.hide();
             confirmSubmitBtn.disabled = true;
             loadingOverlay.classList.remove('d-none');
 
             clearDraft();
 
-            setTimeout(function () {
+            setTimeout(function() {
                 form.submit();
             }, 150);
         });
@@ -1717,7 +1877,7 @@
         /* =========================================================
            CANCEL BUTTON
         ========================================================= */
-        cancelBtn.addEventListener('click', function () {
+        cancelBtn.addEventListener('click', function() {
             window.location.href = "<?= site_url('/') ?>";
         });
 
@@ -1731,7 +1891,7 @@
             entryCount = 0;
             addEntry();
             formAlert.classList.add('d-none');
-            document.querySelectorAll('.form-control, .form-select').forEach(function (el) {
+            document.querySelectorAll('.form-control, .form-select').forEach(function(el) {
                 el.classList.remove('is-valid', 'is-invalid');
             });
             setDateRequested();
@@ -1741,11 +1901,11 @@
         /* =========================================================
            INITIALIZE ON PAGE LOAD
         ========================================================= */
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             setDateRequested();
 
             // CRITICAL: Hide all dynamic sections globally first
-            document.querySelectorAll('.dynamic-section').forEach(function (section) {
+            document.querySelectorAll('.dynamic-section').forEach(function(section) {
                 section.style.display = 'none';
                 section.classList.remove('active');
             });
@@ -1758,12 +1918,12 @@
 
 <?php if (session()->getFlashdata('success')): ?>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             // Request was successfully saved server-side — make sure no stale
             // draft lingers for next time, then show the success modal.
             try {
                 localStorage.removeItem('doleHrRequestFormDraft');
-            } catch (e) { }
+            } catch (e) {}
 
             const modal = new bootstrap.Modal(document.getElementById('successModal'));
             modal.show();
