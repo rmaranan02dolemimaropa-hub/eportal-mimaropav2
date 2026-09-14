@@ -109,7 +109,7 @@ $pager = $pager ?? null;
                                 </td>
 
                                 <td>
-                                    <?= esc($row['service_availed']) ?>
+                                    <?= esc($row['other_service']) ?>
                                 </td>
 
                                 <td>

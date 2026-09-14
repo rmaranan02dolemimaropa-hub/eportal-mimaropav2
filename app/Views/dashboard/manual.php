@@ -26,9 +26,6 @@
     <!-- ===================== LOADING OVERLAY ===================== -->
     <div id="loadingOverlay" class="loading-overlay d-none">
         <div class="loading-box">
-            <div class="logo-badge">
-                <img src="assets/img/dole_blogo.png" alt="DOLE Logo" class="logo-img">
-            </div>
             <div class="spinner-border" role="status" style="width:3rem;height:3rem;color:#10058C;"></div>
             <p class="mt-3 fw-semibold mb-0">Submitting your request...</p>
             <p class="text-muted small">Please wait, do not close or refresh this page.</p>
@@ -52,13 +49,13 @@
             </button>
         </div>
 
-        <form id="hrRequestForm" action="<?= site_url('service-record/save') ?>" method="post"
+        <form id="hrRequestForm" action="<?= site_url('service-record/manualsave') ?>" method="post"
             class="needs-validation">
 
             <!-- ---------- COMMON FIELDS ---------- -->
             <?= csrf_field() ?>
             <!-- ---------- DATE REQUESTED (STATIC, TODAY'S DATE, ALWAYS VISIBLE) ---------- -->
-            <div class="col-md-6 py-3 ms-md-auto text-md-end" style="max-width: 300px;" id="dateRequestedDisplay">
+            <div class="col-md-6 py-3 ms-md-auto text-md-end" style="max-inline-size: 300px;" id="dateRequestedDisplay">
                 <p class="form-control-plaintext fw-bold mb-0">
                     <?= date('F d, Y') ?>
                 </p>
@@ -80,17 +77,22 @@
                 <div class="col-md-6">
                     <div class="form-floating">
                         <input type="tel" name="contact_number" class="form-control" id="contactNumber"
-                            placeholder="09XXXXXXXXX" pattern="^(09\d{9}|\+639\d{9})$" maxlength="11" required>
+                            placeholder="09XXXXXXXXX"
+                            inputmode="numeric"
+                            pattern="^09\d{9}$"
+                            maxlength="11"
+                            minlength="11"
+                            required
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11)">
                         <label for="contactNumber">Contact Number <span class="required-mark">*</span></label>
-                        <div class="invalid-feedback">Please enter a valid PH mobile number (e.g. 09171234567).
-                        </div>
+                        <div class="invalid-feedback">Please enter a valid 11-digit PH mobile number starting with 09 (e.g. 09171234567).</div>
                     </div>
                 </div>
 
                 <div class="col-md-12">
                     <div class="form-floating">
                         <input type="email" name="email_address" class="form-control" id="emailAddress"
-                            placeholder="name@example.com" required>
+                            placeholder="name@example.com" maxlength="254" required>
                         <label for="emailAddress">Email Address <span class="required-mark">*</span></label>
                         <div class="invalid-feedback">Please enter a valid email address.</div>
                     </div>
@@ -681,6 +683,56 @@
                                     </select>
                                     <label for="performanceEvaluationYear__IDX__">Year <span
                                             class="required-mark">*</span></label>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- ---------- SERVICE 11: Payslip ---------- -->
+                    <div class="dynamic-section" id="section-service11__IDX__" data-service="service11">
+                        <hr class="section-divider">
+                        <p class="section-label"><i class="bi bi-receipt"></i>Payslip</p>
+
+                        <div class="row g-3">
+
+                            <!-- MONTH -->
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select" name="entries[__IDX__][payslip_month]"
+                                        id="payslipMonth__IDX__" data-required-group="service11">
+                                        <option value="" selected disabled>Select Month</option>
+                                        <option value="01">January</option>
+                                        <option value="02">February</option>
+                                        <option value="03">March</option>
+                                        <option value="04">April</option>
+                                        <option value="05">May</option>
+                                        <option value="06">June</option>
+                                        <option value="07">July</option>
+                                        <option value="08">August</option>
+                                        <option value="09">September</option>
+                                        <option value="10">October</option>
+                                        <option value="11">November</option>
+                                        <option value="12">December</option>
+                                    </select>
+                                    <label for="payslipMonth__IDX__">Month <span
+                                            class="required-mark">*</span></label>
+                                </div>
+                            </div>
+
+                            <!-- YEAR -->
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select" name="entries[__IDX__][payslip_year]"
+                                        id="payslipYear__IDX__" data-required-group="service11">
+                                        <option value="" selected disabled>Select Year</option>
+                                        <?php
+                                        for ($year = date('Y'); $year >= 2000; $year--) {
+                                            echo "<option value='{$year}'>{$year}</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                    <label for="payslipYear__IDX__">Year <span class="required-mark">*</span></label>
                                 </div>
                             </div>
 
@@ -1728,9 +1780,21 @@
                     rows.push(['Performance Evaluation Period', semester && year ? semester + ' ' + year : '—']);
                     break;
                 }
-                case 'service11':
-                    // No additional fields beyond the common Service Purpose.
+                case 'service11': {
+                    const month = byPrefix(entryEl, 'payslipMonth');
+                    const year = byPrefix(entryEl, 'payslipYear');
+
+                    if (month && year && month.value && year.value) {
+                        const monthNames = ['', 'January', 'February', 'March', 'April', 'May', 'June',
+                            'July', 'August', 'September', 'October', 'November', 'December'
+                        ];
+                        const monthName = monthNames[parseInt(month.value)];
+                        rows.push(['Payslip Period', monthName + ' ' + year.value]);
+                    } else {
+                        rows.push(['Payslip Period', '—']);
+                    }
                     break;
+                }
 
                 case 'service12':
                     rows.push(['Contract Year', byPrefix(entryEl, 'contractYear').value]);

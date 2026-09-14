@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use App\Models\HrRequestModel;
 use App\Models\HrEmploymentHistoryModel;
 use App\Models\ClientSatisfactionModel;
+use App\Models\FeedbackFormModel;
 use App\Models\UserModel;
 use App\Libraries\Mailer;
 
@@ -532,6 +533,261 @@ END
             ->with('success', 'Your request has been submitted successfully.')
             ->with('reference_no', $referenceNo);
     }
+    public function manualsave()
+    {
+        $model = new HrRequestModel();
+        $historyModel = new HrEmploymentHistoryModel();
+
+        // One reference number for the whole submission (all entries share this)
+        $referenceNo = 'HR-' . date('YmdHis');
+
+        // Service List
+        $services = [
+            'service1' => 'Service Record',
+            'service2' => 'Certificate with Compensation',
+            'service5' => 'Certificate of Employment',
+            'service6' => 'Certification',
+            'service7' => 'IPCR',
+            'service8' => '201 Documents',
+            'service9' => 'Others',
+            'service10' => 'Performance Evaluation',
+            'service11' => 'Payslip',
+            'service12' => 'Contract of Service',
+        ];
+
+        // ✅ KEEP THIS - Employee category is ONE shared choice for the whole submission
+        $employeeCategory = $this->request->getPost('employee_category');
+
+        // Requester info is entered once, shared by every entry
+        $fullname = trim($this->request->getPost('fullname') ?? '');
+        $contactNumber = trim($this->request->getPost('contact_number') ?? '');
+        $emailAddress = trim($this->request->getPost('email_address') ?? '');
+        $dateRequested = date('Y-m-d');
+
+        $entries = $this->request->getPost('entries');
+        log_message('debug', 'ENTRIES RECEIVED: ' . print_r($entries, true));
+
+        if (!is_array($entries) || count($entries) === 0) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'No request entries were submitted.');
+        }
+
+        $savedServiceLabels = []; // for the confirmation/admin emails
+        $insertedAny = false;
+
+        foreach ($entries as $entry) {
+
+            $serviceKey = $entry['service_availed'] ?? '';
+            $serviceAvailed = $services[$serviceKey] ?? 'Unknown Service';
+
+            // Certification (checkbox array)
+            $certification = $entry['certification'] ?? null;
+            if (is_array($certification)) {
+                $certification = implode(', ', $certification);
+            }
+
+            // IPCR Period
+            $ipcrPeriod = trim(
+                ($entry['ipcr_semester'] ?? '') . ' ' . ($entry['ipcr_year'] ?? '')
+            );
+
+            // Performance Evaluation Period
+            $performanceEvaluationPeriod = trim(
+                ($entry['performance_evaluation_semester'] ?? '') . ' ' . ($entry['performance_evaluation_year'] ?? '')
+            );
+
+            // NEW: Payslip Period
+            $payslipMonth = $entry['payslip_month'] ?? '';
+            $payslipYear = $entry['payslip_year'] ?? '';
+
+            $payslipPeriod = '';
+            if (!empty($payslipMonth) && !empty($payslipYear)) {
+                $monthNames = [
+                    '',
+                    'January',
+                    'February',
+                    'March',
+                    'April',
+                    'May',
+                    'June',
+                    'July',
+                    'August',
+                    'September',
+                    'October',
+                    'November',
+                    'December'
+                ];
+                $monthName = $monthNames[intval($payslipMonth)] ?? '';
+                $payslipPeriod = trim($monthName . ' ' . $payslipYear);
+            }
+
+            // 201 Documents (checkbox array)
+            $documents201 = $entry['documents_201'] ?? [];
+
+            if (is_array($documents201)) {
+                $documents201 = array_filter(array_map('trim', $documents201));
+
+                $documents201Value = !empty($documents201)
+                    ? implode(', ', $documents201)
+                    : null;
+            } else {
+                $documents201Value = null;
+            }
+
+            // ✅ REMOVED: DON'T override the global $employeeCategory here!
+            // $employeeCategory = $entry['employee_category'] ?? null;  // ❌ DELETE THIS LINE
+
+            $data = [
+                'reference_no' => $referenceNo,
+                'service_availed' => $serviceAvailed,
+                'service_purpose' => trim($entry['service_purpose'] ?? ''),
+                'fullname' => $fullname,
+                'contact_number' => $contactNumber,
+                'email_address' => $emailAddress,
+                'employee_category' => $employeeCategory,
+                'contract_of_service_year' => $entry['contract_of_service_year'] ?? null,
+                'payslip_month' => $entry['payslip_month'] ?? null,
+                'payslip_year' => $entry['payslip_year'] ?? null,
+                'payslipPeriod' => $payslipPeriod,
+                'period_of_service' => null,
+                'position' => null,
+                'office_division' => null,
+                'certification' => $certification,
+                'ipcr_period' => $ipcrPeriod,
+                'performance_evaluation_period' => $performanceEvaluationPeriod,
+                'documents_201' => $documents201Value,
+                'specify_201' => $entry['specify_201'] ?? null,
+                'other_request' => $entry['other_request'] ?? null,
+                'date_requested' => $dateRequested,
+                'status' => 'New Application',
+                'remarks' => '',
+                'date_received' => null,
+                'received_by' => null,
+                'date_released' => null,
+                'released_by' => null,
+                'date_canceled' => null,
+                'cancellation_reason' => null,
+            ];
+
+            if (!$model->insert($data)) {
+                log_message('error', 'INSERT FAILED: ' . print_r($model->errors(), true));
+                continue;
+            }
+
+            $insertedAny = true;
+            $savedServiceLabels[] = $serviceAvailed;
+
+            /*
+            |--------------------------------------------------------------------------
+            | SAVE EMPLOYMENT HISTORY FOR THIS ENTRY (COS ONLY)
+            | ✅ Now this condition will work correctly!
+            |--------------------------------------------------------------------------
+            */
+            if ($employeeCategory === 'cos' && $serviceKey === 'service5') {
+
+                $periods = $entry['period_of_service'] ?? null;
+                $positions = $entry['position'] ?? null;
+                $offices = $entry['office_division'] ?? null;
+
+                if (is_array($periods)) {
+
+                    foreach ($periods as $key => $period) {
+
+                        if (trim($period) === '') {
+                            continue;
+                        }
+
+                        $historyModel->insert([
+                            'reference_no' => $referenceNo,
+                            'period_of_service' => trim($period),
+                            'position' => trim($positions[$key] ?? ''),
+                            'office_division' => trim($offices[$key] ?? ''),
+                        ]);
+                    }
+                } elseif (!empty($periods)) {
+
+                    // Backward compatibility (single employment history)
+                    $historyModel->insert([
+                        'reference_no' => $referenceNo,
+                        'period_of_service' => trim($periods),
+                        'position' => trim($positions),
+                        'office_division' => trim($offices),
+                    ]);
+                }
+            }
+        }
+
+        if (!$insertedAny) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Unable to submit your request.');
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | SEND EMAIL USING PHPMailer (one email for the whole reference number)
+        |--------------------------------------------------------------------------
+        */
+        $mailer = new Mailer();
+
+        $servicesSummary = implode(', ', array_unique($savedServiceLabels));
+
+        // Client Email
+        $clientEmail = view(
+            'emails/hr_request_confirmation',
+            [
+                'fullname' => $fullname,
+                'reference_no' => $referenceNo,
+                'service' => $servicesSummary,
+                'date_requested' => $dateRequested,
+            ]
+        );
+
+        $mailer->send(
+            $emailAddress,
+            'HR Request Submitted Successfully',
+            $clientEmail
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | SEND EMAIL TO HR ADMINISTRATORS
+        |--------------------------------------------------------------------------
+        */
+        $userModel = new UserModel();
+
+        $hrAdmins = $userModel
+            ->where('role', 'HR Administrator')
+            ->where('status', 'ACTIVE')
+            ->findAll();
+
+        foreach ($hrAdmins as $admin) {
+
+            $adminEmail = view(
+                'emails/hr_request_admin_notification',
+                [
+                    'reference_no' => $referenceNo,
+                    'fullname' => $fullname,
+                    'service' => $servicesSummary,
+                    'date_requested' => $dateRequested,
+                ]
+            );
+
+            $mailer->send(
+                $admin['email'],
+                'New HR Request Submitted',
+                $adminEmail
+            );
+        }
+
+        return redirect()
+            ->to(site_url('dashboard'))
+            ->with('success', 'Your request has been submitted successfully.')
+            ->with('reference_no', $referenceNo);
+    }
 
     public function users()
     {
@@ -637,13 +893,13 @@ END
 
     public function feedback()
     {
-        $csmModel = new ClientSatisfactionModel();
+        $feedbackModel = new FeedbackFormModel();
 
-        $data['feedbacks'] = $csmModel
+        $data['feedbacks'] = $feedbackModel
             ->orderBy('created_at', 'DESC')
             ->paginate(10);
 
-        $data['pager'] = $csmModel->pager;
+        $data['pager'] = $feedbackModel->pager;
 
         return view('dashboard/feedback', $data);
     }
@@ -1055,43 +1311,29 @@ END
         );
     }
 
-    public function csm($reference_no)
-    {
-        $requestModel = new HrRequestModel();
-
-        $request = $requestModel
-            ->where('reference_no', $reference_no)
-            ->first();
-
-        if (!$request) {
-            return redirect()->back()
-                ->with('error', 'Reference number not found');
-        }
-
-        return view('feedback/feedback_form_english', [
-            'reference_no' => $request['reference_no'],
-            'service_availed' => $request['service_availed'],
-            'request' => $request,
-        ]);
-    }
 
     public function feedback_form($reference_no)
     {
         $requestModel = new HrRequestModel();
 
-        $request = $requestModel
+        $requests = $requestModel
             ->where('reference_no', $reference_no)
-            ->first();
+            ->findAll();
 
-        if (!$request) {
+        if (!$requests) {
             return redirect()->back()
                 ->with('error', 'Reference number not found');
         }
 
+        $servicesAvailed = array_filter(array_unique(array_column($requests, 'service_availed')));
+        $combinedServices = implode(', ', $servicesAvailed);
+
+        $request = $requests[0];
+
         return view('feedback/feedback_form_hr', [
-            'reference_no' => $request['reference_no'],
-            'service_availed' => $request['service_availed'],
-            'request' => $request,
+            'reference_no'    => $request['reference_no'],
+            'service_availed' => $combinedServices,
+            'request'         => $request,
         ]);
     }
 

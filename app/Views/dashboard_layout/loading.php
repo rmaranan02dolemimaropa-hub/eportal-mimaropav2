@@ -29,14 +29,14 @@
 </div>
 
 <script>
-    (function () {
+    (function() {
 
         const loadingScreen =
             document.getElementById('doleLoadingScreen');
 
         if (!loadingScreen) return;
 
-        document.addEventListener('click', function (event) {
+        document.addEventListener('click', function(event) {
 
             const link = event.target.closest('.nav-link');
 
@@ -81,9 +81,9 @@
              * Give browser one frame to render
              * the loading screen BEFORE navigation.
              */
-            requestAnimationFrame(function () {
+            requestAnimationFrame(function() {
 
-                requestAnimationFrame(function () {
+                requestAnimationFrame(function() {
 
                     window.location.href = href;
 
@@ -97,7 +97,7 @@
         /*
          * Hide when page is loaded/restored
          */
-        window.addEventListener('pageshow', function () {
+        window.addEventListener('pageshow', function() {
 
             loadingScreen.classList.remove('show');
 

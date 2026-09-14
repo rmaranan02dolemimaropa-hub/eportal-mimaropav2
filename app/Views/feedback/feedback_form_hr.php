@@ -1,3 +1,24 @@
+<?php
+$serviceAvailedDisplay = '';
+$normalizeServiceValue = static function ($value) use (&$normalizeServiceValue): array {
+    if (is_array($value)) {
+        $result = [];
+        foreach ($value as $item) {
+            $result = array_merge($result, $normalizeServiceValue($item));
+        }
+        return $result;
+    }
+
+    return is_scalar($value) ? [(string) $value] : [];
+};
+
+if (isset($service_availed)) {
+    $serviceAvailedDisplay = implode(', ', $normalizeServiceValue($service_availed));
+}
+$referenceNoDisplay = isset($reference_no)
+    ? implode(', ', $normalizeServiceValue($reference_no))
+    : '';
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -339,8 +360,8 @@
                 Mimaropa Region</div>
             <h1>Client feedback to IMSD-HR unit</h1>
             <p class="subtitle">CSF Form No. 3</p>
-            <span class="ref-badge">Reference no: <?= esc($reference_no) ?></span><br>
-            <span class="service-badge">Service availed: <?= esc($service_availed) ?></span>
+            <span class="ref-badge">Reference no: <?= esc($referenceNoDisplay) ?></span><br>
+            <span class="service-badge">Service availed: <?= esc($serviceAvailedDisplay) ?></span>
             <p class="desc">Thank you for giving us the opportunity to serve you. Please help us improve the quality of
                 our services by taking a few minutes to tell us about your experience with us.<br><br>Pakilagyan ng tsek
                 ang kahon na nagsasaad ng iyong tugon.</p>
@@ -350,7 +371,7 @@
 
         <form id="feedbackForm">
             <?= csrf_field() ?>
-            <input type="hidden" name="reference_no" value="<?= esc($reference_no) ?>">
+            <input type="hidden" name="reference_no" value="<?= esc($referenceNoDisplay) ?>">
 
             <!-- CLIENT TYPE -->
             <div class="card">
@@ -382,16 +403,34 @@
                     <input type="text" id="name" name="name" required>
                 </div>
                 <div class="field-block">
-                    <label class="field-label" for="contact">Contact number</label>
-                    <input type="tel" id="contact" name="contact">
+                    <label class="field-label" for="contact">Contact number <span class="required">*</span></label>
+                    <input
+                        type="tel"
+                        id="contact"
+                        name="contact"
+                        inputmode="numeric"
+                        pattern="^09\d{9}$"
+                        maxlength="11"
+                        minlength="11"
+                        placeholder="09XXXXXXXXX"
+                        title="Enter a valid 11-digit mobile number starting with 09"
+                        required
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11)">
                 </div>
                 <div class="field-block">
-                    <label class="field-label" for="email">Email address</label>
-                    <input type="email" id="email" name="email">
+                    <label class="field-label" for="email">Email address <span class="required">*</span></label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        maxlength="254"
+                        placeholder="name@example.com"
+                        title="Enter a valid email address"
+                        required>
                 </div>
                 <div class="field-block">
                     <label class="field-label" for="office">Office visited</label>
-                    <input type="text" id="office" name="office">
+                    <input placeholder="Office name" type="text" id="office" name="office">
                 </div>
                 <div class="field-block">
                     <label class="field-label" for="date">Date <span class="required">*</span></label>
@@ -410,83 +449,23 @@
 
             <!-- SERVICE AVAILED -->
             <div class="card">
-                <p class="section-title">Service availed <span class="required">*</span></p>
-                <p class="section-sub">Serbisyong kinailangan &mdash; select all that apply</p>
-                <div class="service-grid">
-                    <div class="checkbox-row"><input type="checkbox" name="service[]"
-                            value="Application for Alien Employment Permit (New/Renewal)" id="s1"><label
-                            for="s1"><span>Application for Alien Employment Permit (New/Renewal)</span></label></div>
-                    <div class="checkbox-row"><input type="checkbox" name="service[]"
-                            value="Issuance of Certificate of Appearance for Professional Mechanical Engineer/Professional Electrical Engineer"
-                            id="s2"><label for="s2"><span>Issuance of Certificate of Appearance for Professional
-                                Mechanical/Electrical Engineer</span></label></div>
+                <p class="section-title">Service availed</p>
+                <p class="section-sub">Serbisyong kinailangan</p>
 
-                    <div class="checkbox-row"><input type="checkbox" name="service[]"
-                            value="Application for Authority to Operate Branch Office of a Private Employment Agency"
-                            id="s3"><label for="s3"><span>Application for Authority to Operate Branch Office of a
-                                Private Employment Agency</span></label></div>
-                    <div class="checkbox-row"><input type="checkbox" name="service[]"
-                            value="Issuance of Certificate of Exclusion from Alien Employment Permit" id="s4"><label
-                            for="s4"><span>Issuance of Certificate of Exclusion from Alien Employment
-                                Permit</span></label></div>
-
-                    <div class="checkbox-row"><input type="checkbox" name="service[]"
-                            value="Application for Authority to Recruit" id="s5"><label for="s5"><span>Application for
-                                Authority to Recruit</span></label></div>
-                    <div class="checkbox-row"><input type="checkbox" name="service[]"
-                            value="Issuance of Letter of Approval/Disapproval of Construction Safety and Health Program (CSHP) Application"
-                            id="s6"><label for="s6"><span>Issuance of Letter of Approval/Disapproval of CSHP
-                                Application</span></label></div>
-
-                    <div class="checkbox-row"><input type="checkbox" name="service[]"
-                            value="Application for License to Operate Private Employment Agency (PEA)" id="s7"><label
-                            for="s7"><span>Application for License to Operate Private Employment Agency
-                                (PEA)</span></label></div>
-                    <div class="checkbox-row"><input type="checkbox" name="service[]"
-                            value="Issuance of Permit to Operate Mechanical Installation/Certificate of Electrical Inspection (CEI)"
-                            id="s8"><label for="s8"><span>Issuance of Permit to Operate Mechanical
-                                Installation/CEI</span></label></div>
-
-                    <div class="checkbox-row"><input type="checkbox" name="service[]"
-                            value="Application for Livelihood Project Assistance" id="s9"><label
-                            for="s9"><span>Application for Livelihood Project Assistance</span></label></div>
-                    <div class="checkbox-row"><input type="checkbox" name="service[]"
-                            value="Registration of Establishment under Rule 1020 of the Occupational Safety and Health Standards"
-                            id="s10"><label for="s10"><span>Registration of Establishment under Rule 1020
-                                OSHS</span></label></div>
-
-                    <div class="checkbox-row"><input type="checkbox" name="service[]"
-                            value="Application for Job Fair Clearance" id="s11"><label for="s11"><span>Application for
-                                Job Fair Clearance</span></label></div>
-                    <div class="checkbox-row"><input type="checkbox" name="service[]"
-                            value="Registration of Collective Bargaining Agreement" id="s12"><label
-                            for="s12"><span>Registration of Collective Bargaining Agreement</span></label></div>
-
-                    <div class="checkbox-row"><input type="checkbox" name="service[]"
-                            value="Application for Job Fair Permit" id="s13"><label for="s13"><span>Application for Job
-                                Fair Permit</span></label></div>
-                    <div class="checkbox-row"><input type="checkbox" name="service[]"
-                            value="Registration of Contractors" id="s14"><label for="s14"><span>Registration of
-                                Contractors</span></label></div>
-
-                    <div class="checkbox-row"><input type="checkbox" name="service[]"
-                            value="Application for Sugar Workers' Death Benefit Claim" id="s15"><label
-                            for="s15"><span>Application for Sugar Workers' Death Benefit Claim</span></label></div>
-                    <div class="checkbox-row"><input type="checkbox" name="service[]" value="Registration of Union"
-                            id="s16"><label for="s16"><span>Registration of Union</span></label></div>
-
-                    <div class="checkbox-row"><input type="checkbox" name="service[]"
-                            value="Application for Sugar Workers' Maternity Benefit Claim" id="s17"><label
-                            for="s17"><span>Application for Sugar Workers' Maternity Benefit Claim</span></label></div>
-                    <div class="checkbox-row"><input type="checkbox" name="service[]"
-                            value="Registration of Workers' Association" id="s18"><label for="s18"><span>Registration of
-                                Workers' Association</span></label></div>
+                <div class="field-block">
+                    <div class="document-tag-group">
+                        <?php
+                        $servicesList = explode(', ', $serviceAvailedDisplay);
+                        $lastIndex = count($servicesList) - 1;
+                        ?>
+                        <?php foreach ($servicesList as $index => $service): ?>
+                            <span class="document-tag document-tag-other"><?= esc($service) ?><?= $index < $lastIndex ? ',' : '' ?></span>
+                        <?php endforeach; ?>
+                        <hr class="section-divider">
+                    </div>
+                    <!-- keep the actual value submittable if this form still posts it -->
+                    <input type="hidden" name="otherService" value="<?= esc($serviceAvailedDisplay) ?>">
                 </div>
-                <div class="field-block other-input">
-                    <label class="field-label" for="otherService">Others, please specify</label>
-                    <input type="text" id="otherService" name="otherService" value="<?= esc($service_availed) ?>">
-                </div>
-                <p class="error-text" id="err-service">Please select at least one service</p>
             </div>
 
             <!-- RATING MATRIX -->
@@ -520,9 +499,9 @@
                     <textarea id="complaint" name="complaint"></textarea>
                 </div>
                 <div class="field-block" style="margin-bottom:0;">
-                    <label class="field-label" for="comment">Comment / suggestion / recommendation</label>
-                    <p class="section-sub" style="margin-top:-6px;">Mungkahi / rekomendasyon</p>
-                    <textarea id="comment" name="comment"></textarea>
+                    <label class="field-label" for="comment">Comment / suggestion / recommendation <span class="required">*</span></label>
+                    <p class="section-sub" style="margin-top:-6px;">Mungkahi / rekomendasyon <span class="required">*</span></p>
+                    <textarea id="comment" name="comment" required></textarea>
                 </div>
             </div>
 
@@ -563,14 +542,14 @@
         ];
         var naRows = [3, 4];
         var tbody = document.querySelector('#ratingTable tbody');
-        questions.forEach(function (q, i) {
+        questions.forEach(function(q, i) {
             var tr = document.createElement('tr');
             if (naRows.indexOf(i) !== -1) {
                 tr.innerHTML = '<td class="qtext">' + (i + 1) + '. ' + q + '</td>' +
                     '<td colspan="5" style="text-align:left;"><span class="na-badge">N/A</span></td>';
             } else {
                 var cells = '<td class="qtext">' + (i + 1) + '. ' + q + '</td>';
-                ['Strongly agree', 'Agree', 'Neither', 'Disagree', 'Strongly disagree'].forEach(function (val) {
+                ['Strongly agree', 'Agree', 'Neither', 'Disagree', 'Strongly disagree'].forEach(function(val) {
                     cells += '<td><input type="radio" name="q' + i + '" value="' + val + '"></td>';
                 });
                 tr.innerHTML = cells;
@@ -578,19 +557,19 @@
             tbody.appendChild(tr);
         });
 
-        document.getElementById('ct2').addEventListener('change', function () {
+        document.getElementById('ct2').addEventListener('change', function() {
             document.getElementById('businessNameWrap').style.display = this.checked ? 'block' : 'none';
         });
-        document.getElementById('ct1').addEventListener('change', function () {
+        document.getElementById('ct1').addEventListener('change', function() {
             document.getElementById('businessNameWrap').style.display = 'none';
             document.getElementById('govAgencyWrap').style.display = 'none';
         });
-        document.getElementById('ct3').addEventListener('change', function () {
+        document.getElementById('ct3').addEventListener('change', function() {
             document.getElementById('govAgencyWrap').style.display = this.checked ? 'block' : 'none';
             document.getElementById('businessNameWrap').style.display = 'none';
         });
 
-        document.getElementById('feedbackForm').addEventListener('submit', function (e) {
+        document.getElementById('feedbackForm').addEventListener('submit', function(e) {
             e.preventDefault();
             var form = this;
             var valid = true;
@@ -599,12 +578,10 @@
             document.getElementById('err-clientType').style.display = clientTypeChecked ? 'none' : 'block';
             if (!clientTypeChecked) valid = false;
 
-            var serviceChecked = document.querySelectorAll('input[name="service[]"]:checked').length > 0 || document.getElementById('otherService').value.trim() !== '';
-            document.getElementById('err-service').style.display = serviceChecked ? 'none' : 'block';
-            if (!serviceChecked) valid = false;
+
 
             var ratingComplete = true;
-            questions.forEach(function (q, i) {
+            questions.forEach(function(q, i) {
                 if (naRows.indexOf(i) === -1) {
                     if (!document.querySelector('input[name="q' + i + '"]:checked')) ratingComplete = false;
                 }
@@ -627,12 +604,16 @@
             submitBtn.textContent = 'Submitting...';
 
             fetch('<?= base_url('feedback/save') ?>', {
-                method: 'POST',
-                body: new FormData(form),
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            })
-                .then(function (res) { return res.json(); })
-                .then(function (data) {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(function(res) {
+                    return res.json();
+                })
+                .then(function(data) {
                     if (data.status === 'success') {
                         form.style.display = 'none';
                         banner.style.display = 'none';
@@ -647,7 +628,7 @@
                         window.scrollTo(0, 0);
                     }
                 })
-                .catch(function () {
+                .catch(function() {
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Submit';
                     banner.textContent = 'Something went wrong. Please try again.';

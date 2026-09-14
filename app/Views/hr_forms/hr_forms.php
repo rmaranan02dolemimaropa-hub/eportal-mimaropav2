@@ -70,17 +70,22 @@
                     <div class="col-md-6">
                         <div class="form-floating">
                             <input type="tel" name="contact_number" class="form-control" id="contactNumber"
-                                placeholder="09XXXXXXXXX" pattern="^(09\d{9}|\+639\d{9})$" maxlength="11" required>
+                                placeholder="09XXXXXXXXX"
+                                inputmode="numeric"
+                                pattern="^09\d{9}$"
+                                maxlength="11"
+                                minlength="11"
+                                required
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11)">
                             <label for="contactNumber">Contact Number <span class="required-mark">*</span></label>
-                            <div class="invalid-feedback">Please enter a valid PH mobile number (e.g. 09171234567).
-                            </div>
+                            <div class="invalid-feedback">Please enter a valid 11-digit PH mobile number starting with 09 (e.g. 09171234567).</div>
                         </div>
                     </div>
 
                     <div class="col-md-12">
                         <div class="form-floating">
                             <input type="email" name="email_address" class="form-control" id="emailAddress"
-                                placeholder="name@example.com" required>
+                                placeholder="name@example.com" maxlength="254" required>
                             <label for="emailAddress">Email Address <span class="required-mark">*</span></label>
                             <div class="invalid-feedback">Please enter a valid email address.</div>
                         </div>

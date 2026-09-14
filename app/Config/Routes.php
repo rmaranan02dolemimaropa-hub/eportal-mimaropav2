@@ -25,6 +25,7 @@ $routes->get('/', 'EportalController::index');
 
 $routes->get('service-record', 'EportalController::service_record');
 $routes->post('service-record/save', 'EportalController::save');
+$routes->post('service-record/manualsave', 'EportalController::manualsave');
 
 $routes->get('csm/(:any)', 'EportalController::csm/$1');
 $routes->get('csmtagalog/(:any)', 'EportalController::csmtagalog/$1');

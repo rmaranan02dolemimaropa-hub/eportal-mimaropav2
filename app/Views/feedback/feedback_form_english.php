@@ -746,7 +746,8 @@
 
         <form method="post" action="<?= base_url('submit-csm') ?>" id="csmForm">
             <?= csrf_field() ?>
-            <input type="hidden" name="reference_no" value="<?= esc($reference_no) ?>">
+            <input type="hidden" name="reference_no"
+                value="<?= esc(isset($reference_no) && is_scalar($reference_no) ? (string) $reference_no : '') ?>">
 
             <!-- ===================== TO BE ACCOMPLISHED BY DOLE PERSONNEL ===================== -->
             <div class="form-card">
@@ -763,7 +764,9 @@
                     </div>
                     <div class="full">
                         <label for="service_availed">Name of Service Provided</label>
-                        <input type="text" name="service_availed" value="<?= esc($service_availed) ?>" readonly>
+                        <input type="text" name="service_availed"
+                            value="<?= esc(isset($service_availed) && is_scalar($service_availed) ? (string) $service_availed : '') ?>"
+                            readonly>
                     </div>
                 </div>
             </div>
@@ -958,7 +961,7 @@
 
 
     <script>
-        (function () {
+        (function() {
             'use strict';
 
             const sqdItems = [
@@ -973,17 +976,34 @@
                 ["SQD8", "I got what I needed from the government office, or (if denied) denial of request was sufficiently explained to me."]
             ];
 
-            const answers = [
-                { value: "strongly_agree", label: "😄 Strongly Agree" },
-                { value: "agree", label: "🙂 Agree" },
-                { value: "neutral", label: "😐 Neither Agree nor Disagree" },
-                { value: "disagree", label: "🙁 Disagree" },
-                { value: "strongly_disagree", label: "😣 Strongly Disagree" },
-                { value: "na", label: "— N/A" }
+            const answers = [{
+                    value: "strongly_agree",
+                    label: "😄 Strongly Agree"
+                },
+                {
+                    value: "agree",
+                    label: "🙂 Agree"
+                },
+                {
+                    value: "neutral",
+                    label: "😐 Neither Agree nor Disagree"
+                },
+                {
+                    value: "disagree",
+                    label: "🙁 Disagree"
+                },
+                {
+                    value: "strongly_disagree",
+                    label: "😣 Strongly Disagree"
+                },
+                {
+                    value: "na",
+                    label: "— N/A"
+                }
             ];
             const tbody = document.getElementById('sqdTableBody');
 
-            sqdItems.forEach(function (item) {
+            sqdItems.forEach(function(item) {
                 const code = item[0];
                 const text = item[1];
                 const tr = document.createElement('tr');
@@ -992,7 +1012,7 @@
                 labelTd.innerHTML = '<span class="sqd-code">' + code + '</span>' + text;
                 tr.appendChild(labelTd);
 
-                answers.forEach(function (ans) {
+                answers.forEach(function(ans) {
                     const td = document.createElement('td');
                     td.setAttribute('data-answer-label', ans.label);
                     const input = document.createElement('input');
@@ -1028,7 +1048,7 @@
                 modal.classList.remove('show');
             }
 
-            form.addEventListener('submit', function (e) {
+            form.addEventListener('submit', function(e) {
                 // Let native HTML5 validation run first; if the form is invalid,
                 // the browser blocks submission and this handler exits safely.
                 if (!form.checkValidity()) {
@@ -1041,22 +1061,24 @@
                 btnSubmit.textContent = 'Submitting...';
 
                 fetch(form.action, {
-                    method: 'POST',
-                    body: new FormData(form),
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                })
-                    .then(function (response) {
+                        method: 'POST',
+                        body: new FormData(form),
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(function(response) {
                         if (!response.ok) {
                             throw new Error('Request failed with status ' + response.status);
                         }
                         showSuccessModal();
                         form.reset();
                     })
-                    .catch(function (err) {
+                    .catch(function(err) {
                         alert('Something went wrong while submitting your feedback. Please try again.');
                         console.error(err);
                     })
-                    .finally(function () {
+                    .finally(function() {
                         btnSubmit.disabled = false;
                         btnSubmit.textContent = 'Submit Feedback';
                     });
@@ -1066,7 +1088,7 @@
             // (e.g. it wasn't opened via script, so window.close() is blocked by the browser).
             const fallbackRedirectUrl = <?= json_encode($redirect_url ?? base_url('/')) ?>;
 
-            btnSuccessOk.addEventListener('click', function () {
+            btnSuccessOk.addEventListener('click', function() {
                 hideSuccessModal();
 
                 // Try to close this tab/window (works if it was opened via a link
@@ -1076,12 +1098,12 @@
                 // If we're still here after a brief delay, the browser blocked the close
                 // (most browsers won't let a script close a tab it didn't open).
                 // Fall back to sending the client to a safe landing page.
-                setTimeout(function () {
+                setTimeout(function() {
                     window.location.href = fallbackRedirectUrl;
                 }, 300);
             });
 
-            modal.addEventListener('click', function (e) {
+            modal.addEventListener('click', function(e) {
                 if (e.target === modal) {
                     hideSuccessModal();
                 }
