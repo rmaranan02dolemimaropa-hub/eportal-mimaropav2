@@ -24,9 +24,9 @@
           <li class="nav-item"><a class="nav-link nav-link-gov" href="#hr-services">HR Services</a></li>
           <li class="nav-item"><a class="nav-link nav-link-gov" href="#mission">Mission &amp; Vision</a></li>
           <li class="nav-item"><a class="nav-link nav-link-gov" href="#contact">Contact</a></li>
-          <li class="nav-item ms-lg-2">
+          <!-- <li class="nav-item ms-lg-2">
             <a class="btn-login js-login-trigger" href="login">Login <i class="bi bi-box-arrow-in-right"></i></a>
-          </li>
+          </li> -->
         </ul>
       </div>
     </div>
