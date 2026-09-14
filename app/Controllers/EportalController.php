@@ -64,7 +64,7 @@ class EportalController extends BaseController
 CASE
     WHEN hr_requests.status = 'New Application' THEN 1
     WHEN hr_requests.status = 'Processing' THEN 2
-    WHEN hr_requests.status = 'For Released' THEN 3
+    WHEN hr_requests.status = 'For Releasing' THEN 3
     WHEN hr_requests.status = 'Completed' THEN 4
     WHEN hr_requests.status = 'Rejected' THEN 5
     ELSE 6
@@ -98,7 +98,7 @@ END
             'new_application' => $requestModel->where('status', 'New Application')->countAllResults(),
             'processing' => $requestModel->where('status', 'Processing')->countAllResults(),
             'completed' => $requestModel->where('status', 'Completed')->countAllResults(),
-            'for_released' => $requestModel->where('status', 'For Released')->countAllResults(),
+            'for_releasing' => $requestModel->where('status', 'For Releasing')->countAllResults(),
             'rejected' => $requestModel->where('status', 'Rejected')->countAllResults(),
         ];
 
@@ -107,7 +107,7 @@ END
 CASE
     WHEN status = 'New Application' THEN 1
     WHEN status = 'Processing' THEN 2
-    WHEN status = 'For Released' THEN 3
+    WHEN status = 'For Releasing' THEN 3
     WHEN status = 'Completed' THEN 4
     WHEN status = 'Rejected' THEN 5
     WHEN status = 'Canceled' THEN 6
@@ -130,8 +130,8 @@ END
             ->where('DATE(date_processing)', date('Y-m-d'))
             ->countAllResults();
 
-        $data['released_today'] = $requestModel
-            ->where('status', 'For Released')
+        $data['releasing_today'] = $requestModel
+            ->where('status', 'For Releasing')
             ->where('DATE(date_released)', date('Y-m-d'))
             ->countAllResults();
 
@@ -411,7 +411,7 @@ END
                 'date_received' => null,
                 'received_by' => null,
                 'date_released' => null,
-                'released_by' => null,
+                'releasing_by' => null,
                 'date_canceled' => null,
                 'cancellation_reason' => null,
             ];
@@ -961,7 +961,7 @@ END
                 break;
 
 
-            case 'For Released':
+            case 'For Releasing':
 
                 $data['date_released'] = date('Y-m-d H:i:s');
 
@@ -1023,7 +1023,7 @@ END
 
 
 
-                case 'For Released':
+                case 'For Releasing':
 
                     $subject = "Your Requested Document is Ready for Release";
 
@@ -1035,7 +1035,7 @@ END
                         'fullname' => $request['fullname'],
                         'reference_no' => $request['reference_no'],
                         'service' => $request['service_availed'],
-                        'status' => 'For Released',
+                        'status' => 'For Releasing',
                         'remarks' => $request['remarks'],
 
                         'message' =>

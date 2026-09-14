@@ -62,9 +62,9 @@
         <div class="stat-card">
             <div class="stat-icon stat-icon-purple"><i class="bi bi-box-arrow-up-right"></i></div>
             <div class="stat-body">
-                <span class="stat-number" data-target="<?= $for_released ?? 0 ?>">0</span>
-                <span class="stat-label">For Released</span>
-                <span class="stat-trend trend-up"><i class="bi bi-box-seam me-1"></i><?= $released_today ?? 0 ?> ready today
+                <span class="stat-number" data-target="<?= $for_releasing ?? 0 ?>">0</span>
+                <span class="stat-label">For Releasing</span>
+                <span class="stat-trend trend-up"><i class="bi bi-box-seam me-1"></i><?= $releasing_today ?? 0 ?> ready today
                 </span>
             </div>
         </div>
@@ -126,13 +126,13 @@
                         $allowedStatus = [
                             'New Application',
                             'Processing',
-                            'For Released'
+                            'For Releasing'
                         ];
 
                         $statusClass = [
                             'New Application' => 'badge-new-application',
                             'Processing' => 'badge-processing',
-                            'For Released' => 'badge-for-released',
+                            'For Releasing' => 'badge-for-released',
                         ];
 
                         $hasData = false;
@@ -169,7 +169,7 @@
                                         if ($row['status'] == 'Processing' && $row['date_processing']) {
 
                                             $displayDate = $row['date_processing'];
-                                        } elseif ($row['status'] == 'For Released' && $row['date_released']) {
+                                        } elseif ($row['status'] == 'For Releasing' && $row['date_released']) {
 
                                             $displayDate = $row['date_released'];
                                         } elseif ($row['status'] == 'Completed' && $row['date_completed']) {

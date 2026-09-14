@@ -24,10 +24,9 @@
                         <td style="background:linear-gradient(135deg, #10058C 0%, #2A1AB8 100%); padding:28px 32px;">
                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                                 <tr>
-                                    <td
-                                    <img src="<?= base_url('assets/images/dole_logo.png') ?>" alt="DOLE MIMAROPA Logo" style="width: 120px; height: auto;">
-                                        style="color:#ffffff; font-size:12px; letter-spacing:1px; text-transform:uppercase; opacity:0.85;">
-                                        DOLE MIMAROPA E-Portal
+                                    <td>
+                                        <img src="<?= base_url('assets/images/dole_logo.png') ?>" alt="DOLE MIMAROPA Logo" style="width: 120px; height: auto;">
+
                                     </td>
                                 </tr>
                                 <tr>

@@ -105,9 +105,9 @@ $pager = $pager ?? null;
                 Processing
             </a>
 
-            <a href="<?= current_url() ?>?status=For+Released"
-                class="status-pill <?= $status == 'For Released' ? 'active' : '' ?>">
-                For Released
+            <a href="<?= current_url() ?>?status=For+Releasing"
+                class="status-pill <?= $status == 'For Releasing' ? 'active' : '' ?>">
+                For Releasing
             </a>
 
             <a href="<?= current_url() ?>?status=Completed"
@@ -170,7 +170,7 @@ $pager = $pager ?? null;
                                     if ($row['status'] == 'Processing' && $row['date_processing']) {
 
                                         $displayDate = $row['date_processing'];
-                                    } elseif ($row['status'] == 'For Released' && $row['date_released']) {
+                                    } elseif ($row['status'] == 'For Releasing' && $row['date_released']) {
 
                                         $displayDate = $row['date_released'];
                                     } elseif ($row['status'] == 'Completed' && $row['date_completed']) {
@@ -197,7 +197,7 @@ $pager = $pager ?? null;
                                         'New Application' => 'badge-new-application',
                                         'Processing' => 'badge-processing',
                                         'Completed' => 'badge-completed',
-                                        'For Released' => 'badge-for-released',
+                                        'For Releasing' => 'badge-for-released',
                                         'Rejected' => 'badge-rejected',
                                         'Canceled' => 'badge-canceled',
                                     ];
@@ -219,7 +219,7 @@ $pager = $pager ?? null;
                                             Submitted
                                         </span>
 
-                                    <?php elseif ($row['status'] == 'For Released'): ?>
+                                    <?php elseif ($row['status'] == 'For Releasing'): ?>
 
                                         <span class="badge bg-warning text-dark">
                                             <i class="bi bi-hourglass-split"></i>
@@ -265,7 +265,7 @@ $pager = $pager ?? null;
                                         </button>
 
 
-                                        <?php if (in_array($row['status'], ['Processing', 'For Released'])): ?>
+                                        <?php if (in_array($row['status'], ['Processing', 'For Releasing'])): ?>
 
                                             <!-- Edit -->
                                             <button class="row-action-btn" title="Edit" data-bs-toggle="modal"
@@ -426,13 +426,13 @@ $pager = $pager ?? null;
                                     <?php if ($row['status'] == 'Processing'): ?>
 
                                         <option value="Processing" selected>Processing</option>
-                                        <option value="For Released">For Released</option>
+                                        <option value="For Releasing">For Releasing</option>
                                         <option value="Completed">Completed</option>
                                         <option value="Rejected">Rejected</option>
 
-                                    <?php elseif ($row['status'] == 'For Released'): ?>
+                                    <?php elseif ($row['status'] == 'For Releasing'): ?>
 
-                                        <option value="For Released" selected>For Released</option>
+                                        <option value="For Releasing" selected>For Releasing</option>
                                         <option value="Completed">Completed</option>
                                         <option value="Rejected">Rejected</option>
 
@@ -1210,7 +1210,7 @@ $pager = $pager ?? null;
                         "Updating request...<br><small>Sending processing notification...</small>";
                     break;
 
-                case "For Released":
+                case "For Releasing":
                     updateText.innerHTML =
                         "Updating request...<br><small>Sending release notification...</small>";
                     break;
