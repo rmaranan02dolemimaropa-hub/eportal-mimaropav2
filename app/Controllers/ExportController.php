@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\HrRequestModel;
+use App\Models\ClientSatisfactionModel;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Throwable;
@@ -488,5 +489,23 @@ class ExportController extends BaseController
             ->orderBy('month', 'ASC')
             ->get()
             ->getResultArray();
+    }
+
+    public function report()
+    {
+        $start = $this->request->getGet('start') ?? date('Y-m-01');
+        $end = $this->request->getGet('end') ?? date('Y-m-t');
+
+        $model = new ClientSatisfactionModel();
+        $sections = $model->getAggregatedReport($start, $end);
+        $overall = $model->getOverallTotals($sections);
+
+        return view('exports/client_satisfaction_report', [
+            'title' => 'CONSOLIDATED SURVEY RESPONSES',
+            'periodLabel' => date('F j, Y', strtotime($start)) . ' - ' . date('F j, Y', strtotime($end)),
+            'questions' => ClientSatisfactionModel::$questions,
+            'sections' => $sections,
+            'overall' => $overall,
+        ]);
     }
 }

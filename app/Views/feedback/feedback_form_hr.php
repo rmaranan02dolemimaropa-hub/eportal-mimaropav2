@@ -25,7 +25,10 @@ $referenceNoDisplay = isset($reference_no)
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Client Feedback to IMSD-HR Unit</title>
+    <title><?= esc($title) ?></title>
+    <meta name="description"
+        content="One portal, multiple digital government services. Submit requests, access HR services, and connect with DOLE MIMAROPA online.">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/doleicon.png">
     <style>
         * {
             box-sizing: border-box;
@@ -404,29 +407,15 @@ $referenceNoDisplay = isset($reference_no)
                 </div>
                 <div class="field-block">
                     <label class="field-label" for="contact">Contact number <span class="required">*</span></label>
-                    <input
-                        type="tel"
-                        id="contact"
-                        name="contact"
-                        inputmode="numeric"
-                        pattern="^09\d{9}$"
-                        maxlength="11"
-                        minlength="11"
-                        placeholder="09XXXXXXXXX"
-                        title="Enter a valid 11-digit mobile number starting with 09"
-                        required
+                    <input type="tel" id="contact" name="contact" inputmode="numeric" pattern="^09\d{9}$" maxlength="11"
+                        minlength="11" placeholder="09XXXXXXXXX"
+                        title="Enter a valid 11-digit mobile number starting with 09" required
                         oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11)">
                 </div>
                 <div class="field-block">
                     <label class="field-label" for="email">Email address <span class="required">*</span></label>
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        maxlength="254"
-                        placeholder="name@example.com"
-                        title="Enter a valid email address"
-                        required>
+                    <input type="email" id="email" name="email" maxlength="254" placeholder="name@example.com"
+                        title="Enter a valid email address" required>
                 </div>
                 <div class="field-block">
                     <label class="field-label" for="office">Office visited</label>
@@ -459,7 +448,8 @@ $referenceNoDisplay = isset($reference_no)
                         $lastIndex = count($servicesList) - 1;
                         ?>
                         <?php foreach ($servicesList as $index => $service): ?>
-                            <span class="document-tag document-tag-other"><?= esc($service) ?><?= $index < $lastIndex ? ',' : '' ?></span>
+                            <span
+                                class="document-tag document-tag-other"><?= esc($service) ?><?= $index < $lastIndex ? ',' : '' ?></span>
                         <?php endforeach; ?>
                         <hr class="section-divider">
                     </div>
@@ -499,8 +489,10 @@ $referenceNoDisplay = isset($reference_no)
                     <textarea id="complaint" name="complaint"></textarea>
                 </div>
                 <div class="field-block" style="margin-bottom:0;">
-                    <label class="field-label" for="comment">Comment / suggestion / recommendation <span class="required">*</span></label>
-                    <p class="section-sub" style="margin-top:-6px;">Mungkahi / rekomendasyon <span class="required">*</span></p>
+                    <label class="field-label" for="comment">Comment / suggestion / recommendation <span
+                            class="required">*</span></label>
+                    <p class="section-sub" style="margin-top:-6px;">Mungkahi / rekomendasyon <span
+                            class="required">*</span></p>
                     <textarea id="comment" name="comment" required></textarea>
                 </div>
             </div>
@@ -542,14 +534,14 @@ $referenceNoDisplay = isset($reference_no)
         ];
         var naRows = [3, 4];
         var tbody = document.querySelector('#ratingTable tbody');
-        questions.forEach(function(q, i) {
+        questions.forEach(function (q, i) {
             var tr = document.createElement('tr');
             if (naRows.indexOf(i) !== -1) {
                 tr.innerHTML = '<td class="qtext">' + (i + 1) + '. ' + q + '</td>' +
                     '<td colspan="5" style="text-align:left;"><span class="na-badge">N/A</span></td>';
             } else {
                 var cells = '<td class="qtext">' + (i + 1) + '. ' + q + '</td>';
-                ['Strongly agree', 'Agree', 'Neither', 'Disagree', 'Strongly disagree'].forEach(function(val) {
+                ['Strongly agree', 'Agree', 'Neither', 'Disagree', 'Strongly disagree'].forEach(function (val) {
                     cells += '<td><input type="radio" name="q' + i + '" value="' + val + '"></td>';
                 });
                 tr.innerHTML = cells;
@@ -557,19 +549,19 @@ $referenceNoDisplay = isset($reference_no)
             tbody.appendChild(tr);
         });
 
-        document.getElementById('ct2').addEventListener('change', function() {
+        document.getElementById('ct2').addEventListener('change', function () {
             document.getElementById('businessNameWrap').style.display = this.checked ? 'block' : 'none';
         });
-        document.getElementById('ct1').addEventListener('change', function() {
+        document.getElementById('ct1').addEventListener('change', function () {
             document.getElementById('businessNameWrap').style.display = 'none';
             document.getElementById('govAgencyWrap').style.display = 'none';
         });
-        document.getElementById('ct3').addEventListener('change', function() {
+        document.getElementById('ct3').addEventListener('change', function () {
             document.getElementById('govAgencyWrap').style.display = this.checked ? 'block' : 'none';
             document.getElementById('businessNameWrap').style.display = 'none';
         });
 
-        document.getElementById('feedbackForm').addEventListener('submit', function(e) {
+        document.getElementById('feedbackForm').addEventListener('submit', function (e) {
             e.preventDefault();
             var form = this;
             var valid = true;
@@ -581,7 +573,7 @@ $referenceNoDisplay = isset($reference_no)
 
 
             var ratingComplete = true;
-            questions.forEach(function(q, i) {
+            questions.forEach(function (q, i) {
                 if (naRows.indexOf(i) === -1) {
                     if (!document.querySelector('input[name="q' + i + '"]:checked')) ratingComplete = false;
                 }
@@ -604,16 +596,16 @@ $referenceNoDisplay = isset($reference_no)
             submitBtn.textContent = 'Submitting...';
 
             fetch('<?= base_url('feedback/save') ?>', {
-                    method: 'POST',
-                    body: new FormData(form),
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(function(res) {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(function (res) {
                     return res.json();
                 })
-                .then(function(data) {
+                .then(function (data) {
                     if (data.status === 'success') {
                         form.style.display = 'none';
                         banner.style.display = 'none';
@@ -628,7 +620,7 @@ $referenceNoDisplay = isset($reference_no)
                         window.scrollTo(0, 0);
                     }
                 })
-                .catch(function() {
+                .catch(function () {
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Submit';
                     banner.textContent = 'Something went wrong. Please try again.';

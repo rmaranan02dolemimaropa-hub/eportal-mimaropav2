@@ -157,6 +157,9 @@ $search = $_GET['search'] ?? '';
                 <button class="btn tool-btn" type="button" id="exportButton" title="Export this response to Excel">
                     <i class="bi bi-file-earmark-spreadsheet-fill"></i> TSR Report
                 </button>
+                <button class="btn tool-btn" type="button" id="exportcsrButton" title="Export this response to Excel">
+                    <i class="bi bi-file-earmark-spreadsheet-fill"></i> CSR Report
+                </button>
 
             </div>
         </div>
@@ -376,6 +379,25 @@ $search = $_GET['search'] ?? '';
         }
         window.open('<?= base_url('exports/satisfaction-excel') ?>?' + params.toString(), '_blank');
     });
+
+
+</script>
+<script>
+    document.getElementById('exportcsrButton').addEventListener('click', function () {
+        const params = new URLSearchParams({
+            year: document.getElementById('fYear').value,
+            month: document.getElementById('fMonth').value,
+            service: document.getElementById('fService').value,
+            rating: document.getElementById('fRating').value,
+            search: document.getElementById('fSearch').value,
+        });
+        for (const [key, val] of [...params.entries()]) {
+            if (!val) params.delete(key);
+        }
+        window.open('<?= base_url('client-satisfaction-report') ?>?' + params.toString(), '_blank');
+    });
+
+
 </script>
 
 

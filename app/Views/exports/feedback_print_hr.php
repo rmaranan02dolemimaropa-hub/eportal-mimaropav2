@@ -3,7 +3,11 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CSF Form No. 3 - <?= esc($feedback['reference_no']) ?></title>
+    <meta name="description"
+        content="One portal, multiple digital government services. Submit requests, access HR services, and connect with DOLE MIMAROPA online.">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/doleicon.png">
     <style>
         @page {
             size: A4;
