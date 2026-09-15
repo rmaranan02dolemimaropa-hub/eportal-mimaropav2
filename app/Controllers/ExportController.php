@@ -313,7 +313,9 @@ class ExportController extends BaseController
     {
         $year = $this->request->getGet('year');
         $month = $this->request->getGet('month');
-
+        $service = $this->request->getGet('service');
+        $rating = $this->request->getGet('rating');
+        $search = $this->request->getGet('search');
 
         $builder = \Config\Database::connect()->table('client_satisfaction');
 
@@ -324,10 +326,25 @@ class ExportController extends BaseController
                 $builder->where('YEAR(date)', $year);
             if (!empty($month))
                 $builder->where('MONTH(date)', $month);
+            if (!empty($service))
+                $builder->where('other_service', $service);
+            if (!empty($search)) {
+                $builder->groupStart()
+                    ->like('name', $search)
+                    ->orLike('reference_no', $search)
+                    ->orLike('other_service', $search)
+                    ->groupEnd();
+            }
         }
 
-
         $responses = $builder->orderBy('id', 'ASC')->get()->getResultArray();
+
+        // ---- Rating filter is derived, so bucket in PHP same as feedback() ----
+        if (!empty($rating) && empty($referenceNo)) {
+            $responses = array_values(array_filter($responses, function ($r) use ($rating) {
+                return $this->resolveOverallRating($r) === $rating;
+            }));
+        }
 
         $periodLabel = 'All Records';
         if (!empty($year) && !empty($month)) {
@@ -335,6 +352,21 @@ class ExportController extends BaseController
         } elseif (!empty($year)) {
             $periodLabel = 'Year ' . $year;
         }
+
+        // ---- Build a human-readable summary of applied filters ----
+        $appliedFilters = [];
+        if (!empty($year))
+            $appliedFilters[] = 'Year: ' . $year;
+        if (!empty($month))
+            $appliedFilters[] = 'Month: ' . date('F', mktime(0, 0, 0, (int) $month, 1));
+        if (!empty($service))
+            $appliedFilters[] = 'Service: ' . $service;
+        if (!empty($rating))
+            $appliedFilters[] = 'Rating: ' . $rating;
+        if (!empty($search))
+            $appliedFilters[] = 'Search: "' . $search . '"';
+
+        $filterSummary = !empty($appliedFilters) ? implode(' | ', $appliedFilters) : null;
 
         // 6 CSM dimensions, in the same order as rating_1..rating_6
         $categories = [
@@ -393,7 +425,6 @@ class ExportController extends BaseController
             ];
         }
 
-
         $totalClients = count($responses);
         $servicesList = implode(', ', array_values(array_unique(array_column($rows, 'other_service'))));
 
@@ -406,7 +437,29 @@ class ExportController extends BaseController
             'noResponse' => $noResponse,
             'totalClients' => $totalClients,
             'servicesList' => $servicesList,
+            'filterSummary' => $filterSummary,
         ]);
+    }
 
+    private function resolveOverallRating(array $row): string
+    {
+        $scores = [
+            $row['rating_1'] ?? '',
+            $row['rating_2'] ?? '',
+            $row['rating_3'] ?? '',
+            $row['rating_6'] ?? '',
+            $row['rating_7'] ?? '',
+            $row['rating_8'] ?? '',
+        ];
+
+        $count = array_count_values($scores);
+
+        if (($count['Strongly agree'] ?? 0) >= 4) {
+            return 'Excellent';
+        } elseif (($count['Agree'] ?? 0) >= 4) {
+            return 'Very Satisfied';
+        }
+
+        return 'Needs Review';
     }
 }

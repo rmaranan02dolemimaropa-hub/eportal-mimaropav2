@@ -385,16 +385,10 @@ $search = $_GET['search'] ?? '';
             rating: document.getElementById('fRating').value,
             search: document.getElementById('fSearch').value,
         });
-
-        // strip empty params so the URL stays clean
         for (const [key, val] of [...params.entries()]) {
             if (!val) params.delete(key);
         }
-
-        window.open(
-            '<?= base_url('exports/satisfaction-excel') ?>?' + params.toString(),
-            '_blank'
-        );
+        window.open('<?= base_url('exports/satisfaction-excel') ?>?' + params.toString(), '_blank');
     });
 </script>
 

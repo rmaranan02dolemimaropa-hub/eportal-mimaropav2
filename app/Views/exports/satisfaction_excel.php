@@ -246,6 +246,16 @@
             font-weight: 700;
         }
 
+        table.report-table .check-row td {
+            background: #eef2ff;
+            font-weight: 700;
+        }
+
+        table.report-table .check-row td.mismatch {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
         .no-records {
             text-align: center;
             padding: 20px;
@@ -278,7 +288,13 @@
             margin-top: 2px;
         }
 
+        /* ===================== PRINT (A4 landscape) ===================== */
         @media print {
+            @page {
+                size: A4 landscape;
+                margin: 10mm 8mm;
+            }
+
             .toolbar {
                 display: none !important;
             }
@@ -290,12 +306,29 @@
             .sheet-wrap {
                 padding: 0;
                 overflow: visible;
+                display: block;
             }
 
             .page {
                 box-shadow: none;
-                width: auto;
+                width: 100%;
                 min-width: 0;
+                padding: 0;
+                transform-origin: top left;
+            }
+
+            table.report-table {
+                width: 100%;
+                font-size: 7.5px;
+            }
+
+            table.report-table th,
+            table.report-table td {
+                padding: 3px 4px;
+            }
+
+            .signature-block {
+                max-width: 50%;
             }
         }
     </style>
@@ -310,8 +343,8 @@
         </div>
         <div class="toolbar-actions">
             <span id="exportStatus"></span>
-            <button type="button" class="tbtn" onclick="window.print()">🖨️ Print</button>
-            <button type="button" class="tbtn primary" onclick="exportToExcel()">⬇️ Export to Excel</button>
+            <button type="button" class="tbtn" onclick="window.print()">Print</button>
+
         </div>
     </div>
 
@@ -344,9 +377,10 @@
                 <?= esc(strtoupper($periodLabel)) ?><br>
                 <strong>Program/Service:</strong>
                 <?= esc($servicesList !== '' ? $servicesList : 'N/A') ?><br>
-
-
-
+                <?php if (!empty($filterSummary)): ?>
+                    <strong>Exported by Filter:</strong>
+                    <?= esc($filterSummary) ?><br>
+                <?php endif; ?>
             </div>
 
 
@@ -443,14 +477,17 @@
                             <?php endforeach; ?>
                             <td colspan="3"></td>
                         </tr>
-                        <tr class="totals-row">
+                        <tr class="check-row">
                             <td colspan="2">No Response</td>
                             <?php foreach (array_keys($categories) as $ci): ?>
-                                <td><?= esc($noResponse[$ci]) ?></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
+                                <?php
+                                $categoryTotal = array_sum($totals[$ci]) + $noResponse[$ci];
+                                $isMismatch = (int) $categoryTotal !== (int) $totalClients;
+                                ?>
+                                <td colspan="5" class="<?= $isMismatch ? 'mismatch' : '' ?>">
+                                    <?= esc($categoryTotal) ?>
+                                    <?= $isMismatch ? ' ⚠' : '' ?>
+                                </td>
                             <?php endforeach; ?>
                             <td colspan="3"></td>
                         </tr>
@@ -470,50 +507,26 @@
                             <?php endforeach; ?>
                             <td colspan="3"></td>
                         </tr>
+
                     </tfoot>
                 <?php endif; ?>
             </table>
 
             <div class="signature-block">
                 <div class="sig">
-                    <div class="line">SIGNATURE OVER PRINTED NAME</div>
-                    <div class="role">HR HEAD</div>
+                    <div class="line">KRYSTEL CHARISMA L. JUMANOY</div>
+                    <div class="role">AOV/HRMO</div>
                 </div>
                 <div class="sig">
-                    <div class="line">SIGNATURE OVER PRINTED NAME</div>
-                    <div class="role">CHIEF HEAD</div>
+                    <div class="line">ROSEMARIE C. HUPANDA</div>
+                    <div class="role">IMSD CHIEF</div>
                 </div>
             </div>
 
         </div>
     </div>
 
-    <script>
-        function exportToExcel() {
-            const statusEl = document.getElementById('exportStatus');
-            try {
-                const table = document.getElementById('exportTable');
 
-                // {cellStyles: true} pulls basic background/bold/border styling
-                // from the HTML into the workbook where the SheetJS build supports it.
-                const wb = XLSX.utils.table_to_book(table, {
-                    sheet: 'Tabulation',
-                    cellStyles: true
-                });
-
-                const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
-                XLSX.writeFile(wb, `Tabulation_of_Survey_Responses_${stamp}.xlsx`);
-
-                statusEl.textContent = '✓ Downloaded';
-                setTimeout(() => {
-                    statusEl.textContent = '';
-                }, 3000);
-            } catch (err) {
-                console.error(err);
-                statusEl.textContent = 'Export failed — see console';
-            }
-        }
-    </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
