@@ -71,7 +71,7 @@ class ClientSatisfactionModel extends Model
      */
     public static array $clientTypes = [
         'citizen' => [
-            'label' => 'MIMAROPA Region',
+            'label' => 'General Public',
             'totalLabel' => '(Total # of MIMAROPA Clients)',
         ],
         'business' => [
