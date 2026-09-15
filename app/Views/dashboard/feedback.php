@@ -155,23 +155,9 @@ $search = $_GET['search'] ?? '';
             </div>
             <div class="r-export-group">
                 <button class="btn tool-btn" type="button" id="exportButton" title="Export this response to Excel">
-                    <i class="bi bi-file-earmark-spreadsheet-fill"></i> Tabulation Report
+                    <i class="bi bi-file-earmark-spreadsheet-fill"></i> TSR Report
                 </button>
 
-                <div id="exportOverlay" class="export-overlay">
-                    <div class="export-card">
-                        <h3>Preparing Report</h3>
-                        <p id="exportText">Initializing...</p>
-
-                        <div class="progress-track">
-                            <div class="progress-bar" id="progressBar"></div>
-                        </div>
-
-                        <div class="progress-percent">
-                            <span id="progressValue">0%</span>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
 

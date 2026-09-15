@@ -1,12 +1,3 @@
-<!--
-        View: app/Views/exports/satisfaction_excel.php
-        Rendered by ExportController::exportSatisfactionExcel()
-        Vars in: $title, $periodLabel, $categories, $rows, $totals, $noResponse, $totalClients
-
-        Same approach as reports_excel.php: a normal styled HTML table that
-        SheetJS reads straight out of the DOM and writes as a real .xlsx —
-        no PhpSpreadsheet, no composer install, no server round-trip.
-    -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -14,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= esc($title) ?></title>
+    <meta name="description"
+        content="One portal, multiple digital government services. Submit requests, access HR services, and connect with DOLE MIMAROPA online.">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/doleicon.png">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
@@ -377,10 +371,7 @@
                 <?= esc(strtoupper($periodLabel)) ?><br>
                 <strong>Program/Service:</strong>
                 <?= esc($servicesList !== '' ? $servicesList : 'N/A') ?><br>
-                <?php if (!empty($filterSummary)): ?>
-                    <strong>Exported by Filter:</strong>
-                    <?= esc($filterSummary) ?><br>
-                <?php endif; ?>
+
             </div>
 
 

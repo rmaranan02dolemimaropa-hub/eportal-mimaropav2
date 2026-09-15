@@ -349,8 +349,6 @@ class ExportController extends BaseController
         $periodLabel = 'All Records';
         if (!empty($year) && !empty($month)) {
             $periodLabel = date('F', mktime(0, 0, 0, (int) $month, 1)) . ' ' . $year;
-        } elseif (!empty($year)) {
-            $periodLabel = 'Year ' . $year;
         }
 
         // ---- Build a human-readable summary of applied filters ----
@@ -461,5 +459,34 @@ class ExportController extends BaseController
         }
 
         return 'Needs Review';
+    }
+
+    // app/Models/ClientSatisfactionModel.php
+
+    public function getAvailableYears()
+    {
+        return $this->db->table('client_satisfaction')
+            ->select('YEAR(`date`) as year', false)
+            ->where('date IS NOT NULL')
+            ->groupBy('YEAR(`date`)')
+            ->orderBy('year', 'DESC')
+            ->get()
+            ->getResultArray();
+    }
+
+    public function getAvailableMonths(?int $year = null)
+    {
+        $builder = $this->db->table('client_satisfaction')
+            ->select('MONTH(`date`) as month', false)
+            ->where('date IS NOT NULL');
+
+        if (!empty($year)) {
+            $builder->where('YEAR(`date`)', $year);
+        }
+
+        return $builder->groupBy('MONTH(`date`)')
+            ->orderBy('month', 'ASC')
+            ->get()
+            ->getResultArray();
     }
 }
