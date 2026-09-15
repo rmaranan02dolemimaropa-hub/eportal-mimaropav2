@@ -895,13 +895,97 @@ END
     {
         $feedbackModel = new FeedbackFormModel();
 
-        $data['feedbacks'] = $feedbackModel
-            ->orderBy('created_at', 'DESC')
-            ->paginate(10);
+        $data['title'] = 'Client Satisfaction Feedback';
 
-        $data['pager'] = $feedbackModel->pager;
+        $year = $this->request->getGet('year');
+        $month = $this->request->getGet('month');
+        $service = $this->request->getGet('service');
+        $rating = $this->request->getGet('rating');
+        $search = $this->request->getGet('search');
+
+        $builder = $feedbackModel->orderBy('created_at', 'DESC');
+
+        // ---- Year filter ----
+        if (!empty($year)) {
+            $builder->where('YEAR(created_at)', $year);
+        }
+
+        // ---- Month filter ----
+        if (!empty($month)) {
+            $builder->where('MONTH(created_at)', $month);
+        }
+
+        // ---- Service Availed filter ----
+        if (!empty($service)) {
+            $builder->where('other_service', $service);
+        }
+
+        // ---- Search filter (name / reference no. / service) ----
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('name', $search)
+                ->orLike('reference_no', $search)
+                ->orLike('other_service', $search)
+                ->groupEnd();
+        }
+
+        // ---- Overall Rating filter (derived field) ----
+        // Since "Excellent / Very Satisfied / Needs Review" is computed from
+        // 6 rating columns rather than stored directly, we can't paginate at
+        // the DB level when this filter is active. Instead, pull all matching
+        // rows, bucket them in PHP, then paginate the filtered array manually.
+        if (!empty($rating)) {
+
+            $all = $builder->findAll();
+
+            $filtered = array_values(array_filter($all, function ($row) use ($rating) {
+                return $this->resolveOverallRating($row) === $rating;
+            }));
+
+            $perPage = 10;
+            $page = (int) ($this->request->getGet('page') ?? 1);
+            $page = max($page, 1);
+
+            $offset = ($page - 1) * $perPage;
+            $data['feedbacks'] = array_slice($filtered, $offset, $perPage);
+
+            // Manually build a pager compatible with the view
+            $data['pager'] = service('pager');
+            $data['pager']->makeLinks($page, $perPage, count($filtered));
+
+        } else {
+
+            $data['feedbacks'] = $builder->paginate(10);
+            $data['pager'] = $feedbackModel->pager;
+        }
 
         return view('dashboard/feedback', $data);
+    }
+
+    /**
+     * Determine the overall rating bucket for a feedback row,
+     * based on the same logic used in the view.
+     */
+    private function resolveOverallRating(array $row): string
+    {
+        $scores = [
+            $row['rating_1'],
+            $row['rating_2'],
+            $row['rating_3'],
+            $row['rating_6'],
+            $row['rating_7'],
+            $row['rating_8'],
+        ];
+
+        $count = array_count_values($scores);
+
+        if (($count['Strongly agree'] ?? 0) >= 4) {
+            return 'Excellent';
+        } elseif (($count['Agree'] ?? 0) >= 4) {
+            return 'Very Satisfied';
+        }
+
+        return 'Needs Review';
     }
 
     /**
@@ -1016,7 +1100,7 @@ END
                         'status' => 'Processing',
                         'remarks' => $request['remarks'],
                         'message' =>
-                        'Your request has been received and is currently being processed.'
+                            'Your request has been received and is currently being processed.'
                     ]);
 
                     break;
@@ -1039,7 +1123,7 @@ END
                         'remarks' => $request['remarks'],
 
                         'message' =>
-                        'Your requested document is now ready for release. Please coordinate with the Human Resource Unit for claiming.',
+                            'Your requested document is now ready for release. Please coordinate with the Human Resource Unit for claiming.',
 
                         'csm_link' => $csmLink,
                         'csmtagalog_Link' => $csmtagalog_Link,
@@ -1061,7 +1145,7 @@ END
                         'status' => 'Completed',
                         'remarks' => $request['remarks'],
                         'message' =>
-                        'Your HR request has been successfully completed. Thank you for using the DOLE MIMAROPA e-Client Portal.'
+                            'Your HR request has been successfully completed. Thank you for using the DOLE MIMAROPA e-Client Portal.'
                     ]);
 
                     break;
@@ -1079,7 +1163,7 @@ END
                         'status' => 'Rejected',
                         'remarks' => $request['remarks'],
                         'message' =>
-                        'We regret to inform you that your request cannot be processed at this time.'
+                            'We regret to inform you that your request cannot be processed at this time.'
                     ]);
 
                     break;
@@ -1096,7 +1180,7 @@ END
                         'status' => $status,
                         'remarks' => $request['remarks'],
                         'message' =>
-                        'Your request status has been updated.'
+                            'Your request status has been updated.'
                     ]);
 
                     break;
@@ -1153,7 +1237,7 @@ END
                 'status' => 'Canceled',
                 'remarks' => $cancellationReason,
                 'message' =>
-                'Your HR request has been canceled. If you believe this was a mistake or you wish to submit a new request, please contact the Human Resource Unit.'
+                    'Your HR request has been canceled. If you believe this was a mistake or you wish to submit a new request, please contact the Human Resource Unit.'
             ]);
 
             $mailer->send(
@@ -1331,9 +1415,9 @@ END
         $request = $requests[0];
 
         return view('feedback/feedback_form_hr', [
-            'reference_no'    => $request['reference_no'],
+            'reference_no' => $request['reference_no'],
             'service_availed' => $combinedServices,
-            'request'         => $request,
+            'request' => $request,
         ]);
     }
 

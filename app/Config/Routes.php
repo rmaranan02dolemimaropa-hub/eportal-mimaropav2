@@ -119,6 +119,9 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
         'ExportController::printHrRequestReport'
     );
 
+    $routes->get('exports/satisfaction-excel/(:any)', 'ExportController::exportSatisfactionExcel/$1');
+    $routes->get('exports/satisfaction-excel', 'ExportController::exportSatisfactionExcel');
+
     $routes->get(
         'export/hr-request',
         'ExportController::exportHrRequestReport'

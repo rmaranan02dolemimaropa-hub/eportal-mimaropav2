@@ -7,6 +7,7 @@ use Dompdf\Dompdf;
 use Dompdf\Options;
 use Throwable;
 
+
 class ExportController extends BaseController
 {
     protected HrRequestModel $requestModel;
@@ -201,7 +202,6 @@ class ExportController extends BaseController
             return $this->response
                 ->download($filename, $pdf)
                 ->setContentType('application/pdf');
-
         } catch (Throwable $e) {
             log_message('error', 'PDF export error: {message}', [
                 'message' => $e->getMessage(),
@@ -261,7 +261,6 @@ class ExportController extends BaseController
             return $this->response
                 ->download($filename, $csvContent)
                 ->setContentType('text/csv');
-
         } catch (Throwable $e) {
 
             return $this->response
@@ -310,4 +309,104 @@ class ExportController extends BaseController
     }
 
 
+    public function exportSatisfactionExcel($referenceNo = null)
+    {
+        $year = $this->request->getGet('year');
+        $month = $this->request->getGet('month');
+
+
+        $builder = \Config\Database::connect()->table('client_satisfaction');
+
+        if (!empty($referenceNo)) {
+            $builder->where('reference_no', $referenceNo);
+        } else {
+            if (!empty($year))
+                $builder->where('YEAR(date)', $year);
+            if (!empty($month))
+                $builder->where('MONTH(date)', $month);
+        }
+
+
+        $responses = $builder->orderBy('id', 'ASC')->get()->getResultArray();
+
+        $periodLabel = 'All Records';
+        if (!empty($year) && !empty($month)) {
+            $periodLabel = date('F', mktime(0, 0, 0, (int) $month, 1)) . ' ' . $year;
+        } elseif (!empty($year)) {
+            $periodLabel = 'Year ' . $year;
+        }
+
+        // 6 CSM dimensions, in the same order as rating_1..rating_6
+        $categories = [
+            ['group' => 'Responsiveness', 'question' => 'Delivered on a timely manner'],
+            ['group' => 'Reliability', 'question' => 'Responded properly to your queries/needs'],
+            ['group' => 'Access and Facilities', 'question' => 'Easy access to service/facility'],
+            ['group' => 'Integrity', 'question' => 'Feel safe and secure in doing transaction'],
+            ['group' => 'Assurance', 'question' => 'Action Officer knowledgeable on DOLE programs/services'],
+            ['group' => 'Outcome', 'question' => 'How satisfied are you with the service you received?'],
+        ];
+
+        $ratingMap = [
+            'Strongly agree' => 5,
+            'Agree' => 4,
+            'Neither' => 3,
+            'Disagree' => 2,
+            'Strongly disagree' => 1,
+            // anything else (e.g. 'N/A', '') => no response (null)
+        ];
+
+        // ---- Build one row per client + running totals, same logic as the xlsx ----
+        $rows = [];
+        $totals = [];      // totals[$catIndex][5|4|3|2|1] = count
+        $noResponse = [];  // noResponse[$catIndex] = count
+        foreach (array_keys($categories) as $ci) {
+            $totals[$ci] = [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0];
+            $noResponse[$ci] = 0;
+        }
+
+        foreach ($responses as $i => $r) {
+            $ratings = [];
+            foreach (array_keys($categories) as $ci) {
+                $field = 'rating_' . ($ci + 1);
+                $label = trim((string) ($r[$field] ?? ''));
+                $score = $ratingMap[$label] ?? null;
+                $ratings[$ci] = $score;
+
+                if ($score !== null) {
+                    $totals[$ci][$score]++;
+                } else {
+                    $noResponse[$ci]++;
+                }
+            }
+
+            $rows[] = [
+                'no' => $i + 1,
+                'name' => $r['name'] ?? '',
+                'gender' => $r['sex'] ?? '',
+                'contact' => $r['contact_number'] ?? '',
+                'email' => $r['email_address'] ?? '',
+                'date' => !empty($r['date']) ? date('M j, Y', strtotime($r['date'])) : '',
+                'ratings' => $ratings,
+                'complaint' => $r['complaint'] ?? '',
+                'suggestion' => $r['suggestions'] ?? '',
+                'other_service' => $r['other_service'] ?? 'N/A',
+            ];
+        }
+
+
+        $totalClients = count($responses);
+        $servicesList = implode(', ', array_values(array_unique(array_column($rows, 'other_service'))));
+
+        return view('exports/satisfaction_excel', [
+            'title' => 'Tabulation of Survey Responses',
+            'periodLabel' => $periodLabel,
+            'categories' => $categories,
+            'rows' => $rows,
+            'totals' => $totals,
+            'noResponse' => $noResponse,
+            'totalClients' => $totalClients,
+            'servicesList' => $servicesList,
+        ]);
+
+    }
 }

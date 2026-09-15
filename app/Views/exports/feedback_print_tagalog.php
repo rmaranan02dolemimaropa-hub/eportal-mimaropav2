@@ -676,7 +676,6 @@
         <div>
             <h1>CSM Questionnaire &mdash; Tagalog</h1>
             <div class="sub">Official-layout replica of the DOLE MIMAROPA paper form, ready for printing.</div>
-        </div>
         <div class="toolbar-actions">
             <button type="button" class="tbtn primary" onclick="window.location.href='<?= base_url('feedback') ?>'">
                 Back
@@ -904,7 +903,8 @@
                     </tr>
                     <tr>
                         <td><strong>SQD5.</strong> Nagbayad ako ng makatwirang halaga para sa aking transaksyon.
-                            <em>(Kung ang sebisyo ay ibinigay ng libre, maglagay ng tsek sa hanay ng N/A.)</em></td>
+                            <em>(Kung ang sebisyo ay ibinigay ng libre, maglagay ng tsek sa hanay ng N/A.)</em>
+                        </td>
                         <td><?= checkSQD($feedback['sqd5'], 'strongly_agree') ?></td>
                         <td><?= checkSQD($feedback['sqd5'], 'agree') ?></td>
                         <td><?= checkSQD($feedback['sqd5'], 'neutral') ?></td>
@@ -948,7 +948,7 @@
             <div class="suggestions-block">
                 Mga suhestiyon kung paano pa mapapabuti pa ang aming mga serbisyo (opsyonal):
                 <div class="suggest-line">
-                    <?= nl2br(esc($feedback['suggestions'])) ?>
+                    <?= nl2br(esc($feedback['suggestions'] ?? '')) ?>
                 </div>
             </div>
 
