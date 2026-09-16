@@ -25,7 +25,7 @@ $referenceNoDisplay = isset($reference_no)
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= esc($title) ?></title>
+    <title>Feedback HR</title>
     <meta name="description"
         content="One portal, multiple digital government services. Submit requests, access HR services, and connect with DOLE MIMAROPA online.">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/img/doleicon.png">
