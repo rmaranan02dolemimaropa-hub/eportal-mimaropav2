@@ -125,7 +125,7 @@
   font-size: 0.82rem;
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 1.5rem;
   align-items: center;
   justify-content: space-between;
 }
@@ -133,6 +133,53 @@
   display: flex;
   gap: 1.3rem;
   flex-wrap: wrap;
+}
+
+/* Designed by branding */
+.gov-footer .designed-by {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.gov-footer .designed-by:hover {
+  color: rgba(255, 255, 255, 0.85);
+}
+.gov-footer .designer-logo {
+  height: 60px;
+  width: auto;
+  flex-shrink: 0;
+  opacity: 0.75;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+.gov-footer .designed-by:hover .designer-logo {
+  opacity: 1;
+}
+
+/* Designed by branding */
+.gov-footer .designed-by {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.6);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.gov-footer .designed-by:hover {
+  color: rgba(255, 255, 255, 0.85);
+}
+.gov-footer .designer-logo {
+  height: 60px;
+  width: auto;
+  flex-shrink: 0;
+  opacity: 0.75;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+.gov-footer .designed-by:hover .designer-logo {
+  opacity: 1;
 }
 
 /* ==========================================================================
@@ -210,6 +257,10 @@
   .gov-footer .footer-bottom .legal-links {
     justify-content: center;
   }
+
+  .gov-footer .designed-by {
+    justify-content: center;
+  }
 }
 
 /* ---------- Small mobile (≤575.98px): un-squeeze the two side-by-side
@@ -257,5 +308,14 @@
 
   .gov-footer p.footer-desc {
     font-size: 0.86rem;
+  }
+
+  .gov-footer .designed-by {
+    font-size: 0.78rem;
+    gap: 0.5rem;
+  }
+
+  .gov-footer .designer-logo {
+    height: 60px;
   }
 }

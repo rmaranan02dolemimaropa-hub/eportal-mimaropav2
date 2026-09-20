@@ -12,12 +12,17 @@
             <span>Department of Labor and Employment</span>
           </div>
         </div>
-        <p class="footer-desc">Delivering labor and employment services to Mindoro, Marinduque, Romblon, and Palawan — now with a digital front door for every client.</p>
+        <p class="footer-desc">Delivering labor and employment services to Mindoro, Marinduque, Romblon, and Palawan —
+          now with a digital front door for every client.</p>
         <div class="social-icons">
           <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
           <a href="#" aria-label="X (Twitter)"><i class="bi bi-twitter-x"></i></a>
           <a href="#" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
           <a href="#" aria-label="Email"><i class="bi bi-envelope"></i></a>
+        </div>
+        <div class="designed-by">
+          <span>Designed by</span>
+          <img src="assets/img/whitemt_logo.png" alt="Designed by Logo" class="designer-logo">
         </div>
       </div>
 
@@ -62,6 +67,7 @@
         <a href="#">Privacy Policy</a>
         <a href="#">Terms of Use</a>
       </div>
+
     </div>
   </div>
 </footer>
