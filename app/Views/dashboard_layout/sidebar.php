@@ -11,7 +11,7 @@
   $navLinks = static function (bool $mobile = false) use ($isActive): string {
     ob_start();
     $dismiss = $mobile ? 'data-bs-dismiss="offcanvas"' : '';
-  ?>
+    ?>
     <a href="dashboard" class="nav-link<?= $isActive('dashboard') ?>" <?= $dismiss ?>>
       <i class="bi bi-grid-1x2"></i><span>Dashboard</span>
     </a>
@@ -32,6 +32,9 @@
     <a href="feedback" class="nav-link<?= $isActive('feedback') ?>" <?= $dismiss ?>>
       <i class="bi bi-chat-right-text-fill"></i><span>Feedback</span>
     </a>
+    <a href="tia_page" class="nav-link<?= $isActive('tia_page') ?>" <?= $dismiss ?>>
+      <i class="bi bi-file-earmark-post"></i><span>TIA</span>
+    </a>
 
 
     <div class="nav-divider"></div>
@@ -39,7 +42,7 @@
     <a href="logout" class="nav-link nav-link-logout" <?= $dismiss ?>>
       <i class="bi bi-box-arrow-right"></i><span>Logout</span>
     </a>
-  <?php
+    <?php
     return (string) ob_get_clean();
   };
   ?>
@@ -52,8 +55,8 @@
   </aside>
 
   <!-- ============ OFFCANVAS SIDEBAR (mobile / tablet, <992px) ============ -->
-  <div class="offcanvas offcanvas-start sidebar-offcanvas" tabindex="-1"
-    id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
+  <div class="offcanvas offcanvas-start sidebar-offcanvas" tabindex="-1" id="mobileSidebar"
+    aria-labelledby="mobileSidebarLabel">
     <div class="offcanvas-header">
       <span class="offcanvas-title" id="mobileSidebarLabel">Menu</span>
       <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
