@@ -189,3 +189,11 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
         'EportalController::logout'
     );
 });
+
+// Training Impact Assessment
+$routes->get('tia', 'HrController::create');
+$routes->post('tia', 'HrController::store');
+
+// Optional admin routes
+$routes->get('tia/list', 'HrController::index');
+$routes->get('tia/(:num)', 'HrController::show/$1');
