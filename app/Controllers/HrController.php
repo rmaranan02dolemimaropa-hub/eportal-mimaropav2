@@ -207,9 +207,13 @@ class HrController extends BaseController
 
 
 
+    // -------------------------------------------------------------------------
+    // Dashboard: Trainings + Participants
+    // -------------------------------------------------------------------------
+
     /**
-     * Show the list of trainings (table page)
-     * URL: GET /tia
+     * Training list page
+     * GET /tia_page
      */
     public function tia_page()
     {
@@ -217,12 +221,12 @@ class HrController extends BaseController
             ->orderBy('created_at', 'DESC')
             ->findAll();
 
-        return view('dashboard/tia', $data);   // your table view
+        return view('dashboard/tia', $data);
     }
 
     /**
      * Store a new Training
-     * URL: POST /tia/store-training
+     * POST /tia/store-training
      */
     public function storeTraining()
     {
@@ -238,20 +242,19 @@ class HrController extends BaseController
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $this->validator->getErrors()
+                'errors' => $this->validator->getErrors(),
             ])->setStatusCode(422);
         }
 
-        // Generate a unique training_code
         $trainingCode = 'TRN-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -5));
 
         $data = [
-            'training_code' => $trainingCode,          // ← THIS WAS MISSING
+            'training_code' => $trainingCode,
             'training_title' => $this->request->getPost('training_title'),
             'training_dates' => $this->request->getPost('training_dates'),
-            'conducted_by' => $this->request->getPost('conducted_by'),
-            'office' => $this->request->getPost('office'),
-            'immediate_superior' => $this->request->getPost('immediate_superior'),
+            'conducted_by' => $this->request->getPost('conducted_by') ?: null,
+            'office' => $this->request->getPost('office') ?: null,
+            'immediate_superior' => $this->request->getPost('immediate_superior') ?: null,
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
         ];
@@ -263,7 +266,7 @@ class HrController extends BaseController
                 return $this->response->setJSON([
                     'success' => false,
                     'message' => 'Failed to save training',
-                    'errors' => $this->trainingsModel->errors()
+                    'errors' => $this->trainingsModel->errors(),
                 ])->setStatusCode(500);
             }
 
@@ -271,23 +274,22 @@ class HrController extends BaseController
                 'success' => true,
                 'message' => 'Training added successfully!',
                 'id' => $id,
-                'training_code' => $trainingCode
+                'training_code' => $trainingCode,
             ])->setStatusCode(201);
-
         } catch (\Exception $e) {
             log_message('error', 'Store Training Error: ' . $e->getMessage());
 
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'Server error occurred',
-                'error' => ENVIRONMENT === 'development' ? $e->getMessage() : null
+                'error' => ENVIRONMENT === 'development' ? $e->getMessage() : null,
             ])->setStatusCode(500);
         }
     }
 
     /**
-     * Add a Participant to a Training
-     * URL: POST /tia/add-participant
+     * Add a single participant
+     * POST /tia/add-participant
      */
     public function addParticipant()
     {
@@ -302,13 +304,12 @@ class HrController extends BaseController
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $this->validator->getErrors()
+                'errors' => $this->validator->getErrors(),
             ])->setStatusCode(422);
         }
 
         $trainingCode = $this->request->getPost('training_code');
 
-        // Check if training exists by code
         $training = $this->trainingsModel
             ->where('training_code', $trainingCode)
             ->first();
@@ -316,7 +317,7 @@ class HrController extends BaseController
         if (!$training) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Training not found'
+                'message' => 'Training not found',
             ])->setStatusCode(404);
         }
 
@@ -336,50 +337,54 @@ class HrController extends BaseController
                 return $this->response->setJSON([
                     'success' => false,
                     'message' => 'Failed to add participant',
-                    'errors' => $this->participantsModel->errors()
+                    'errors' => $this->participantsModel->errors(),
                 ])->setStatusCode(500);
             }
 
             return $this->response->setJSON([
                 'success' => true,
                 'message' => 'Participant added successfully!',
-                'id' => $id
+                'id' => $id,
             ])->setStatusCode(201);
-
         } catch (\Exception $e) {
             log_message('error', 'Add Participant Error: ' . $e->getMessage());
 
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'Server error occurred',
-                'error' => ENVIRONMENT === 'development' ? $e->getMessage() : null
+                'error' => ENVIRONMENT === 'development' ? $e->getMessage() : null,
             ])->setStatusCode(500);
         }
     }
+
     /**
-     * Optional: Get participants of a specific training
-     * URL: GET /tia/participants/(:num)
+     * Get participants for a training
+     * GET /tia/participants/(:any)
      */
     public function getParticipants($trainingCode = null)
     {
         if (!$trainingCode) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Training code is required'
+                'message' => 'Training code is required',
             ])->setStatusCode(400);
         }
 
         $participants = $this->participantsModel
             ->where('training_code', $trainingCode)
-            ->orderBy('created_at', 'DESC')
+            ->orderBy('id', 'ASC')
             ->findAll();
 
         return $this->response->setJSON([
             'success' => true,
-            'data' => $participants
+            'data' => $participants,
         ]);
     }
 
+    /**
+     * Export participants as CSV
+     * GET /tia/export-participants/(:any)
+     */
     public function exportParticipants($trainingCode = null)
     {
         if (!$trainingCode) {
@@ -399,47 +404,58 @@ class HrController extends BaseController
             ->orderBy('id', 'ASC')
             ->findAll();
 
-        $filename = 'Participants_' . preg_replace('/[^A-Za-z0-9_\-]/', '_', $training['training_title']) . '.csv';
+        $safeTitle = preg_replace('/[^A-Za-z0-9_\-]/', '_', $training['training_title']);
+        $filename = 'Participants_' . $safeTitle . '.csv';
 
-        header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-        header('Pragma: no-cache');
-        header('Expires: 0');
+        return $this->response
+            ->setHeader('Content-Type', 'text/csv')
+            ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
+            ->setHeader('Pragma', 'no-cache')
+            ->setHeader('Expires', '0')
+            ->setBody($this->buildParticipantsCsv($participants));
+    }
 
-        $output = fopen('php://output', 'w');
+    /**
+     * Build CSV string for participants export
+     */
+    private function buildParticipantsCsv(array $participants): string
+    {
+        $output = fopen('php://temp', 'r+');
         fputcsv($output, ['Name of Participant', 'Position', 'Email Address']);
 
         foreach ($participants as $p) {
             fputcsv($output, [
-                $p['participant_name'],
-                $p['position'],
-                $p['email']
+                $p['participant_name'] ?? '',
+                $p['position'] ?? '',
+                $p['email'] ?? '',
             ]);
         }
 
+        rewind($output);
+        $csv = stream_get_contents($output);
         fclose($output);
-        exit;
+
+        return $csv !== false ? $csv : '';
     }
 
     /**
      * Bulk add participants
-     * URL: POST /tia/add-participants-bulk
+     * POST /tia/add-participants-bulk
      */
     public function addParticipantsBulk()
     {
-        $json = $this->request->getJSON(true);
+        $json = $this->request->getJSON(true) ?? [];
 
-        $trainingCode = $json['training_code'] ?? null;   // ← change from training_id
+        $trainingCode = $json['training_code'] ?? null;
         $participants = $json['participants'] ?? [];
 
-        if (!$trainingCode || empty($participants)) {
+        if (!$trainingCode || empty($participants) || !is_array($participants)) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Training code and participants are required'
+                'message' => 'Training code and participants are required',
             ])->setStatusCode(400);
         }
 
-        // Verify training exists
         $training = $this->trainingsModel
             ->where('training_code', $trainingCode)
             ->first();
@@ -447,7 +463,7 @@ class HrController extends BaseController
         if (!$training) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Training not found'
+                'message' => 'Training not found',
             ])->setStatusCode(404);
         }
 
@@ -455,11 +471,25 @@ class HrController extends BaseController
         $errors = [];
 
         foreach ($participants as $p) {
+            $name = trim($p['participant_name'] ?? '');
+            $position = trim($p['position'] ?? '');
+            $email = trim($p['email'] ?? '');
+
+            if ($name === '' || $position === '' || $email === '') {
+                $errors[] = $name ?: 'Unknown';
+                continue;
+            }
+
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = $name . ' (invalid email)';
+                continue;
+            }
+
             $data = [
-                'training_code' => $trainingCode,          // only code
-                'participant_name' => $p['participant_name'] ?? '',
-                'position' => $p['position'] ?? '',
-                'email' => $p['email'] ?? '',
+                'training_code' => $trainingCode,
+                'participant_name' => $name,
+                'position' => $position,
+                'email' => $email,
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ];
@@ -467,7 +497,7 @@ class HrController extends BaseController
             if ($this->participantsModel->insert($data)) {
                 $inserted++;
             } else {
-                $errors[] = $p['participant_name'] ?? 'Unknown';
+                $errors[] = $name;
             }
         }
 
@@ -475,10 +505,83 @@ class HrController extends BaseController
             'success' => true,
             'message' => "Successfully added {$inserted} participant(s)",
             'count' => $inserted,
-            'failed' => $errors
+            'failed' => $errors,
         ]);
+    }
+
+    /**
+     * Update a participant
+     * POST /tia/update-participant/(:num)
+     */
+    public function updateParticipant($id = null)
+    {
+        if (!$id) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Participant ID is required',
+            ])->setStatusCode(400);
+        }
+
+        $participant = $this->participantsModel->find($id);
+        if (!$participant) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Participant not found',
+            ])->setStatusCode(404);
+        }
+
+        $rules = [
+            'participant_name' => 'required|max_length[150]',
+            'position' => 'required|max_length[150]',
+            'email' => 'required|valid_email|max_length[150]',
+        ];
+
+        if (!$this->validate($rules)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $this->validator->getErrors(),
+            ])->setStatusCode(422);
+        }
+
+        $data = [
+            'participant_name' => $this->request->getPost('participant_name'),
+            'position' => $this->request->getPost('position'),
+            'email' => $this->request->getPost('email'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ];
+
+        try {
+            $updated = $this->participantsModel->update($id, $data);
+
+            if ($updated === false) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to update participant',
+                    'errors' => $this->participantsModel->errors(),
+                ])->setStatusCode(500);
+            }
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Participant updated successfully!',
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Update Participant Error: ' . $e->getMessage());
+
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Server error occurred',
+                'error' => ENVIRONMENT === 'development' ? $e->getMessage() : null,
+            ])->setStatusCode(500);
+        }
     }
 
 
 
+
 }
+
+
+
+

@@ -1,99 +1,183 @@
 /* =====================================================
-   TIA Dashboard Table Styles
+   TIA Dashboard — aligned with DOLE MIMAROPA tokens
    ===================================================== */
 
 .tia-table {
-  font-size: 0.92rem;
+  min-width: 640px;
+  font-size: 0.86rem;
 }
 
 .tia-table thead th {
-  background-color: #0b3d91;
-  color: #ffffff;
-  font-weight: 600;
-  padding: 14px 16px;
-  border: none;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #f9fafc;
+  color: var(--color-text-muted, #6b7280);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  padding: 12px 16px;
   white-space: nowrap;
 }
 
 .tia-table tbody td {
-  padding: 13px 16px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
   vertical-align: middle;
-  border-bottom: 1px solid #e9ecef;
 }
 
 .tia-table tbody tr:hover {
-  background-color: #f0f5ff;
+  background-color: #f8fafc;
 }
 
-.tia-table .btn-outline-primary {
-  border-color: #0b3d91;
-  color: #0b3d91;
-  font-size: 0.82rem;
-  padding: 5px 12px;
+.tia-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Modals — same minimalist style as user modals */
+.add-training-modal .modal-content,
+.manage-participants-modal .modal-content,
+.edit-participant-modal .modal-content {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.add-training-modal .modal-header,
+.manage-participants-modal .modal-header,
+.edit-participant-modal .modal-header {
+  background: #fff !important;
+  color: #111827 !important;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 20px 24px;
+}
+
+.add-training-modal .modal-title,
+.manage-participants-modal .modal-title,
+.edit-participant-modal .modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #111827;
+}
+
+.add-training-modal .btn-close,
+.manage-participants-modal .btn-close,
+.edit-participant-modal .btn-close {
+  filter: none;
+  opacity: 0.5;
+}
+
+.add-training-modal .modal-body,
+.manage-participants-modal .modal-body,
+.edit-participant-modal .modal-body {
+  padding: 24px;
+}
+
+.add-training-modal .form-label,
+.manage-participants-modal .form-label,
+.edit-participant-modal .form-label {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 6px;
+}
+
+.add-training-modal .form-control,
+.manage-participants-modal .form-control,
+.edit-participant-modal .form-control {
+  border: 1px solid #e5e7eb;
   border-radius: 6px;
-  transition: all 0.2s;
+  font-size: 14px;
+  padding: 9px 12px;
+  color: #111827;
+  background: #fafafa;
 }
 
-.tia-table .btn-outline-primary:hover {
-  background-color: #0b3d91;
+.add-training-modal .form-control:focus,
+.manage-participants-modal .form-control:focus,
+.edit-participant-modal .form-control:focus {
+  border-color: #9ca3af;
+  box-shadow: none;
+  background: #fff;
+}
+
+.add-training-modal .modal-footer,
+.manage-participants-modal .modal-footer,
+.edit-participant-modal .modal-footer {
+  border-top: 1px solid #e5e7eb;
+  padding: 16px 24px;
+}
+
+.add-training-modal .btn,
+.manage-participants-modal .btn,
+.edit-participant-modal .btn {
+  font-size: 13.5px;
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 8px 16px;
+}
+
+.add-training-modal .btn-secondary,
+.manage-participants-modal .btn-secondary,
+.edit-participant-modal .btn-secondary {
+  background: #fff;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+}
+
+.add-training-modal .btn-secondary:hover,
+.manage-participants-modal .btn-secondary:hover,
+.edit-participant-modal .btn-secondary:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.add-training-modal .btn-primary,
+.manage-participants-modal .btn-primary,
+.edit-participant-modal .btn-primary {
+  background: #111827;
+  border-color: #111827;
   color: #fff;
 }
 
-/* Card */
-.card {
-  border-radius: 12px;
-  overflow: hidden;
+.add-training-modal .btn-primary:hover,
+.manage-participants-modal .btn-primary:hover,
+.edit-participant-modal .btn-primary:hover {
+  background: #1f2937;
+  border-color: #1f2937;
 }
 
-/* Modal tweaks */
-#addParticipantModal .modal-content {
-  border-radius: 14px;
-}
-
-#addParticipantModal .form-control:focus {
-  border-color: #0b3d91;
-  box-shadow: 0 0 0 0.2rem rgba(11, 61, 145, 0.18);
-}
-
-#addParticipantModal .form-label {
-  font-size: 0.88rem;
-  color: #495057;
-}
-
-#participantsTable input {
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  padding: 6px 10px;
+/* Inline inputs in add-participants table */
+#newParticipantsTable input {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 8px 12px;
   width: 100%;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+  background: #fafafa;
 }
 
-#participantsTable input:focus {
-  border-color: #0b3d91;
-  box-shadow: 0 0 0 0.15rem rgba(11, 61, 145, 0.2);
+#newParticipantsTable input:focus {
+  border-color: #9ca3af;
+  background: #fff;
+  box-shadow: none;
   outline: none;
 }
 
-#participantsTable td {
-  padding: 6px;
+#newParticipantsTable td {
+  padding: 8px 6px;
   vertical-align: middle;
 }
 
-#participantsTable .btn-remove-row {
-  padding: 2px 8px;
-  font-size: 0.85rem;
-}
-
-/* Responsive */
 @media (max-width: 768px) {
   .tia-table thead th,
   .tia-table tbody td {
     padding: 10px 12px;
-    font-size: 0.85rem;
-  }
-
-  .tia-table .btn-outline-primary {
-    font-size: 0.78rem;
-    padding: 4px 10px;
+    font-size: 0.82rem;
   }
 }

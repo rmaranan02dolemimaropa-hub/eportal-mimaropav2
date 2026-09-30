@@ -177,17 +177,17 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
         'EportalController::deleteUser/$1'
     );
 
+
     // Training Impact Assessment - Dashboard
     $routes->get('tia_page', 'HrController::tia_page');
     $routes->post('tia/store-training', 'HrController::storeTraining');
     $routes->post('tia/add-participant', 'HrController::addParticipant');
     $routes->get('tia/participants/(:any)', 'HrController::getParticipants/$1');
-
     $routes->post('tia/add-participants-bulk', 'HrController::addParticipantsBulk');
     $routes->get('tia/export-participants/(:any)', 'HrController::exportParticipants/$1');
-
     $routes->post('tia/update-participant/(:num)', 'HrController::updateParticipant/$1');
-    $routes->post('tia/delete-participant/(:num)', 'HrController::deleteParticipant/$1');
+
+
 
 
 
@@ -204,6 +204,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
 
 
 });
+
 
 // Training Impact Assessment
 $routes->get('tia_ad', 'HrController::create');

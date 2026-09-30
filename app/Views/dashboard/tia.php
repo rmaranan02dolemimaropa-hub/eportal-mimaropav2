@@ -2,148 +2,150 @@
 <?= $this->include('dashboard_layout/navbar') ?>
 <?= $this->include('dashboard_layout/sidebar') ?>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="<?= base_url('assets/css/tia-dashboard.css') ?>">
+
 <main class="main-content">
 
-    <div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Training Impact Assessment</h1>
+            <p class="page-subtitle">Manage trainings and their participants</p>
+        </div>
+        <button type="button" class="btn btn-dole-primary" data-bs-toggle="modal" data-bs-target="#addTrainingModal">
+            <i class="bi bi-plus-lg me-1"></i> Add Training
+        </button>
+    </div>
 
-        <!-- Page Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h4 class="fw-bold mb-1" style="color: #0b3d91;">Training Impact Assessment</h4>
-                <p class="text-muted mb-0">List of trainings and participants</p>
-            </div>
-            <button class="btn btn-primary" style="background:#0b3d91; border-color:#0b3d91;" data-bs-toggle="modal"
-                data-bs-target="#addTrainingModal">
-                <i class="bi bi-plus-lg me-1"></i> Add Training
-            </button>
+    <!-- Training Table Panel -->
+    <div class="panel table-panel">
+        <div class="panel-header">
+            <h2 class="panel-title">Trainings</h2>
         </div>
 
-        <!-- Training Table Card -->
-        <div class="card shadow-sm border-0">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0 tia-table">
-                        <thead>
+        <div class="table-responsive">
+            <table class="table requests-table tia-table mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Training Title</th>
+                        <th>Training Date</th>
+                        <th>Conducted by</th>
+                        <th>Office</th>
+                        <th>Immediate Superior</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (!empty($trainings)): ?>
+                        <?php foreach ($trainings as $index => $row): ?>
                             <tr>
-                                <th>#</th>
-                                <th>Training Title</th>
-                                <th>Training Date</th>
-                                <th>Conducted by</th>
-                                <th>Office</th>
-                                <th>Immediate Superior</th>
-                                <th class="text-center">Actions</th>
+                                <td><?= $index + 1 ?></td>
+                                <td>
+                                    <span class="ref-no"><?= esc($row['training_title']) ?></span>
+                                </td>
+                                <td><?= esc($row['training_dates']) ?></td>
+                                <td><?= esc($row['conducted_by'] ?? '—') ?></td>
+                                <td><?= esc($row['office'] ?? '—') ?></td>
+                                <td><?= esc($row['immediate_superior'] ?? '—') ?></td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-sm tool-btn manage-participants-btn"
+                                        data-bs-toggle="modal" data-bs-target="#manageParticipantsModal"
+                                        data-training-code="<?= esc($row['training_code'], 'attr') ?>"
+                                        data-training-title="<?= esc($row['training_title'], 'attr') ?>">
+                                        <i class="bi bi-people me-1"></i> Manage
+                                    </button>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (!empty($trainings)): ?>
-                                    <?php foreach ($trainings as $index => $row): ?>
-                                            <tr>
-                                                <td><?= $index + 1 ?></td>
-                                                <td class="fw-semibold"><?= esc($row['training_title']) ?></td>
-                                                <td><?= esc($row['training_dates']) ?></td>
-                                                <td><?= esc($row['conducted_by'] ?? '—') ?></td>
-                                                <td><?= esc($row['office'] ?? '—') ?></td>
-                                                <td><?= esc($row['immediate_superior'] ?? '—') ?></td>
-                                                <td class="text-center">
-                                                    <button class="btn btn-sm btn-outline-primary manage-participants-btn"
-                                                        data-bs-toggle="modal" data-bs-target="#manageParticipantsModal"
-                                                        data-training-code="<?= esc($row['training_code']) ?>"
-                                                        data-training-title="<?= esc($row['training_title']) ?>">
-                                                        <i class="bi bi-people me-1"></i> Manage Participants
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                    <?php endforeach; ?>
-                            <?php else: ?>
-                                    <tr>
-                                        <td colspan="7" class="text-center text-muted py-5">
-                                            No trainings found.
-                                        </td>
-                                    </tr>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-5">
+                                No trainings found. Click “Add Training” to create one.
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
-
     </div>
 
     <!-- ===================== ADD TRAINING MODAL ===================== -->
     <div class="modal fade" id="addTrainingModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header" style="background:#0b3d91; color:white;">
+            <div class="modal-content add-training-modal">
+                <div class="modal-header">
                     <h5 class="modal-title">
                         <i class="bi bi-plus-circle me-2"></i> Add New Training
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="addTrainingForm">
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Training Title <span class="text-danger">*</span></label>
+                            <label class="form-label">Training Title <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="training_title" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Training Date/s <span class="text-danger">*</span></label>
+                            <label class="form-label">Training Date/s <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="training_dates"
                                 placeholder="e.g. March 10-12, 2026" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Conducted by</label>
+                            <label class="form-label">Conducted by</label>
                             <input type="text" class="form-control" name="conducted_by" placeholder="e.g. HR Division">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Office</label>
+                            <label class="form-label">Office</label>
                             <input type="text" class="form-control" name="office">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Name of Immediate Superior</label>
+                            <label class="form-label">Name of Immediate Superior</label>
                             <input type="text" class="form-control" name="immediate_superior">
                         </div>
                     </div>
-                    <div class="modal-footer border-0">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary" style="background:#0b3d91; border-color:#0b3d91;">
-                            Save Training
-                        </button>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Training</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- ===================== MANAGE PARTICIPANTS MODAL (Combined) ===================== -->
+    <!-- ===================== MANAGE PARTICIPANTS MODAL ===================== -->
     <div class="modal fade" id="manageParticipantsModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header" style="background:#0b3d91; color:white;">
+            <div class="modal-content manage-participants-modal">
+                <div class="modal-header">
                     <h5 class="modal-title">
                         <i class="bi bi-people me-2"></i> Manage Participants
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
                 <div class="modal-body">
                     <!-- Training info -->
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Training</label>
+                    <div class="mb-4">
+                        <label class="form-label">Training</label>
                         <input type="text" class="form-control" id="manage_training_title" readonly>
                         <input type="hidden" id="manage_training_code">
                     </div>
 
-                    <!-- ===== EXISTING PARTICIPANTS ===== -->
-                    <h6 class="fw-bold mb-2">Current Participants</h6>
-                    <div class="table-responsive mb-3">
-                        <table class="table table-bordered table-sm align-middle mb-0">
-                            <thead class="table-light">
+                    <!-- Current participants -->
+                    <h6 class="detail-section-title mb-3">
+                        <i class="bi bi-person-check"></i> Current Participants
+                    </h6>
+                    <div class="table-responsive mb-2">
+                        <table class="table requests-table table-sm align-middle mb-0">
+                            <thead>
                                 <tr>
                                     <th style="width:40px;">#</th>
                                     <th>Name</th>
                                     <th>Position</th>
                                     <th>Email</th>
-                                    <th style="width:100px;" class="text-center">Action</th>
+                                    <th style="width:110px;" class="text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="existingParticipantsBody">
@@ -151,36 +153,38 @@
                             </tbody>
                         </table>
                     </div>
-                    <div id="existingEmpty" class="text-muted text-center mb-4 d-none">
+                    <div id="existingEmpty" class="text-muted text-center py-3 d-none">
                         No participants yet.
                     </div>
 
-                    <hr>
+                    <hr class="my-4">
 
-                    <!-- ===== ADD NEW PARTICIPANTS ===== -->
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="fw-bold mb-0">Add New Participants</h6>
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-sm btn-outline-success" id="exportCsvBtn">
+                    <!-- Add new participants -->
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                        <h6 class="detail-section-title mb-0">
+                            <i class="bi bi-person-plus"></i> Add New Participants
+                        </h6>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button type="button" class="btn btn-sm tool-btn" id="exportCsvBtn">
                                 <i class="bi bi-download me-1"></i> Export CSV
                             </button>
-                            <label class="btn btn-sm btn-outline-primary mb-0">
+                            <label class="btn btn-sm tool-btn mb-0">
                                 <i class="bi bi-upload me-1"></i> Import CSV
-                                <input type="file" id="importCsvInput" accept=".csv" hidden>
+                                <input type="file" id="importCsvInput" accept=".csv,text/csv" hidden>
                             </label>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" id="addRowBtn">
+                            <button type="button" class="btn btn-sm tool-btn" id="addRowBtn">
                                 <i class="bi bi-plus-lg"></i> Add Row
                             </button>
                         </div>
                     </div>
 
                     <small class="text-muted d-block mb-2">
-                        Paste from Excel or import a CSV file (columns: Name, Position, Email)
+                        Paste from Excel or import a CSV (columns: Name, Position, Email)
                     </small>
 
                     <div class="table-responsive">
-                        <table class="table table-bordered table-sm align-middle mb-0" id="newParticipantsTable">
-                            <thead class="table-light">
+                        <table class="table requests-table table-sm align-middle mb-0" id="newParticipantsTable">
+                            <thead>
                                 <tr>
                                     <th style="width:40px;">#</th>
                                     <th>Name of Participant</th>
@@ -190,16 +194,15 @@
                                 </tr>
                             </thead>
                             <tbody id="newParticipantsBody">
-                                <!-- empty rows for adding -->
+                                <!-- rows for adding -->
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="saveNewParticipantsBtn"
-                        style="background:#0b3d91; border-color:#0b3d91;">
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveNewParticipantsBtn">
                         Save New Participants
                     </button>
                 </div>
@@ -210,34 +213,33 @@
     <!-- ===================== EDIT PARTICIPANT MODAL ===================== -->
     <div class="modal fade" id="editParticipantModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header" style="background:#0b3d91; color:white;">
+            <div class="modal-content edit-participant-modal">
+                <div class="modal-header">
                     <h5 class="modal-title">
                         <i class="bi bi-pencil-square me-2"></i> Edit Participant
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="editParticipantForm">
                     <div class="modal-body">
                         <input type="hidden" id="edit_participant_id" name="id">
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Name of Participant <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="edit_participant_name" name="participant_name" required>
+                            <label class="form-label">Name of Participant <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="edit_participant_name" name="participant_name"
+                                required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Position <span class="text-danger">*</span></label>
+                            <label class="form-label">Position <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="edit_position" name="position" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
+                            <label class="form-label">Email Address <span class="text-danger">*</span></label>
                             <input type="email" class="form-control" id="edit_email" name="email" required>
                         </div>
                     </div>
-                    <div class="modal-footer border-0">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary" style="background:#0b3d91; border-color:#0b3d91;">
-                            Update Participant
-                        </button>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Participant</button>
                     </div>
                 </form>
             </div>
@@ -248,367 +250,460 @@
 
 <?= $this->include('dashboard_layout/loading') ?>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<link rel="stylesheet" href="<?= base_url('assets/css/tia-dashboard.css') ?>">
+<!-- NOTE: remove this line if dashboard_layout/head or /loading already loads Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function () {
 
-    // ========== ADD TRAINING ==========
-    document.getElementById('addTrainingForm').addEventListener('submit', async function (e) {
-        e.preventDefault();
-        const form = this;
-        const submitBtn = form.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = 'Saving...';
+        // =====================================================
+        // CONFIG + CSRF
+        // =====================================================
+        const URLS = {
+            storeTraining: '<?= site_url('tia/store-training') ?>',
+            participants: '<?= site_url('tia/participants') ?>',
+            exportCsv: '<?= site_url('tia/export-participants') ?>',
+            addBulk: '<?= site_url('tia/add-participants-bulk') ?>',
+            updateParticipant: '<?= site_url('tia/update-participant') ?>'
+        };
 
-        try {
-            const response = await fetch('<?= site_url('tia/store-training') ?>', {
-                method: 'POST',
-                body: new FormData(form),
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            });
-            const result = await response.json();
+        const csrfName = '<?= csrf_token() ?>';
+        const csrfHeader = '<?= csrf_header() ?>';
+        let csrfHash = '<?= csrf_hash() ?>';   // let: it may be refreshed after each request
 
-            if (result.success) {
-                bootstrap.Modal.getInstance(document.getElementById('addTrainingModal')).hide();
-                form.reset();
-                location.reload();
-            } else {
-                let msg = result.message || 'Failed to save training.';
-                if (result.errors) msg += '\n\n' + Object.values(result.errors).join('\n');
-                alert(msg);
+        /**
+         * Central fetch helper.
+         * - always sends the CSRF header + AJAX header
+         * - refreshes the CSRF token if the server returns result.csrf
+         * - always returns parsed JSON, or throws a readable Error
+         */
+        async function apiFetch(url, options = {}) {
+            options.headers = Object.assign({
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+                [csrfHeader]: csrfHash
+            }, options.headers || {});
+
+            const response = await fetch(url, options);
+
+            let data = null;
+            try { data = await response.json(); } catch (e) { /* not JSON */ }
+
+            if (data && data.csrf) csrfHash = data.csrf;
+
+            if (!data) {
+                throw new Error('Server returned an invalid response (HTTP ' + response.status + ').');
             }
-        } catch (err) {
-            console.error(err);
-            alert('Network error. Please try again.');
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
-        }
-    });
-
-    // ========== HELPERS ==========
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    let newRowCount = 0;
-
-    function createNewParticipantRow(name = '', position = '', email = '') {
-        newRowCount++;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td class="text-center text-muted">${newRowCount}</td>
-            <td><input type="text" class="form-control form-control-sm new-name" value="${escapeHtml(name)}" placeholder="Full Name"></td>
-            <td><input type="text" class="form-control form-control-sm new-position" value="${escapeHtml(position)}" placeholder="Position"></td>
-            <td><input type="email" class="form-control form-control-sm new-email" value="${escapeHtml(email)}" placeholder="email@example.com"></td>
-            <td class="text-center">
-                <button type="button" class="btn btn-sm btn-outline-danger btn-remove-new-row" title="Remove">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </td>
-        `;
-        return tr;
-    }
-
-    function renumberNewRows() {
-        const rows = document.querySelectorAll('#newParticipantsBody tr');
-        rows.forEach((row, i) => {
-            row.querySelector('td:first-child').textContent = i + 1;
-        });
-        newRowCount = rows.length;
-    }
-
-    // ========== LOAD EXISTING PARTICIPANTS ==========
-    async function loadExistingParticipants(trainingCode) {
-        const tbody = document.getElementById('existingParticipantsBody');
-        const emptyMsg = document.getElementById('existingEmpty');
-
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Loading...</td></tr>';
-        emptyMsg.classList.add('d-none');
-
-        try {
-            const response = await fetch(`<?= site_url('tia/participants') ?>/${trainingCode}`, {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            });
-            const result = await response.json();
-
-            tbody.innerHTML = '';
-
-            if (result.success && result.data && result.data.length > 0) {
-                result.data.forEach((p, index) => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td class="text-center text-muted">${index + 1}</td>
-                        <td class="fw-semibold">${escapeHtml(p.participant_name)}</td>
-                        <td>${escapeHtml(p.position)}</td>
-                        <td>${escapeHtml(p.email)}</td>
-                        <td class="text-center">
-                            <button type="button" class="btn btn-sm btn-outline-primary btn-edit-participant"
-                                data-id="${p.id}"
-                                data-name="${escapeHtml(p.participant_name)}"
-                                data-position="${escapeHtml(p.position)}"
-                                data-email="${escapeHtml(p.email)}"
-                                title="Edit">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-danger btn-delete-participant"
-                                data-id="${p.id}"
-                                title="Delete">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            } else {
-                emptyMsg.classList.remove('d-none');
+            if (!response.ok && !data.message) {
+                throw new Error('Request failed (HTTP ' + response.status + ').');
             }
-        } catch (err) {
-            console.error(err);
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Failed to load participants.</td></tr>';
+            return data;
         }
-    }
 
-    // ========== OPEN MANAGE MODAL ==========
-    document.querySelectorAll('.manage-participants-btn').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const code = this.dataset.trainingCode;
-            const title = this.dataset.trainingTitle;
+        function buildFormData(form) {
+            const fd = form ? new FormData(form) : new FormData();
+            fd.append(csrfName, csrfHash);
+            return fd;
+        }
 
-            document.getElementById('manage_training_code').value = code;
-            document.getElementById('manage_training_title').value = title;
+        // =====================================================
+        // HELPERS
+        // =====================================================
+        function escapeHtml(text) {
+            if (text === null || text === undefined) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
 
-            // Reset add-new table
-            const newBody = document.getElementById('newParticipantsBody');
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function setBusy(btn, busyText) {
+            const original = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = busyText;
+            return () => { btn.disabled = false; btn.innerHTML = original; };
+        }
+
+        function showErrors(result, fallback) {
+            let msg = (result && result.message) || fallback;
+            if (result && result.errors) msg += '\n\n' + Object.values(result.errors).join('\n');
+            alert(msg);
+        }
+
+        // CSV parser (handles quotes, commas inside quotes, BOM, CRLF)
+        function parseCsv(text, delimiter = ',') {
+            text = text.replace(/^\uFEFF/, '');
+            const rows = [];
+            let row = [], cur = '', inQuotes = false;
+
+            for (let i = 0; i < text.length; i++) {
+                const ch = text[i];
+                if (inQuotes) {
+                    if (ch === '"' && text[i + 1] === '"') { cur += '"'; i++; }
+                    else if (ch === '"') { inQuotes = false; }
+                    else { cur += ch; }
+                } else if (ch === '"') {
+                    inQuotes = true;
+                } else if (ch === delimiter) {
+                    row.push(cur); cur = '';
+                } else if (ch === '\n' || ch === '\r') {
+                    if (ch === '\r' && text[i + 1] === '\n') i++;
+                    row.push(cur); rows.push(row); row = []; cur = '';
+                } else {
+                    cur += ch;
+                }
+            }
+            if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
+            return rows.filter(r => r.some(c => c.trim() !== ''));
+        }
+
+        function detectDelimiter(text) {
+            const firstLine = text.replace(/^\uFEFF/, '').split(/\r\n|\n|\r/)[0] || '';
+            if (firstLine.includes('\t')) return '\t';
+            if (firstLine.includes(';') && !firstLine.includes(',')) return ';';
+            return ',';
+        }
+
+        // =====================================================
+        // NEW PARTICIPANT ROWS
+        // =====================================================
+        const newBody = document.getElementById('newParticipantsBody');
+
+        function createNewParticipantRow(name = '', position = '', email = '') {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="text-center text-muted row-number"></td>
+                <td><input type="text" class="form-control form-control-sm new-name" value="${escapeHtml(name)}" placeholder="Full Name"></td>
+                <td><input type="text" class="form-control form-control-sm new-position" value="${escapeHtml(position)}" placeholder="Position"></td>
+                <td><input type="email" class="form-control form-control-sm new-email" value="${escapeHtml(email)}" placeholder="email@example.com"></td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm row-action-btn row-action-danger btn-remove-new-row" title="Remove">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            `;
+            return tr;
+        }
+
+        function renumberNewRows() {
+            newBody.querySelectorAll('tr').forEach((row, i) => {
+                row.querySelector('.row-number').textContent = i + 1;
+            });
+        }
+
+        function isRowBlank(tr) {
+            return ![...tr.querySelectorAll('input')].some(i => i.value.trim() !== '');
+        }
+
+        function removeBlankRows() {
+            newBody.querySelectorAll('tr').forEach(tr => { if (isRowBlank(tr)) tr.remove(); });
+        }
+
+        function resetNewRows() {
             newBody.innerHTML = '';
-            newRowCount = 0;
             newBody.appendChild(createNewParticipantRow());
-
-            // Load existing
-            loadExistingParticipants(code);
-        });
-    });
-
-    // ========== ADD ROW ==========
-    document.getElementById('addRowBtn').addEventListener('click', function () {
-        document.getElementById('newParticipantsBody').appendChild(createNewParticipantRow());
-    });
-
-    // ========== REMOVE NEW ROW ==========
-    document.getElementById('newParticipantsBody').addEventListener('click', function (e) {
-        if (e.target.closest('.btn-remove-new-row')) {
-            e.target.closest('tr').remove();
             renumberNewRows();
         }
-    });
 
-    // ========== PASTE FROM EXCEL ==========
-    document.getElementById('newParticipantsBody').addEventListener('paste', function (e) {
-        e.preventDefault();
-        const clipboardData = e.clipboardData || window.clipboardData;
-        const pastedData = clipboardData.getData('text');
-        const rows = pastedData.trim().split(/\r\n|\n|\r/).filter(r => r.trim() !== '');
-
-        const tbody = document.getElementById('newParticipantsBody');
-        tbody.innerHTML = '';
-        newRowCount = 0;
-
-        rows.forEach(row => {
-            const cols = row.split(/\t/);
-            tbody.appendChild(createNewParticipantRow(
-                cols[0] ? cols[0].trim() : '',
-                cols[1] ? cols[1].trim() : '',
-                cols[2] ? cols[2].trim() : ''
-            ));
-        });
-    });
-
-    // ========== EXPORT CSV ==========
-    document.getElementById('exportCsvBtn').addEventListener('click', function () {
-        const code = document.getElementById('manage_training_code').value;
-        if (!code) {
-            alert('No training selected.');
-            return;
+        function appendParticipantRows(list) {
+            removeBlankRows();
+            list.forEach(c => newBody.appendChild(createNewParticipantRow(
+                (c[0] || '').trim(), (c[1] || '').trim(), (c[2] || '').trim()
+            )));
+            if (newBody.children.length === 0) newBody.appendChild(createNewParticipantRow());
+            renumberNewRows();
         }
-        window.location.href = `<?= site_url('tia/export-participants') ?>/${code}`;
-    });
 
-    // ========== IMPORT CSV ==========
-    document.getElementById('importCsvInput').addEventListener('change', function (e) {
-        const file = e.target.files[0];
-        if (!file) return;
+        // =====================================================
+        // ADD TRAINING
+        // =====================================================
+        document.getElementById('addTrainingForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const form = this;
+            const restore = setBusy(form.querySelector('button[type="submit"]'), 'Saving...');
 
-        const reader = new FileReader();
-        reader.onload = function (event) {
-            const text = event.target.result;
-            let rows = text.trim().split(/\r\n|\n|\r/).filter(r => r.trim() !== '');
+            try {
+                const result = await apiFetch(URLS.storeTraining, {
+                    method: 'POST',
+                    body: buildFormData(form)
+                });
 
-            if (rows.length > 0 && (rows[0].toLowerCase().includes('name') || rows[0].toLowerCase().includes('email'))) {
-                rows.shift();
-            }
-
-            const tbody = document.getElementById('newParticipantsBody');
-            tbody.innerHTML = '';
-            newRowCount = 0;
-
-            rows.forEach(row => {
-                const cols = row.includes('\t') ? row.split('\t') : row.split(',');
-                const name = cols[0] ? cols[0].replace(/^"|"$/g, '').trim() : '';
-                const position = cols[1] ? cols[1].replace(/^"|"$/g, '').trim() : '';
-                const email = cols[2] ? cols[2].replace(/^"|"$/g, '').trim() : '';
-                if (name || position || email) {
-                    tbody.appendChild(createNewParticipantRow(name, position, email));
+                if (result.success) {
+                    bootstrap.Modal.getOrCreateInstance(document.getElementById('addTrainingModal')).hide();
+                    form.reset();
+                    location.reload();
+                } else {
+                    showErrors(result, 'Failed to save training.');
                 }
-            });
+            } catch (err) {
+                console.error(err);
+                alert(err.message || 'Network error. Please try again.');
+            } finally {
+                restore();
+            }
+        });
 
-            e.target.value = '';
-        };
-        reader.readAsText(file);
-    });
+        // =====================================================
+        // LOAD EXISTING PARTICIPANTS
+        // =====================================================
+        async function loadExistingParticipants(trainingCode) {
+            const tbody = document.getElementById('existingParticipantsBody');
+            const emptyMsg = document.getElementById('existingEmpty');
 
-    // ========== SAVE NEW PARTICIPANTS ==========
-    document.getElementById('saveNewParticipantsBtn').addEventListener('click', async function () {
-        const trainingCode = document.getElementById('manage_training_code').value;
-        const rows = document.querySelectorAll('#newParticipantsBody tr');
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Loading...</td></tr>';
+            emptyMsg.classList.add('d-none');
 
-        if (rows.length === 0) {
-            alert('Please add at least one participant.');
-            return;
+            try {
+                const result = await apiFetch(`${URLS.participants}/${encodeURIComponent(trainingCode)}`);
+                tbody.innerHTML = '';
+
+                if (result.success && Array.isArray(result.data) && result.data.length > 0) {
+                    result.data.forEach((p, index) => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td class="text-center text-muted">${index + 1}</td>
+                            <td class="fw-semibold">${escapeHtml(p.participant_name)}</td>
+                            <td>${escapeHtml(p.position)}</td>
+                            <td>${escapeHtml(p.email)}</td>
+                            <td class="text-center">
+                                <div class="row-actions">
+                                    <button type="button" class="btn btn-sm row-action-btn btn-edit-participant"
+                                        data-id="${escapeHtml(p.id)}"
+                                        data-name="${escapeHtml(p.participant_name)}"
+                                        data-position="${escapeHtml(p.position)}"
+                                        data-email="${escapeHtml(p.email)}"
+                                        title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                } else {
+                    tbody.innerHTML = '';
+                    emptyMsg.classList.remove('d-none');
+                }
+            } catch (err) {
+                console.error(err);
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Failed to load participants.</td></tr>';
+            }
         }
 
-        const participants = [];
-        let hasError = false;
+        // =====================================================
+        // OPEN MANAGE MODAL
+        // =====================================================
+        document.querySelectorAll('.manage-participants-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const code = this.dataset.trainingCode;
+                const title = this.dataset.trainingTitle;
 
-        rows.forEach(row => {
-            const name = row.querySelector('.new-name').value.trim();
-            const position = row.querySelector('.new-position').value.trim();
-            const email = row.querySelector('.new-email').value.trim();
+                document.getElementById('manage_training_code').value = code;
+                document.getElementById('manage_training_title').value = title;
 
-            if (!name || !position || !email) {
-                hasError = true;
+                resetNewRows();
+                loadExistingParticipants(code);
+            });
+        });
+
+        // =====================================================
+        // ADD / REMOVE ROW
+        // =====================================================
+        document.getElementById('addRowBtn').addEventListener('click', function () {
+            newBody.appendChild(createNewParticipantRow());
+            renumberNewRows();
+        });
+
+        newBody.addEventListener('click', function (e) {
+            const removeBtn = e.target.closest('.btn-remove-new-row');
+            if (!removeBtn) return;
+            removeBtn.closest('tr').remove();
+            if (newBody.children.length === 0) newBody.appendChild(createNewParticipantRow());
+            renumberNewRows();
+        });
+
+        // =====================================================
+        // PASTE FROM EXCEL (multi-cell only; appends)
+        // =====================================================
+        newBody.addEventListener('paste', function (e) {
+            const text = (e.clipboardData || window.clipboardData).getData('text');
+            if (!/[\t\r\n]/.test(text)) return;   // single value -> normal paste
+
+            e.preventDefault();
+            const list = text.trim()
+                .split(/\r\n|\n|\r/)
+                .filter(r => r.trim() !== '')
+                .map(r => r.split('\t'));
+            appendParticipantRows(list);
+        });
+
+        // =====================================================
+        // EXPORT CSV
+        // =====================================================
+        document.getElementById('exportCsvBtn').addEventListener('click', function () {
+            const code = document.getElementById('manage_training_code').value;
+            if (!code) {
+                alert('No training selected.');
                 return;
             }
-            participants.push({ participant_name: name, position, email });
+            window.location.href = `${URLS.exportCsv}/${encodeURIComponent(code)}`;
         });
 
-        if (hasError) {
-            alert('Please fill in all fields (Name, Position, Email) for every row.');
-            return;
-        }
+        // =====================================================
+        // IMPORT CSV
+        // =====================================================
+        document.getElementById('importCsvInput').addEventListener('change', function (e) {
+            const input = e.target;
+            const file = input.files[0];
+            if (!file) return;
 
-        const btn = this;
-        const originalText = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = 'Saving...';
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const text = event.target.result;
+                let rows = parseCsv(text, detectDelimiter(text));
 
-        try {
-            const response = await fetch('<?= site_url('tia/add-participants-bulk') ?>', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({ training_code: trainingCode, participants })
+                // skip header row if first cell is "name" / "participant name" etc.
+                if (rows.length && /^(participant\s*)?name/i.test(rows[0][0].trim())) {
+                    rows.shift();
+                }
+
+                if (rows.length === 0) {
+                    alert('No participant rows found in the CSV file.');
+                } else {
+                    appendParticipantRows(rows);
+                }
+                input.value = '';
+            };
+            reader.onerror = function () {
+                alert('Could not read the file.');
+                input.value = '';
+            };
+            reader.readAsText(file);
+        });
+
+        // =====================================================
+        // SAVE NEW PARTICIPANTS
+        // =====================================================
+        document.getElementById('saveNewParticipantsBtn').addEventListener('click', async function () {
+            const trainingCode = document.getElementById('manage_training_code').value;
+            const rows = newBody.querySelectorAll('tr');
+
+            const participants = [];
+            const badRows = [];
+
+            rows.forEach((row, i) => {
+                const name = row.querySelector('.new-name').value.trim();
+                const position = row.querySelector('.new-position').value.trim();
+                const email = row.querySelector('.new-email').value.trim();
+
+                if (!name && !position && !email) return;   // ignore blank rows
+
+                if (!name || !position || !isValidEmail(email)) {
+                    badRows.push(i + 1);
+                    return;
+                }
+                participants.push({ participant_name: name, position, email });
             });
-            const result = await response.json();
 
-            if (result.success) {
-                alert(`Successfully added ${result.count} participant(s)!`);
-                // Clear new rows and refresh existing list
-                const newBody = document.getElementById('newParticipantsBody');
-                newBody.innerHTML = '';
-                newRowCount = 0;
-                newBody.appendChild(createNewParticipantRow());
-                loadExistingParticipants(trainingCode);
-            } else {
-                alert(result.message || 'Failed to save participants.');
+            if (badRows.length) {
+                alert('Please complete Name, Position and a valid Email for row(s): ' + badRows.join(', '));
+                return;
             }
-        } catch (err) {
-            console.error(err);
-            alert('Network error. Please try again.');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = originalText;
-        }
-    });
+            if (participants.length === 0) {
+                alert('Please add at least one participant.');
+                return;
+            }
 
-    // ========== EDIT / DELETE (Existing table) ==========
-    document.getElementById('existingParticipantsBody').addEventListener('click', function (e) {
-        const editBtn = e.target.closest('.btn-edit-participant');
-        if (editBtn) {
+            const restore = setBusy(this, 'Saving...');
+
+            try {
+                const result = await apiFetch(URLS.addBulk, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        training_code: trainingCode,
+                        participants: participants,
+                        [csrfName]: csrfHash
+                    })
+                });
+
+                if (result.success) {
+                    alert(`Successfully added ${result.count ?? participants.length} participant(s)!`);
+                    resetNewRows();
+                    loadExistingParticipants(trainingCode);
+                } else {
+                    showErrors(result, 'Failed to save participants.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert(err.message || 'Network error. Please try again.');
+            } finally {
+                restore();
+            }
+        });
+
+        // =====================================================
+        // EDIT / DELETE (existing participants table)
+        // =====================================================
+        const editModalEl = document.getElementById('editParticipantModal');
+
+        function openEditParticipant(editBtn) {
             document.getElementById('edit_participant_id').value = editBtn.dataset.id;
             document.getElementById('edit_participant_name').value = editBtn.dataset.name;
             document.getElementById('edit_position').value = editBtn.dataset.position;
             document.getElementById('edit_email').value = editBtn.dataset.email;
-            new bootstrap.Modal(document.getElementById('editParticipantModal')).show();
-            return;
+
+            bootstrap.Modal.getOrCreateInstance(editModalEl).show();
         }
 
-        const deleteBtn = e.target.closest('.btn-delete-participant');
-        if (deleteBtn) {
-            if (!confirm('Are you sure you want to delete this participant?')) return;
-            deleteParticipant(deleteBtn.dataset.id);
-        }
-    });
-
-    // ========== UPDATE PARTICIPANT ==========
-    document.getElementById('editParticipantForm').addEventListener('submit', async function (e) {
-        e.preventDefault();
-        const id = document.getElementById('edit_participant_id').value;
-        const btn = this.querySelector('button[type="submit"]');
-        const originalText = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = 'Updating...';
-
-        try {
-            const response = await fetch(`<?= site_url('tia/update-participant') ?>/${id}`, {
-                method: 'POST',
-                body: new FormData(this),
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            });
-            const result = await response.json();
-
-            if (result.success) {
-                bootstrap.Modal.getInstance(document.getElementById('editParticipantModal')).hide();
-                loadExistingParticipants(document.getElementById('manage_training_code').value);
-            } else {
-                alert(result.message || 'Failed to update participant.');
+        // Keep the Manage modal scrollable after the stacked Edit modal closes
+        editModalEl.addEventListener('hidden.bs.modal', function () {
+            if (document.querySelector('#manageParticipantsModal.show')) {
+                document.body.classList.add('modal-open');
             }
-        } catch (err) {
-            console.error(err);
-            alert('Network error. Please try again.');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = originalText;
-        }
-    });
+        });
 
-    // ========== DELETE PARTICIPANT ==========
-    async function deleteParticipant(id) {
-        try {
-            const response = await fetch(`<?= site_url('tia/delete-participant') ?>/${id}`, {
-                method: 'POST',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            });
-            const result = await response.json();
-
-            if (result.success) {
-                loadExistingParticipants(document.getElementById('manage_training_code').value);
-            } else {
-                alert(result.message || 'Failed to delete participant.');
+        document.getElementById('existingParticipantsBody').addEventListener('click', function (e) {
+            const editBtn = e.target.closest('.btn-edit-participant');
+            if (editBtn) {
+                openEditParticipant(editBtn);
             }
-        } catch (err) {
-            console.error(err);
-            alert('Network error. Please try again.');
-        }
-    }
+        });
 
-});
+        // =====================================================
+        // UPDATE PARTICIPANT
+        // =====================================================
+        document.getElementById('editParticipantForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const id = document.getElementById('edit_participant_id').value;
+            const restore = setBusy(this.querySelector('button[type="submit"]'), 'Updating...');
+
+            try {
+                const result = await apiFetch(`${URLS.updateParticipant}/${encodeURIComponent(id)}`, {
+                    method: 'POST',
+                    body: buildFormData(this)
+                });
+
+                if (result.success) {
+                    bootstrap.Modal.getOrCreateInstance(editModalEl).hide();
+                    loadExistingParticipants(document.getElementById('manage_training_code').value);
+                } else {
+                    showErrors(result, 'Failed to update participant.');
+                }
+            } catch (err) {
+                console.error('Update error:', err);
+                alert(err.message || 'Network error. Please try again.');
+            } finally {
+                restore();
+            }
+        });
+
+    });
 </script>
