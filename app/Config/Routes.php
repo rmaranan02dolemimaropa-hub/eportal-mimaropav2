@@ -186,6 +186,9 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('tia/add-participants-bulk', 'HrController::addParticipantsBulk');
     $routes->get('tia/export-participants/(:any)', 'HrController::exportParticipants/$1');
     $routes->post('tia/update-participant/(:num)', 'HrController::updateParticipant/$1');
+    $routes->post('tia/update-training/(:segment)', 'HrController::updateTraining/$1');
+    $routes->post('tia/delete-training/(:segment)', 'HrController::deleteTraining/$1');
+    $routes->post('tia/update-status/(:segment)', 'HrController::updateTrainingStatus/$1');
 
 
 

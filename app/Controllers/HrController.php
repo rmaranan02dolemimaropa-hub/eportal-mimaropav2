@@ -577,6 +577,240 @@ class HrController extends BaseController
         }
     }
 
+    /**
+     * Update a Training (identified by training_code)
+     * POST /tia/update-training/(:segment)
+     */
+    public function updateTraining($trainingCode = null)
+    {
+        if (!$trainingCode) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Training code is required',
+            ])->setStatusCode(400);
+        }
+
+        $training = $this->trainingsModel
+            ->where('training_code', $trainingCode)
+            ->first();
+
+        if (!$training) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Training not found',
+            ])->setStatusCode(404);
+        }
+
+        $rules = [
+            'training_title' => 'required|max_length[255]',
+            'training_dates' => 'required|max_length[100]',
+            'conducted_by' => 'permit_empty|max_length[150]',
+            'office' => 'permit_empty|max_length[150]',
+            'immediate_superior' => 'permit_empty|max_length[150]',
+        ];
+
+        if (!$this->validate($rules)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $this->validator->getErrors(),
+            ])->setStatusCode(422);
+        }
+
+        $data = [
+            'training_title' => $this->request->getPost('training_title'),
+            'training_dates' => $this->request->getPost('training_dates'),
+            'conducted_by' => $this->request->getPost('conducted_by') ?: null,
+            'office' => $this->request->getPost('office') ?: null,
+            'immediate_superior' => $this->request->getPost('immediate_superior') ?: null,
+            'updated_at' => date('Y-m-d H:i:s'),
+        ];
+
+        try {
+            $updated = $this->trainingsModel->update($training['id'], $data);
+
+            if ($updated === false) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to update training',
+                    'errors' => $this->trainingsModel->errors(),
+                ])->setStatusCode(500);
+            }
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Training updated successfully!',
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Update Training Error: ' . $e->getMessage());
+
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Server error occurred',
+                'error' => ENVIRONMENT === 'development' ? $e->getMessage() : null,
+            ])->setStatusCode(500);
+        }
+    }
+
+    /**
+     * Delete a Training + all its participants (by training_code)
+     * POST /tia/delete-training/(:segment)
+     */
+    public function deleteTraining($trainingCode = null)
+    {
+        if (!$trainingCode) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Training code is required',
+            ])->setStatusCode(400);
+        }
+
+        $training = $this->trainingsModel
+            ->where('training_code', $trainingCode)
+            ->first();
+
+        if (!$training) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Training not found',
+            ])->setStatusCode(404);
+        }
+
+        $db = \Config\Database::connect();
+
+        try {
+            $db->transStart();
+
+            // 1. delete participants first
+            $this->participantsModel
+                ->where('training_code', $trainingCode)
+                ->delete();
+
+            // 2. then delete the training
+            $this->trainingsModel
+                ->where('training_code', $trainingCode)
+                ->delete();
+
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to delete training',
+                ])->setStatusCode(500);
+            }
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Training and its participants were deleted.',
+            ]);
+        } catch (\Exception $e) {
+            $db->transRollback();
+            log_message('error', 'Delete Training Error: ' . $e->getMessage());
+
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Server error occurred',
+                'error' => ENVIRONMENT === 'development' ? $e->getMessage() : null,
+            ])->setStatusCode(500);
+        }
+    }
+
+    /**
+     * Update training status (by training_code)
+     * POST /tia/update-status/(:segment)
+     */
+    public function updateTrainingStatus($trainingCode = null)
+    {
+        if (!$trainingCode) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Training code is required',
+            ])->setStatusCode(400);
+        }
+
+        $training = $this->trainingsModel
+            ->where('training_code', $trainingCode)
+            ->first();
+
+        if (!$training) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Training not found',
+            ])->setStatusCode(404);
+        }
+
+        $rules = [
+            'status' => 'required|in_list[active,canceled,rescheduled,completed]',
+            'reason' => 'permit_empty|max_length[1000]',
+            'new_dates' => 'permit_empty|max_length[100]',
+        ];
+
+        if (!$this->validate($rules)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $this->validator->getErrors(),
+            ])->setStatusCode(422);
+        }
+
+        $status = $this->request->getPost('status');
+        $reason = trim((string) $this->request->getPost('reason'));
+        $newDates = trim((string) $this->request->getPost('new_dates'));
+        $now = date('Y-m-d H:i:s');
+
+        if (in_array($status, ['canceled', 'rescheduled'], true) && $reason === '') {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => ['reason' => 'Reason is required for canceled / rescheduled trainings.'],
+            ])->setStatusCode(422);
+        }
+
+        $data = [
+            'status' => $status,
+            'updated_at' => $now,
+        ];
+
+        if ($status === 'canceled') {
+            $data['cancel_reason'] = $reason;
+            $data['canceled_at'] = $now;
+        }
+
+        if ($status === 'rescheduled') {
+            $data['reschedule_reason'] = $reason;
+            $data['rescheduled_at'] = $now;
+            if ($newDates !== '') {
+                $data['training_dates'] = $newDates;
+            }
+        }
+
+        try {
+            $updated = $this->trainingsModel->update($training['id'], $data);
+
+            if ($updated === false) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to update status',
+                    'errors' => $this->trainingsModel->errors(),
+                ])->setStatusCode(500);
+            }
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Status updated successfully!',
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Update Status Error: ' . $e->getMessage());
+
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Server error occurred',
+                'error' => ENVIRONMENT === 'development' ? $e->getMessage() : null,
+            ])->setStatusCode(500);
+        }
+    }
+
 
 
 

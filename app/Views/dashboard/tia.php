@@ -34,6 +34,7 @@
                         <th>Conducted by</th>
                         <th>Office</th>
                         <th>Immediate Superior</th>
+                        <th>Status</th>
                         <th class="text-center">Actions</th>
                     </tr>
                 </thead>
@@ -49,13 +50,59 @@
                                 <td><?= esc($row['conducted_by'] ?? '—') ?></td>
                                 <td><?= esc($row['office'] ?? '—') ?></td>
                                 <td><?= esc($row['immediate_superior'] ?? '—') ?></td>
+                                <?php
+                                $status = $row['status'] ?? 'active';
+                                $badgeMap = [
+                                    'active' => 'bg-success',
+                                    'canceled' => 'bg-danger',
+                                    'rescheduled' => 'bg-warning text-dark',
+                                    'completed' => 'bg-primary',
+                                ];
+                                $badge = $badgeMap[$status] ?? 'bg-secondary';
+                                $reason = $status === 'canceled'
+                                    ? ($row['cancel_reason'] ?? '')
+                                    : ($status === 'rescheduled' ? ($row['reschedule_reason'] ?? '') : '');
+                                ?>
+
+                                <td>
+                                    <span class="badge <?= $badge ?>" <?= $reason ? 'title="' . esc($reason, 'attr') . '"' : '' ?>>
+                                        <?= esc(ucfirst($status)) ?>
+                                    </span>
+                                </td>
                                 <td class="text-center">
+                               
+                                <div class="d-flex gap-1 justify-content-center flex-wrap">
                                     <button type="button" class="btn btn-sm tool-btn manage-participants-btn"
                                         data-bs-toggle="modal" data-bs-target="#manageParticipantsModal"
                                         data-training-code="<?= esc($row['training_code'], 'attr') ?>"
                                         data-training-title="<?= esc($row['training_title'], 'attr') ?>">
                                         <i class="bi bi-people me-1"></i> Manage
                                     </button>
+
+                                    <button type="button" class="btn btn-sm tool-btn edit-training-btn"
+                                        data-code="<?= esc($row['training_code'], 'attr') ?>"
+                                        data-title="<?= esc($row['training_title'], 'attr') ?>"
+                                        data-dates="<?= esc($row['training_dates'], 'attr') ?>"
+                                        data-conducted-by="<?= esc($row['conducted_by'] ?? '', 'attr') ?>"
+                                        data-office="<?= esc($row['office'] ?? '', 'attr') ?>"
+                                        data-superior="<?= esc($row['immediate_superior'] ?? '', 'attr') ?>">
+                                        <i class="bi bi-pencil me-1"></i> Edit
+                                    </button>
+
+                                    <button type="button" class="btn btn-sm tool-btn status-training-btn"
+                                        data-code="<?= esc($row['training_code'], 'attr') ?>"
+                                        data-title="<?= esc($row['training_title'], 'attr') ?>"
+                                        data-status="<?= esc($status, 'attr') ?>"
+                                        data-dates="<?= esc($row['training_dates'], 'attr') ?>">
+                                        <i class="bi bi-flag me-1"></i> Status
+                                    </button>
+
+                                    <button type="button" class="btn btn-sm tool-btn text-danger delete-training-btn"
+                                        data-code="<?= esc($row['training_code'], 'attr') ?>"
+                                        data-title="<?= esc($row['training_title'], 'attr') ?>">
+                                        <i class="bi bi-trash me-1"></i> Delete
+                                    </button>
+                                </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -113,6 +160,102 @@
             </div>
         </div>
     </div>
+
+    <!-- ===================== EDIT TRAINING MODAL ===================== -->
+    <div class="modal fade" id="editTrainingModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content add-training-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-pencil-square me-2"></i> Edit Training
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editTrainingForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="edit_training_code">
+                        <div class="mb-3">
+                            <label class="form-label">Training Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="edit_training_title" name="training_title"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Training Date/s <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="edit_training_dates" name="training_dates"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Conducted by</label>
+                            <input type="text" class="form-control" id="edit_conducted_by" name="conducted_by">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Office</label>
+                            <input type="text" class="form-control" id="edit_office" name="office">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Name of Immediate Superior</label>
+                            <input type="text" class="form-control" id="edit_immediate_superior"
+                                name="immediate_superior">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Training</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== STATUS MODAL ===================== -->
+<div class="modal fade" id="statusTrainingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content add-training-modal">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-flag me-2"></i> Update Status
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="statusTrainingForm">
+                <div class="modal-body">
+                    <input type="hidden" id="status_training_code">
+
+                    <div class="mb-3">
+                        <label class="form-label">Training</label>
+                        <input type="text" class="form-control" id="status_training_title" readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Status <span class="text-danger">*</span></label>
+                        <select class="form-select" id="status_select" name="status" required>
+                            <option value="active">Active</option>
+                            <option value="rescheduled">Rescheduled</option>
+                            <option value="canceled">Canceled</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3 d-none" id="statusNewDatesWrap">
+                        <label class="form-label">New Training Date/s</label>
+                        <input type="text" class="form-control" id="status_new_dates" name="new_dates"
+                            placeholder="e.g. April 10-12, 2026">
+                        <small class="text-muted">Iwanang blangko kung hindi babaguhin ang petsa.</small>
+                    </div>
+
+                    <div class="mb-3 d-none" id="statusReasonWrap">
+                        <label class="form-label">Reason <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="status_reason" name="reason" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Status</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
     <!-- ===================== MANAGE PARTICIPANTS MODAL ===================== -->
     <div class="modal fade" id="manageParticipantsModal" tabindex="-1" aria-hidden="true">
@@ -252,458 +395,23 @@
 
 <!-- NOTE: remove this line if dashboard_layout/head or /loading already loads Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-
-        // =====================================================
-        // CONFIG + CSRF
-        // =====================================================
-        const URLS = {
-            storeTraining: '<?= site_url('tia/store-training') ?>',
-            participants: '<?= site_url('tia/participants') ?>',
-            exportCsv: '<?= site_url('tia/export-participants') ?>',
-            addBulk: '<?= site_url('tia/add-participants-bulk') ?>',
-            updateParticipant: '<?= site_url('tia/update-participant') ?>'
-        };
-
-        const csrfName = '<?= csrf_token() ?>';
-        const csrfHeader = '<?= csrf_header() ?>';
-        let csrfHash = '<?= csrf_hash() ?>';   // let: it may be refreshed after each request
-
-        /**
-         * Central fetch helper.
-         * - always sends the CSRF header + AJAX header
-         * - refreshes the CSRF token if the server returns result.csrf
-         * - always returns parsed JSON, or throws a readable Error
-         */
-        async function apiFetch(url, options = {}) {
-            options.headers = Object.assign({
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json',
-                [csrfHeader]: csrfHash
-            }, options.headers || {});
-
-            const response = await fetch(url, options);
-
-            let data = null;
-            try { data = await response.json(); } catch (e) { /* not JSON */ }
-
-            if (data && data.csrf) csrfHash = data.csrf;
-
-            if (!data) {
-                throw new Error('Server returned an invalid response (HTTP ' + response.status + ').');
-            }
-            if (!response.ok && !data.message) {
-                throw new Error('Request failed (HTTP ' + response.status + ').');
-            }
-            return data;
+    window.TIA = {
+        urls: {
+            storeTraining:     '<?= site_url('tia/store-training') ?>',
+            participants:      '<?= site_url('tia/participants') ?>',
+            exportCsv:         '<?= site_url('tia/export-participants') ?>',
+            addBulk:           '<?= site_url('tia/add-participants-bulk') ?>',
+            updateParticipant: '<?= site_url('tia/update-participant') ?>',
+            updateTraining:    '<?= site_url('tia/update-training') ?>',
+            deleteTraining:    '<?= site_url('tia/delete-training') ?>',
+            updateStatus:      '<?= site_url('tia/update-status') ?>'
+        },
+        csrf: {
+            name:   '<?= csrf_token() ?>',
+            header: '<?= csrf_header() ?>',
+            hash:   '<?= csrf_hash() ?>'
         }
-
-        function buildFormData(form) {
-            const fd = form ? new FormData(form) : new FormData();
-            fd.append(csrfName, csrfHash);
-            return fd;
-        }
-
-        // =====================================================
-        // HELPERS
-        // =====================================================
-        function escapeHtml(text) {
-            if (text === null || text === undefined) return '';
-            return String(text)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        }
-
-        function isValidEmail(email) {
-            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-        }
-
-        function setBusy(btn, busyText) {
-            const original = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = busyText;
-            return () => { btn.disabled = false; btn.innerHTML = original; };
-        }
-
-        function showErrors(result, fallback) {
-            let msg = (result && result.message) || fallback;
-            if (result && result.errors) msg += '\n\n' + Object.values(result.errors).join('\n');
-            alert(msg);
-        }
-
-        // CSV parser (handles quotes, commas inside quotes, BOM, CRLF)
-        function parseCsv(text, delimiter = ',') {
-            text = text.replace(/^\uFEFF/, '');
-            const rows = [];
-            let row = [], cur = '', inQuotes = false;
-
-            for (let i = 0; i < text.length; i++) {
-                const ch = text[i];
-                if (inQuotes) {
-                    if (ch === '"' && text[i + 1] === '"') { cur += '"'; i++; }
-                    else if (ch === '"') { inQuotes = false; }
-                    else { cur += ch; }
-                } else if (ch === '"') {
-                    inQuotes = true;
-                } else if (ch === delimiter) {
-                    row.push(cur); cur = '';
-                } else if (ch === '\n' || ch === '\r') {
-                    if (ch === '\r' && text[i + 1] === '\n') i++;
-                    row.push(cur); rows.push(row); row = []; cur = '';
-                } else {
-                    cur += ch;
-                }
-            }
-            if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
-            return rows.filter(r => r.some(c => c.trim() !== ''));
-        }
-
-        function detectDelimiter(text) {
-            const firstLine = text.replace(/^\uFEFF/, '').split(/\r\n|\n|\r/)[0] || '';
-            if (firstLine.includes('\t')) return '\t';
-            if (firstLine.includes(';') && !firstLine.includes(',')) return ';';
-            return ',';
-        }
-
-        // =====================================================
-        // NEW PARTICIPANT ROWS
-        // =====================================================
-        const newBody = document.getElementById('newParticipantsBody');
-
-        function createNewParticipantRow(name = '', position = '', email = '') {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="text-center text-muted row-number"></td>
-                <td><input type="text" class="form-control form-control-sm new-name" value="${escapeHtml(name)}" placeholder="Full Name"></td>
-                <td><input type="text" class="form-control form-control-sm new-position" value="${escapeHtml(position)}" placeholder="Position"></td>
-                <td><input type="email" class="form-control form-control-sm new-email" value="${escapeHtml(email)}" placeholder="email@example.com"></td>
-                <td class="text-center">
-                    <button type="button" class="btn btn-sm row-action-btn row-action-danger btn-remove-new-row" title="Remove">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </td>
-            `;
-            return tr;
-        }
-
-        function renumberNewRows() {
-            newBody.querySelectorAll('tr').forEach((row, i) => {
-                row.querySelector('.row-number').textContent = i + 1;
-            });
-        }
-
-        function isRowBlank(tr) {
-            return ![...tr.querySelectorAll('input')].some(i => i.value.trim() !== '');
-        }
-
-        function removeBlankRows() {
-            newBody.querySelectorAll('tr').forEach(tr => { if (isRowBlank(tr)) tr.remove(); });
-        }
-
-        function resetNewRows() {
-            newBody.innerHTML = '';
-            newBody.appendChild(createNewParticipantRow());
-            renumberNewRows();
-        }
-
-        function appendParticipantRows(list) {
-            removeBlankRows();
-            list.forEach(c => newBody.appendChild(createNewParticipantRow(
-                (c[0] || '').trim(), (c[1] || '').trim(), (c[2] || '').trim()
-            )));
-            if (newBody.children.length === 0) newBody.appendChild(createNewParticipantRow());
-            renumberNewRows();
-        }
-
-        // =====================================================
-        // ADD TRAINING
-        // =====================================================
-        document.getElementById('addTrainingForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const form = this;
-            const restore = setBusy(form.querySelector('button[type="submit"]'), 'Saving...');
-
-            try {
-                const result = await apiFetch(URLS.storeTraining, {
-                    method: 'POST',
-                    body: buildFormData(form)
-                });
-
-                if (result.success) {
-                    bootstrap.Modal.getOrCreateInstance(document.getElementById('addTrainingModal')).hide();
-                    form.reset();
-                    location.reload();
-                } else {
-                    showErrors(result, 'Failed to save training.');
-                }
-            } catch (err) {
-                console.error(err);
-                alert(err.message || 'Network error. Please try again.');
-            } finally {
-                restore();
-            }
-        });
-
-        // =====================================================
-        // LOAD EXISTING PARTICIPANTS
-        // =====================================================
-        async function loadExistingParticipants(trainingCode) {
-            const tbody = document.getElementById('existingParticipantsBody');
-            const emptyMsg = document.getElementById('existingEmpty');
-
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Loading...</td></tr>';
-            emptyMsg.classList.add('d-none');
-
-            try {
-                const result = await apiFetch(`${URLS.participants}/${encodeURIComponent(trainingCode)}`);
-                tbody.innerHTML = '';
-
-                if (result.success && Array.isArray(result.data) && result.data.length > 0) {
-                    result.data.forEach((p, index) => {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td class="text-center text-muted">${index + 1}</td>
-                            <td class="fw-semibold">${escapeHtml(p.participant_name)}</td>
-                            <td>${escapeHtml(p.position)}</td>
-                            <td>${escapeHtml(p.email)}</td>
-                            <td class="text-center">
-                                <div class="row-actions">
-                                    <button type="button" class="btn btn-sm row-action-btn btn-edit-participant"
-                                        data-id="${escapeHtml(p.id)}"
-                                        data-name="${escapeHtml(p.participant_name)}"
-                                        data-position="${escapeHtml(p.position)}"
-                                        data-email="${escapeHtml(p.email)}"
-                                        title="Edit">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                } else {
-                    tbody.innerHTML = '';
-                    emptyMsg.classList.remove('d-none');
-                }
-            } catch (err) {
-                console.error(err);
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Failed to load participants.</td></tr>';
-            }
-        }
-
-        // =====================================================
-        // OPEN MANAGE MODAL
-        // =====================================================
-        document.querySelectorAll('.manage-participants-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                const code = this.dataset.trainingCode;
-                const title = this.dataset.trainingTitle;
-
-                document.getElementById('manage_training_code').value = code;
-                document.getElementById('manage_training_title').value = title;
-
-                resetNewRows();
-                loadExistingParticipants(code);
-            });
-        });
-
-        // =====================================================
-        // ADD / REMOVE ROW
-        // =====================================================
-        document.getElementById('addRowBtn').addEventListener('click', function () {
-            newBody.appendChild(createNewParticipantRow());
-            renumberNewRows();
-        });
-
-        newBody.addEventListener('click', function (e) {
-            const removeBtn = e.target.closest('.btn-remove-new-row');
-            if (!removeBtn) return;
-            removeBtn.closest('tr').remove();
-            if (newBody.children.length === 0) newBody.appendChild(createNewParticipantRow());
-            renumberNewRows();
-        });
-
-        // =====================================================
-        // PASTE FROM EXCEL (multi-cell only; appends)
-        // =====================================================
-        newBody.addEventListener('paste', function (e) {
-            const text = (e.clipboardData || window.clipboardData).getData('text');
-            if (!/[\t\r\n]/.test(text)) return;   // single value -> normal paste
-
-            e.preventDefault();
-            const list = text.trim()
-                .split(/\r\n|\n|\r/)
-                .filter(r => r.trim() !== '')
-                .map(r => r.split('\t'));
-            appendParticipantRows(list);
-        });
-
-        // =====================================================
-        // EXPORT CSV
-        // =====================================================
-        document.getElementById('exportCsvBtn').addEventListener('click', function () {
-            const code = document.getElementById('manage_training_code').value;
-            if (!code) {
-                alert('No training selected.');
-                return;
-            }
-            window.location.href = `${URLS.exportCsv}/${encodeURIComponent(code)}`;
-        });
-
-        // =====================================================
-        // IMPORT CSV
-        // =====================================================
-        document.getElementById('importCsvInput').addEventListener('change', function (e) {
-            const input = e.target;
-            const file = input.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function (event) {
-                const text = event.target.result;
-                let rows = parseCsv(text, detectDelimiter(text));
-
-                // skip header row if first cell is "name" / "participant name" etc.
-                if (rows.length && /^(participant\s*)?name/i.test(rows[0][0].trim())) {
-                    rows.shift();
-                }
-
-                if (rows.length === 0) {
-                    alert('No participant rows found in the CSV file.');
-                } else {
-                    appendParticipantRows(rows);
-                }
-                input.value = '';
-            };
-            reader.onerror = function () {
-                alert('Could not read the file.');
-                input.value = '';
-            };
-            reader.readAsText(file);
-        });
-
-        // =====================================================
-        // SAVE NEW PARTICIPANTS
-        // =====================================================
-        document.getElementById('saveNewParticipantsBtn').addEventListener('click', async function () {
-            const trainingCode = document.getElementById('manage_training_code').value;
-            const rows = newBody.querySelectorAll('tr');
-
-            const participants = [];
-            const badRows = [];
-
-            rows.forEach((row, i) => {
-                const name = row.querySelector('.new-name').value.trim();
-                const position = row.querySelector('.new-position').value.trim();
-                const email = row.querySelector('.new-email').value.trim();
-
-                if (!name && !position && !email) return;   // ignore blank rows
-
-                if (!name || !position || !isValidEmail(email)) {
-                    badRows.push(i + 1);
-                    return;
-                }
-                participants.push({ participant_name: name, position, email });
-            });
-
-            if (badRows.length) {
-                alert('Please complete Name, Position and a valid Email for row(s): ' + badRows.join(', '));
-                return;
-            }
-            if (participants.length === 0) {
-                alert('Please add at least one participant.');
-                return;
-            }
-
-            const restore = setBusy(this, 'Saving...');
-
-            try {
-                const result = await apiFetch(URLS.addBulk, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        training_code: trainingCode,
-                        participants: participants,
-                        [csrfName]: csrfHash
-                    })
-                });
-
-                if (result.success) {
-                    alert(`Successfully added ${result.count ?? participants.length} participant(s)!`);
-                    resetNewRows();
-                    loadExistingParticipants(trainingCode);
-                } else {
-                    showErrors(result, 'Failed to save participants.');
-                }
-            } catch (err) {
-                console.error(err);
-                alert(err.message || 'Network error. Please try again.');
-            } finally {
-                restore();
-            }
-        });
-
-        // =====================================================
-        // EDIT / DELETE (existing participants table)
-        // =====================================================
-        const editModalEl = document.getElementById('editParticipantModal');
-
-        function openEditParticipant(editBtn) {
-            document.getElementById('edit_participant_id').value = editBtn.dataset.id;
-            document.getElementById('edit_participant_name').value = editBtn.dataset.name;
-            document.getElementById('edit_position').value = editBtn.dataset.position;
-            document.getElementById('edit_email').value = editBtn.dataset.email;
-
-            bootstrap.Modal.getOrCreateInstance(editModalEl).show();
-        }
-
-        // Keep the Manage modal scrollable after the stacked Edit modal closes
-        editModalEl.addEventListener('hidden.bs.modal', function () {
-            if (document.querySelector('#manageParticipantsModal.show')) {
-                document.body.classList.add('modal-open');
-            }
-        });
-
-        document.getElementById('existingParticipantsBody').addEventListener('click', function (e) {
-            const editBtn = e.target.closest('.btn-edit-participant');
-            if (editBtn) {
-                openEditParticipant(editBtn);
-            }
-        });
-
-        // =====================================================
-        // UPDATE PARTICIPANT
-        // =====================================================
-        document.getElementById('editParticipantForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
-
-            const id = document.getElementById('edit_participant_id').value;
-            const restore = setBusy(this.querySelector('button[type="submit"]'), 'Updating...');
-
-            try {
-                const result = await apiFetch(`${URLS.updateParticipant}/${encodeURIComponent(id)}`, {
-                    method: 'POST',
-                    body: buildFormData(this)
-                });
-
-                if (result.success) {
-                    bootstrap.Modal.getOrCreateInstance(editModalEl).hide();
-                    loadExistingParticipants(document.getElementById('manage_training_code').value);
-                } else {
-                    showErrors(result, 'Failed to update participant.');
-                }
-            } catch (err) {
-                console.error('Update error:', err);
-                alert(err.message || 'Network error. Please try again.');
-            } finally {
-                restore();
-            }
-        });
-
-    });
+    };
 </script>
+<script src="<?= base_url('assets/js/tia-dashboard.js') ?>"></script>

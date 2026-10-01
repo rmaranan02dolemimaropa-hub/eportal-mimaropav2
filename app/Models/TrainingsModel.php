@@ -20,6 +20,11 @@ class TrainingsModel extends Model
         'conducted_by',
         'office',
         'immediate_superior',
+        'status',
+        'cancel_reason',
+        'canceled_at',
+        'reschedule_reason',
+        'rescheduled_at',
         'created_at',
         'updated_at'
     ];
