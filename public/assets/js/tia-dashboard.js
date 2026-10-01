@@ -196,6 +196,43 @@ function detectDelimiter(text) {
   return ",";
 }
 
+/**
+ * In-page alert.
+ * type: "success" | "danger" | "warning"
+ * Success alerts disappear on their own after 4 seconds.
+ */
+function showAlert(box, type, title, lines = []) {
+  clearTimeout(box._timer);
+  box.className = `alert alert-${type} mb-3`;
+  box.innerHTML = "";
+
+  const strong = document.createElement("strong");
+  strong.textContent = title;
+  box.appendChild(strong);
+
+  if (lines.length) {
+    const ul = document.createElement("ul");
+    ul.className = "mb-0 mt-1";
+    lines.forEach((text) => {
+      const li = document.createElement("li");
+      li.textContent = text; // textContent = safe, no HTML injection
+      ul.appendChild(li);
+    });
+    box.appendChild(ul);
+  }
+
+  box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+  if (type === "success") {
+    box._timer = setTimeout(() => hideAlert(box), 4000);
+  }
+}
+
+function hideAlert(box) {
+  clearTimeout(box._timer);
+  box.classList.add("d-none");
+}
+
 /* =========================================================================
  * 4. ADD TRAINING
  * Trigger : button na may data-bs-target="#addTrainingModal"
@@ -276,23 +313,34 @@ function initStatusTraining() {
   const reasonInput = $("status_reason");
   const newDatesInput = $("status_new_dates");
 
-  // ipakita/itago ang mga field depende sa napiling status
+  // values of the training currently being edited (set when the modal opens)
+  let currentStatus = "active";
+  let currentDates = "";
+
+  // show/hide fields AND set which ones are required
   function toggleFields() {
     const v = select.value;
-    const needsReason = v === "rescheduled" || v === "canceled";
+    const isResched = v === "rescheduled";
+    const needsReason = isResched || v === "canceled";
 
-    newDatesWrap.classList.toggle("d-none", v !== "rescheduled");
+    newDatesWrap.classList.toggle("d-none", !isResched);
     reasonWrap.classList.toggle("d-none", !needsReason);
+
+    // hidden fields must NOT be required, or the browser blocks the submit
+    newDatesInput.required = isResched;
     reasonInput.required = needsReason;
   }
   select.addEventListener("change", toggleFields);
 
-  // 1. buksan ang modal
+  // 1. open the modal
   document.querySelectorAll(".status-training-btn").forEach((btn) => {
     btn.addEventListener("click", function () {
+      currentStatus = this.dataset.status || "active";
+      currentDates = this.dataset.dates || "";
+
       $("status_training_code").value = this.dataset.code;
       $("status_training_title").value = this.dataset.title;
-      select.value = this.dataset.status || "active";
+      select.value = currentStatus;
       reasonInput.value = "";
       newDatesInput.value = "";
       toggleFields();
@@ -300,9 +348,41 @@ function initStatusTraining() {
     });
   });
 
-  // 2. i-submit
+  // 2. validate, then submit
   form.addEventListener("submit", (e) => {
     e.preventDefault();
+
+    const status = select.value;
+    const reason = reasonInput.value.trim();
+    const newDates = newDatesInput.value.trim();
+
+    // CONDITION 1: nothing changed (same status, and not a reschedule)
+    if (status === currentStatus && status !== "rescheduled") {
+      alert(`This training is already "${status}". Choose a different status.`);
+      return;
+    }
+
+    // CONDITION 2: rescheduled needs NEW dates that differ from the current ones
+    if (status === "rescheduled") {
+      if (!newDates) {
+        alert("Please enter the new training date/s.");
+        newDatesInput.focus();
+        return;
+      }
+      if (newDates.toLowerCase() === currentDates.trim().toLowerCase()) {
+        alert("The new date/s must be different from the current date/s.");
+        newDatesInput.focus();
+        return;
+      }
+    }
+
+    // CONDITION 3: canceled / rescheduled need a reason
+    if ((status === "canceled" || status === "rescheduled") && !reason) {
+      alert("Please provide a reason.");
+      reasonInput.focus();
+      return;
+    }
+
     const code = $("status_training_code").value;
     submitForm({
       form,
@@ -324,40 +404,43 @@ function initStatusTraining() {
  * Endpoint: POST tia/delete-training/{code}
  * ========================================================================= */
 function initDeleteTraining() {
+  const modalEl = $("deleteTrainingModal");
+  const codeInput = $("delete_training_code");
+  const titleEl = $("delete_training_title");
+  const confirmBtn = $("confirmDeleteTrainingBtn");
+
+  // 1. Delete button on a row: fill in the modal and open it
   document.querySelectorAll(".delete-training-btn").forEach((btn) => {
-    btn.addEventListener("click", async function () {
-      const { code, title } = this.dataset;
-
-      if (
-        !confirm(
-          `Delete training "${title}"?\n\nAll participants of this training will also be deleted. This cannot be undone.`,
-        )
-      ) {
-        return;
-      }
-
-      const restore = setBusy(this, "Deleting...");
-      try {
-        const result = await apiFetch(
-          `${URLS.deleteTraining}/${encodeURIComponent(code)}`,
-          {
-            method: "POST",
-            body: buildFormData(),
-          },
-        );
-
-        if (result.success) {
-          location.reload();
-        } else {
-          showErrors(result, "Failed to delete training.");
-          restore();
-        }
-      } catch (err) {
-        console.error(err);
-        alert(err.message || "Network error. Please try again.");
-        restore();
-      }
+    btn.addEventListener("click", function () {
+      codeInput.value = this.dataset.code;
+      titleEl.textContent = this.dataset.title; // textContent = safe, no HTML injection
+      getModal(modalEl).show();
     });
+  });
+
+  // 2. "Yes, Delete" button inside the modal: send the request
+  confirmBtn.addEventListener("click", async function () {
+    const code = codeInput.value;
+    const restore = setBusy(this, "Deleting...");
+
+    try {
+      const result = await apiFetch(
+        `${URLS.deleteTraining}/${encodeURIComponent(code)}`,
+        { method: "POST", body: buildFormData() },
+      );
+
+      if (result.success) {
+        getModal(modalEl).hide();
+        location.reload();
+      } else {
+        showErrors(result, "Failed to delete training.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Network error. Please try again.");
+    } finally {
+      restore();
+    }
   });
 }
 
@@ -372,7 +455,9 @@ function initDeleteTraining() {
  *   D. Save                  -> POST add-participants-bulk (JSON)
  * ========================================================================= */
 function initManageParticipants() {
+  const saveBtn = $("saveNewParticipantsBtn");
   const newBody = $("newParticipantsBody");
+  const alertBox = $("participantsAlert");
 
   // ---------- A. CURRENT PARTICIPANTS ----------
   async function loadExistingParticipants(trainingCode) {
@@ -458,11 +543,19 @@ function initManageParticipants() {
       (i) => i.value.trim() !== "",
     );
   }
+  // show the Save button only if at least one row has data
+  function updateSaveBtn() {
+    const hasData = [...newBody.querySelectorAll("tr")].some(
+      (tr) => !isRowBlank(tr),
+    );
+    saveBtn.classList.toggle("d-none", !hasData);
+  }
 
   function resetRows() {
     newBody.innerHTML = "";
     newBody.appendChild(createRow());
     renumberRows();
+    updateSaveBtn();
   }
 
   // dagdagan ng rows (galing paste o CSV); tanggalin muna ang blangkong rows
@@ -481,6 +574,7 @@ function initManageParticipants() {
     );
     if (newBody.children.length === 0) newBody.appendChild(createRow());
     renumberRows();
+    updateSaveBtn();
   }
 
   // ---------- BUKSAN ANG MODAL ----------
@@ -497,6 +591,7 @@ function initManageParticipants() {
   $("addRowBtn").addEventListener("click", () => {
     newBody.appendChild(createRow());
     renumberRows();
+    updateSaveBtn();
   });
 
   newBody.addEventListener("click", (e) => {
@@ -506,6 +601,8 @@ function initManageParticipants() {
     if (newBody.children.length === 0) newBody.appendChild(createRow());
     renumberRows();
   });
+
+  newBody.addEventListener("input", updateSaveBtn);
 
   // ---------- PASTE MULA EXCEL (multi-cell lang) ----------
   newBody.addEventListener("paste", (e) => {
@@ -561,6 +658,8 @@ function initManageParticipants() {
   // ---------- D. SAVE NEW PARTICIPANTS ----------
   $("saveNewParticipantsBtn").addEventListener("click", async function () {
     const trainingCode = $("manage_training_code").value;
+
+    hideAlert(alertBox);
     const participants = [];
     const badRows = [];
 
@@ -569,24 +668,29 @@ function initManageParticipants() {
       const position = row.querySelector(".new-position").value.trim();
       const email = row.querySelector(".new-email").value.trim();
 
-      if (!name && !position && !email) return; // huwag pansinin ang blangko
+      if (!name && !position && !email) return; // skip blank rows
 
-      if (!name || !position || !isValidEmail(email)) {
-        badRows.push(i + 1);
+      const missing = [];
+      if (!name) missing.push("Name");
+      if (!position) missing.push("Position");
+      if (!email) missing.push("Email");
+      else if (!isValidEmail(email)) missing.push("valid Email");
+
+      if (missing.length) {
+        badRows.push(`Row ${i + 1}: ${missing.join(", ")}`);
         return;
       }
       participants.push({ participant_name: name, position, email });
     });
 
     if (badRows.length) {
-      alert(
-        "Please complete Name, Position and a valid Email for row(s): " +
-          badRows.join(", "),
-      );
+      showAlert(alertBox, "danger", "Please fix the following:", badRows);
       return;
     }
     if (participants.length === 0) {
-      alert("Please add at least one participant.");
+      showAlert(alertBox, "danger", "Nothing to save.", [
+        "Fill in at least one participant (Name, Position, and a valid Email).",
+      ]);
       return;
     }
 
@@ -603,17 +707,31 @@ function initManageParticipants() {
       });
 
       if (result.success) {
-        alert(
-          `Successfully added ${result.count ?? participants.length} participant(s)!`,
-        );
         resetRows();
         loadExistingParticipants(trainingCode);
+
+        const failed = Array.isArray(result.failed) ? result.failed : [];
+        showAlert(
+          alertBox,
+          failed.length ? "warning" : "success",
+          `Successfully added ${result.count ?? participants.length} participant(s)!`,
+          failed.length ? ["Could not save: " + failed.join(", ")] : [],
+        ); // must come AFTER resetRows(), because resetRows() hides the alert
       } else {
-        showErrors(result, "Failed to save participants.");
+        showAlert(
+          alertBox,
+          "danger",
+          result.message || "Failed to save participants.",
+          result.errors ? Object.values(result.errors) : [],
+        );
       }
     } catch (err) {
       console.error(err);
-      alert(err.message || "Network error. Please try again.");
+      showAlert(
+        alertBox,
+        "danger",
+        err.message || "Network error. Please try again.",
+      );
     } finally {
       restore();
     }
@@ -629,11 +747,16 @@ function initManageParticipants() {
 function initEditParticipant() {
   const modalEl = $("editParticipantModal");
   const form = $("editParticipantForm");
+  const editAlert = $("editParticipantAlert"); // inside the Edit modal
+  const manageAlert = $("participantsAlert"); // inside the Manage modal
 
-  // delegated click: gumagana kahit dynamic ang mga button
+  // open the Edit modal (delegated: the buttons are created by JS)
   $("existingParticipantsBody").addEventListener("click", (e) => {
     const btn = e.target.closest(".btn-edit-participant");
     if (!btn) return;
+
+    hideAlert(editAlert);
+    hideAlert(manageAlert);
 
     $("edit_participant_id").value = btn.dataset.id;
     $("edit_participant_name").value = btn.dataset.name;
@@ -642,25 +765,58 @@ function initEditParticipant() {
     getModal(modalEl).show();
   });
 
-  // panatilihing scrollable ang Manage modal pagkatapos magsara ng stacked Edit modal
+  // hide the error as soon as the user edits a field
+  form.addEventListener("input", () => hideAlert(editAlert));
+
+  // keep the Manage modal scrollable after the stacked Edit modal closes
   modalEl.addEventListener("hidden.bs.modal", () => {
     if (document.querySelector("#manageParticipantsModal.show")) {
       document.body.classList.add("modal-open");
     }
   });
 
-  form.addEventListener("submit", (e) => {
+  // submit
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    hideAlert(editAlert);
+
     const id = $("edit_participant_id").value;
-    submitForm({
-      form,
-      url: `${URLS.updateParticipant}/${encodeURIComponent(id)}`,
-      busyText: "Updating...",
-      errorText: "Failed to update participant.",
-      onSuccess: () => {
+    const restore = setBusy(
+      form.querySelector('[type="submit"]'),
+      "Updating...",
+    );
+
+    try {
+      const result = await apiFetch(
+        `${URLS.updateParticipant}/${encodeURIComponent(id)}`,
+        { method: "POST", body: buildFormData(form) },
+      );
+
+      if (result.success) {
         getModal(modalEl).hide();
         window.reloadParticipants();
-      },
-    });
+        showAlert(
+          manageAlert,
+          "success",
+          result.message || "Participant updated successfully!",
+        );
+      } else {
+        showAlert(
+          editAlert,
+          "danger",
+          result.message || "Failed to update participant.",
+          result.errors ? Object.values(result.errors) : [],
+        );
+      }
+    } catch (err) {
+      console.error(err);
+      showAlert(
+        editAlert,
+        "danger",
+        err.message || "Network error. Please try again.",
+      );
+    } finally {
+      restore();
+    }
   });
 }

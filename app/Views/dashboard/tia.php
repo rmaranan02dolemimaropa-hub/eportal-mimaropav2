@@ -65,44 +65,48 @@
                                 ?>
 
                                 <td>
-                                    <span class="badge <?= $badge ?>" <?= $reason ? 'title="' . esc($reason, 'attr') . '"' : '' ?>>
-                                        <?= esc(ucfirst($status)) ?>
-                                    </span>
+                                    <?php if ($reason): ?>
+                                        <span class="badge <?= esc($badge, 'attr') ?>" title="<?= esc($reason, 'attr') ?>">
+                                        <?php else: ?>
+                                            <span class="badge <?= esc($badge, 'attr') ?>">
+                                            <?php endif; ?>
+                                            <?= esc(ucfirst($status)) ?>
+                                        </span>
                                 </td>
                                 <td class="text-center">
-                               
-                                <div class="d-flex gap-1 justify-content-center flex-wrap">
-                                    <button type="button" class="btn btn-sm tool-btn manage-participants-btn"
-                                        data-bs-toggle="modal" data-bs-target="#manageParticipantsModal"
-                                        data-training-code="<?= esc($row['training_code'], 'attr') ?>"
-                                        data-training-title="<?= esc($row['training_title'], 'attr') ?>">
-                                        <i class="bi bi-people me-1"></i> Manage
-                                    </button>
 
-                                    <button type="button" class="btn btn-sm tool-btn edit-training-btn"
-                                        data-code="<?= esc($row['training_code'], 'attr') ?>"
-                                        data-title="<?= esc($row['training_title'], 'attr') ?>"
-                                        data-dates="<?= esc($row['training_dates'], 'attr') ?>"
-                                        data-conducted-by="<?= esc($row['conducted_by'] ?? '', 'attr') ?>"
-                                        data-office="<?= esc($row['office'] ?? '', 'attr') ?>"
-                                        data-superior="<?= esc($row['immediate_superior'] ?? '', 'attr') ?>">
-                                        <i class="bi bi-pencil me-1"></i> Edit
-                                    </button>
+                                    <div class="d-flex gap-1 justify-content-center flex-wrap">
+                                        <button type="button" class="btn btn-sm tool-btn manage-participants-btn"
+                                            data-bs-toggle="modal" data-bs-target="#manageParticipantsModal"
+                                            data-training-code="<?= esc($row['training_code'], 'attr') ?>"
+                                            data-training-title="<?= esc($row['training_title'], 'attr') ?>">
+                                            <i class="bi bi-people me-1"></i> Manage
+                                        </button>
 
-                                    <button type="button" class="btn btn-sm tool-btn status-training-btn"
-                                        data-code="<?= esc($row['training_code'], 'attr') ?>"
-                                        data-title="<?= esc($row['training_title'], 'attr') ?>"
-                                        data-status="<?= esc($status, 'attr') ?>"
-                                        data-dates="<?= esc($row['training_dates'], 'attr') ?>">
-                                        <i class="bi bi-flag me-1"></i> Status
-                                    </button>
+                                        <button type="button" class="btn btn-sm tool-btn edit-training-btn"
+                                            data-code="<?= esc($row['training_code'], 'attr') ?>"
+                                            data-title="<?= esc($row['training_title'], 'attr') ?>"
+                                            data-dates="<?= esc($row['training_dates'], 'attr') ?>"
+                                            data-conducted-by="<?= esc($row['conducted_by'] ?? '', 'attr') ?>"
+                                            data-office="<?= esc($row['office'] ?? '', 'attr') ?>"
+                                            data-superior="<?= esc($row['immediate_superior'] ?? '', 'attr') ?>">
+                                            <i class="bi bi-pencil me-1"></i> Edit
+                                        </button>
 
-                                    <button type="button" class="btn btn-sm tool-btn text-danger delete-training-btn"
-                                        data-code="<?= esc($row['training_code'], 'attr') ?>"
-                                        data-title="<?= esc($row['training_title'], 'attr') ?>">
-                                        <i class="bi bi-trash me-1"></i> Delete
-                                    </button>
-                                </div>
+                                        <button type="button" class="btn btn-sm tool-btn status-training-btn"
+                                            data-code="<?= esc($row['training_code'], 'attr') ?>"
+                                            data-title="<?= esc($row['training_title'], 'attr') ?>"
+                                            data-status="<?= esc($status, 'attr') ?>"
+                                            data-dates="<?= esc($row['training_dates'], 'attr') ?>">
+                                            <i class="bi bi-flag me-1"></i> Status
+                                        </button>
+
+                                        <button type="button" class="btn btn-sm tool-btn text-danger delete-training-btn"
+                                            data-code="<?= esc($row['training_code'], 'attr') ?>"
+                                            data-title="<?= esc($row['training_title'], 'attr') ?>">
+                                            <i class="bi bi-trash me-1"></i> Delete
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -208,54 +212,55 @@
     </div>
 
     <!-- ===================== STATUS MODAL ===================== -->
-<div class="modal fade" id="statusTrainingModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content add-training-modal">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="bi bi-flag me-2"></i> Update Status
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal fade" id="statusTrainingModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content add-training-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-flag me-2"></i> Update Status
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="statusTrainingForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="status_training_code">
+
+                        <div class="mb-3">
+                            <label class="form-label">Training</label>
+                            <input type="text" class="form-control" id="status_training_title" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Status <span class="text-danger">*</span></label>
+                            <select class="form-select" id="status_select" name="status" required>
+                                <option value="active">Active</option>
+                                <option value="rescheduled">Rescheduled</option>
+                                <option value="canceled">Canceled</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3 d-none" id="statusNewDatesWrap">
+                            <label class="form-label">New Training Date/s <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="status_new_dates" name="new_dates"
+                                placeholder="e.g. April 10-12, 2026">
+                            <small class="text-muted">Required when rescheduling. Must be different from the current
+                                date.</small>
+                        </div>
+
+                        <div class="mb-3 d-none" id="statusReasonWrap">
+                            <label class="form-label">Reason <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="status_reason" name="reason" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Status</button>
+                    </div>
+                </form>
             </div>
-            <form id="statusTrainingForm">
-                <div class="modal-body">
-                    <input type="hidden" id="status_training_code">
-
-                    <div class="mb-3">
-                        <label class="form-label">Training</label>
-                        <input type="text" class="form-control" id="status_training_title" readonly>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Status <span class="text-danger">*</span></label>
-                        <select class="form-select" id="status_select" name="status" required>
-                            <option value="active">Active</option>
-                            <option value="rescheduled">Rescheduled</option>
-                            <option value="canceled">Canceled</option>
-                            <option value="completed">Completed</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3 d-none" id="statusNewDatesWrap">
-                        <label class="form-label">New Training Date/s</label>
-                        <input type="text" class="form-control" id="status_new_dates" name="new_dates"
-                            placeholder="e.g. April 10-12, 2026">
-                        <small class="text-muted">Iwanang blangko kung hindi babaguhin ang petsa.</small>
-                    </div>
-
-                    <div class="mb-3 d-none" id="statusReasonWrap">
-                        <label class="form-label">Reason <span class="text-danger">*</span></label>
-                        <textarea class="form-control" id="status_reason" name="reason" rows="3"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Update Status</button>
-                </div>
-            </form>
         </div>
     </div>
-</div>
 
     <!-- ===================== MANAGE PARTICIPANTS MODAL ===================== -->
     <div class="modal fade" id="manageParticipantsModal" tabindex="-1" aria-hidden="true">
@@ -269,6 +274,7 @@
                 </div>
 
                 <div class="modal-body">
+                    <div id="participantsAlert" class="alert d-none" role="alert"></div>
                     <!-- Training info -->
                     <div class="mb-4">
                         <label class="form-label">Training</label>
@@ -345,7 +351,7 @@
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="saveNewParticipantsBtn">
+                    <button type="button" class="btn btn-primary d-none" id="saveNewParticipantsBtn">
                         Save New Participants
                     </button>
                 </div>
@@ -365,6 +371,7 @@
                 </div>
                 <form id="editParticipantForm">
                     <div class="modal-body">
+                        <div id="editParticipantAlert" class="alert d-none" role="alert"></div>
                         <input type="hidden" id="edit_participant_id" name="id">
                         <div class="mb-3">
                             <label class="form-label">Name of Participant <span class="text-danger">*</span></label>
@@ -389,28 +396,58 @@
         </div>
     </div>
 
+    <!-- ===================== DELETE TRAINING MODAL ===================== -->
+    <div class="modal fade" id="deleteTrainingModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content add-training-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i> Delete Training
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="delete_training_code">
+                    <p class="mb-2">Are you sure you want to delete this training?</p>
+                    <p class="fw-semibold mb-3" id="delete_training_title"></p>
+                    <div class="alert alert-danger mb-0 py-2">
+                        All participants of this training will also be deleted.
+                        This cannot be undone.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteTrainingBtn">
+                        <i class="bi bi-trash me-1"></i> Yes, Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </main>
 
 <?= $this->include('dashboard_layout/loading') ?>
 
-<!-- NOTE: remove this line if dashboard_layout/head or /loading already loads Bootstrap JS -->
+<!-- remove this line if dashboard_layout/head already loads Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
     window.TIA = {
         urls: {
-            storeTraining:     '<?= site_url('tia/store-training') ?>',
-            participants:      '<?= site_url('tia/participants') ?>',
-            exportCsv:         '<?= site_url('tia/export-participants') ?>',
-            addBulk:           '<?= site_url('tia/add-participants-bulk') ?>',
+            storeTraining: '<?= site_url('tia/store-training') ?>',
+            participants: '<?= site_url('tia/participants') ?>',
+            exportCsv: '<?= site_url('tia/export-participants') ?>',
+            addBulk: '<?= site_url('tia/add-participants-bulk') ?>',
             updateParticipant: '<?= site_url('tia/update-participant') ?>',
-            updateTraining:    '<?= site_url('tia/update-training') ?>',
-            deleteTraining:    '<?= site_url('tia/delete-training') ?>',
-            updateStatus:      '<?= site_url('tia/update-status') ?>'
+            updateTraining: '<?= site_url('tia/update-training') ?>',
+            deleteTraining: '<?= site_url('tia/delete-training') ?>',
+            updateStatus: '<?= site_url('tia/update-status') ?>'
         },
         csrf: {
-            name:   '<?= csrf_token() ?>',
+            name: '<?= csrf_token() ?>',
             header: '<?= csrf_header() ?>',
-            hash:   '<?= csrf_hash() ?>'
+            hash: '<?= csrf_hash() ?>'
         }
     };
 </script>
