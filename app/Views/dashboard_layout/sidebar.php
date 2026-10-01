@@ -35,6 +35,9 @@
     <a href="tia_page" class="nav-link<?= $isActive('tia_page') ?>" <?= $dismiss ?>>
       <i class="bi bi-file-earmark-post"></i><span>TIA</span>
     </a>
+    <a href="employees" class="nav-link<?= $isActive('employees') ?>" <?= $dismiss ?>>
+      <i class="bi bi-person-vcard-fill"></i><span>Employees</span>
+    </a>
 
 
     <div class="nav-divider"></div>

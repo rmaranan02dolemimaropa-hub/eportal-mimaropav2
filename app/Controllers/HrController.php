@@ -810,6 +810,52 @@ class HrController extends BaseController
             ])->setStatusCode(500);
         }
     }
+    /**
+     * Delete a single participant
+     * POST /tia/delete-participant/(:num)
+     */
+    public function deleteParticipant($id = null)
+    {
+        if (!$id) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Participant ID is required',
+            ])->setStatusCode(400);
+        }
+
+        $participant = $this->participantsModel->find($id);
+        if (!$participant) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Participant not found',
+            ])->setStatusCode(404);
+        }
+
+        try {
+            $deleted = $this->participantsModel->delete($id);
+
+            if ($deleted === false) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to delete participant',
+                    'errors' => $this->participantsModel->errors(),
+                ])->setStatusCode(500);
+            }
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Participant deleted successfully!',
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Delete Participant Error: ' . $e->getMessage());
+
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Server error occurred',
+                'error' => ENVIRONMENT === 'development' ? $e->getMessage() : null,
+            ])->setStatusCode(500);
+        }
+    }
 
 
 

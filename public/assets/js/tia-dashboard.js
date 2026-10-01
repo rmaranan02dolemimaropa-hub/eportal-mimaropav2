@@ -25,8 +25,9 @@ document.addEventListener("DOMContentLoaded", () => {
   initEditTraining();
   initStatusTraining();
   initDeleteTraining();
-  initManageParticipants(); // load, add/remove row, paste, import/export, save
+  initManageParticipants();
   initEditParticipant();
+  initDeleteParticipant();
 });
 
 /* =========================================================================
@@ -487,15 +488,23 @@ function initManageParticipants() {
                         <td>${escapeHtml(p.position)}</td>
                         <td>${escapeHtml(p.email)}</td>
                         <td class="text-center">
-                            <div class="row-actions">
-                                <button type="button" class="btn btn-sm row-action-btn btn-edit-participant"
-                                    data-id="${escapeHtml(p.id)}"
-                                    data-name="${escapeHtml(p.participant_name)}"
-                                    data-position="${escapeHtml(p.position)}"
-                                    data-email="${escapeHtml(p.email)}"
-                                    title="Edit">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
+                            <div class="row-actions d-flex gap-1 justify-content-center">
+                            <button type="button" class="btn btn-sm row-action-btn btn-edit-participant"
+                                data-id="${escapeHtml(p.id)}"
+                                data-name="${escapeHtml(p.participant_name)}"
+                                data-position="${escapeHtml(p.position)}"
+                                data-email="${escapeHtml(p.email)}"
+                                title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                           <button type="button" class="btn btn-sm row-action-btn row-action-danger btn-delete-participant"
+                              data-id="${escapeHtml(p.id)}"
+                              data-name="${escapeHtml(p.participant_name)}"
+                              data-position="${escapeHtml(p.position)}"
+                              data-email="${escapeHtml(p.email)}"
+                              title="Delete">
+                              <i class="bi bi-trash"></i>
+                          </button>
                             </div>
                         </td>
                     `;
@@ -600,6 +609,7 @@ function initManageParticipants() {
     removeBtn.closest("tr").remove();
     if (newBody.children.length === 0) newBody.appendChild(createRow());
     renumberRows();
+    updateSaveBtn();
   });
 
   newBody.addEventListener("input", updateSaveBtn);
@@ -812,6 +822,84 @@ function initEditParticipant() {
       console.error(err);
       showAlert(
         editAlert,
+        "danger",
+        err.message || "Network error. Please try again.",
+      );
+    } finally {
+      restore();
+    }
+  });
+}
+
+/* =========================================================================
+ * 10. DELETE PARTICIPANT  (modal on top of the Manage modal)
+ * Trigger : .btn-delete-participant (created by JS, so delegated click)
+ * Modal   : #deleteParticipantModal
+ * Endpoint: POST tia/delete-participant/{id}
+ * ========================================================================= */
+function initDeleteParticipant() {
+  const modalEl = $("deleteParticipantModal");
+  const idInput = $("delete_participant_id");
+  const nameEl = $("delete_participant_name");
+  const confirmBtn = $("confirmDeleteParticipantBtn");
+  const modalAlert = $("deleteParticipantAlert"); // inside the Delete modal
+  const manageAlert = $("participantsAlert"); // inside the Manage modal
+  const positionEl = $("delete_participant_position");
+  const emailEl = $("delete_participant_email");
+
+  // 1. open the confirmation modal
+  $("existingParticipantsBody").addEventListener("click", (e) => {
+    const btn = e.target.closest(".btn-delete-participant");
+    if (!btn) return;
+
+    hideAlert(modalAlert);
+    hideAlert(manageAlert);
+    idInput.value = btn.dataset.id;
+    nameEl.textContent = btn.dataset.name; // textContent = safe
+    positionEl.textContent = btn.dataset.position; // <-- new
+    emailEl.textContent = btn.dataset.email; // <-- new
+    getModal(modalEl).show();
+  });
+
+  // keep the Manage modal scrollable after the stacked modal closes
+  modalEl.addEventListener("hidden.bs.modal", () => {
+    if (document.querySelector("#manageParticipantsModal.show")) {
+      document.body.classList.add("modal-open");
+    }
+  });
+
+  // 2. confirm: send the request
+  confirmBtn.addEventListener("click", async function () {
+    hideAlert(modalAlert);
+    const id = idInput.value;
+    const restore = setBusy(this, "Deleting...");
+
+    try {
+      const result = await apiFetch(
+        `${URLS.deleteParticipant}/${encodeURIComponent(id)}`,
+        { method: "POST", body: buildFormData() },
+      );
+
+      if (result.success) {
+        getModal(modalEl).hide();
+        window.reloadParticipants();
+        showAlert(
+          manageAlert,
+          "success",
+          result.message || "Participant deleted successfully!",
+        );
+      } else {
+        showAlert(
+          modalAlert,
+          "danger",
+          result.message || "Failed to delete participant.",
+          result.errors ? Object.values(result.errors) : [],
+        );
+      }
+    } catch (err) {
+      console.error(err);
+      showAlert(
+        modalAlert,
         "danger",
         err.message || "Network error. Please try again.",
       );

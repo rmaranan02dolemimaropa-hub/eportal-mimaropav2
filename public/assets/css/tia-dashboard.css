@@ -181,3 +181,76 @@
     font-size: 0.82rem;
   }
 }
+
+/* =====================================================
+   Employees page buttons — matches TIA dashboard style
+   (paste at the bottom of tia-dashboard.css)
+   ===================================================== */
+
+.employees-page .btn {
+  font-size: 13.5px;
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 8px 16px;
+  box-shadow: none;
+}
+
+.employees-page .btn-sm {
+  font-size: 12.5px;
+  padding: 5px 12px;
+}
+
+/* Primary (+ Add Employee) */
+.employees-page .btn-primary {
+  background: #111827;
+  border-color: #111827;
+  color: #fff;
+}
+.employees-page .btn-primary:hover,
+.employees-page .btn-primary:focus {
+  background: #1f2937;
+  border-color: #1f2937;
+  color: #fff;
+}
+
+/* Secondary actions (CSV Template, Import, Export, Edit) */
+.employees-page .btn-outline-secondary,
+.employees-page .btn-outline-primary,
+.employees-page .btn-outline-success {
+  background: #fff;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+}
+.employees-page .btn-outline-secondary:hover,
+.employees-page .btn-outline-primary:hover,
+.employees-page .btn-outline-success:hover {
+  background: #f3f4f6;
+  color: #111827;
+  border-color: #d1d5db;
+}
+
+/* Delete */
+.employees-page .btn-outline-danger {
+  background: #fff;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+.employees-page .btn-outline-danger:hover {
+  background: #fef2f2;
+  color: #991b1b;
+  border-color: #fca5a5;
+}
+
+/* Search box */
+.employees-page .form-control {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+  padding: 9px 12px;
+  background: #fafafa;
+  box-shadow: none;
+}
+.employees-page .form-control:focus {
+  border-color: #9ca3af;
+  background: #fff;
+}

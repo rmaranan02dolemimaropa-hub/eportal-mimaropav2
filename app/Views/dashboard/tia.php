@@ -425,6 +425,50 @@
         </div>
     </div>
 
+
+    <!-- ===================== DELETE PARTICIPANT MODAL ===================== -->
+    <div class="modal fade" id="deleteParticipantModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content add-training-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i> Delete Participant
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="deleteParticipantAlert" class="alert d-none" role="alert"></div>
+                    <input type="hidden" id="delete_participant_id">
+
+                    <p class="mb-2">Are you sure you want to delete this participant?</p>
+
+                    <div class="border rounded p-3 mb-3">
+                        <div class="mb-2">
+                            <small class="text-muted d-block">Name of Participant</small>
+                            <span class="fw-semibold" id="delete_participant_name"></span>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted d-block">Position</small>
+                            <span id="delete_participant_position"></span>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Email Address</small>
+                            <span id="delete_participant_email"></span>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-danger mb-0 py-2">This cannot be undone.</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteParticipantBtn">
+                        <i class="bi bi-trash me-1"></i> Yes, Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </main>
 
 <?= $this->include('dashboard_layout/loading') ?>
@@ -442,7 +486,8 @@
             updateParticipant: '<?= site_url('tia/update-participant') ?>',
             updateTraining: '<?= site_url('tia/update-training') ?>',
             deleteTraining: '<?= site_url('tia/delete-training') ?>',
-            updateStatus: '<?= site_url('tia/update-status') ?>'
+            updateStatus: '<?= site_url('tia/update-status') ?>',
+            deleteParticipant: '<?= site_url('tia/delete-participant') ?>'
         },
         csrf: {
             name: '<?= csrf_token() ?>',
