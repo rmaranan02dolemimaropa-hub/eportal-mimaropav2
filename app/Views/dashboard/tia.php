@@ -299,6 +299,7 @@
                                     <th>Name</th>
                                     <th>Position</th>
                                     <th>Email</th>
+                                    <th style="width:130px;" class="text-center">TIA Status</th>
                                     <th style="width:110px;" class="text-center">Action</th>
                                 </tr>
                             </thead>

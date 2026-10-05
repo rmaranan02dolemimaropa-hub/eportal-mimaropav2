@@ -2,22 +2,28 @@
  * tia-dashboard.js
  * Training Impact Assessment - Dashboard (Trainings + Participants)
  *
- * Kailangan ng view ang window.TIA config bago i-load ang file na ito:
+ * The view must define window.TIA before loading this file:
  *   window.TIA = { urls: {...}, csrf: { name, header, hash } };
  *
- * MAPA NG BUTTON -> MODAL -> ENDPOINT -> CONTROLLER
+ * BUTTON -> MODAL -> ENDPOINT -> CONTROLLER MAP
  * ---------------------------------------------------------------------------
  * Add Training      -> #addTrainingModal        -> POST store-training          -> storeTraining
  * Edit              -> #editTrainingModal       -> POST update-training/{code}  -> updateTraining
  * Status            -> #statusTrainingModal     -> POST update-status/{code}    -> updateTrainingStatus
- * Delete            -> confirm()                -> POST delete-training/{code}  -> deleteTraining
+ * Delete            -> #deleteTrainingModal     -> POST delete-training/{code}  -> deleteTraining
  * Manage            -> #manageParticipantsModal -> GET  participants/{code}     -> getParticipants
  * Save Participants -> (same modal)             -> POST add-participants-bulk   -> addParticipantsBulk
  * Export CSV        -> (same modal)             -> GET  export-participants/{c} -> exportParticipants
  * Edit participant  -> #editParticipantModal    -> POST update-participant/{id} -> updateParticipant
+ * Delete participant-> #deleteParticipantModal  -> POST delete-participant/{id} -> deleteParticipant
  *
- * DALOY NG HALOS LAHAT NG FORM:
- *   buksan modal -> lagyan ng data -> submit -> apiFetch -> success: reload / error: alert
+ * TIA STATUS (per participant):
+ *   getParticipants() returns tia_submitted, tia_reference_no, tia_submitted_at.
+ *   The "Current Participants" table shows a Submitted / Pending badge,
+ *   and #tiaSummary shows "X of Y submitted the assessment".
+ *
+ * COMMON FORM FLOW:
+ *   open modal -> fill data -> submit -> apiFetch -> success: reload / error: alert
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -36,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
 const URLS = window.TIA.urls;
 const csrfName = window.TIA.csrf.name;
 const csrfHeader = window.TIA.csrf.header;
-let csrfHash = window.TIA.csrf.hash; // let: puwedeng ma-refresh pagkatapos ng request
+let csrfHash = window.TIA.csrf.hash; // let: refreshed after each request
 
 /* =========================================================================
  * 2. API HELPERS
@@ -44,9 +50,9 @@ let csrfHash = window.TIA.csrf.hash; // let: puwedeng ma-refresh pagkatapos ng r
 
 /**
  * Central fetch helper.
- * - laging may CSRF header + AJAX header
- * - ina-update ang CSRF token kung may data.csrf ang response
- * - laging JSON ang ibinabalik, o may readable na Error
+ * - always sends the CSRF header + AJAX header
+ * - updates the CSRF token if the response has data.csrf
+ * - always returns JSON, or throws a readable Error
  */
 async function apiFetch(url, options = {}) {
   options.headers = Object.assign(
@@ -64,7 +70,7 @@ async function apiFetch(url, options = {}) {
   try {
     data = await response.json();
   } catch (e) {
-    /* hindi JSON */
+    /* not JSON */
   }
 
   if (data && data.csrf) csrfHash = data.csrf;
@@ -87,8 +93,8 @@ function buildFormData(form) {
 }
 
 /**
- * Pangkaraniwang pattern ng form submit:
- * busy button -> POST -> success/error -> ibalik ang button
+ * Common form submit pattern:
+ * busy button -> POST -> success/error -> restore button
  */
 async function submitForm({ form, url, busyText, errorText, onSuccess }) {
   const restore = setBusy(form.querySelector('[type="submit"]'), busyText);
@@ -132,6 +138,27 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+/**
+ * Badge for the TIA (Annex D) submission status of a participant.
+ * Uses p.tia_submitted, p.tia_reference_no, p.tia_submitted_at from getParticipants().
+ */
+function tiaStatusBadge(p) {
+  if (!p.tia_submitted) {
+    return '<span class="badge bg-secondary"><i class="bi bi-hourglass-split me-1"></i>Pending</span>';
+  }
+
+  let when = "";
+  if (p.tia_submitted_at) {
+    const d = new Date(String(p.tia_submitted_at).replace(" ", "T"));
+    if (!isNaN(d)) when = d.toLocaleDateString();
+  }
+  const title = `Ref: ${p.tia_reference_no || ""} ${when}`.trim();
+
+  return `<span class="badge bg-success" title="${escapeHtml(title)}">
+            <i class="bi bi-check-circle me-1"></i>Submitted
+          </span>`;
+}
+
 function setBusy(btn, busyText) {
   const original = btn.innerHTML;
   btn.disabled = true;
@@ -149,7 +176,7 @@ function showErrors(result, fallback) {
   alert(msg);
 }
 
-// CSV parser (kaya ang quotes, comma sa loob ng quotes, BOM, CRLF)
+// CSV parser (handles quotes, commas inside quotes, BOM, CRLF)
 function parseCsv(text, delimiter = ",") {
   text = text.replace(/^\uFEFF/, "");
   const rows = [];
@@ -236,7 +263,7 @@ function hideAlert(box) {
 
 /* =========================================================================
  * 4. ADD TRAINING
- * Trigger : button na may data-bs-target="#addTrainingModal"
+ * Trigger : button with data-bs-target="#addTrainingModal"
  * Modal   : #addTrainingModal
  * Endpoint: POST tia/store-training
  * Fields  : training_title*, training_dates*, conducted_by, office, immediate_superior
@@ -269,7 +296,7 @@ function initAddTraining() {
 function initEditTraining() {
   const form = $("editTrainingForm");
 
-  // 1. buksan ang modal at punuin ng data
+  // 1. open the modal and fill in the data
   document.querySelectorAll(".edit-training-btn").forEach((btn) => {
     btn.addEventListener("click", function () {
       $("edit_training_code").value = this.dataset.code;
@@ -282,7 +309,7 @@ function initEditTraining() {
     });
   });
 
-  // 2. i-submit
+  // 2. submit
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const code = $("edit_training_code").value;
@@ -300,11 +327,11 @@ function initEditTraining() {
 }
 
 /* =========================================================================
- * 6. STATUS  (dating WALANG JS - ito ang dahilan kung bakit hindi gumagana)
+ * 6. STATUS
  * Trigger : .status-training-btn  (data-code, title, status, dates)
  * Modal   : #statusTrainingModal
  * Endpoint: POST tia/update-status/{code}
- * Fields  : status*, reason (required kung canceled/rescheduled), new_dates (rescheduled lang)
+ * Fields  : status*, reason (required if canceled/rescheduled), new_dates (rescheduled only)
  * ========================================================================= */
 function initStatusTraining() {
   const form = $("statusTrainingForm");
@@ -399,9 +426,9 @@ function initStatusTraining() {
 }
 
 /* =========================================================================
- * 7. DELETE TRAINING  (buburahin din ang lahat ng participants)
+ * 7. DELETE TRAINING  (also deletes all of its participants)
  * Trigger : .delete-training-btn  (data-code, title)
- * Modal   : wala, confirm() lang
+ * Modal   : #deleteTrainingModal
  * Endpoint: POST tia/delete-training/{code}
  * ========================================================================= */
 function initDeleteTraining() {
@@ -449,9 +476,9 @@ function initDeleteTraining() {
  * 8. MANAGE PARTICIPANTS
  * Trigger : .manage-participants-btn  (data-training-code, data-training-title)
  * Modal   : #manageParticipantsModal
- * May tatlong bahagi:
- *   A. Current participants  -> GET participants/{code}
- *   B. Table ng bagong rows  -> add/remove row, paste mula Excel, import CSV
+ * Three parts:
+ *   A. Current participants  -> GET participants/{code}  (with TIA status)
+ *   B. Table of new rows     -> add/remove row, paste from Excel, import CSV
  *   C. Export CSV            -> GET export-participants/{code}
  *   D. Save                  -> POST add-participants-bulk (JSON)
  * ========================================================================= */
@@ -460,14 +487,16 @@ function initManageParticipants() {
   const newBody = $("newParticipantsBody");
   const alertBox = $("participantsAlert");
 
-  // ---------- A. CURRENT PARTICIPANTS ----------
+  // ---------- A. CURRENT PARTICIPANTS (with TIA status) ----------
   async function loadExistingParticipants(trainingCode) {
     const tbody = $("existingParticipantsBody");
     const emptyMsg = $("existingEmpty");
+    const summary = $("tiaSummary"); // optional element
 
     tbody.innerHTML =
-      '<tr><td colspan="5" class="text-center text-muted">Loading...</td></tr>';
+      '<tr><td colspan="6" class="text-center text-muted">Loading...</td></tr>';
     emptyMsg.classList.add("d-none");
+    if (summary) summary.textContent = "";
 
     try {
       const result = await apiFetch(
@@ -483,61 +512,68 @@ function initManageParticipants() {
         result.data.forEach((p, index) => {
           const tr = document.createElement("tr");
           tr.innerHTML = `
-                        <td class="text-center text-muted">${index + 1}</td>
-                        <td class="fw-semibold">${escapeHtml(p.participant_name)}</td>
-                        <td>${escapeHtml(p.position)}</td>
-                        <td>${escapeHtml(p.email)}</td>
-                        <td class="text-center">
-                            <div class="row-actions d-flex gap-1 justify-content-center">
-                            <button type="button" class="btn btn-sm row-action-btn btn-edit-participant"
-                                data-id="${escapeHtml(p.id)}"
-                                data-name="${escapeHtml(p.participant_name)}"
-                                data-position="${escapeHtml(p.position)}"
-                                data-email="${escapeHtml(p.email)}"
-                                title="Edit">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                           <button type="button" class="btn btn-sm row-action-btn row-action-danger btn-delete-participant"
-                              data-id="${escapeHtml(p.id)}"
-                              data-name="${escapeHtml(p.participant_name)}"
-                              data-position="${escapeHtml(p.position)}"
-                              data-email="${escapeHtml(p.email)}"
-                              title="Delete">
-                              <i class="bi bi-trash"></i>
-                          </button>
-                            </div>
-                        </td>
-                    `;
+            <td class="text-center text-muted">${index + 1}</td>
+            <td class="fw-semibold">${escapeHtml(p.participant_name)}</td>
+            <td>${escapeHtml(p.position)}</td>
+            <td>${escapeHtml(p.email)}</td>
+            <td class="text-center">${tiaStatusBadge(p)}</td>
+            <td class="text-center">
+              <div class="row-actions d-flex gap-1 justify-content-center">
+                <button type="button" class="btn btn-sm row-action-btn btn-edit-participant"
+                  data-id="${escapeHtml(p.id)}"
+                  data-name="${escapeHtml(p.participant_name)}"
+                  data-position="${escapeHtml(p.position)}"
+                  data-email="${escapeHtml(p.email)}"
+                  title="Edit">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button type="button" class="btn btn-sm row-action-btn row-action-danger btn-delete-participant"
+                  data-id="${escapeHtml(p.id)}"
+                  data-name="${escapeHtml(p.participant_name)}"
+                  data-position="${escapeHtml(p.position)}"
+                  data-email="${escapeHtml(p.email)}"
+                  data-submitted="${p.tia_submitted ? 1 : 0}"
+                  title="Delete">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          `;
           tbody.appendChild(tr);
         });
+
+        if (summary) {
+          const done = result.data.filter((p) => p.tia_submitted).length;
+          summary.textContent = `${done} of ${result.data.length} submitted the assessment`;
+        }
       } else {
         emptyMsg.classList.remove("d-none");
       }
     } catch (err) {
       console.error(err);
       tbody.innerHTML =
-        '<tr><td colspan="5" class="text-center text-danger">Failed to load participants.</td></tr>';
+        '<tr><td colspan="6" class="text-center text-danger">Failed to load participants.</td></tr>';
     }
   }
 
-  // gagamitin din ng initEditParticipant() pagkatapos mag-update
+  // also used by initEditParticipant(), initDeleteParticipant(), and the Send Form button
   window.reloadParticipants = () =>
     loadExistingParticipants($("manage_training_code").value);
 
-  // ---------- B. BAGONG ROWS ----------
+  // ---------- B. NEW ROWS ----------
   function createRow(name = "", position = "", email = "") {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-            <td class="text-center text-muted row-number"></td>
-            <td><input type="text" class="form-control form-control-sm new-name" value="${escapeHtml(name)}" placeholder="Full Name"></td>
-            <td><input type="text" class="form-control form-control-sm new-position" value="${escapeHtml(position)}" placeholder="Position"></td>
-            <td><input type="email" class="form-control form-control-sm new-email" value="${escapeHtml(email)}" placeholder="email@example.com"></td>
-            <td class="text-center">
-                <button type="button" class="btn btn-sm row-action-btn row-action-danger btn-remove-new-row" title="Remove">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </td>
-        `;
+      <td class="text-center text-muted row-number"></td>
+      <td><input type="text" class="form-control form-control-sm new-name" value="${escapeHtml(name)}" placeholder="Full Name"></td>
+      <td><input type="text" class="form-control form-control-sm new-position" value="${escapeHtml(position)}" placeholder="Position"></td>
+      <td><input type="email" class="form-control form-control-sm new-email" value="${escapeHtml(email)}" placeholder="email@example.com"></td>
+      <td class="text-center">
+        <button type="button" class="btn btn-sm row-action-btn row-action-danger btn-remove-new-row" title="Remove">
+          <i class="bi bi-trash"></i>
+        </button>
+      </td>
+    `;
     return tr;
   }
 
@@ -552,6 +588,7 @@ function initManageParticipants() {
       (i) => i.value.trim() !== "",
     );
   }
+
   // show the Save button only if at least one row has data
   function updateSaveBtn() {
     const hasData = [...newBody.querySelectorAll("tr")].some(
@@ -567,7 +604,7 @@ function initManageParticipants() {
     updateSaveBtn();
   }
 
-  // dagdagan ng rows (galing paste o CSV); tanggalin muna ang blangkong rows
+  // append rows (from paste or CSV); remove blank rows first
   function appendRows(list) {
     newBody.querySelectorAll("tr").forEach((tr) => {
       if (isRowBlank(tr)) tr.remove();
@@ -586,7 +623,7 @@ function initManageParticipants() {
     updateSaveBtn();
   }
 
-  // ---------- BUKSAN ANG MODAL ----------
+  // ---------- OPEN THE MODAL ----------
   document.querySelectorAll(".manage-participants-btn").forEach((btn) => {
     btn.addEventListener("click", function () {
       $("manage_training_code").value = this.dataset.trainingCode;
@@ -614,10 +651,10 @@ function initManageParticipants() {
 
   newBody.addEventListener("input", updateSaveBtn);
 
-  // ---------- PASTE MULA EXCEL (multi-cell lang) ----------
+  // ---------- PASTE FROM EXCEL (multi-cell only) ----------
   newBody.addEventListener("paste", (e) => {
     const text = (e.clipboardData || window.clipboardData).getData("text");
-    if (!/[\t\r\n]/.test(text)) return; // iisang value -> normal na paste
+    if (!/[\t\r\n]/.test(text)) return; // single value -> normal paste
 
     e.preventDefault();
     const list = text
@@ -639,7 +676,7 @@ function initManageParticipants() {
       const text = event.target.result;
       const rows = parseCsv(text, detectDelimiter(text));
 
-      // laktawan ang header row kung "name" / "participant name" ang unang cell
+      // skip the header row if the first cell is "name" / "participant name"
       if (rows.length && /^(participant\s*)?name/i.test(rows[0][0].trim()))
         rows.shift();
 
@@ -749,8 +786,8 @@ function initManageParticipants() {
 }
 
 /* =========================================================================
- * 9. EDIT PARTICIPANT  (modal sa ibabaw ng Manage modal)
- * Trigger : .btn-edit-participant (nilikha ng JS, kaya delegated click)
+ * 9. EDIT PARTICIPANT  (modal on top of the Manage modal)
+ * Trigger : .btn-edit-participant (created by JS, so delegated click)
  * Modal   : #editParticipantModal
  * Endpoint: POST tia/update-participant/{id}
  * ========================================================================= */
@@ -836,6 +873,7 @@ function initEditParticipant() {
  * Trigger : .btn-delete-participant (created by JS, so delegated click)
  * Modal   : #deleteParticipantModal
  * Endpoint: POST tia/delete-participant/{id}
+ * Shows a warning if the participant already submitted the TIA form.
  * ========================================================================= */
 function initDeleteParticipant() {
   const modalEl = $("deleteParticipantModal");
@@ -856,8 +894,19 @@ function initDeleteParticipant() {
     hideAlert(manageAlert);
     idInput.value = btn.dataset.id;
     nameEl.textContent = btn.dataset.name; // textContent = safe
-    positionEl.textContent = btn.dataset.position; // <-- new
-    emailEl.textContent = btn.dataset.email; // <-- new
+    positionEl.textContent = btn.dataset.position;
+    emailEl.textContent = btn.dataset.email;
+
+    // warn if this participant already submitted the assessment
+    if (btn.dataset.submitted === "1") {
+      showAlert(
+        modalAlert,
+        "warning",
+        "This participant has already submitted the assessment.",
+        ["Their submitted response will remain in the records."],
+      );
+    }
+
     getModal(modalEl).show();
   });
 

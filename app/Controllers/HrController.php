@@ -415,6 +415,24 @@ class HrController extends BaseController
             ->orderBy('id', 'ASC')
             ->findAll();
 
+        $responses = (new \App\Models\TiaResponsesModel())
+            ->select('email, reference_no, created_at')
+            ->where('training_code', $trainingCode)
+            ->findAll();
+
+        $submitted = [];
+        foreach ($responses as $r) {
+            $submitted[strtolower(trim($r['email']))] = $r;
+        }
+
+        foreach ($participants as &$p) {
+            $key = strtolower(trim((string) ($p['email'] ?? '')));
+            $p['tia_submitted'] = isset($submitted[$key]);
+            $p['tia_reference_no'] = $submitted[$key]['reference_no'] ?? null;
+            $p['tia_submitted_at'] = $submitted[$key]['created_at'] ?? null;
+        }
+        unset($p);
+
         return $this->response->setJSON([
             'success' => true,
             'data' => $participants,
