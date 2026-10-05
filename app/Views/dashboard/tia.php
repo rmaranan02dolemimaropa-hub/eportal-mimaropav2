@@ -283,9 +283,14 @@
                     </div>
 
                     <!-- Current participants -->
-                    <h6 class="detail-section-title mb-3">
-                        <i class="bi bi-person-check"></i> Current Participants
-                    </h6>
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                        <h6 class="detail-section-title mb-0">
+                            <i class="bi bi-person-check"></i> Current Participants
+                        </h6>
+                        <button type="button" class="btn btn-sm tool-btn" id="sendFormEmailsBtn">
+                            <i class="bi bi-envelope-paper me-1"></i> Send Form to All
+                        </button>
+                    </div>
                     <div class="table-responsive mb-2">
                         <table class="table requests-table table-sm align-middle mb-0">
                             <thead>
@@ -469,6 +474,35 @@
         </div>
     </div>
 
+    <!-- ===================== SEND FORM EMAILS MODAL ===================== -->
+    <div class="modal fade" id="sendEmailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content add-training-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-envelope-paper me-2"></i> Send Form to All Participants
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2">The TIA Self-Rater Form (Annex D) link will be emailed to
+                        <strong id="sendEmails_count"></strong> of:
+                    </p>
+                    <p class="fw-semibold mb-3" id="sendEmails_title"></p>
+                    <div class="alert alert-warning mb-0 py-2">
+                        Everyone listed under Current Participants will receive the email.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmSendEmailsBtn">
+                        <i class="bi bi-send me-1"></i> Send Emails
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </main>
 
 <?= $this->include('dashboard_layout/loading') ?>
@@ -487,7 +521,8 @@
             updateTraining: '<?= site_url('tia/update-training') ?>',
             deleteTraining: '<?= site_url('tia/delete-training') ?>',
             updateStatus: '<?= site_url('tia/update-status') ?>',
-            deleteParticipant: '<?= site_url('tia/delete-participant') ?>'
+            deleteParticipant: '<?= site_url('tia/delete-participant') ?>',
+            sendFormEmails: '<?= site_url('tia/send-form-emails') ?>'
         },
         csrf: {
             name: '<?= csrf_token() ?>',
@@ -497,3 +532,7 @@
     };
 </script>
 <script src="<?= base_url('assets/js/tia-dashboard.js') ?>"></script>
+<script src="<?= base_url('assets/js/tia-send-emails.js') ?>"></script>
+
+<script>window.EMPLOYEE_LIST_URL = '<?= site_url('employees/all') ?>';</script>
+<script src="<?= base_url('assets/js/employee-select.js') ?>"></script>

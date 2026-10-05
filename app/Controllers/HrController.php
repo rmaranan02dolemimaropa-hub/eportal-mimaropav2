@@ -25,148 +25,188 @@ class HrController extends BaseController
      * Show the Training Impact Assessment form
      * URL: /tia  or  /hr/create
      */
-    public function create()
+    public function create($trainingCode = null)
     {
-        return view('tia/ad_form');   // resources/views/tia/form.php  (or .html)
-    }
+        $trainingCode = $trainingCode ?: $this->request->getGet('t');
+        $training = null;
+        $participant = null;
 
+        if ($trainingCode) {
+            $training = $this->trainingsModel
+                ->where('training_code', $trainingCode)
+                ->first();
+
+            if (!$training) {
+                throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound(
+                    'Training not found: ' . esc($trainingCode)
+                );
+            }
+
+            // Prefill: kunin ang participant kung may ?p= sa link
+            $pid = $this->request->getGet('p');
+            if ($pid !== null && ctype_digit((string) $pid)) {
+                $participant = $this->participantsModel
+                    ->where('id', (int) $pid)
+                    ->where('training_code', $trainingCode)   // dapat pareho ang training
+                    ->first();
+            }
+        }
+
+        return view('tia/ad_form', [
+            'training' => $training,
+            'participant' => $participant,
+        ]);
+    }
     /**
      * Store the submitted form
      * URL: POST /tia  or  /hr/store
      */
     public function store()
     {
-        // 1. Log everything we received
-        log_message('error', '=== TIA FORM SUBMITTED ===');
-        log_message('error', 'POST data: ' . json_encode($this->request->getPost()));
-        log_message('error', 'Raw input: ' . $this->request->getBody());
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Invalid request.',
+                'csrf' => csrf_hash(),
+            ])->setStatusCode(403);
+        }
 
-        $request = $this->request;
+        // --- Validation ---
+        $required = 'required|in_list[1,2,3,4]';
+        $optional = 'permit_empty|in_list[1,2,3,4]';
 
-        // ===== Temporary relaxed validation (for debugging only) =====
         $rules = [
-            'training_title' => 'required',
-            'participant_name' => 'required',
-            'email' => 'required|valid_email',
+            'training_code' => 'required|max_length[50]',
+            'participant_name' => 'required|max_length[150]',
+            'email' => 'required|valid_email|max_length[150]',
+            'position' => 'required|max_length[150]',
+            'office' => 'required|max_length[150]',
+            'immediate_superior' => 'required|max_length[150]',
             'presented_ideas' => 'required|in_list[Yes,No]',
         ];
+
+        foreach (['att', 'perf', 'app'] as $prefix) {
+            for ($i = 1; $i <= 5; $i++) {
+                $rules["{$prefix}_{$i}"] = $required;
+            }
+        }
+        foreach (['comp', 'obj'] as $prefix) {
+            for ($i = 1; $i <= 4; $i++) {
+                $rules["{$prefix}_{$i}"] = $optional;
+                $rules["{$prefix}_{$i}_text"] = 'permit_empty|max_length[255]';
+            }
+        }
 
         if (!$this->validate($rules)) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Validation failed',
+                'message' => 'Please complete all required fields.',
                 'errors' => $this->validator->getErrors(),
-                'received_data' => $this->request->getPost()
+                'csrf' => csrf_hash(),
             ])->setStatusCode(422);
         }
 
-        // Prepare data
-        $barriers = $request->getPost('barrier') ?? [];
-        $barriersStr = is_array($barriers) ? implode(',', $barriers) : null;
+        // --- Training: kunin sa DB, huwag magtiwala sa form ---
+        $trainingCode = trim((string) $this->request->getPost('training_code'));
+        $training = $this->trainingsModel
+            ->where('training_code', $trainingCode)
+            ->first();
 
-        // ===== Generate Reference Number → TIA20260929A7K9X2 =====
-        $datePart = date('Ymd');                          // e.g. 20260929
-        $characters = '0123456789';
-        $randomPart = '';
-
-        for ($i = 0; $i < 6; $i++) {
-            $randomPart .= $characters[random_int(0, strlen($characters) - 1)];
-        }
-
-        $referenceNo = 'TIA-' . $datePart . $randomPart;
-
-        $data = [
-            'reference_no' => $referenceNo,   // ← added
-
-            'training_title' => $request->getPost('training_title'),
-            'training_dates' => $request->getPost('training_dates'),
-            'participant_name' => $request->getPost('participant_name'),
-            'email' => $request->getPost('email'),
-            'position' => $request->getPost('position'),
-            'office' => $request->getPost('office'),
-            'immediate_superior' => $request->getPost('immediate_superior'),
-
-            'att_1' => $request->getPost('att_1'),
-            'att_2' => $request->getPost('att_2'),
-            'att_3' => $request->getPost('att_3'),
-            'att_4' => $request->getPost('att_4'),
-            'att_5' => $request->getPost('att_5'),
-
-            'perf_1' => $request->getPost('perf_1'),
-            'perf_2' => $request->getPost('perf_2'),
-            'perf_3' => $request->getPost('perf_3'),
-            'perf_4' => $request->getPost('perf_4'),
-            'perf_5' => $request->getPost('perf_5'),
-
-            'comp_1_text' => $request->getPost('comp_1_text'),
-            'comp_1' => $request->getPost('comp_1'),
-            'comp_2_text' => $request->getPost('comp_2_text'),
-            'comp_2' => $request->getPost('comp_2'),
-            'comp_3_text' => $request->getPost('comp_3_text'),
-            'comp_3' => $request->getPost('comp_3'),
-            'comp_4_text' => $request->getPost('comp_4_text'),
-            'comp_4' => $request->getPost('comp_4'),
-
-            'obj_1_text' => $request->getPost('obj_1_text'),
-            'obj_1' => $request->getPost('obj_1'),
-            'obj_2_text' => $request->getPost('obj_2_text'),
-            'obj_2' => $request->getPost('obj_2'),
-            'obj_3_text' => $request->getPost('obj_3_text'),
-            'obj_3' => $request->getPost('obj_3'),
-            'obj_4_text' => $request->getPost('obj_4_text'),
-            'obj_4' => $request->getPost('obj_4'),
-
-            'app_1' => $request->getPost('app_1'),
-            'app_2' => $request->getPost('app_2'),
-            'app_3' => $request->getPost('app_3'),
-            'app_4' => $request->getPost('app_4'),
-            'app_5' => $request->getPost('app_5'),
-
-            'other_behavior_changes' => $request->getPost('other_behavior_changes'),
-            'measurable_improvements' => $request->getPost('measurable_improvements'),
-
-            'barriers' => $barriersStr,
-            'barrier_others_text' => $request->getPost('barrier_others_text'),
-
-            'presented_ideas' => $request->getPost('presented_ideas'),
-            'ideas_yes' => $request->getPost('ideas_yes'),
-            'ideas_no' => $request->getPost('ideas_no'),
-
-            'submitted_at' => date('Y-m-d H:i:s'),
-            'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s'),
-        ];
-
-        try {
-            $insertedId = $this->hrModel->insert($data);
-
-            if ($insertedId === false) {
-                // Model validation or database error
-                return $this->response->setJSON([
-                    'success' => false,
-                    'message' => 'Model insert failed',
-                    'model_errors' => $this->hrModel->errors(),
-                    'data_tried' => $data
-                ])->setStatusCode(500);
-            }
-
-            return $this->response->setJSON([
-                'success' => true,
-                'message' => 'Training Impact Assessment submitted successfully!',
-                'reference_no' => $referenceNo,
-                'id' => $insertedId
-            ])->setStatusCode(201);
-
-        } catch (\Exception $e) {
-            log_message('error', 'TIA Store Error: ' . $e->getMessage());
-
+        if (!$training) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Exception occurred',
-                'error' => $e->getMessage(),
-                'data' => $data
+                'message' => 'Training not found.',
+                'csrf' => csrf_hash(),
+            ])->setStatusCode(404);
+        }
+
+        $tiaModel = new \App\Models\TiaResponsesModel();
+        $email = strtolower(trim((string) $this->request->getPost('email')));
+
+        // --- Iwas dobleng sagot ---
+        $exists = $tiaModel
+            ->where('training_code', $trainingCode)
+            ->where('email', $email)
+            ->first();
+
+        if ($exists) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'You have already submitted an assessment for this training. Reference No.: ' . $exists['reference_no'],
+                'csrf' => csrf_hash(),
+            ])->setStatusCode(409);
+        }
+
+        // --- Barriers (checkbox array) ---
+        $allowedBarriers = [
+            'no_opportunity',
+            'not_enough_time',
+            'work_environment',
+            'superior_no_support',
+            'others',
+            'none'
+        ];
+        $barriers = array_values(array_intersect(
+            (array) $this->request->getPost('barrier'),
+            $allowedBarriers
+        ));
+
+        // --- Reference no. ---
+        $referenceNo = 'TIA-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(3)));
+
+        $data = [
+            'reference_no' => $referenceNo,
+            'training_code' => $trainingCode,
+            'training_title' => $training['training_title'],
+            'training_dates' => $training['training_dates'] ?? null,
+            'participant_name' => trim($this->request->getPost('participant_name')),
+            'email' => $email,
+            'position' => trim($this->request->getPost('position')),
+            'office' => trim($this->request->getPost('office')),
+            'immediate_superior' => trim($this->request->getPost('immediate_superior')),
+
+            'other_behavior_changes' => trim((string) $this->request->getPost('other_behavior_changes')),
+            'measurable_improvements' => trim((string) $this->request->getPost('measurable_improvements')),
+
+            'barriers' => json_encode($barriers),
+            'barrier_others_text' => in_array('others', $barriers, true)
+                ? trim((string) $this->request->getPost('barrier_others_text'))
+                : null,
+
+            'presented_ideas' => $this->request->getPost('presented_ideas'),
+            'ideas_yes' => trim((string) $this->request->getPost('ideas_yes')),
+            'ideas_no' => trim((string) $this->request->getPost('ideas_no')),
+        ];
+
+        // Ratings
+        foreach (['att' => 5, 'perf' => 5, 'app' => 5, 'comp' => 4, 'obj' => 4] as $prefix => $count) {
+            for ($i = 1; $i <= $count; $i++) {
+                $val = $this->request->getPost("{$prefix}_{$i}");
+                $data["{$prefix}_{$i}"] = ($val === null || $val === '') ? null : (int) $val;
+
+                if (in_array($prefix, ['comp', 'obj'], true)) {
+                    $data["{$prefix}_{$i}_text"] = trim((string) $this->request->getPost("{$prefix}_{$i}_text"));
+                }
+            }
+        }
+
+        try {
+            $tiaModel->insert($data);
+        } catch (\Throwable $e) {
+            log_message('error', 'TIA submit failed: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unable to save your assessment. Please try again.',
+                'csrf' => csrf_hash(),
             ])->setStatusCode(500);
         }
+
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => 'Assessment submitted.',
+            'reference_no' => $referenceNo,
+            'csrf' => csrf_hash(),
+        ]);
     }
 
     /**
@@ -855,6 +895,125 @@ class HrController extends BaseController
                 'error' => ENVIRONMENT === 'development' ? $e->getMessage() : null,
             ])->setStatusCode(500);
         }
+    }
+
+
+
+
+    public function sendFormEmails()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Invalid request.',
+                'csrf' => csrf_hash(),
+            ])->setStatusCode(403);
+        }
+
+        $trainingCode = trim((string) $this->request->getPost('training_code'));
+        if ($trainingCode === '') {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Training code is required',
+                'csrf' => csrf_hash(),
+            ])->setStatusCode(400);
+        }
+
+        $training = $this->trainingsModel
+            ->where('training_code', $trainingCode)
+            ->first();
+
+        if (!$training) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Training not found',
+                'csrf' => csrf_hash(),
+            ])->setStatusCode(404);
+        }
+
+        $participants = $this->participantsModel
+            ->where('training_code', $trainingCode)
+            ->orderBy('id', 'ASC')
+            ->findAll();
+
+        if (empty($participants)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'This training has no participants yet.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        @set_time_limit(0);
+        ignore_user_abort(true);
+
+        $mailer = \Config\Services::email();
+        $cfg = config('Email');
+
+        $sent = 0;
+        $failed = [];
+        $seen = [];
+        $failReason = '';
+
+        foreach ($participants as $p) {
+            $to = strtolower(trim((string) ($p['email'] ?? '')));
+
+            if ($to === '' || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
+                $failed[] = ($p['participant_name'] ?? 'Unknown') . ' (invalid email)';
+                continue;
+            }
+            if (isset($seen[$to])) {          // same email listed twice -> send once
+                continue;
+            }
+            $seen[$to] = true;
+
+            // Per-participant link: the form opens with this person's details prefilled.
+            // -> http://yourdomain/tia_ad?t=TRN-20261005-AB12C&p=12
+            $formUrl = site_url('tia_ad')
+                . '?t=' . rawurlencode($trainingCode)
+                . '&p=' . (int) $p['id'];
+
+            $mailer->clear(true);
+            $mailer->setMailType('html');
+            if (!empty($cfg->fromEmail)) {
+                $mailer->setFrom($cfg->fromEmail, $cfg->fromName ?? '');
+            }
+            $mailer->setTo($to);
+            $mailer->setSubject('Training Impact Assessment: ' . $training['training_title']);
+            $mailer->setMessage(view('tia/email_tia_link', [
+                'fullname' => $p['participant_name'] ?? '',
+                'training_title' => $training['training_title'],
+                'training_dates' => $training['training_dates'] ?? '',
+                'formUrl' => $formUrl,
+            ]));
+
+            if ($mailer->send(false)) {
+                $sent++;
+            } else {
+                $failed[] = ($p['participant_name'] ?? $to) . ' (' . $to . ')';
+                $debug = $mailer->printDebugger(['headers']);
+                log_message('error', 'TIA form email failed for ' . $to . ': ' . $debug);
+                if ($failReason === '') {
+                    $failReason = trim(preg_replace('/\s+/', ' ', strip_tags($debug)));
+                }
+            }
+        }
+
+        $message = "Form sent to {$sent} participant" . ($sent === 1 ? '' : 's') . '.';
+        if ($failed) {
+            $message .= ' Failed: ' . implode(', ', $failed) . '.';
+            if (ENVIRONMENT === 'development' && $failReason !== '') {
+                $message .= ' Reason: ' . mb_substr($failReason, 0, 400);   // shows the SMTP error on screen (dev only)
+            }
+        }
+
+        return $this->response->setJSON([
+            'success' => $sent > 0,
+            'message' => $message,
+            'sent' => $sent,
+            'failed' => $failed,
+            'csrf' => csrf_hash(),
+        ]);
     }
 
 

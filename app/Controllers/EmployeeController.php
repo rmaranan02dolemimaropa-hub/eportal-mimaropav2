@@ -161,4 +161,14 @@ class EmployeeController extends BaseController
             'position' => trim((string) $this->request->getPost('position')),
         ];
     }
+
+    public function all()
+    {
+        return $this->response->setJSON(
+            $this->model
+                ->select('id, employee_code, name, email, position, division')
+                ->orderBy('name', 'ASC')
+                ->findAll()
+        );
+    }
 }

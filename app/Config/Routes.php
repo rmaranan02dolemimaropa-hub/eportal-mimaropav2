@@ -190,6 +190,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('tia/delete-training/(:segment)', 'HrController::deleteTraining/$1');
     $routes->post('tia/update-status/(:segment)', 'HrController::updateTrainingStatus/$1');
     $routes->post('tia/delete-participant/(:num)', 'HrController::deleteParticipant/$1');
+    $routes->post('tia/send-form-emails', 'HrController::sendFormEmails');
 
     $routes->get('employees', 'EmployeeController::index');
     $routes->post('employees/store', 'EmployeeController::store');
@@ -198,6 +199,8 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('employees/export', 'EmployeeController::export');
     $routes->get('employees/template', 'EmployeeController::template');
     $routes->post('employees/import', 'EmployeeController::import');
+    $routes->get('employees/all', 'EmployeeController::all');
+
 
 
 

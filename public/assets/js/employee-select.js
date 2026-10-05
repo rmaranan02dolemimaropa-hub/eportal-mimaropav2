@@ -33,6 +33,8 @@
     "/dist/css/tom-select.bootstrap5.min.css";
 
   var employees = [];
+  var byName = {};
+  var instances = [];
 
   // ---------- 1) load Tom Select (only if the page doesn't have it) ----------
   var tsReady = new Promise(function (resolve, reject) {
@@ -69,7 +71,9 @@
     ".ts-dropdown .active{background:#f3f4f6;color:#111827}" +
     ".ts-emp-name{font-weight:600;color:#111827}" +
     ".ts-emp-meta{font-size:12px;color:#6b7280}" +
-    ".ts-dropdown .no-results,.ts-dropdown .create{color:#6b7280}";
+    ".ts-dropdown .no-results,.ts-dropdown .create{color:#6b7280}" +
+    "#newParticipantsTable .ts-wrapper .ts-control>input{border:0!important;padding:0!important;" +
+    "background:transparent!important;box-shadow:none!important;width:auto!important}";
   document.head.appendChild(style);
 
   // ---------- 3) load employees ----------
@@ -90,6 +94,10 @@
           custom: false,
         };
       });
+      employees.forEach(function (e) {
+        var key = e.name.trim().toLowerCase();
+        if (key && !byName[key]) byName[key] = e;
+      });
     })
     .catch(function (err) {
       console.error("employee-select: could not load employees", err);
@@ -102,6 +110,58 @@
     el.value = value || "";
     el.dispatchEvent(new Event("input", { bubbles: true }));
     el.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  // ---------- hide employees that are already used ----------
+  // 1) already chosen in another row of the "Add New Participants" table
+  // 2) already a participant of this training (#existingParticipantsBody, Email = 4th column)
+  function takenIds(self) {
+    var taken = {};
+    instances = instances.filter(function (t) {
+      return document.body.contains(t.input);
+    });
+    instances.forEach(function (t) {
+      if (t === self) return;
+      var v = t.getValue();
+      var o = v ? t.options[v] : null;
+      if (o && !o.custom) taken[v] = true;
+    });
+    return taken;
+  }
+
+  function existingEmails() {
+    var emails = {};
+    document
+      .querySelectorAll("#existingParticipantsBody tr")
+      .forEach(function (tr) {
+        var td = tr.querySelectorAll("td");
+        if (td.length < 4) return;
+        var mail = td[3].textContent.trim().toLowerCase();
+        if (mail) emails[mail] = true;
+      });
+    return emails;
+  }
+
+  function isBlocked(emp, self, taken, emails) {
+    taken = taken || takenIds(self);
+    emails = emails || existingEmails();
+    return !!(taken[emp.id] || (emp.email && emails[emp.email.toLowerCase()]));
+  }
+
+  // Remove blocked employees from this dropdown, put the others back.
+  function syncOptions(ts) {
+    var taken = takenIds(ts),
+      emails = existingEmails(),
+      selected = ts.getValue();
+    employees.forEach(function (e) {
+      var blocked = e.id !== selected && isBlocked(e, ts, taken, emails);
+      if (blocked) {
+        if (ts.options[e.id]) ts.removeOption(e.id, true);
+      } else if (!ts.options[e.id]) {
+        ts.addOption(Object.assign({}, e));
+      }
+    });
+    ts.refreshOptions(false);
   }
 
   function initInput(input) {
@@ -164,6 +224,13 @@
         },
       },
 
+      onFocus: function () {
+        syncOptions(this);
+      },
+      onDropdownOpen: function () {
+        syncOptions(this);
+      },
+
       onChange: function (value) {
         var el = this.input;
         var row = el.closest("tr");
@@ -190,6 +257,27 @@
         row.dataset.employeeId = opt.id;
       },
     });
+
+    instances.push(ts);
+    syncOptions(ts);
+
+    // Name already in the input (pasted / imported) and it matches an employee:
+    // link it, and only fill Position/Email if they are still empty.
+    var initial = (input.value || "").trim();
+    var match = initial ? byName[initial.toLowerCase()] : null;
+    if (match && !isBlocked(match, ts)) {
+      ts.clear(true);
+      ts.setValue(match.id, true);
+      input.value = match.name;
+      var row = input.closest("tr");
+      if (row) {
+        var pos = row.querySelector(".new-position");
+        var em = row.querySelector(".new-email");
+        if (pos && !pos.value.trim()) setValue(pos, match.position);
+        if (em && !em.value.trim()) setValue(em, match.email);
+        row.dataset.employeeId = match.id;
+      }
+    }
 
     // Tom Select copies the input's classes onto its wrapper; remove ".new-name"
     // so row.querySelector('.new-name') still returns the real <input>.
