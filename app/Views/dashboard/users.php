@@ -4,6 +4,19 @@
 
 <?php
 $users = $users ?? [];
+
+// Roles stored in the database (ENUM values are UPPERCASE) => label shown to the user
+$roles = [
+    'IT ADMINISTRATOR' => 'IT Administrator',
+    'HR ADMINISTRATOR' => 'HR Administrator',
+    'SUPERIOR'         => 'Superior',
+];
+
+// Display label for a role value coming from the database (case-insensitive)
+$roleLabel = static function (?string $role) use ($roles): string {
+    $key = strtoupper(trim((string) $role));
+    return $roles[$key] ?? (string) $role;
+};
 ?>
 
 
@@ -16,7 +29,8 @@ $users = $users ?? [];
         <div>
             <h1 class="page-title">User Management</h1>
             <p class="page-subtitle">
-                Welcome back, <?= session('fullname') ?> — create, update, and manage user accounts and system access.
+                Welcome back, <?= esc(session('fullname')) ?> — create, update, and manage user accounts and system
+                access.
             </p>
         </div>
         <div class="page-date">
@@ -29,7 +43,7 @@ $users = $users ?? [];
 
         <div class="alert alert-success alert-dismissible fade show" id="successAlert">
 
-            <?= session()->getFlashdata('success'); ?>
+            <?= esc(session()->getFlashdata('success')); ?>
 
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
             </button>
@@ -38,10 +52,38 @@ $users = $users ?? [];
 
     <?php endif; ?>
 
-    <!-- Recent Requests Table -->
+    <?php if (session()->getFlashdata('error')): ?>
+
+        <div class="alert alert-danger alert-dismissible fade show">
+
+            <?= esc(session()->getFlashdata('error')); ?>
+
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+            </button>
+
+        </div>
+
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('errors')): ?>
+
+        <div class="alert alert-danger alert-dismissible fade show">
+
+            <?php foreach ((array) session()->getFlashdata('errors') as $err): ?>
+                <div><?= esc($err) ?></div>
+            <?php endforeach; ?>
+
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+            </button>
+
+        </div>
+
+    <?php endif; ?>
+
+    <!-- User Accounts Table -->
     <section class="panel table-panel">
         <div class="panel-header">
-            <h2 class="panel-title">Recent Service Requests</h2>
+            <h2 class="panel-title">User Accounts</h2>
             <div class="panel-tools">
                 <button class="btn tool-btn" type="button" data-bs-toggle="modal" data-bs-target="#addUserModal">
                     <i class="bi bi-person-plus-fill"></i><span class="d-none d-md-inline">Add User</span>
@@ -65,7 +107,7 @@ $users = $users ?? [];
                         <tr>
                             <td><?= esc($row['fullname']) ?></td>
                             <td><?= esc($row['username']) ?></td>
-                            <td><?= esc($row['role']) ?></td>
+                            <td><?= esc($roleLabel($row['role'])) ?></td>
                             <td>
                                 <?php if ($row['status'] == 'ACTIVE'): ?>
                                     <span class="badge badge-completed">ACTIVE</span>
@@ -141,6 +183,7 @@ $users = $users ?? [];
         <div class="modal-content">
 
             <form action="<?= base_url('users/store') ?>" method="post">
+                <?= csrf_field() ?>
 
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title">
@@ -193,33 +236,19 @@ $users = $users ?? [];
                         <div class="col-md-6 mb-3">
                             <label>Role</label>
 
-                            <select name="role" class="form-select" required>
+                            <select name="role" id="addRole" class="form-select" required>
 
-                                <option value="" disabled>Select Role</option>
+                                <option value="" selected disabled>Select Role</option>
 
-                                <option value="IT Administrator">
-                                    IT Administrator
-                                </option>
-
-                                <option value="HR Administrator">
-                                    HR Administrator
-                                </option>
+                                <?php foreach ($roles as $value => $label): ?>
+                                    <option value="<?= esc($value, 'attr') ?>"><?= esc($label) ?></option>
+                                <?php endforeach; ?>
 
                             </select>
+
+                            <small class="text-muted" id="roleHint"></small>
 
                         </div>
-
-                        <!-- <div class="col-md-6 mb-3">
-                            <label>Status</label>
-
-                            <select name="status" class="form-select" required>
-
-                                <option value="ACTIVE">ACTIVE</option>
-                                <option value="INACTIVE">INACTIVE</option>
-
-                            </select>
-
-                        </div> -->
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label d-block">Status</label>
@@ -267,6 +296,7 @@ $users = $users ?? [];
             <div class="modal-content">
 
                 <form action="<?= base_url('users/update/' . $row['id']) ?>" method="post">
+                    <?= csrf_field() ?>
 
                     <div class="modal-header bg-warning">
 
@@ -287,8 +317,8 @@ $users = $users ?? [];
 
                                 <label>Full Name</label>
 
-                                <input type="text" name="fullname" class="form-control" value="<?= $row['fullname'] ?>"
-                                    required>
+                                <input type="text" name="fullname" class="form-control"
+                                    value="<?= esc($row['fullname'], 'attr') ?>" required>
 
                             </div>
 
@@ -296,15 +326,15 @@ $users = $users ?? [];
 
                                 <label>Username</label>
 
-                                <input type="text" name="username" class="form-control" value="<?= $row['username'] ?>"
-                                    required>
+                                <input type="text" name="username" class="form-control"
+                                    value="<?= esc($row['username'], 'attr') ?>" required>
 
                             </div>
 
                             <div class="col-md-6 mb-3">
                                 <label>Email Address</label>
-                                <input type="email" name="email" class="form-control" value="<?= esc($row['email']) ?>"
-                                    required>
+                                <input type="email" name="email" class="form-control"
+                                    value="<?= esc($row['email'], 'attr') ?>" required>
                             </div>
 
                             <div class="col-md-6 mb-3">
@@ -335,37 +365,19 @@ $users = $users ?? [];
 
                                 <label>Role</label>
 
-                                <select name="role" class="form-select">
+                                <select name="role" class="form-select" required>
 
-                                    <option <?= $row['role'] == 'IT Administrator' ? 'selected' : '' ?>>
-                                        IT Administrator
-                                    </option>
-
-                                    <option <?= $row['role'] == 'HR Administrator' ? 'selected' : '' ?>>
-                                        HR Administrator
-                                    </option>
+                                    <?php foreach ($roles as $value => $label): ?>
+                                        <option value="<?= esc($value, 'attr') ?>"
+                                            <?= strtoupper(trim((string) $row['role'])) === $value ? 'selected' : '' ?>>
+                                            <?= esc($label) ?>
+                                        </option>
+                                    <?php endforeach; ?>
 
                                 </select>
 
                             </div>
 
-                            <!-- <div class="col-md-6">
-
-                                <label>Status</label>
-
-                                <select name="status" class="form-select">
-
-                                    <option <?= $row['status'] == 'ACTIVE' ? 'selected' : '' ?>>
-                                        ACTIVE
-                                    </option>
-
-                                    <option <?= $row['status'] == 'INACTIVE' ? 'selected' : '' ?>>
-                                        INACTIVE
-                                    </option>
-
-                                </select>
-
-                            </div> -->
                             <div class="col-md-6">
                                 <label class="form-label">Status</label>
 
@@ -435,17 +447,22 @@ $users = $users ?? [];
 
                         <tr>
                             <th>Full Name</th>
-                            <td><?= $row['fullname'] ?></td>
+                            <td><?= esc($row['fullname']) ?></td>
                         </tr>
 
                         <tr>
                             <th>Username</th>
-                            <td><?= $row['username'] ?></td>
+                            <td><?= esc($row['username']) ?></td>
+                        </tr>
+
+                        <tr>
+                            <th>Email</th>
+                            <td><?= esc($row['email']) ?></td>
                         </tr>
 
                         <tr>
                             <th>Role</th>
-                            <td><?= $row['role'] ?></td>
+                            <td><?= esc($roleLabel($row['role'])) ?></td>
                         </tr>
 
                         <tr>
@@ -488,6 +505,7 @@ $users = $users ?? [];
             <div class="modal-content">
 
                 <form action="<?= base_url('users/delete/' . $row['id']) ?>" method="post">
+                    <?= csrf_field() ?>
 
                     <div class="modal-header bg-danger text-white">
 
@@ -630,6 +648,9 @@ $users = $users ?? [];
                         input.classList.remove('is-valid');
                     });
 
+                    document.getElementById('statusLabel').textContent = 'ACTIVE';
+                    document.getElementById('roleHint').textContent = '';
+
                 }
 
             });
@@ -653,8 +674,6 @@ $users = $users ?? [];
 
     document.addEventListener("DOMContentLoaded", function() {
         setCurrentDate();
-        animateStatCounters();
-        enableTableSearch();
     });
 
     /**
@@ -682,6 +701,17 @@ $users = $users ?? [];
 
     statusToggle.addEventListener('change', function() {
         statusLabel.textContent = this.checked ? 'ACTIVE' : 'INACTIVE';
+    });
+
+    // Short explanation of what each role can access
+    const roleDescriptions = {
+        'IT ADMINISTRATOR': 'Full access, including user management.',
+        'HR ADMINISTRATOR': 'Dashboard, requests, reports, feedback, TIA, employees and superiors.',
+        'SUPERIOR': 'Training Impact Assessment (TIA) page only.'
+    };
+
+    document.getElementById('addRole').addEventListener('change', function() {
+        document.getElementById('roleHint').textContent = roleDescriptions[this.value] || '';
     });
 
     document.querySelectorAll(".toggle-password").forEach(button => {
