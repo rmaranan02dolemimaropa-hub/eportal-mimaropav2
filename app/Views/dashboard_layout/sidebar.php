@@ -38,6 +38,9 @@
     <a href="employees" class="nav-link<?= $isActive('employees') ?>" <?= $dismiss ?>>
       <i class="bi bi-person-vcard-fill"></i><span>Employees</span>
     </a>
+    <a href="superiors" class="nav-link<?= $isActive('superiors') ?>" <?= $dismiss ?>>
+      <i class="bi bi-person-vcard-fill"></i><span>Superiors</span>
+    </a>
 
 
     <div class="nav-divider"></div>

@@ -191,6 +191,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('tia/update-status/(:segment)', 'HrController::updateTrainingStatus/$1');
     $routes->post('tia/delete-participant/(:num)', 'HrController::deleteParticipant/$1');
     $routes->post('tia/send-form-emails', 'HrController::sendFormEmails');
+    $routes->get('tia_submitted/(:segment)', 'HrController::submitted/$1');
 
     $routes->get('employees', 'EmployeeController::index');
     $routes->post('employees/store', 'EmployeeController::store');
@@ -200,6 +201,16 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('employees/template', 'EmployeeController::template');
     $routes->post('employees/import', 'EmployeeController::import');
     $routes->get('employees/all', 'EmployeeController::all');
+    $routes->get('employees/lookup', 'EmployeeController::lookup');
+
+    $routes->get('superiors', 'SuperiorController::index');
+    $routes->post('superiors/store', 'SuperiorController::store');
+    $routes->post('superiors/update/(:num)', 'SuperiorController::update/$1');
+    $routes->post('superiors/delete/(:num)', 'SuperiorController::delete/$1');
+    $routes->post('superiors/quick-add', 'SuperiorController::quickAdd');
+    $routes->get('superiors/all', 'SuperiorController::all');
+
+
 
 
 
@@ -221,7 +232,9 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
 });
 
 
-// Training Impact Assessment
+// Training Impact Assessment annex d
 $routes->get('tia_ad', 'HrController::create');
 $routes->post('tia_store', 'HrController::store');
+
+
 

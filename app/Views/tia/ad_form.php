@@ -2,6 +2,7 @@
 $training = $training ?? null;
 $participant = $participant ?? null;   // optional: ipasa mula sa controller kung gusto ng prefill
 $locked = !empty($training) ? 'readonly' : '';
+$alreadySubmitted = $alreadySubmitted ?? null;
 
 // Gumagawa ng 1-4 radio buttons (parehong markup ng dati)
 $ratingRadios = function (string $name, bool $required = false): string {
@@ -32,6 +33,9 @@ $ratingRows = function (string $prefix, array $statements) use ($ratingRadios): 
     <title>DOLE Training Impact Assessment (Self-Rater Form)</title>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
+    <meta name="description"
+        content="One portal, multiple digital government services. Submit requests, access HR services, and connect with DOLE MIMAROPA online.">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/doleicon.png">
 
     <!-- Bootstrap 5.3 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -76,13 +80,13 @@ $ratingRows = function (string $prefix, array $statements) use ($ratingRadios): 
                     <div class="info-grid">
                         <div class="field">
                             <label>Training Title *</label>
-                            <input type="text" name="training_title" required
-                                value="<?= esc($training['training_title'] ?? '') ?>" <?= $locked ?>>
+                            <input type="text" name="training_title" class="locked-field" required readonly
+                                tabindex="-1" value="<?= esc($training['training_title'] ?? '') ?>">
                         </div>
                         <div class="field">
                             <label>Training Date/s *</label>
-                            <input type="text" name="training_dates" required
-                                value="<?= esc($training['training_dates'] ?? '') ?>" <?= $locked ?>>
+                            <input type="text" name="training_dates" class="locked-field" required readonly
+                                tabindex="-1" value="<?= esc($training['training_dates'] ?? '') ?>">
                         </div>
                         <div class="field">
                             <label>Name of Participant *</label>
@@ -101,11 +105,24 @@ $ratingRows = function (string $prefix, array $statements) use ($ratingRadios): 
                         </div>
                         <div class="field">
                             <label>Office *</label>
-                            <input type="text" name="office" value="<?= esc($participant['office'] ?? '') ?>" required>
+                            <select name="office" required>
+                                <option value="">-- Select office --</option>
+                                <?php foreach (($offices ?? []) as $o): ?>
+                                    <option value="<?= esc($o, 'attr') ?>" <?= ($participant['office'] ?? '') === $o ? 'selected' : '' ?>>
+                                        <?= esc($o) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                         <div class="field" style="grid-column: 1 / -1;">
                             <label>Name of Immediate Superior *</label>
-                            <input type="text" name="immediate_superior" required>
+                            <input type="text" name="immediate_superior" list="superiorList" required
+                                value="<?= esc($participant['immediate_superior'] ?? '') ?>">
+                            <datalist id="superiorList">
+                                <?php foreach (($superiors ?? []) as $s): ?>
+                                    <option value="<?= esc($s['name'], 'attr') ?>"></option>
+                                <?php endforeach; ?>
+                            </datalist>
                         </div>
                     </div>
                 </div>
@@ -279,7 +296,7 @@ $ratingRows = function (string $prefix, array $statements) use ($ratingRadios): 
 
                 <div class="form-actions">
                     <button type="button" class="btn-secondary" id="resetBtn">Reset</button>
-                    <button type="submit" class="btn-primary" <?= empty($training['training_code']) ? 'disabled' : '' ?>>Submit
+                    <button type="submit" class="btn-primary" <?= (empty($training['training_code']) || $alreadySubmitted) ? 'disabled' : '' ?>>Submit
                         Assessment</button>
                 </div>
             </form>
@@ -315,6 +332,45 @@ $ratingRows = function (string $prefix, array $statements) use ($ratingRadios): 
         </div>
     </div>
 
+    <!-- ===================== ALREADY SUBMITTED MODAL ===================== -->
+    <div class="modal fade" id="alreadyModal" tabindex="-1" aria-labelledby="alreadyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-body text-center py-5 px-4">
+                    <i class="bi bi-exclamation-circle-fill" style="font-size: 3.8rem; color: #d98200;"></i>
+
+                    <h4 class="fw-bold mt-3 mb-2" id="alreadyModalLabel" style="color: #0b3d91;">
+                        Already Submitted
+                    </h4>
+
+                    <p class="text-muted mb-1">
+                        You have already submitted a Training Impact Assessment for this training.
+                    </p>
+
+                    <h3 class="fw-bold my-3" style="color: #10058C;" id="alreadyReferenceNumber">
+                        <?= esc($alreadySubmitted['reference_no'] ?? '') ?>
+                    </h3>
+
+                    <p class="text-muted mb-1" id="alreadySubmittedAt">
+                        <?php if (!empty($alreadySubmitted['created_at'])): ?>
+                            Submitted on
+                            <?= esc(date('F j, Y g:i A', strtotime($alreadySubmitted['created_at']))) ?>
+                        <?php endif; ?>
+                    </p>
+
+                    <p class="text-muted mb-4">
+                        Each participant can submit only once. Please keep this reference number.
+                    </p>
+
+                    <button type="button" class="btn btn-primary px-5" data-bs-dismiss="modal"
+                        style="background-color: #0b3d91; border-color: #0b3d91;">
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap 5 JS Bundle (includes Popper) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -344,42 +400,51 @@ $ratingRows = function (string $prefix, array $statements) use ($ratingRadios): 
         form.addEventListener('submit', async function (e) {
             e.preventDefault();
 
+            // Show the browser's own validation message instead of failing silently
+            if (!form.reportValidity()) return;
+
             const submitBtn = form.querySelector('button[type="submit"]');
             const originalText = submitBtn.textContent;
-
             submitBtn.disabled = true;
             submitBtn.textContent = 'Submitting...';
-
-            const formData = new FormData(form);
-            let result = null;
 
             try {
                 const response = await fetch('<?= site_url('tia_store') ?>', {
                     method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
+                    body: new FormData(form),
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 });
 
-                result = await response.json();
+                const raw = await response.text();
+                let result = null;
+                try { result = JSON.parse(raw); } catch (_) { /* not JSON */ }
+
+                if (!result) {
+                    console.error('HTTP ' + response.status, raw.slice(0, 500));
+                    alert('Server error (HTTP ' + response.status + '). Open the browser console (F12) for details.');
+                    return;
+                }
 
                 if (result.success) {
                     document.getElementById('referenceNumber').textContent = result.reference_no;
                     new bootstrap.Modal(document.getElementById('successModal')).show();
-
                     form.reset();
                     document.getElementById('othersSpecify').style.display = 'none';
-                } else {
-                    let errorMsg = result.message || 'Validation failed.';
-                    if (result.errors) {
-                        errorMsg += '\n\n' + Object.values(result.errors).join('\n');
-                    }
-                    alert(errorMsg);
-                    console.log(result.errors);
+                } else if (result.already_submitted) {
+                    document.getElementById('alreadyReferenceNumber').textContent = result.reference_no || '';
+                    document.getElementById('alreadySubmittedAt').textContent = result.submitted_at
+                        ? 'Submitted on ' + new Date(result.submitted_at.replace(' ', 'T')).toLocaleString('en-PH', {
+                            year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit'
+                        })
+                        : '';
+                    new bootstrap.Modal(document.getElementById('alreadyModal')).show();
+                }
+                else {
+                    let msg = result.message || 'Validation failed.';
+                    if (result.errors) msg += '\n\n' + Object.values(result.errors).join('\n');
+                    alert(msg);
                 }
 
-                // Ilagay DITO (pagkatapos ng reset) para hindi maibalik ang lumang token
                 refreshCsrf(result.csrf);
             } catch (error) {
                 console.error(error);
@@ -394,6 +459,10 @@ $ratingRows = function (string $prefix, array $statements) use ($ratingRadios): 
         document.getElementById('closeSuccess').addEventListener('click', function () {
             document.getElementById('successMsg').style.display = 'none';
         });
+
+        <?php if (!empty($alreadySubmitted)): ?>
+            new bootstrap.Modal(document.getElementById('alreadyModal')).show();
+        <?php endif; ?>
     </script>
 </body>
 

@@ -7,6 +7,8 @@ use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\HrModel;
 use App\Models\TrainingsModel;
 use App\Models\TrainingParticipantsModel;
+use App\Models\EmployeeModel;
+use App\Models\SuperiorModel;
 
 class HrController extends BaseController
 {
@@ -42,19 +44,47 @@ class HrController extends BaseController
                 );
             }
 
-            // Prefill: kunin ang participant kung may ?p= sa link
+            // Prefill: get the participant if ?p= is in the link
             $pid = $this->request->getGet('p');
             if ($pid !== null && ctype_digit((string) $pid)) {
                 $participant = $this->participantsModel
                     ->where('id', (int) $pid)
-                    ->where('training_code', $trainingCode)   // dapat pareho ang training
+                    ->where('training_code', $trainingCode)
                     ->first();
+            }
+
+            if ($participant && !empty($participant['email'])) {
+                $email = strtolower(trim($participant['email']));
+
+                // Already submitted? Show the dedicated page instead of the form
+                $done = (new \App\Models\TiaResponsesModel())
+                    ->where('training_code', $trainingCode)
+                    ->where('email', $email)
+                    ->first();
+
+                if ($done) {
+                    return view('tia/already_submitted', ['response' => $done]);
+                }
+
+                // Office + Immediate Superior from the employees table (matched by email)
+                $emp = (new EmployeeModel())
+                    ->select('employees.office, s.name AS immediate_superior')
+                    ->join('superiors s', 's.id = employees.superior_id', 'left')
+                    ->where('LOWER(employees.email)', $email)
+                    ->first();
+
+                $participant['office'] = EmployeeModel::normalizeOffice($emp['office'] ?? '')
+                    ?? EmployeeModel::normalizeOffice($training['office'] ?? '');
+                $participant['immediate_superior'] = $emp['immediate_superior']
+                    ?? ($training['immediate_superior'] ?? '');
             }
         }
 
         return view('tia/ad_form', [
             'training' => $training,
             'participant' => $participant,
+            'offices' => EmployeeModel::OFFICES,
+            'superiors' => (new SuperiorModel())->orderBy('name', 'ASC')->findAll(),
         ]);
     }
     /**
@@ -132,7 +162,9 @@ class HrController extends BaseController
         if ($exists) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'You have already submitted an assessment for this training. Reference No.: ' . $exists['reference_no'],
+                'already_submitted' => true,
+                'message' => 'You have already submitted an assessment for this training.',
+                'reference_no' => $exists['reference_no'],
                 'csrf' => csrf_hash(),
             ])->setStatusCode(409);
         }
@@ -1032,6 +1064,23 @@ class HrController extends BaseController
             'failed' => $failed,
             'csrf' => csrf_hash(),
         ]);
+    }
+
+    /**
+     * Already-submitted page, found by reference number
+     * GET /tia_submitted/(:segment)
+     */
+    public function submitted($referenceNo = null)
+    {
+        $row = (new \App\Models\TiaResponsesModel())
+            ->where('reference_no', (string) $referenceNo)
+            ->first();
+
+        if (!$row) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Assessment not found.');
+        }
+
+        return view('tia/already_submitted', ['response' => $row]);
     }
 
 

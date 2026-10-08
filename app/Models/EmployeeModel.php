@@ -17,6 +17,10 @@ class EmployeeModel extends Model
         'name',
         'email',
         'position',
+        'office',
+        'division',
+        'superior_id',
+        'immediate_superior',
         'created_at',
         'updated_at'
     ];
@@ -28,7 +32,7 @@ class EmployeeModel extends Model
     protected array $castHandlers = [];
 
     // Dates
-    protected $useTimestamps = false;
+    protected $useTimestamps = true;
     protected $dateFormat = 'datetime';
     protected $createdField = 'created_at';
     protected $updatedField = 'updated_at';
@@ -36,12 +40,24 @@ class EmployeeModel extends Model
 
     // Validation
     protected $validationRules = [
-        'employee_code' => 'required|max_length[50]',
+        'id' => 'permit_empty|is_natural_no_zero',
+        'employee_code' => 'required|max_length[50]|is_unique[employees.employee_code,id,{id}]',
         'name' => 'required|max_length[150]',
         'email' => 'required|valid_email|max_length[150]',
         'position' => 'required|max_length[150]',
+        'office' => 'permit_empty|max_length[150]',
+        'division' => 'permit_empty|max_length[150]',
+        'superior_id' => 'permit_empty|is_natural_no_zero|is_not_unique[superiors.id]',
+        'immediate_superior' => 'permit_empty|max_length[150]',
     ];
-    protected $validationMessages = [];
+    protected $validationMessages = [
+        'employee_code' => [
+            'is_unique' => 'That employee code is already used by another employee.',
+        ],
+        'superior_id' => [
+            'is_not_unique' => 'The selected superior does not exist.',
+        ],
+    ];
     protected $skipValidation = false;
     protected $cleanValidationRules = true;
 
@@ -54,21 +70,30 @@ class EmployeeModel extends Model
         return $builder->countAllResults() > 0;
     }
 
-    /**
-     * Next employee code in the format EMP-0001, EMP-0002, ...
-     */
-    public function generateCode(string $prefix = 'EMP-', int $pad = 4): string
+
+
+    public const OFFICES = [
+        'DOLE MIMAROPA REGIONAL OFFICE',
+        'DOLE OCCIDENTAL MINDORO PROVINCIAL OFFICE',
+        'ORIENTAL MINDORO PROVINCIAL OFFICE',
+        'MARINDUQUE PROVINCIAL OFFICE',
+        'ROMBLON PROVINCIAL OFFICE',
+        'PALAWAN PROVINCIAL OFFICE',
+    ];
+
+    /** Returns the official office name (case-insensitive match), or null if empty/not in the list */
+    public static function normalizeOffice(?string $value): ?string
     {
-        $row = $this->db->query(
-            "SELECT MAX(CAST(SUBSTRING(employee_code, ?) AS UNSIGNED)) AS max_no
-             FROM {$this->table}
-             WHERE employee_code LIKE ?",
-            [strlen($prefix) + 1, $prefix . '%']
-        )->getRowArray();
-
-        $next = ((int) ($row['max_no'] ?? 0)) + 1;
-
-        return $prefix . str_pad((string) $next, $pad, '0', STR_PAD_LEFT);
+        $value = strtoupper(trim((string) $value));
+        if ($value === '') {
+            return null;
+        }
+        foreach (self::OFFICES as $office) {
+            if (strtoupper($office) === $value) {
+                return $office;
+            }
+        }
+        return null;
     }
 
     // Callbacks

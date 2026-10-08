@@ -77,34 +77,38 @@
 
                                     <div class="d-flex gap-1 justify-content-center flex-wrap">
                                         <button type="button" class="btn btn-sm tool-btn manage-participants-btn"
-                                            data-bs-toggle="modal" data-bs-target="#manageParticipantsModal"
+                                            title="Manage Participants" aria-label="Manage Participants" data-bs-toggle="modal"
+                                            data-bs-target="#manageParticipantsModal"
                                             data-training-code="<?= esc($row['training_code'], 'attr') ?>"
                                             data-training-title="<?= esc($row['training_title'], 'attr') ?>">
-                                            <i class="bi bi-people me-1"></i> Manage
+                                            <i class="bi bi-people me-1"></i>
                                         </button>
 
                                         <button type="button" class="btn btn-sm tool-btn edit-training-btn"
+                                            title="Edit Training" aria-label="Edit Training"
                                             data-code="<?= esc($row['training_code'], 'attr') ?>"
                                             data-title="<?= esc($row['training_title'], 'attr') ?>"
                                             data-dates="<?= esc($row['training_dates'], 'attr') ?>"
                                             data-conducted-by="<?= esc($row['conducted_by'] ?? '', 'attr') ?>"
                                             data-office="<?= esc($row['office'] ?? '', 'attr') ?>"
                                             data-superior="<?= esc($row['immediate_superior'] ?? '', 'attr') ?>">
-                                            <i class="bi bi-pencil me-1"></i> Edit
+                                            <i class="bi bi-pencil me-1"></i>
                                         </button>
 
                                         <button type="button" class="btn btn-sm tool-btn status-training-btn"
+                                            title="Update Status" aria-label="Update Status"
                                             data-code="<?= esc($row['training_code'], 'attr') ?>"
                                             data-title="<?= esc($row['training_title'], 'attr') ?>"
                                             data-status="<?= esc($status, 'attr') ?>"
                                             data-dates="<?= esc($row['training_dates'], 'attr') ?>">
-                                            <i class="bi bi-flag me-1"></i> Status
+                                            <i class="bi bi-flag me-1"></i>
                                         </button>
 
                                         <button type="button" class="btn btn-sm tool-btn text-danger delete-training-btn"
+                                            title="Delete Training" aria-label="Delete Training"
                                             data-code="<?= esc($row['training_code'], 'attr') ?>"
                                             data-title="<?= esc($row['training_title'], 'attr') ?>">
-                                            <i class="bi bi-trash me-1"></i> Delete
+                                            <i class="bi bi-trash me-1"></i>
                                         </button>
                                     </div>
                                 </td>
@@ -531,6 +535,13 @@
             hash: '<?= csrf_hash() ?>'
         }
     };
+    // Hover labels for the action buttons
+    document.querySelectorAll('.tool-btn[title]').forEach(function (el) {
+        var tip = new bootstrap.Tooltip(el, { trigger: 'hover', placement: 'top', container: 'body' });
+
+        // hide the bubble when the button is clicked (so it doesn't stick over a modal)
+        el.addEventListener('click', function () { tip.hide(); });
+    });
 </script>
 <script src="<?= base_url('assets/js/tia-dashboard.js') ?>"></script>
 <script src="<?= base_url('assets/js/tia-send-emails.js') ?>"></script>
