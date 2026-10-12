@@ -30,7 +30,7 @@
   | MENU LINKS  (written once, used by desktop + mobile)
   |--------------------------------------------------------------------------
   */
-  $navLinks = static function (bool $mobile = false) use ($isActive, $isIT, $isAdmin): string {
+  $navLinks = static function (bool $mobile = false) use ($isActive, $isIT, $isAdmin, $isSuperior): string {
     ob_start();
     $dismiss = $mobile ? 'data-bs-dismiss="offcanvas"' : '';
     ?>
@@ -59,14 +59,24 @@
       <a href="<?= site_url('feedback') ?>" class="nav-link<?= $isActive('feedback') ?>" <?= $dismiss ?>>
         <i class="bi bi-chat-right-text-fill"></i><span>Feedback</span>
       </a>
+      <a href="<?= site_url('tia-report') ?>" class="nav-link<?= $isActive('tia-report') ?>" <?= $dismiss ?>>
+        <i class="bi bi-clipboard-data"></i><span>TIA Report</span>
+      </a>
     <?php endif; ?>
 
     <!-- TIA: visible to every logged-in role, including SUPERIOR -->
-    <a href="<?= site_url('tia_page') ?>" class="nav-link<?= $isActive('tia_page') ?>" <?= $dismiss ?>>
-      <i class="bi bi-file-earmark-post"></i><span>TIA</span>
-    </a>
+
+
+    <?php if ($isSuperior): ?>
+      <a href="<?= site_url('tia-superior') ?>" class="nav-link<?= $isActive('tia-superior') ?>" <?= $dismiss ?>>
+        <i class="bi bi-file-earmark-post"></i><span>TIA (Superior)</span>
+      </a>
+    <?php endif; ?>
 
     <?php if ($isAdmin): ?>
+      <a href="<?= site_url('tia_page') ?>" class="nav-link<?= $isActive('tia_page') ?>" <?= $dismiss ?>>
+        <i class="bi bi-file-earmark-post"></i><span>TIA</span>
+      </a>
       <a href="<?= site_url('employees') ?>" class="nav-link<?= $isActive('employees') ?>" <?= $dismiss ?>>
         <i class="bi bi-person-vcard-fill"></i><span>Employees</span>
       </a>

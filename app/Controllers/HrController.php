@@ -296,6 +296,9 @@ class HrController extends BaseController
         return view('dashboard/tia', $data);
     }
 
+
+
+
     /**
      * Store a new Training
      * POST /tia/store-training
@@ -532,6 +535,10 @@ class HrController extends BaseController
      * Bulk add participants
      * POST /tia/add-participants-bulk
      */
+    /**
+     * Bulk add participants
+     * POST /tia/add-participants-bulk
+     */
     public function addParticipantsBulk()
     {
         $json = $this->request->getJSON(true) ?? [];
@@ -591,14 +598,24 @@ class HrController extends BaseController
             }
         }
 
+        // First time participants are saved for this training -> email the superior (once)
+        $notice = null;
+        if (
+            $inserted > 0
+            && empty($training['superior_notified_at'])
+            && ($training['status'] ?? 'active') !== 'canceled'
+        ) {
+            $notice = $this->sendSuperiorNotice($training);
+        }
+
         return $this->response->setJSON([
             'success' => true,
             'message' => "Successfully added {$inserted} participant(s)",
             'count' => $inserted,
             'failed' => $errors,
+            'superior_notice' => $notice['message'] ?? null,
         ]);
     }
-
     /**
      * Update a participant
      * POST /tia/update-participant/(:num)
@@ -1065,6 +1082,111 @@ class HrController extends BaseController
             'csrf' => csrf_hash(),
         ]);
     }
+
+    /**
+     * Email the training's immediate superior to rate the participants.
+     * Called automatically from addParticipantsBulk().
+     * Returns ['success' => bool, 'message' => string].
+     */
+    private function sendSuperiorNotice(array $training): array
+    {
+        $superiorName = trim((string) ($training['immediate_superior'] ?? ''));
+        $superior = $superiorName !== ''
+            ? (new SuperiorModel())->where('LOWER(TRIM(name))', strtolower($superiorName))->first()
+            : null;
+
+        if (!$superior || empty($superior['email']) || !filter_var($superior['email'], FILTER_VALIDATE_EMAIL)) {
+            return [
+                'success' => false,
+                'message' => 'Superior was not emailed: no superior with a valid email matches "'
+                    . $superiorName . '".',
+            ];
+        }
+
+        $count = $this->participantsModel
+            ->where('training_code', $training['training_code'])
+            ->countAllResults();
+
+        $mailer = \Config\Services::email();
+        $cfg = config('Email');
+
+        $mailer->clear(true);
+        $mailer->setMailType('html');
+        if (!empty($cfg->fromEmail)) {
+            $mailer->setFrom($cfg->fromEmail, $cfg->fromName ?? '');
+        }
+        $mailer->setTo($superior['email']);
+        $mailer->setSubject('Action needed: Rate participants – ' . $training['training_title']);
+        $mailer->setMessage(view('tia/email_superior_notify', [
+            'superiorName' => $superior['name'],
+            'training_title' => $training['training_title'],
+            'training_dates' => $training['training_dates'] ?? '',
+            'participantCount' => $count,
+            'dashboardUrl' => site_url('tia-superior'),
+        ]));
+
+        if (!$mailer->send(false)) {
+            log_message('error', 'TIA superior notify failed for ' . $superior['email'] . ': '
+                . $mailer->printDebugger(['headers']));
+
+            return ['success' => false, 'message' => 'Could not email the superior.'];
+        }
+
+        $this->trainingsModel->update($training['id'], [
+            'superior_notified_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        return [
+            'success' => true,
+            'message' => 'Superior notified: ' . $superior['name'] . ' (' . $superior['email'] . ').',
+        ];
+    }
+
+    /**
+     * Manually (re)send the "rate participants" email to the superior.
+     * POST /tia/notify-superior
+     */
+    public function notifySuperior()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Invalid request.',
+                'csrf' => csrf_hash(),
+            ])->setStatusCode(403);
+        }
+
+        $trainingCode = trim((string) $this->request->getPost('training_code'));
+        $training = $trainingCode !== ''
+            ? $this->trainingsModel->where('training_code', $trainingCode)->first()
+            : null;
+
+        if (!$training) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Training not found.',
+                'csrf' => csrf_hash(),
+            ])->setStatusCode(404);
+        }
+
+        $hasParticipants = $this->participantsModel
+            ->where('training_code', $trainingCode)
+            ->countAllResults() > 0;
+
+        if (!$hasParticipants) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'This training has no participants yet.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $result = $this->sendSuperiorNotice($training);
+        $result['csrf'] = csrf_hash();
+
+        return $this->response->setJSON($result);
+    }
+
 
     /**
      * Already-submitted page, found by reference number

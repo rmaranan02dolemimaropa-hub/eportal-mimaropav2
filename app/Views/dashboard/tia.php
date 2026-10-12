@@ -49,7 +49,12 @@
                                 <td><?= esc($row['training_dates']) ?></td>
                                 <td><?= esc($row['conducted_by'] ?? '—') ?></td>
                                 <td><?= esc($row['office'] ?? '—') ?></td>
-                                <td><?= esc($row['immediate_superior'] ?? '—') ?></td>
+                                <td><?= esc($row['immediate_superior'] ?? '—') ?>
+                                    <?php if (!empty($row['superior_notified_at'])): ?>
+                                        <i class="bi bi-envelope-check text-success ms-1"
+                                            title="Superior notified <?= esc(date('M d, Y h:i A', strtotime($row['superior_notified_at'])), 'attr') ?>"></i>
+                                    <?php endif; ?>
+                                </td>
                                 <?php
                                 $status = $row['status'] ?? 'active';
                                 $badgeMap = [
@@ -116,7 +121,7 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-5">
+                            <td colspan="8" class="text-center text-muted py-5">
                                 No trainings found. Click “Add Training” to create one.
                             </td>
                         </tr>
@@ -291,9 +296,14 @@
                         <h6 class="detail-section-title mb-0">
                             <i class="bi bi-person-check"></i> Current Participants
                         </h6>
-                        <button type="button" class="btn btn-sm tool-btn" id="sendFormEmailsBtn">
-                            <i class="bi bi-envelope-paper me-1"></i> Send Form to All
-                        </button>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button type="button" class="btn btn-sm tool-btn" id="notifySuperiorBtn">
+                                <i class="bi bi-person-check me-1"></i> Notify Superior
+                            </button>
+                            <button type="button" class="btn btn-sm tool-btn" id="sendFormEmailsBtn">
+                                <i class="bi bi-envelope-paper me-1"></i> Send Form to All
+                            </button>
+                        </div>
                     </div>
                     <div class="table-responsive mb-2">
                         <table class="table requests-table table-sm align-middle mb-0">
@@ -527,7 +537,8 @@
             deleteTraining: '<?= site_url('tia/delete-training') ?>',
             updateStatus: '<?= site_url('tia/update-status') ?>',
             deleteParticipant: '<?= site_url('tia/delete-participant') ?>',
-            sendFormEmails: '<?= site_url('tia/send-form-emails') ?>'
+            sendFormEmails: '<?= site_url('tia/send-form-emails') ?>',
+            notifySuperior: '<?= site_url('tia/notify-superior') ?>',
         },
         csrf: {
             name: '<?= csrf_token() ?>',
@@ -548,3 +559,4 @@
 
 <script>window.EMPLOYEE_LIST_URL = '<?= site_url('employees/all') ?>';</script>
 <script src="<?= base_url('assets/js/employee-select.js') ?>"></script>
+<script src="<?= base_url('assets/js/tia-notify-superior.js') ?>"></script>

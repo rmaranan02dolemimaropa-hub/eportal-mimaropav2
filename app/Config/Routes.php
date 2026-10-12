@@ -86,7 +86,17 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('tia/update-status/(:segment)', 'HrController::updateTrainingStatus/$1');
     $routes->post('tia/delete-participant/(:num)', 'HrController::deleteParticipant/$1');
     $routes->post('tia/send-form-emails', 'HrController::sendFormEmails');
+    $routes->post('tia/notify-superior', 'HrController::notifySuperior');
+
     $routes->post('tia/send-superior-emails', 'TiaSuperiorController::sendEmails');
+    $routes->get('tia-superior/rate/(:segment)/(:num)', 'TiaSuperiorController::rate/$1/$2');
+    $routes->post('tia_superior_store', 'TiaSuperiorController::store');
+
+    $routes->get('tia-superior', 'TiaSuperiorController::index');
+    $routes->get('tia-superior/participants/(:segment)', 'TiaSuperiorController::getParticipants/$1');
+
+    $routes->get('tia-report', 'TiaReportController::index');
+    $routes->get('tia-report/export', 'TiaReportController::export');
 
     // Logout
     $routes->get('logout', 'EportalController::logout');

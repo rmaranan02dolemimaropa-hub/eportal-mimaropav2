@@ -25,6 +25,7 @@ class TrainingsModel extends Model
         'canceled_at',
         'reschedule_reason',
         'rescheduled_at',
+        'superior_notified_at',
         'created_at',
         'updated_at'
     ];

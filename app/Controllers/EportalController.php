@@ -35,7 +35,7 @@ class EportalController extends BaseController
 
         // If already logged in, go directly to dashboard
         if ($session->get('logged_in') === true) {
-            return redirect()->to(site_url('dashboard'));
+            return redirect()->to($this->homeFor($session->get('role')));
         }
 
         // Prevent browser from caching the login page
@@ -87,7 +87,7 @@ class EportalController extends BaseController
             'logged_in' => true,
         ]);
 
-        return redirect()->to(site_url('dashboard'));
+        return redirect()->to($this->homeFor($user['role']));
     }
 
     public function logout()
@@ -355,5 +355,13 @@ class EportalController extends BaseController
             ->to($redirectTo)
             ->with('success', 'Your request has been submitted successfully.')
             ->with('reference_no', $referenceNo);
+    }
+
+    /** Where each role lands after login. */
+    private function homeFor(?string $role): string
+    {
+        return strtoupper(trim((string) $role)) === 'SUPERIOR'
+            ? site_url('tia-superior')
+            : site_url('dashboard');
     }
 }
