@@ -3,12 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\TiaReportModel;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
-use PhpOffice\PhpSpreadsheet\Cell\DataType;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
+
 
 class TiaReportController extends BaseController
 {
@@ -42,92 +37,14 @@ class TiaReportController extends BaseController
             $report = $this->buildReport($model, $training);
         }
 
-        return view('dashboard/tiareport', [
+        return view('dashboard/tiareportannexd', [
             'trainings' => $trainings,
             'code' => $code,
             'report' => $report,
         ]);
     }
 
-    /**
-     * GET /tia-report/export?t=TRN-...
-     * Downloads the report as .xlsx (1 summary sheet + 1 sheet per table).
-     */
-    public function export()
-    {
-        $model = new TiaReportModel();
-        $code = trim((string) $this->request->getGet('t'));
-        $training = $code !== '' ? $model->findTraining($code) : null;
 
-        if (!$training) {
-            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Training not found.');
-        }
-
-        $r = $this->buildReport($model, $training);
-        if ($r['n'] === 0) {
-            return redirect()->to(site_url('tia-report') . '?t=' . rawurlencode($code));
-        }
-
-        $wb = new Spreadsheet();
-        $summary = $wb->getActiveSheet();
-        $summary->setTitle('Summary');
-
-        // ---- one sheet per table (each returns the cell holding its "Overall") ----
-        $refAtt = $this->gridSheet($wb, 'Attitudinal', $r['att'], [
-            '1. I adopted a more positive attitude towards work.',
-            '2. I have shown improved work habits after the training.',
-            '3. My motivation to perform the job has increased.',
-            '4. My interpersonal skill was enhanced.',
-            '5. I have been open to learning new things at work.',
-        ]);
-        $refPerf = $this->gridSheet($wb, 'Performance', $r['perf'], [
-            '1. The quality of my work has improved.',
-            '2. I have completed tasks with fewer errors.',
-            '3. I have accomplished my task at a faster rate.',
-            '4. I was able to manage workload better.',
-            '5. I became confident in performing work.',
-        ]);
-
-        $compHeads = [];
-        foreach ($r['comp']['labels'] as $i => $t) {
-            $compHeads[] = $t !== '' ? $t : "Competency No {$i}";
-        }
-        $objHeads = [];
-        foreach ($r['obj']['labels'] as $i => $t) {
-            $objHeads[] = $t !== '' ? $t : "Objective {$i}";
-        }
-
-        $refComp = $this->gridSheet($wb, 'Productivity Areas', $r['comp'], $compHeads);
-        $refObj = $this->gridSheet($wb, 'CSF Objectives', $r['obj'], $objHeads);
-        $refApp = $this->gridSheet($wb, 'CSF Application', $r['app'], [
-            '1. The training I attended was relevant and directly applicable to the job.',
-            '2. I was able to use the new knowledge gained from the training in the job.',
-            '3. I was able to use the skills learned from the training in performing my tasks.',
-            '4. I was able to introduce new systems, procedures or innovations at work.',
-            '5. I have frequently applied the new knowledge/skill at work.',
-        ]);
-
-        $this->part2Sheet($wb, $r['part2']);
-        $this->part3Sheet($wb, $r['challenges']);
-        $this->part4Sheet($wb, $r['ideas']);
-
-        // ---- Summary sheet (built last, it points to the other sheets) ----
-        $this->summarySheet($summary, $r, [$refAtt, $refPerf, $refComp, $refObj, $refApp]);
-        $wb->setActiveSheetIndex(0);
-
-        // ---- download ----
-        $safe = preg_replace('/[^A-Za-z0-9_\-]/', '_', $training['training_title']);
-
-        ob_start();
-        (new Xlsx($wb))->save('php://output');
-        $data = ob_get_clean();
-
-        return $this->response
-            ->setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            ->setHeader('Content-Disposition', 'attachment; filename="TIA_Report_' . $safe . '.xlsx"')
-            ->setHeader('Cache-Control', 'no-store')
-            ->setBody($data);
-    }
 
     // ------------------------------------------------------------------ build
 
@@ -639,5 +556,260 @@ class TiaReportController extends BaseController
         $sheet->getColumnDimension('A')->setWidth(50);
         $sheet->getColumnDimension('B')->setWidth(34);
         $sheet->getStyle("B{$start}:B{$row}")->getAlignment()->setHorizontal('left');
+    }
+
+    /**
+     * The sample accomplished Annex E-1 averages FIVE values: its summary box lists the
+     * Critical Success Factors score twice (3.16, 2.72, 2.95, 3.6, 3.6 -> 3.206).
+     * true = match the sample exactly; false = average the four distinct scores.
+     */
+    private const E1_COUNT_CSF_TWICE = true;
+
+    /** GET /tia-report/superior?t=TRN-... -> Annex E-1 */
+    public function superior()
+    {
+        $model = new TiaReportModel();
+        $trainings = $model->trainingsWithSuperiorCounts();
+        $code = trim((string) $this->request->getGet('t'));
+        $report = null;
+
+        if ($code !== '') {
+            $training = $model->findTraining($code);
+            if (!$training) {
+                throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Training not found.');
+            }
+            $report = $this->buildSuperiorReport($model, $training);
+        }
+
+        return view('dashboard/tiareportannexe', [
+            'trainings' => $trainings,
+            'code' => $code,
+            'report' => $report,
+        ]);
+    }
+
+    private function buildSuperiorReport(TiaReportModel $model, array $training): array
+    {
+        // grid() reads the row label from 'participant_name'; here it is the superior's name
+        $rows = array_map(function ($r) {
+            $r['participant_name'] = $r['superior_name'];
+            return $r;
+        }, $model->superiorResponses($training['training_code']));
+
+        $att = $this->grid($rows, 'att', 5);
+        $perf = $this->grid($rows, 'perf', 5);
+        $comp = $this->grid($rows, 'comp', 4);
+        $app = $this->grid($rows, 'app', 5);   // Critical Success Factors (5 statements)
+
+        $comp['labels'] = $this->firstTexts($rows, 'comp', 4);
+
+        $overalls = [$att['overall'], $perf['overall'], $comp['overall'], $app['overall']];
+        if (self::E1_COUNT_CSF_TWICE) {
+            $overalls[] = $app['overall'];
+        }
+        $average = $this->mean($overalls);
+
+        return [
+            'training' => $training,
+            'n' => count($rows),
+            'att' => $att,
+            'perf' => $perf,
+            'comp' => $comp,
+            'app' => $app,
+            'summary' => [
+                'att' => $att['overall'],
+                'perf' => $perf['overall'],
+                'comp' => $comp['overall'],
+                'app' => $app['overall'],
+                'csf_twice' => self::E1_COUNT_CSF_TWICE,
+                'average' => $average,
+                'rating' => $this->adjectival($average),
+            ],
+        ];
+    }
+
+    // =====================================================================
+    // ANNEX H — Training Impact Assessment Form for Public Offerings
+    // (for public trainings with 1-5 attendees)
+    // =====================================================================
+
+    /**
+     * Annex H lists FIVE adjectival levels (Very High ... No Impact).
+     * These cut-offs split the 1-4 rating range into five equal bands.
+     * VERIFY against the rating table in AO 229 before official use.
+     * Format: [minimum average, label], highest first.
+     */
+    private const SCALE_H = [
+        [3.40, 'Very High Impact'],
+        [2.80, 'High Impact'],
+        [2.20, 'Moderate Impact'],
+        [1.60, 'Low Impact'],
+        [1.00, 'No Impact'],
+    ];
+
+    /** The form is meant for public trainings with this many attendees or fewer. */
+    private const H_MAX_ATTENDEES = 5;
+
+    /**
+     * GET /tia-report-annex-h            -> training picker
+     * GET /tia-report-annex-h?t=TRN-...  -> Annex H for that training
+     */
+    public function annexH()
+    {
+        $model = new TiaReportModel();
+        $trainings = $model->trainingsWithCounts();
+        $code = trim((string) $this->request->getGet('t'));
+        $report = null;
+
+        if ($code !== '') {
+            $training = $model->findTraining($code);
+            if (!$training) {
+                throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Training not found.');
+            }
+            $report = $this->buildAnnexH($model, $training);
+        }
+
+        return view('dashboard/tiareportannexh', [
+            'trainings' => $trainings,
+            'code' => $code,
+            'report' => $report,
+            'maxAttendees' => self::H_MAX_ATTENDEES,
+        ]);
+    }
+
+    private function buildAnnexH(TiaReportModel $model, array $training): array
+    {
+        $code = $training['training_code'];
+        $rows = $model->responses($code);
+        $n = count($rows);
+
+        // Same self-rater data as Annex D-1
+        $att = $this->grid($rows, 'att', 5);
+        $perf = $this->grid($rows, 'perf', 5);
+        $comp = $this->grid($rows, 'comp', 4);
+        $obj = $this->grid($rows, 'obj', 4);
+        $app = $this->grid($rows, 'app', 5);
+
+        // Competencies typed in by the respondents (cluster is not collected)
+        $competencies = array_values(array_filter(
+            $this->firstTexts($rows, 'comp', 4),
+            fn($t) => $t !== ''
+        ));
+
+        // 3 areas: Performance Impact = work performance + competencies,
+        // Critical Success Factors = training objectives + application of knowledge.
+        $areas = [
+            [
+                'label' => 'Attitudinal Outcomes',
+                'note' => '',
+                'score' => $att['overall'],
+            ],
+            [
+                'label' => 'Performance Impact',
+                'note' => '(Changes in work performance and Competencies)',
+                'score' => $this->mean([$perf['overall'], $comp['overall']]),
+            ],
+            [
+                'label' => 'Critical Success Factors',
+                'note' => '(Achieving Training Objectives and Application of knowledge)',
+                'score' => $this->mean([$obj['overall'], $app['overall']]),
+            ],
+        ];
+        foreach ($areas as &$a) {
+            $a['rating'] = $this->adjectivalH($a['score']);
+        }
+        unset($a);
+
+        $overall = $this->mean(array_column($areas, 'score'));
+
+        // Attendees = everyone on the participants list.
+        // submitted = true if they already answered the self-rater form (Annex D).
+        $norm = fn($s) => strtolower(preg_replace('/\s+/', ' ', trim((string) $s)));
+
+        $doneByEmail = [];
+        $doneByName = [];
+        foreach ($rows as $r) {
+            $doneByName[$norm($r['participant_name'])] = true;
+            if (!empty($r['email'])) {
+                $doneByEmail[$norm($r['email'])] = true;
+            }
+        }
+
+        $attendees = [];
+        $listedNames = [];
+        foreach ($model->participants($code) as $p) {
+            $name = trim((string) ($p['participant_name'] ?? $p['name'] ?? ''));
+            $email = $norm($p['email'] ?? '');
+
+            $attendees[] = [
+                'name' => $name,
+                'position' => trim((string) ($p['position'] ?? '')),
+                'submitted' => ($email !== '' && isset($doneByEmail[$email]))
+                    || isset($doneByName[$norm($name)]),
+            ];
+            $listedNames[$norm($name)] = true;
+        }
+
+        // Respondents who are not on the participants list still count as submitted
+        foreach ($rows as $r) {
+            if (!isset($listedNames[$norm($r['participant_name'])])) {
+                $attendees[] = [
+                    'name' => trim((string) $r['participant_name']),
+                    'position' => trim((string) ($r['position'] ?? '')),
+                    'submitted' => true,
+                ];
+            }
+        }
+
+        // "Challenges encountered and any additional significant inputs"
+        $labels = [
+            'no_opportunity' => 'No opportunity to use the skills',
+            'not_enough_time' => 'Not enough time to apply the skills/knowledge',
+            'work_environment' => 'Work environment not appropriate for the use of the skills/knowledge',
+            'superior_no_support' => 'Superior does not support this type of program',
+        ];
+        $ch = $this->challenges($rows);
+        $challengeCounts = [];
+        foreach ($labels as $k => $label) {
+            if (($ch['totals'][$k] ?? 0) > 0) {
+                $challengeCounts[] = ['label' => $label, 'total' => (int) $ch['totals'][$k]];
+            }
+        }
+        $others = array_values(array_filter(array_column($ch['people'], 'others'), fn($t) => $t !== ''));
+
+        $ideas = $this->ideas($rows);
+        $ideaList = array_values(array_filter(
+            array_map(fn($p) => $p['ideas'], $ideas['people']),
+            fn($t) => $t !== ''
+        ));
+
+        return [
+            'training' => $training,
+            'n' => $n,
+            'participants' => $model->participantCount($code),
+            'attendees' => $attendees,
+            'competencies' => $competencies,
+            'areas' => $areas,
+            'overall' => [
+                'score' => $overall,
+                'rating' => $this->adjectivalH($overall),
+            ],
+            'challenge_counts' => $challengeCounts,
+            'challenge_others' => $others,
+            'ideas' => $ideaList,
+        ];
+    }
+
+    private function adjectivalH(?float $avg): string
+    {
+        if ($avg === null) {
+            return '—';
+        }
+        foreach (self::SCALE_H as [$min, $label]) {
+            if ($avg >= $min) {
+                return $label;
+            }
+        }
+        return '—';
     }
 }

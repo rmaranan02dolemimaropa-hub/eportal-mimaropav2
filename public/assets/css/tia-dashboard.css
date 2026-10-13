@@ -184,7 +184,6 @@
 
 /* =====================================================
    Employees page buttons — matches TIA dashboard style
-   (paste at the bottom of tia-dashboard.css)
    ===================================================== */
 
 .employees-page .btn {
@@ -253,4 +252,563 @@
 .employees-page .form-control:focus {
   border-color: #9ca3af;
   background: #fff;
+}
+
+/* =====================================================
+   TIA REPORTS — shared (Annex D-1, E-1, H)
+   Screen styles are scoped to .d1 / .tia-picker. The print
+   rules only apply to pages that contain .d1.
+   ===================================================== */
+
+/* ---- training picker (form above the report) ---- */
+.tia-picker .form-label {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 6px;
+}
+
+.tia-picker .form-select {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+  padding: 9px 12px;
+  color: #111827;
+  background-color: #fafafa;
+  box-shadow: none;
+}
+
+.tia-picker .form-select:focus {
+  border-color: #9ca3af;
+  background-color: #fff;
+  box-shadow: none;
+}
+
+.tia-picker .btn {
+  font-size: 13.5px;
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 9px 16px;
+}
+
+.tia-picker .btn-primary {
+  background: #111827;
+  border-color: #111827;
+  color: #fff;
+}
+
+.tia-picker .btn-primary:hover {
+  background: #1f2937;
+  border-color: #1f2937;
+}
+
+/* ---- A4 sheet (screen): D-1, E-1 and H ---- */
+.d1 {
+  page: d1report; /* named page, see @page below */
+}
+
+.d1.annex-d,
+.d1.annex-e,
+.d1.annex-h {
+  box-sizing: border-box;
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 20mm;
+  background: #fff;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+  color: #000;
+}
+
+.d1 table {
+  font-size: 0.85rem;
+}
+
+.d1 th,
+.d1 td {
+  vertical-align: middle;
+}
+
+.d1 .avg-col {
+  background: #fdeede;
+  font-weight: 600;
+  text-align: center;
+}
+
+.d1 .overall {
+  background: #fbd9a7;
+  font-weight: 700;
+}
+
+.d1 h6 {
+  font-weight: 700;
+  margin: 22px 0 6px;
+}
+
+.d1 .sub {
+  font-style: italic;
+  margin: 10px 0 4px;
+}
+
+.d1 td.num {
+  text-align: center;
+}
+
+/* ---- header banner (D-1 / E-1) ---- */
+.d1 .header-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding-bottom: 10px;
+  margin: 0 auto 14px;
+  border-bottom: 1px solid #000;
+  width: 60%;
+}
+
+.d1 .dole-cell,
+.d1 .iso-cell,
+.d1 .bp-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 50px;
+  min-height: 50px;
+}
+
+.d1 .dole-cell img,
+.d1 .iso-cell img,
+.d1 .bp-cell img {
+  width: 50px;
+  height: auto;
+  object-fit: contain;
+  margin: 0;
+}
+
+.d1 .agency-title {
+  text-align: center;
+  padding: 0 8px;
+  flex: 0;
+  white-space: nowrap;
+}
+
+.d1 .agency-title .country {
+  font-size: 10pt;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.d1 .agency-title .dept {
+  font-size: 10pt;
+  font-weight: bold;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.d1 .agency-title .region {
+  font-size: 9.5pt;
+  margin: 0;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+
+@media (max-width: 992px) {
+  .d1 .header-banner {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .d1 .agency-title {
+    white-space: normal;
+  }
+}
+
+/* =====================================================
+   ANNEX H — screen (mirrors the official form)
+   ===================================================== */
+
+.annex-h {
+  font-size: 9pt;
+}
+
+/* ---- header (same as CSF form) ---- */
+.annex-h .header-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 3px;
+}
+.annex-h .header-table tr {
+  height: 70px;
+}
+.annex-h .header-table td {
+  vertical-align: middle;
+  padding: 4px 6px;
+  border: 0;
+}
+.annex-h .logo-cell {
+  width: 70px;
+  text-align: center;
+}
+.annex-h .logo-cell img {
+  width: 75px;
+  height: auto;
+  vertical-align: middle;
+  margin-left: 10px;
+}
+.annex-h .agency-title {
+  text-align: center;
+  padding: 4px 20px;
+}
+.annex-h .agency-title .country,
+.annex-h .agency-title .dept,
+.annex-h .agency-title .region {
+  font-size: 11pt;
+  margin: 0;
+  line-height: 1.3;
+}
+.annex-h .agency-title .dept {
+  font-weight: bold;
+}
+.annex-h .agency-title .region {
+  letter-spacing: 0.5px;
+}
+.annex-h .cert-cell {
+  width: 150px;
+  text-align: center;
+  padding: 4px;
+  white-space: nowrap;
+}
+.annex-h .cert-cell img {
+  width: 70px;
+  height: auto;
+  vertical-align: middle;
+}
+.annex-h .cert-cell img:last-child {
+  margin-right: 10px;
+}
+
+/* ---- annex tag + date ---- */
+.annex-h .ah-annex-tag {
+  text-align: right;
+  color: #e60000;
+  font-size: 1.6rem;
+  font-weight: 500;
+  line-height: 1;
+  margin: 2px 4px 10px 0;
+}
+.annex-h .ah-date {
+  text-align: right;
+  margin-bottom: 14px;
+}
+
+/* ---- underlined fill-in values ---- */
+.annex-h .ah-fill {
+  display: inline-block;
+  min-width: 110px;
+  padding: 0 6px;
+  border-bottom: 1px solid #000;
+  font-weight: 700;
+  text-align: center;
+}
+.annex-h .ah-fill-date {
+  min-width: 130px;
+}
+
+/* ---- title block ---- */
+.annex-h .ah-title {
+  text-align: center;
+  line-height: 1.45;
+  margin-bottom: 14px;
+}
+.annex-h .ah-title .t1 {
+  font-weight: 700;
+  font-size: 1rem;
+}
+.annex-h .ah-title .t2 {
+  font-weight: 700;
+  font-style: italic;
+}
+
+/* ---- tables ---- */
+.annex-h .ah-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 6px;
+  font-size: 0.88rem;
+}
+.annex-h .ah-table th,
+.annex-h .ah-table td {
+  border: 1px solid #000;
+  padding: 2px 6px;
+  vertical-align: middle;
+}
+.annex-h .ah-table th {
+  text-align: center;
+  font-weight: 700;
+  background: #fff;
+}
+.annex-h .ah-table td.ah-left {
+  text-align: left;
+}
+.annex-h .ah-table td.ah-right {
+  text-align: right;
+}
+.annex-h .ah-table td.ah-center {
+  text-align: center;
+}
+.annex-h .ah-yesno {
+  text-align: center;
+  white-space: nowrap;
+}
+.annex-h .ah-yn {
+  display: inline-block;
+  min-width: 80px;
+  text-align: left;
+}
+.annex-h .cb {
+  font-size: 1.05em;
+}
+.annex-h .ah-heading {
+  text-align: center;
+  font-weight: 700;
+  margin: 18px 0 6px;
+}
+
+/* ---- challenges ---- */
+.annex-h .ah-challenge-label {
+  margin: 14px 0 4px;
+}
+.annex-h .ah-lines {
+  min-height: 34px;
+  border-bottom: 1px solid #000;
+  padding-bottom: 4px;
+  font-size: 0.85rem;
+}
+
+/* ---- signatories ---- */
+.annex-h .ah-sign {
+  margin-top: 18px;
+}
+.annex-h .ah-sign-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+.annex-h .ah-sign-row.ah-center-row {
+  justify-content: center;
+  margin-top: 10px;
+}
+.annex-h .ah-sign-box {
+  min-width: 220px;
+}
+.annex-h .ah-sign-space {
+  height: 28px;
+}
+.annex-h .ah-foot {
+  margin-top: 18px;
+  font-size: 0.78rem;
+}
+
+/* =====================================================
+   PRINT — A4, 20mm margin on every page, flows to page 2
+   Named page so these margins apply to the reports only.
+   ===================================================== */
+
+@page d1report {
+  size: A4 portrait;
+  margin: 20mm;
+}
+
+@media print {
+  .d1,
+  .d1 * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body:has(.d1) {
+    font-size: 7.5pt !important;
+    background: #fff !important;
+  }
+
+  body:has(.annex-h) {
+    font-size: 9pt !important;
+  }
+
+  body:has(.d1) .no-print,
+  body:has(.d1) .topbar,
+  body:has(.d1) .sidebar,
+  body:has(.d1) .navbar,
+  body:has(.d1) .app-header,
+  body:has(.d1) .app-footer,
+  body:has(.d1) .sidebar-offcanvas {
+    display: none !important;
+  }
+
+  body:has(.d1) .app-body {
+    display: block !important;
+  }
+
+  body:has(.d1) .main-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  body:has(.d1) .table-responsive {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  /* the page margin replaces the sheet padding */
+  .d1,
+  .d1.panel,
+  .d1.annex-d,
+  .d1.annex-e,
+  .d1.annex-h {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    animation: none !important;
+  }
+
+  .d1 table {
+    font-size: 7pt !important;
+    margin-bottom: 2px !important;
+  }
+
+  .d1 th,
+  .d1 td {
+    padding: 1px 3px !important;
+    line-height: 1.15 !important;
+  }
+
+  .d1 h5 {
+    font-size: 10pt;
+    margin: 2px 0 !important;
+  }
+
+  .d1 h6 {
+    font-size: 8pt;
+    margin: 6px 0 2px !important;
+  }
+
+  .d1 .sub {
+    margin: 4px 0 2px !important;
+  }
+
+  .d1 .mb-3,
+  .d1 .mt-3,
+  .d1 .mt-4 {
+    margin-top: 2px !important;
+    margin-bottom: 2px !important;
+  }
+
+  /* header banner (D-1 / E-1) */
+  .d1 .header-banner {
+    width: 70%;
+    gap: 8px;
+    padding-bottom: 4px;
+    margin-bottom: 2mm !important;
+  }
+
+  .d1 .dole-cell,
+  .d1 .iso-cell,
+  .d1 .bp-cell {
+    min-width: 14mm;
+    min-height: 14mm;
+  }
+
+  .d1 .dole-cell img,
+  .d1 .iso-cell img,
+  .d1 .bp-cell img {
+    width: 14mm !important;
+  }
+
+  .d1 .agency-title .country,
+  .d1 .agency-title .dept {
+    font-size: 8pt;
+  }
+
+  .d1 .agency-title .region {
+    font-size: 7.5pt;
+  }
+
+  /* page flow: no split rows, repeat table headers on page 2 */
+  .d1 thead {
+    display: table-header-group;
+  }
+  .d1 tr {
+    break-inside: avoid;
+  }
+  .d1 h5,
+  .d1 h6,
+  .d1 .sub {
+    break-after: avoid;
+  }
+
+  .d1 .page-break {
+    break-before: page;
+    margin-top: 0 !important;
+  }
+
+  /* ---- Annex H print ---- */
+  .d1.annex-h {
+    font-size: 9pt !important;
+  }
+
+  .d1.annex-h table {
+    font-size: 8.5pt !important;
+    margin-bottom: 4px !important;
+  }
+
+  .d1.annex-h .ah-table th,
+  .d1.annex-h .ah-table td {
+    padding: 1px 5px !important;
+    line-height: 1.2 !important;
+  }
+
+  .d1.annex-h .header-table tr {
+    height: auto;
+  }
+  .d1.annex-h .logo-cell img {
+    width: 20mm !important;
+    margin-left: 4mm;
+  }
+  .d1.annex-h .cert-cell img {
+    width: 18mm !important;
+  }
+  .d1.annex-h .cert-cell img:last-child {
+    margin-right: 4mm;
+  }
+  .d1.annex-h .agency-title .country,
+  .d1.annex-h .agency-title .dept,
+  .d1.annex-h .agency-title .region {
+    font-size: 9pt;
+  }
+
+  .d1.annex-h .ah-annex-tag {
+    font-size: 16pt;
+  }
+  .d1.annex-h .ah-heading {
+    margin: 10px 0 4px !important;
+    break-after: avoid;
+  }
+  .d1.annex-h .ah-sign-space {
+    height: 22px;
+  }
+  .d1.annex-h .ah-foot {
+    font-size: 7.5pt;
+  }
+
+  /* signatories, footnotes and the challenges label stay together */
+  .annex-h .ah-sign,
+  .annex-h .ah-foot,
+  .annex-h .ah-challenge-label {
+    break-inside: avoid;
+  }
 }

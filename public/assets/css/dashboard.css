@@ -236,7 +236,6 @@ button {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-
 }
 
 .avatar-lg {
@@ -296,6 +295,8 @@ button {
   background: #ffffff;
   border-right: 1px solid var(--color-border);
   padding: 20px 14px;
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 
 .sidebar-nav {
@@ -305,6 +306,7 @@ button {
   width: 100%;
 }
 
+/* -------------------- Nav links -------------------- */
 .nav-link {
   display: flex;
   align-items: center;
@@ -356,6 +358,83 @@ button {
 .nav-link-logout:hover {
   background-color: #fef2f2;
   color: var(--color-red);
+}
+
+/* -------------------- Submenu: TIA Report -------------------- */
+.nav-group {
+  position: relative;
+}
+
+.nav-group .nav-parent {
+  padding-right: 46px; /* room for the caret button */
+}
+
+/* Parent row: soft tint when its section is current (only the child gets the gradient) */
+.nav-parent.active {
+  background: rgba(16, 5, 140, 0.08);
+  color: var(--color-primary);
+  box-shadow: none;
+}
+
+.nav-parent.active:hover {
+  background: rgba(16, 5, 140, 0.12);
+}
+
+/* Caret button (expand / collapse only) */
+.nav-toggle {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-toggle:hover,
+.nav-parent.active ~ .nav-toggle {
+  color: var(--color-primary);
+}
+
+.nav-toggle:hover {
+  background: rgba(16, 5, 140, 0.08);
+}
+
+.nav-toggle i {
+  font-size: 0.8rem;
+  transition: transform var(--transition-base);
+}
+
+.nav-toggle[aria-expanded="true"] i {
+  transform: rotate(180deg);
+}
+
+/* Child links */
+.nav-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 4px 0 6px 22px;
+  padding-left: 8px;
+  border-left: 2px solid var(--color-border);
+}
+
+.nav-sub .nav-link {
+  padding: 9px 12px;
+  font-size: 0.85rem;
+  gap: 8px;
+}
+
+.nav-sub .nav-link i {
+  font-size: 1.2rem;
+  width: 14px;
 }
 
 /* -------------------- Sidebar (offcanvas / mobile) -------------------- */

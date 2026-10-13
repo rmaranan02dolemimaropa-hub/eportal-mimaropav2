@@ -5,52 +5,14 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <link rel="stylesheet" href="<?= base_url('assets/css/tia-dashboard.css') ?>">
 
-<style>
-    /* ---- screen ---- */
-    .d1 table { font-size: .85rem; }
-    .d1 th, .d1 td { vertical-align: middle; }
-    .d1 .avg-col { background: #fdeede; font-weight: 600; text-align: center; }
-    .d1 .overall { background: #fbd9a7; font-weight: 700; }
-    .d1 h6 { font-weight: 700; margin: 22px 0 6px; }
-    .d1 .sub { font-style: italic; margin: 10px 0 4px; }
-    .d1 td.num { text-align: center; }
-    .d1-header img { height: 70px; width: auto; object-fit: contain; }
 
-    /* ---- print: 2 pages, small text ---- */
-    @page { size: A4 portrait; margin: 8mm; }
-
-    @media print {
-        * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-
-        html, body { font-size: 7.5pt !important; background: #fff !important; }
-
-        .no-print, .sidebar, .navbar, .app-header, .sidebar-offcanvas { display: none !important; }
-        .app-body { display: block !important; }
-        .main-content { margin: 0 !important; padding: 0 !important; width: 100% !important; max-width: 100% !important; }
-        .panel, .d1 { box-shadow: none !important; border: 0 !important; padding: 0 !important; }
-
-        .d1 table { font-size: 7pt !important; margin-bottom: 2px !important; }
-        .d1 th, .d1 td { padding: 1px 3px !important; line-height: 1.15 !important; }
-        .d1 h5 { font-size: 10pt; margin: 2px 0 !important; }
-        .d1 h6 { font-size: 8pt; margin: 6px 0 2px !important; }
-        .d1 .sub { margin: 4px 0 2px !important; }
-        .d1 .mb-3, .d1 .mt-3, .d1 .mt-4 { margin-top: 2px !important; margin-bottom: 2px !important; }
-        .table-responsive { overflow: visible !important; }
-
-        .d1-header img { height: 14mm !important; }
-        .d1-header { margin-bottom: 2mm !important; }
-
-        .d1 tr { break-inside: avoid; }
-        .d1 .page-break { break-before: page; margin-top: 0 !important; }
-    }
-</style>
 
 <?php
-$fmt  = static fn($v) => $v === null ? '—' : number_format((float) $v, 2);
+$fmt = static fn($v) => $v === null ? '—' : number_format((float) $v, 2);
 $grid = static fn(array $g, array $heads) => view('dashboard/_d1_grid', ['g' => $g, 'heads' => $heads]);
 
 $compHeads = [];
-$objHeads  = [];
+$objHeads = [];
 if ($report) {
     foreach ($report['comp']['labels'] as $i => $t) {
         $compHeads[] = $t !== '' ? $t : "Competency No $i";
@@ -66,20 +28,12 @@ if ($report) {
     <div class="page-header no-print">
         <div>
             <h1 class="page-title">TIA Report</h1>
-            <p class="page-subtitle">Annex D-1 – Summary of Self-Rater Responses</p>
+            <p class="page-subtitle">Annex E-1 – Summary of Superior-Rater Responses</p>
         </div>
-        <?php if ($report): ?>
-            <div class="d-flex gap-2">
-                <?php if ($report['n'] > 0): ?>
-                    <a class="btn btn-success"
-                        href="<?= site_url('tia-report/export') ?>?t=<?= rawurlencode($code) ?>">
-                        <i class="bi bi-file-earmark-excel me-1"></i> Export Excel
-                    </a>
-                <?php endif; ?>
-                <button type="button" class="btn btn-dole-primary" onclick="window.print()">
-                    <i class="bi bi-printer me-1"></i> Print / Save as PDF
-                </button>
-            </div>
+        <?php if ($report && $report['n'] > 0): ?>
+            <button type="button" class="btn btn-dole-primary" onclick="window.print()">
+                <i class="bi bi-printer me-1"></i> Print / Save as PDF
+            </button>
         <?php endif; ?>
     </div>
 
@@ -91,8 +45,7 @@ if ($report) {
                 <select name="t" class="form-select" onchange="this.form.submit()">
                     <option value="">— Select a training —</option>
                     <?php foreach ($trainings as $t): ?>
-                        <option value="<?= esc($t['training_code'], 'attr') ?>"
-                            <?= $t['training_code'] === $code ? 'selected' : '' ?>>
+                        <option value="<?= esc($t['training_code'], 'attr') ?>" <?= $t['training_code'] === $code ? 'selected' : '' ?>>
                             <?= esc($t['training_title']) ?> (<?= esc($t['training_dates']) ?>)
                             – <?= (int) $t['respondents'] ?> respondent<?= (int) $t['respondents'] === 1 ? '' : 's' ?>
                         </option>
@@ -114,25 +67,31 @@ if ($report) {
         </div>
 
     <?php else: ?>
-        <div class="panel p-4 d1">
+        <div class="panel d1 annex-d">
 
             <!-- Header with logos -->
-            <div class="d1-header d-flex align-items-center justify-content-between gap-2 mb-3">
-                <img src="<?= base_url('assets/img/dole_blogo.png') ?>" alt="DOLE">
-
-                <div class="text-center flex-grow-1">
-                    <div>Republic of the Philippines</div>
-                    <strong>DEPARTMENT OF LABOR AND EMPLOYMENT</strong>
-                    <div>Intramuros, Manila</div>
-                    <h5 class="mt-2 mb-1 fw-bold">SUMMARY OF SELF-RATER RESPONSES</h5>
-                    <div><em>Title of the Training:</em> <strong><?= esc($report['training']['training_title']) ?></strong></div>
-                    <div class="text-muted small"><?= esc($report['training']['training_dates']) ?></div>
+            <div class="header-banner">
+                <div class="dole-cell">
+                    <img src="<?= base_url('assets/img/dole_blogo.png') ?>" alt="DOLE">
                 </div>
-
-                <div class="d-flex align-items-center gap-2">
+                <div class="agency-title">
+                    <p class="country">Republic of the Philippines</p>
+                    <p class="dept">DEPARTMENT OF LABOR AND EMPLOYMENT</p>
+                    <p class="region">MIMAROPA REGION</p>
+                </div>
+                <div class="iso-cell">
+                    <img src="<?= base_url('assets/img/iso.png') ?>" alt="ISO 9001:2015 Certification">
+                </div>
+                <div class="bp-cell">
                     <img src="<?= base_url('assets/img/bagong_pilipinas.png') ?>" alt="Bagong Pilipinas">
-                    <img src="<?= base_url('assets/img/iso.png') ?>" alt="ISO">
                 </div>
+            </div>
+
+            <div class="text-center mb-3">
+                <h5 class="mt-2 mb-1 fw-bold">SUMMARY OF SELF-RATER RESPONSES</h5>
+                <div><em>Title of the Training:</em> <strong><?= esc($report['training']['training_title']) ?></strong>
+                </div>
+                <div class="text-muted small"><?= esc($report['training']['training_dates']) ?></div>
             </div>
 
             <div class="small mb-3">

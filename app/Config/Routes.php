@@ -96,7 +96,8 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('tia-superior/participants/(:segment)', 'TiaSuperiorController::getParticipants/$1');
 
     $routes->get('tia-report', 'TiaReportController::index');
-    $routes->get('tia-report/export', 'TiaReportController::export');
+    $routes->get('tia-report-superior', 'TiaReportController::superior');
+    $routes->get('tia-report-annex-h', 'TiaReportController::annexH');
 
     // Logout
     $routes->get('logout', 'EportalController::logout');

@@ -298,6 +298,8 @@ button {
   background: #ffffff;
   border-right: 1px solid var(--color-border);
   padding: 20px 14px;
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 
 .sidebar-nav {
@@ -307,6 +309,7 @@ button {
   width: 100%;
 }
 
+/* -------------------- Nav links -------------------- */
 .nav-link {
   display: flex;
   align-items: center;
@@ -358,6 +361,98 @@ button {
 .nav-link-logout:hover {
   background-color: #fef2f2;
   color: var(--color-red);
+}
+
+/* -------------------- Submenu: TIA -------------------- */
+.nav-group {
+  position: relative;
+}
+
+.nav-group .nav-parent {
+  padding-right: 46px; /* room for the caret button */
+}
+
+/* Head is now a <button>: reset the native button look */
+.nav-parent-btn {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.nav-parent-btn:focus-visible {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+/* Head row: soft tint when its section is current (only the child gets the gradient) */
+.nav-parent.active {
+  background: rgba(16, 5, 140, 0.08);
+  color: var(--color-primary);
+  box-shadow: none;
+}
+
+.nav-parent.active:hover {
+  background: rgba(16, 5, 140, 0.12);
+}
+
+/* Caret button (expand / collapse only) */
+.nav-toggle {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-toggle:hover {
+  background: rgba(16, 5, 140, 0.08);
+  color: var(--color-primary);
+}
+
+.nav-parent.active ~ .nav-toggle {
+  color: var(--color-primary);
+}
+
+.nav-toggle i {
+  font-size: 0.8rem;
+  transition: transform var(--transition-base);
+}
+
+.nav-toggle[aria-expanded="true"] i {
+  transform: rotate(180deg);
+}
+
+/* Child links */
+.nav-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 4px 0 6px 22px;
+  padding-left: 8px;
+  border-left: 2px solid var(--color-border);
+}
+
+.nav-sub .nav-link {
+  padding: 9px 12px;
+  font-size: 0.85rem;
+  gap: 10px;
+}
+
+.nav-sub .nav-link i {
+  font-size: 1.05rem;
+  width: 18px;
 }
 
 /* -------------------- Sidebar (offcanvas / mobile) -------------------- */
@@ -2283,7 +2378,6 @@ body:has(.offcanvas.show) .export-overlay {
   letter-spacing: 0.02em;
 }
 
-
 .request-modal-header .d-flex.align-items-center.gap-2 {
   flex-shrink: 0;
   padding-top: 2px;
@@ -2308,7 +2402,6 @@ body:has(.offcanvas.show) .export-overlay {
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.28);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  
 }
 
 .modal-status-pill::before {
@@ -2347,9 +2440,6 @@ body:has(.offcanvas.show) .export-overlay {
   user-select: none;
 }
 
-
-
-
 /* -------------------- Close Button -------------------- */
 .request-modal-header .btn-close {
   opacity: 0.75;
@@ -2368,8 +2458,6 @@ body:has(.offcanvas.show) .export-overlay {
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
   outline: none;
 }
-
-
 
 /* -------------------- Modal Body -------------------- */
 .request-modal-body {
@@ -2583,7 +2671,7 @@ body:has(.offcanvas.show) .export-overlay {
   .request-modal-footer .btn {
     width: 100%;
   }
-    .form-switch {
+  .form-switch {
     padding-left: 3em;
     min-height: 2rem; /* mas malaking touch target sa mobile */
   }

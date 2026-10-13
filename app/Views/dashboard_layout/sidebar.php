@@ -30,9 +30,15 @@
   | MENU LINKS  (written once, used by desktop + mobile)
   |--------------------------------------------------------------------------
   */
-  $navLinks = static function (bool $mobile = false) use ($isActive, $isIT, $isAdmin, $isSuperior): string {
+  $navLinks = static function (bool $mobile = false) use ($currentPage, $isActive, $isIT, $isAdmin, $isSuperior): string {
     ob_start();
     $dismiss = $mobile ? 'data-bs-dismiss="offcanvas"' : '';
+
+    // TIA submenu: open on tia_page or any tia-report/... page; unique id per copy (desktop + mobile)
+    $tiaOpen = ($currentPage === 'tia_page'
+      || str_starts_with($currentPage, 'tia_page/')
+      || str_starts_with($currentPage, 'tia-report'));
+    $subId = $mobile ? 'tiaMenuMobile' : 'tiaMenu';
     ?>
     <?php if ($isAdmin): ?>
       <a href="<?= site_url('dashboard') ?>" class="nav-link<?= $isActive('dashboard') ?>" <?= $dismiss ?>>
@@ -59,29 +65,56 @@
       <a href="<?= site_url('feedback') ?>" class="nav-link<?= $isActive('feedback') ?>" <?= $dismiss ?>>
         <i class="bi bi-chat-right-text-fill"></i><span>Feedback</span>
       </a>
-      <a href="<?= site_url('tia-report') ?>" class="nav-link<?= $isActive('tia-report') ?>" <?= $dismiss ?>>
-        <i class="bi bi-clipboard-data"></i><span>TIA Report</span>
-      </a>
+
+
+
+
+
+      <?php if ($isAdmin): ?>
+        <!-- TIA (head menu + submenu) -->
+        <div class="nav-group">
+          <button type="button" class="nav-link nav-parent nav-parent-btn<?= $tiaOpen ? ' active' : '' ?>"
+            data-bs-toggle="collapse" data-bs-target="#<?= $subId ?>" aria-expanded="<?= $tiaOpen ? 'true' : 'false' ?>"
+            aria-controls="<?= $subId ?>">
+            <i class="bi bi-file-earmark-post"></i><span>TIA</span>
+          </button>
+          <button type="button" class="nav-toggle" data-bs-toggle="collapse" data-bs-target="#<?= $subId ?>"
+            aria-expanded="<?= $tiaOpen ? 'true' : 'false' ?>" aria-controls="<?= $subId ?>" aria-label="Toggle TIA menu">
+            <i class="bi bi-chevron-down"></i>
+          </button>
+        </div>
+        <div class="collapse<?= $tiaOpen ? ' show' : '' ?>" id="<?= $subId ?>">
+          <div class="nav-sub">
+            <a href="<?= site_url('tia_page') ?>" class="nav-link<?= $isActive('tia_page') ?>" <?= $dismiss ?>>
+              <i class="bi bi-card-checklist"></i><span>TIA</span>
+            </a>
+            <a href="<?= site_url('tia-report') ?>" class="nav-link<?= $currentPage === 'tia-report' ? ' active' : '' ?>"
+              <?= $dismiss ?>>
+              <i class="bi bi-person-check"></i><span>Annex D-1 (Self-Rater)</span>
+            </a>
+            <a href="<?= site_url('tia-report-superior') ?>" class="nav-link<?= $isActive('tia-report-superior') ?>"
+              <?= $dismiss ?>>
+              <i class="bi bi-person-workspace"></i><span>Annex E-1 (Superior)</span>
+            </a>
+            <a href="<?= site_url('tia-report-annex-h') ?>" class="nav-link<?= $isActive('tia-report-annex-h') ?>"
+              <?= $dismiss ?>>
+              <i class="bi bi-people"></i><span>Annex H (Public Offerings)</span>
+            </a>
+          </div>
+        </div>
+
+        <a href="<?= site_url('employees') ?>" class="nav-link<?= $isActive('employees') ?>" <?= $dismiss ?>>
+          <i class="bi bi-person-vcard-fill"></i><span>Employees</span>
+        </a>
+        <a href="<?= site_url('superiors') ?>" class="nav-link<?= $isActive('superiors') ?>" <?= $dismiss ?>>
+          <i class="bi bi-person-vcard-fill"></i><span>Superiors</span>
+        </a>
+      <?php endif; ?>
     <?php endif; ?>
-
-    <!-- TIA: visible to every logged-in role, including SUPERIOR -->
-
 
     <?php if ($isSuperior): ?>
       <a href="<?= site_url('tia-superior') ?>" class="nav-link<?= $isActive('tia-superior') ?>" <?= $dismiss ?>>
         <i class="bi bi-file-earmark-post"></i><span>TIA (Superior)</span>
-      </a>
-    <?php endif; ?>
-
-    <?php if ($isAdmin): ?>
-      <a href="<?= site_url('tia_page') ?>" class="nav-link<?= $isActive('tia_page') ?>" <?= $dismiss ?>>
-        <i class="bi bi-file-earmark-post"></i><span>TIA</span>
-      </a>
-      <a href="<?= site_url('employees') ?>" class="nav-link<?= $isActive('employees') ?>" <?= $dismiss ?>>
-        <i class="bi bi-person-vcard-fill"></i><span>Employees</span>
-      </a>
-      <a href="<?= site_url('superiors') ?>" class="nav-link<?= $isActive('superiors') ?>" <?= $dismiss ?>>
-        <i class="bi bi-person-vcard-fill"></i><span>Superiors</span>
       </a>
     <?php endif; ?>
 

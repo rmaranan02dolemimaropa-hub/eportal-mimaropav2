@@ -9,8 +9,9 @@
 
     <div class="brand">
       <div class="brand-mark">
-        <img src="assets/img/dole_blogo.png" alt="DOLE MIMAROPA Logo" class="brand-logo">
+        <img src="<?= base_url('assets/img/dole_blogo.png') ?>" alt="DOLE MIMAROPA Logo" class="brand-logo">
       </div>
+
       <span class="brand-name">DOLE MIMAROPA <strong>E-Portal</strong></span>
     </div>
   </div>
