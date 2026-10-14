@@ -137,6 +137,38 @@
     }
 </style>
 
+<?php
+// Quarter of a training (from its date text, e.g. "March 10-14, 2026")
+$monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+$quarterOf = static function (array $training) use ($monthNames): string {
+    $text = (string) ($training['training_dates'] ?? '');
+    $month = 0;
+    $year = 0;
+    $m = [];
+    $y = [];
+
+    if (preg_match('/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*/i', $text, $m)) {
+        $month = (int) array_search(strtolower($m[1]), $monthNames, true) + 1;
+    }
+    if (preg_match('/\b(20\d{2})\b/', $text, $y)) {
+        $year = (int) $y[1];
+    }
+    return ($month > 0 && $year > 0) ? $year . '-Q' . (int) ceil($month / 3) : '';
+};
+
+// Years shown in the quarter dropdown: every year found in the data + the current year
+$years = [(int) date('Y')];
+foreach (($trainings ?? []) as $training) {
+    $q = $quarterOf($training);
+    if ($q !== '') {
+        $years[] = (int) substr($q, 0, 4);
+    }
+}
+$years = array_values(array_unique($years));
+rsort($years);
+$qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–Dec'];
+?>
+
 <main class="main-content">
 
     <div class="page-header no-print">
@@ -154,18 +186,40 @@
     <!-- Training picker -->
     <div class="panel mb-3 no-print tia-picker">
         <form method="get" action="<?= site_url('tia-report-annex-g') ?>" class="row g-2 align-items-end p-3">
-            <div class="col-md-9">
+            <div class="col-md-3">
+                <label class="form-label">Quarter</label>
+                <select id="quarterFilter" class="form-select" autocomplete="off">
+                    <option value="">All quarters</option>
+                    <?php foreach ($years as $yr): ?>
+                        <optgroup label="<?= $yr ?>">
+                            <?php for ($qn = 1; $qn <= 4; $qn++): ?>
+                                <option value="<?= $yr ?>-Q<?= $qn ?>">Q<?= $qn ?>         <?= $yr ?> (<?= $qMonths[$qn] ?>)</option>
+                            <?php endfor; ?>
+                        </optgroup>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Search</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="search" id="trainingSearch" class="form-control" placeholder="Search trainings..."
+                        autocomplete="off">
+                </div>
+            </div>
+            <div class="col-md-4">
                 <label class="form-label">Training</label>
                 <select name="t" class="form-select" onchange="this.form.submit()">
                     <option value="">— Select a training —</option>
                     <?php foreach ($trainings as $t): ?>
-                        <option value="<?= esc($t['training_code'], 'attr') ?>" <?= $t['training_code'] === $code ? 'selected' : '' ?>>
+                        <option value="<?= esc($t['training_code'], 'attr') ?>"
+                            data-quarter="<?= esc($quarterOf($t), 'attr') ?>" <?= $t['training_code'] === $code ? 'selected' : '' ?>>
                             <?= esc($t['training_title']) ?> (<?= esc($t['training_dates']) ?>)
                         </option>
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <button class="btn btn-primary w-100" type="submit">View Directory</button>
             </div>
         </form>
@@ -247,3 +301,4 @@
 
 <?= $this->include('dashboard_layout/loading') ?>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="<?= base_url('assets/js/tia-quarter-picker.js') ?>"></script>

@@ -25,9 +25,12 @@ class TrainingsModel extends Model
         'canceled_at',
         'reschedule_reason',
         'rescheduled_at',
+        'rescheduled_at',
         'superior_notified_at',
+        'superior_notify_count',
         'created_at',
         'updated_at'
+
     ];
 
     protected bool $allowEmptyInserts = false;

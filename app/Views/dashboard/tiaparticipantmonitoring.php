@@ -5,6 +5,36 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <link rel="stylesheet" href="<?= base_url('assets/css/tia-dashboard.css') ?>">
 
+<?php
+// Quarter of each row (from the training date text, e.g. "March 10-14, 2026")
+$monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+$quarters = [];
+foreach (($rows ?? []) as $i => $r) {
+    $text = (string) ($r['training_dates'] ?? '');
+    $month = 0;
+    $year = 0;
+    $m = [];
+    $y = [];
+
+    if (preg_match('/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*/i', $text, $m)) {
+        $month = (int) array_search(strtolower($m[1]), $monthNames, true) + 1;
+    }
+    if (preg_match('/\b(20\d{2})\b/', $text, $y)) {
+        $year = (int) $y[1];
+    }
+
+    $quarters[$i] = ($month > 0 && $year > 0) ? $year . '-Q' . (int) ceil($month / 3) : '';
+}
+
+// Years shown in the dropdown: every year found in the data + the current year
+$years = array_map(fn($q) => (int) substr($q, 0, 4), array_filter($quarters));
+$years[] = (int) date('Y');
+$years = array_values(array_unique($years));
+rsort($years);
+
+$qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–Dec'];
+?>
+
 <main class="main-content">
 
     <div class="page-header">
@@ -41,25 +71,48 @@
     </div>
 
     <div class="panel table-panel">
-        <div class="panel-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div class="panel-header d-flex flex-wrap justify-content-between align-items-center gap-3">
             <h2 class="panel-title mb-0">Participants</h2>
 
-            <form method="get" class="d-flex flex-wrap gap-2">
-                <select name="t" class="form-select form-select-sm" style="min-width:260px;"
-                    onchange="this.form.submit()">
-                    <option value="">All trainings</option>
-                    <?php foreach ($trainings as $t): ?>
-                        <option value="<?= esc($t['training_code'], 'attr') ?>" <?= $code === $t['training_code'] ? 'selected' : '' ?>>
-                            <?= esc($t['training_title']) ?> — <?= (int) $t['pending'] ?> pending
-                        </option>
+            <div class="d-flex align-items-center gap-2 flex-wrap ms-auto">
+                <!-- Training + status (reloads the page) -->
+                <form method="get" class="d-flex flex-wrap gap-2">
+                    <select name="t" class="form-select form-select-sm" style="width:260px; flex:0 0 auto;"
+                        onchange="this.form.submit()">
+                        <option value="">All trainings</option>
+                        <?php foreach ($trainings as $t): ?>
+                            <option value="<?= esc($t['training_code'], 'attr') ?>" <?= $code === $t['training_code'] ? 'selected' : '' ?>>
+                                <?= esc($t['training_title']) ?> — <?= (int) $t['pending'] ?> pending
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <select name="status" class="form-select form-select-sm" style="width:120px; flex:0 0 auto;"
+                        onchange="this.form.submit()">
+                        <option value="pending" <?= $status === 'pending' ? 'selected' : '' ?>>Pending</option>
+                        <option value="rated" <?= $status === 'rated' ? 'selected' : '' ?>>Submitted</option>
+                        <option value="all" <?= $status === 'all' ? 'selected' : '' ?>>All</option>
+                    </select>
+                </form>
+
+                <!-- Quarter + search (filter the rows on this page instantly) -->
+                <select id="quarterFilter" class="form-select form-select-sm" autocomplete="off"
+                    style="width:200px; flex:0 0 auto;">
+                    <option value="">All quarters</option>
+                    <?php foreach ($years as $yr): ?>
+                        <optgroup label="<?= $yr ?>">
+                            <?php for ($qn = 1; $qn <= 4; $qn++): ?>
+                                <option value="<?= $yr ?>-Q<?= $qn ?>">Q<?= $qn ?>         <?= $yr ?> (<?= $qMonths[$qn] ?>)</option>
+                            <?php endfor; ?>
+                        </optgroup>
                     <?php endforeach; ?>
                 </select>
-                <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
-                    <option value="pending" <?= $status === 'pending' ? 'selected' : '' ?>>Pending</option>
-                    <option value="rated" <?= $status === 'rated' ? 'selected' : '' ?>>Submitted</option>
-                    <option value="all" <?= $status === 'all' ? 'selected' : '' ?>>All</option>
-                </select>
-            </form>
+
+                <div class="input-group input-group-sm" style="width:260px; flex:0 0 auto;">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="search" id="trainingSearch" class="form-control" placeholder="Search participants..."
+                        autocomplete="off">
+                </div>
+            </div>
         </div>
 
         <div class="table-responsive">
@@ -78,7 +131,7 @@
                 <tbody>
                     <?php if (!empty($rows)): ?>
                         <?php foreach ($rows as $i => $r): ?>
-                            <tr>
+                            <tr data-quarter="<?= esc($quarters[$i] ?? '', 'attr') ?>">
                                 <td><?= $i + 1 ?></td>
                                 <td>
                                     <?= esc($r['name']) ?>
@@ -165,3 +218,4 @@
         document.getElementById('sheetFrame').src = 'about:blank';
     });
 </script>
+<script src="<?= base_url('assets/js/tia-search.js') ?>"></script>

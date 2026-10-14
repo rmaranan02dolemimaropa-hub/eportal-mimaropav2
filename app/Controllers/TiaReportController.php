@@ -435,6 +435,25 @@ class TiaReportController extends BaseController
                 $status === 'all' || ($status === 'pending' ? !$r['rated'] : $r['rated'])
         ));
 
+        // Attach "superior notified" info (count + last sent) to each row
+        $info = [];
+        foreach ((new \App\Models\TrainingsModel())->findAll() as $tr) {
+            $val = [
+                'count' => (int) ($tr['superior_notify_count'] ?? 0),
+                'at' => $tr['superior_notified_at'] ?? null,
+            ];
+            $info['code:' . $tr['training_code']] = $val;
+            $info['title:' . $tr['training_title'] . '|' . $tr['training_dates']] = $val;
+        }
+        foreach ($rows as &$r) {
+            $v = $info['code:' . ($r['training_code'] ?? '')]
+                ?? $info['title:' . ($r['training_title'] ?? '') . '|' . ($r['training_dates'] ?? '')]
+                ?? ['count' => 0, 'at' => null];
+            $r['notify_count'] = $v['count'];
+            $r['notified_at'] = $v['at'];
+        }
+        unset($r);
+
         // use the same picker data as the other pages (all trainings, for the dropdown)
         $all = $model->superiorMonitoring(null)['trainings'];
 

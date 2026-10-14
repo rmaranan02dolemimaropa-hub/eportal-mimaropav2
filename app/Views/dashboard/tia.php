@@ -5,6 +5,45 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <link rel="stylesheet" href="<?= base_url('assets/css/tia-dashboard.css') ?>">
 
+<?php
+// Quarter of each training (from its date text; falls back to when it was added)
+$monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+$quarters = [];
+foreach (($trainings ?? []) as $i => $t) {
+    $text = (string) ($t['training_dates'] ?? '');
+    $created = strtotime((string) ($t['created_at'] ?? '')) ?: null;
+    $month = 0;
+    $year = 0;
+    $m = [];
+    $y = [];
+
+    if (preg_match('/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*/i', $text, $m)) {
+        $month = (int) array_search(strtolower($m[1]), $monthNames, true) + 1;
+    }
+    if (preg_match('/\b(20\d{2})\b/', $text, $y)) {
+        $year = (int) $y[1];
+    }
+
+    // fall back to when the training was added
+    if ($month === 0 && $created) {
+        $month = (int) date('n', $created);
+    }
+    if ($year === 0 && $created) {
+        $year = (int) date('Y', $created);
+    }
+
+    $quarters[$i] = ($month > 0 && $year > 0) ? $year . '-Q' . (int) ceil($month / 3) : '';
+}
+
+// Years shown in the dropdown: every year found in the data + the current year
+$years = array_map(fn($q) => (int) substr($q, 0, 4), array_filter($quarters));
+$years[] = (int) date('Y');
+$years = array_values(array_unique($years));
+rsort($years);
+
+$qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–Dec'];
+?>
+
 <main class="main-content">
 
     <!-- Page Header -->
@@ -20,8 +59,28 @@
 
     <!-- Training Table Panel -->
     <div class="panel table-panel">
-        <div class="panel-header">
-            <h2 class="panel-title">Trainings</h2>
+        <div class="panel-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <h2 class="panel-title mb-0">Trainings</h2>
+
+            <div class="d-flex align-items-center gap-2 flex-wrap ms-auto">
+                <select id="quarterFilter" class="form-select form-select-sm" autocomplete="off"
+                    style="width:200px; flex:0 0 auto;">
+                    <option value="">All quarters</option>
+                    <?php foreach ($years as $yr): ?>
+                        <optgroup label="<?= $yr ?>">
+                            <?php for ($qn = 1; $qn <= 4; $qn++): ?>
+                                <option value="<?= $yr ?>-Q<?= $qn ?>">Q<?= $qn ?>         <?= $yr ?> (<?= $qMonths[$qn] ?>)</option>
+                            <?php endfor; ?>
+                        </optgroup>
+                    <?php endforeach; ?>
+                </select>
+
+                <div class="input-group input-group-sm" style="width:280px; flex:0 0 auto;">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="search" id="trainingSearch" class="form-control" placeholder="Search trainings..."
+                        autocomplete="off">
+                </div>
+            </div>
         </div>
 
         <div class="table-responsive">
@@ -41,7 +100,7 @@
                 <tbody>
                     <?php if (!empty($trainings)): ?>
                         <?php foreach ($trainings as $index => $row): ?>
-                            <tr>
+                            <tr data-quarter="<?= esc($quarters[$index] ?? '', 'attr') ?>">
                                 <td><?= $index + 1 ?></td>
                                 <td>
                                     <span class="ref-no"><?= esc($row['training_title']) ?></span>
@@ -52,7 +111,7 @@
                                 <td><?= esc($row['immediate_superior'] ?? '—') ?>
                                     <?php if (!empty($row['superior_notified_at'])): ?>
                                         <i class="bi bi-envelope-check text-success ms-1"
-                                            title="Superior notified <?= esc(date('M d, Y h:i A', strtotime($row['superior_notified_at'])), 'attr') ?>"></i>
+                                            title="Superior notified <?= (int) ($row['superior_notify_count'] ?? 1) ?>x · last <?= esc(date('M d, Y h:i A', strtotime($row['superior_notified_at'])), 'attr') ?>"></i>
                                     <?php endif; ?>
                                 </td>
                                 <?php
@@ -445,7 +504,6 @@
         </div>
     </div>
 
-
     <!-- ===================== DELETE PARTICIPANT MODAL ===================== -->
     <div class="modal fade" id="deleteParticipantModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -560,3 +618,4 @@
 <script>window.EMPLOYEE_LIST_URL = '<?= site_url('employees/all') ?>';</script>
 <script src="<?= base_url('assets/js/employee-select.js') ?>"></script>
 <script src="<?= base_url('assets/js/tia-notify-superior.js') ?>"></script>
+<script src="<?= base_url('assets/js/tia-search.js') ?>"></script>
