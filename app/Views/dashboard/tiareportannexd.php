@@ -3,9 +3,7 @@
 <?= $this->include('dashboard_layout/sidebar') ?>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<link rel="stylesheet" href="<?= base_url('assets/css/tia-dashboard.css') ?>">
-
-
+<link rel="stylesheet" href="<?= base_url('assets/css/tia-sheet.css') ?>">
 
 <?php
 $fmt = static fn($v) => $v === null ? '—' : number_format((float) $v, 2);
@@ -28,12 +26,17 @@ if ($report) {
     <div class="page-header no-print">
         <div>
             <h1 class="page-title">TIA Report</h1>
-            <p class="page-subtitle">Annex E-1 – Summary of Superior-Rater Responses</p>
+            <p class="page-subtitle">Annex D-1 – Summary of Self-Rater Responses</p>
         </div>
         <?php if ($report && $report['n'] > 0): ?>
-            <button type="button" class="btn btn-dole-primary" onclick="window.print()">
-                <i class="bi bi-printer me-1"></i> Print / Save as PDF
-            </button>
+            <div class="d-flex gap-2">
+                <a href="<?= site_url('tia-report/export') ?>?t=<?= urlencode($code) ?>" class="btn btn-success">
+                    <i class="bi bi-file-earmark-excel me-1"></i> Export Excel
+                </a>
+                <button type="button" class="btn btn-dole-primary" onclick="window.print()">
+                    <i class="bi bi-printer me-1"></i> Print / Save as PDF
+                </button>
+            </div>
         <?php endif; ?>
     </div>
 
@@ -46,8 +49,11 @@ if ($report) {
                     <option value="">— Select a training —</option>
                     <?php foreach ($trainings as $t): ?>
                         <option value="<?= esc($t['training_code'], 'attr') ?>" <?= $t['training_code'] === $code ? 'selected' : '' ?>>
-                            <?= esc($t['training_title']) ?> (<?= esc($t['training_dates']) ?>)
-                            – <?= (int) $t['respondents'] ?> respondent<?= (int) $t['respondents'] === 1 ? '' : 's' ?>
+                            <?= esc($t['training_title']) ?> (
+                            <?= esc($t['training_dates']) ?>)
+                            –
+                            <?= (int) $t['respondents'] ?> respondent
+                            <?= (int) $t['respondents'] === 1 ? '' : 's' ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -67,7 +73,7 @@ if ($report) {
         </div>
 
     <?php else: ?>
-        <div class="panel d1 annex-d">
+        <div class="panel d1 annex-d sheet">
 
             <!-- Header with logos -->
             <div class="header-banner">
@@ -89,9 +95,13 @@ if ($report) {
 
             <div class="text-center mb-3">
                 <h5 class="mt-2 mb-1 fw-bold">SUMMARY OF SELF-RATER RESPONSES</h5>
-                <div><em>Title of the Training:</em> <strong><?= esc($report['training']['training_title']) ?></strong>
+                <div><em>Title of the Training:</em> <strong>
+                        <?= esc($report['training']['training_title']) ?>
+                    </strong>
                 </div>
-                <div class="text-muted small"><?= esc($report['training']['training_dates']) ?></div>
+                <div class="text-muted small">
+                    <?= esc($report['training']['training_dates']) ?>
+                </div>
             </div>
 
             <div class="small mb-3">
@@ -109,17 +119,23 @@ if ($report) {
                 <tbody>
                     <tr>
                         <td>No. of participants (based on attendance sheet)</td>
-                        <td><?= (int) $report['profile']['participants'] ?></td>
+                        <td>
+                            <?= (int) $report['profile']['participants'] ?>
+                        </td>
                     </tr>
                     <tr>
                         <td>Total no. of survey respondents</td>
-                        <td><?= (int) $report['profile']['respondents'] ?></td>
+                        <td>
+                            <?= (int) $report['profile']['respondents'] ?>
+                        </td>
                     </tr>
                     <tr>
                         <td>No. of respondents per office</td>
                         <td>
                             <?php foreach ($report['profile']['offices'] as $o): ?>
-                                <?= esc($o['label']) ?> - <?= $o['total'] ?> (<?= $o['percent'] ?>%)<br>
+                                <?= esc($o['label']) ?> -
+                                <?= $o['total'] ?> (
+                                <?= $o['percent'] ?>%)<br>
                             <?php endforeach; ?>
                         </td>
                     </tr>
@@ -127,7 +143,9 @@ if ($report) {
                         <td>No. of respondents per position</td>
                         <td>
                             <?php foreach ($report['profile']['positions'] as $o): ?>
-                                <?= esc($o['label']) ?> - <?= $o['total'] ?> (<?= $o['percent'] ?>%)<br>
+                                <?= esc($o['label']) ?> -
+                                <?= $o['total'] ?> (
+                                <?= $o['percent'] ?>%)<br>
                             <?php endforeach; ?>
                         </td>
                     </tr>
@@ -189,9 +207,16 @@ if ($report) {
                     <tbody>
                         <?php foreach ($report['part2'] as $i => $p): ?>
                             <tr>
-                                <td><?= $i + 1 ?>. <?= esc($p['name']) ?></td>
-                                <td><?= esc($p['changes']) ?></td>
-                                <td><?= esc($p['improvement']) ?></td>
+                                <td>
+                                    <?= $i + 1 ?>.
+                                    <?= esc($p['name']) ?>
+                                </td>
+                                <td>
+                                    <?= esc($p['changes']) ?>
+                                </td>
+                                <td>
+                                    <?= esc($p['improvement']) ?>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -215,17 +240,26 @@ if ($report) {
                     <tbody>
                         <?php foreach ($report['challenges']['people'] as $i => $p): ?>
                             <tr>
-                                <td><?= $i + 1 ?>. <?= esc($p['name']) ?></td>
+                                <td>
+                                    <?= $i + 1 ?>.
+                                    <?= esc($p['name']) ?>
+                                </td>
                                 <?php foreach ($p['flags'] as $f): ?>
-                                    <td class="num"><?= $f ? 1 : '' ?></td>
+                                    <td class="num">
+                                        <?= $f ? 1 : '' ?>
+                                    </td>
                                 <?php endforeach; ?>
-                                <td><?= esc($p['others']) ?></td>
+                                <td>
+                                    <?= esc($p['others']) ?>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                         <tr class="avg-col">
                             <td class="text-start">TOTAL:</td>
                             <?php foreach ($report['challenges']['totals'] as $t): ?>
-                                <td class="num"><?= number_format($t, 2) ?></td>
+                                <td class="num">
+                                    <?= number_format($t, 2) ?>
+                                </td>
                             <?php endforeach; ?>
                             <td></td>
                         </tr>
@@ -234,7 +268,9 @@ if ($report) {
             </div>
             <div>
                 <span class="overall px-3 py-1">TOTAL</span>
-                <strong class="ms-2"><?= number_format($report['challenges']['total'], 2) ?></strong>
+                <strong class="ms-2">
+                    <?= number_format($report['challenges']['total'], 2) ?>
+                </strong>
             </div>
 
             <h6>Part IV: Proposed Project and/or Innovations</h6>
@@ -252,18 +288,33 @@ if ($report) {
                     <tbody>
                         <?php foreach ($report['ideas']['people'] as $i => $p): ?>
                             <tr>
-                                <td><?= $i + 1 ?>. <?= esc($p['name']) ?></td>
-                                <td class="num"><?= $p['yes'] ? 1 : '' ?></td>
-                                <td><?= esc($p['ideas']) ?></td>
-                                <td class="num"><?= $p['yes'] ? '' : 1 ?></td>
-                                <td><?= esc($p['why_not']) ?></td>
+                                <td>
+                                    <?= $i + 1 ?>.
+                                    <?= esc($p['name']) ?>
+                                </td>
+                                <td class="num">
+                                    <?= $p['yes'] ? 1 : '' ?>
+                                </td>
+                                <td>
+                                    <?= esc($p['ideas']) ?>
+                                </td>
+                                <td class="num">
+                                    <?= $p['yes'] ? '' : 1 ?>
+                                </td>
+                                <td>
+                                    <?= esc($p['why_not']) ?>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                         <tr class="avg-col">
                             <td class="text-start">TOTAL:</td>
-                            <td class="num"><?= number_format($report['ideas']['yes'], 2) ?></td>
+                            <td class="num">
+                                <?= number_format($report['ideas']['yes'], 2) ?>
+                            </td>
                             <td></td>
-                            <td class="num"><?= number_format($report['ideas']['no'], 2) ?></td>
+                            <td class="num">
+                                <?= number_format($report['ideas']['no'], 2) ?>
+                            </td>
                             <td></td>
                         </tr>
                     </tbody>
@@ -275,31 +326,45 @@ if ($report) {
                 <tbody>
                     <tr>
                         <th>I. Attitudinal Outcomes</th>
-                        <td class="num"><?= $fmt($report['summary']['att']) ?></td>
+                        <td class="num">
+                            <?= $fmt($report['summary']['att']) ?>
+                        </td>
                     </tr>
                     <tr>
                         <th>II. Performance Impact</th>
-                        <td class="num"><?= $fmt($report['summary']['perf']) ?></td>
+                        <td class="num">
+                            <?= $fmt($report['summary']['perf']) ?>
+                        </td>
                     </tr>
                     <tr>
                         <td></td>
-                        <td class="num"><?= $fmt($report['summary']['comp']) ?></td>
+                        <td class="num">
+                            <?= $fmt($report['summary']['comp']) ?>
+                        </td>
                     </tr>
                     <tr>
                         <th>III. Critical Success Factors</th>
-                        <td class="num"><?= $fmt($report['summary']['obj']) ?></td>
+                        <td class="num">
+                            <?= $fmt($report['summary']['obj']) ?>
+                        </td>
                     </tr>
                     <tr>
                         <td></td>
-                        <td class="num"><?= $fmt($report['summary']['app']) ?></td>
+                        <td class="num">
+                            <?= $fmt($report['summary']['app']) ?>
+                        </td>
                     </tr>
                     <tr>
                         <th class="text-end">Average:</th>
-                        <td class="num fw-bold"><?= number_format((float) $report['summary']['average'], 3) ?></td>
+                        <td class="num fw-bold">
+                            <?= number_format((float) $report['summary']['average'], 3) ?>
+                        </td>
                     </tr>
                     <tr>
                         <th class="text-end">Adjectival Rating:</th>
-                        <td class="fw-bold"><?= esc($report['summary']['rating']) ?></td>
+                        <td class="fw-bold">
+                            <?= esc($report['summary']['rating']) ?>
+                        </td>
                     </tr>
                 </tbody>
             </table>

@@ -2,8 +2,10 @@
 
 namespace App\Controllers;
 
+use App\Libraries\TiaExcelExport;
 use App\Models\TiaReportModel;
-
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class TiaReportController extends BaseController
 {
@@ -17,6 +19,34 @@ class TiaReportController extends BaseController
         [1.50, 'Low Impact'],
         [1.00, 'No Impact'],
     ];
+
+    /**
+     * The sample accomplished Annex E-1 averages FIVE values: its summary box lists the
+     * Critical Success Factors score twice (3.16, 2.72, 2.95, 3.6, 3.6 -> 3.206).
+     * true = match the sample exactly; false = average the four distinct scores.
+     */
+    private const E1_COUNT_CSF_TWICE = true;
+
+    /**
+     * Annex H lists FIVE adjectival levels (Very High ... No Impact).
+     * These cut-offs split the 1-4 rating range into five equal bands.
+     * VERIFY against the rating table in AO 229 before official use.
+     * Format: [minimum average, label], highest first.
+     */
+    private const SCALE_H = [
+        [3.40, 'Very High Impact'],
+        [2.80, 'High Impact'],
+        [2.20, 'Moderate Impact'],
+        [1.60, 'Low Impact'],
+        [1.00, 'No Impact'],
+    ];
+
+    /** Annex H is meant for public trainings with this many attendees or fewer. */
+    private const H_MAX_ATTENDEES = 5;
+
+    // =====================================================================
+    // ANNEX D-1  -  Summary of Self-Rater Responses
+    // =====================================================================
 
     /**
      * GET /tia-report            -> training picker
@@ -43,10 +73,6 @@ class TiaReportController extends BaseController
             'report' => $report,
         ]);
     }
-
-
-
-    // ------------------------------------------------------------------ build
 
     private function buildReport(TiaReportModel $model, array $training): array
     {
@@ -97,475 +123,11 @@ class TiaReportController extends BaseController
         ];
     }
 
-    /** Rows of participants x columns, with per-person and per-column averages. */
-    private function grid(array $rows, string $prefix, int $count): array
-    {
-        $people = [];
-        $cols = array_fill(1, $count, []);
+    // =====================================================================
+    // ANNEX E-1  -  Summary of Superior-Rater Responses
+    // =====================================================================
 
-        foreach ($rows as $r) {
-            $vals = [];
-            for ($i = 1; $i <= $count; $i++) {
-                $v = $r["{$prefix}_{$i}"] ?? null;
-                $v = ($v === null || $v === '') ? null : (int) $v;
-                $vals[$i] = $v;
-                if ($v !== null) {
-                    $cols[$i][] = $v;
-                }
-            }
-            $people[] = [
-                'name' => $r['participant_name'],
-                'values' => $vals,
-                'avg' => $this->mean($vals),
-            ];
-        }
-
-        $colAvg = [];
-        for ($i = 1; $i <= $count; $i++) {
-            $colAvg[$i] = $this->mean($cols[$i]);
-        }
-
-        return [
-            'people' => $people,
-            'colAvg' => $colAvg,
-            'overall' => $this->mean($colAvg),
-            'count' => $count,
-        ];
-    }
-
-    private function firstTexts(array $rows, string $prefix, int $count): array
-    {
-        $out = array_fill(1, $count, '');
-        for ($i = 1; $i <= $count; $i++) {
-            foreach ($rows as $r) {
-                $t = trim((string) ($r["{$prefix}_{$i}_text"] ?? ''));
-                if ($t !== '') {
-                    $out[$i] = $t;
-                    break;
-                }
-            }
-        }
-        return $out;
-    }
-
-    private function part2(array $rows): array
-    {
-        return array_map(fn($r) => [
-            'name' => $r['participant_name'],
-            'changes' => trim((string) $r['other_behavior_changes']),
-            'improvement' => trim((string) $r['measurable_improvements']),
-        ], $rows);
-    }
-
-    /** Part III: challenges (1 per participant who ticked it) + verbatim "others". */
-    private function challenges(array $rows): array
-    {
-        $keys = ['no_opportunity', 'not_enough_time', 'work_environment', 'superior_no_support', 'none'];
-
-        $people = [];
-        $totals = array_fill_keys($keys, 0);
-
-        foreach ($rows as $r) {
-            $picked = json_decode((string) $r['barriers'], true);
-            $picked = is_array($picked) ? $picked : [];
-
-            $line = ['name' => $r['participant_name'], 'flags' => [], 'others' => ''];
-            foreach ($keys as $k) {
-                $has = in_array($k, $picked, true);
-                $line['flags'][$k] = $has ? 1 : 0;
-                $totals[$k] += $has ? 1 : 0;
-            }
-            if (in_array('others', $picked, true)) {
-                $line['others'] = trim((string) $r['barrier_others_text']);
-            }
-            $people[] = $line;
-        }
-
-        return ['people' => $people, 'totals' => $totals, 'total' => array_sum($totals)];
-    }
-
-    /** Part IV: proposed project / innovations. */
-    private function ideas(array $rows): array
-    {
-        $people = [];
-        $yes = $no = 0;
-
-        foreach ($rows as $r) {
-            $isYes = ($r['presented_ideas'] === 'Yes');
-            $yes += $isYes ? 1 : 0;
-            $no += $isYes ? 0 : 1;
-
-            $people[] = [
-                'name' => $r['participant_name'],
-                'yes' => $isYes,
-                'ideas' => $isYes ? trim((string) $r['ideas_yes']) : '',
-                'why_not' => $isYes ? '' : trim((string) $r['ideas_no']),
-            ];
-        }
-
-        return ['people' => $people, 'yes' => $yes, 'no' => $no];
-    }
-
-    // ---------------------------------------------------------------- helpers
-
-    private function withPercent(array $list, int $n): array
-    {
-        return array_map(fn($x) => [
-            'label' => $x['label'],
-            'total' => (int) $x['total'],
-            'percent' => $n > 0 ? round(((int) $x['total'] / $n) * 100) : 0,
-        ], $list);
-    }
-
-    /** Mean ignoring nulls; null when there is nothing to average. */
-    private function mean(array $vals): ?float
-    {
-        $vals = array_values(array_filter($vals, fn($v) => $v !== null));
-        return $vals ? array_sum($vals) / count($vals) : null;
-    }
-
-    private function adjectival(?float $avg): string
-    {
-        if ($avg === null) {
-            return '—';
-        }
-        foreach (self::SCALE as [$min, $label]) {
-            if ($avg >= $min) {
-                return $label;
-            }
-        }
-        return '—';
-    }
-
-    // ------------------------------------------------------------ excel helpers
-
-    /** Write one cell. $text = true forces a string, so answers starting with = + - @ never become formulas. */
-    private function put($sheet, int $col, int $row, $value, bool $text = false): void
-    {
-        $cell = Coordinate::stringFromColumnIndex($col) . $row;
-        if ($text) {
-            $sheet->setCellValueExplicit($cell, (string) $value, DataType::TYPE_STRING);
-        } else {
-            $sheet->setCellValue($cell, $value);
-        }
-    }
-
-    private function boxStyle($sheet, string $range): void
-    {
-        $sheet->getStyle($range)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        $sheet->getStyle($range)->getAlignment()->setWrapText(true)->setVertical('top');
-    }
-
-    private function headStyle($sheet, string $range): void
-    {
-        $sheet->getStyle($range)->applyFromArray([
-            'font' => ['bold' => true],
-            'alignment' => ['wrapText' => true, 'vertical' => 'center', 'horizontal' => 'center'],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'FDEEDE']],
-        ]);
-    }
-
-    /** Participants x statements sheet with AVERAGE formulas. Returns e.g. 'Attitudinal'!B8 (the Overall cell). */
-    private function gridSheet(Spreadsheet $wb, string $title, array $g, array $heads): string
-    {
-        $sheet = $wb->createSheet();
-        $sheet->setTitle($title);
-
-        $count = $g['count'];
-        $n = count($g['people']);
-        $avgCol = $count + 2;
-        $first = Coordinate::stringFromColumnIndex(2);
-        $last = Coordinate::stringFromColumnIndex($count + 1);
-        $avgL = Coordinate::stringFromColumnIndex($avgCol);
-
-        // header
-        $this->put($sheet, 1, 1, 'Name of Participants', true);
-        foreach (array_values($heads) as $i => $h) {
-            $this->put($sheet, $i + 2, 1, $h, true);
-        }
-        $this->put($sheet, $avgCol, 1, 'AVERAGE (per pax)', true);
-
-        // participants
-        foreach ($g['people'] as $i => $p) {
-            $row = $i + 2;
-            $this->put($sheet, 1, $row, ($i + 1) . '. ' . $p['name'], true);
-            foreach ($p['values'] as $k => $v) {
-                if ($v !== null) {
-                    $this->put($sheet, $k + 1, $row, $v);
-                }
-            }
-            $this->put($sheet, $avgCol, $row, "=IFERROR(AVERAGE({$first}{$row}:{$last}{$row}),\"\")");
-        }
-
-        // group average per column
-        $gr = $n + 2;
-        $this->put($sheet, 1, $gr, 'AVERAGE (as a group):', true);
-        for ($c = 2; $c <= $count + 1; $c++) {
-            $L = Coordinate::stringFromColumnIndex($c);
-            $this->put($sheet, $c, $gr, "=IFERROR(AVERAGE({$L}2:{$L}" . ($n + 1) . "),\"\")");
-        }
-
-        // overall
-        $or = $n + 3;
-        $this->put($sheet, 1, $or, 'Overall', true);
-        $this->put($sheet, 2, $or, "=IFERROR(AVERAGE({$first}{$gr}:{$last}{$gr}),\"\")");
-
-        // look
-        $this->boxStyle($sheet, "A1:{$avgL}{$gr}");
-        $this->headStyle($sheet, "A1:{$avgL}1");
-        $sheet->getStyle("{$avgL}2:{$avgL}{$gr}")->getNumberFormat()->setFormatCode('0.00');
-        $sheet->getStyle("A{$gr}:{$avgL}{$gr}")->getNumberFormat()->setFormatCode('0.00');
-        $sheet->getStyle("A{$gr}:{$avgL}{$gr}")->applyFromArray([
-            'font' => ['bold' => true],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'FDEEDE']],
-        ]);
-        $sheet->getStyle("A{$or}:B{$or}")->applyFromArray([
-            'font' => ['bold' => true],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'FBD9A7']],
-        ]);
-        $sheet->getStyle("B{$or}")->getNumberFormat()->setFormatCode('0.00');
-        $sheet->getStyle("B2:{$last}{$n}")->getAlignment()->setHorizontal('center');
-
-        $sheet->getColumnDimension('A')->setWidth(30);
-        for ($c = 2; $c <= $count + 2; $c++) {
-            $sheet->getColumnDimension(Coordinate::stringFromColumnIndex($c))->setWidth(20);
-        }
-        $sheet->freezePane('B2');
-
-        return "'{$title}'!B{$or}";
-    }
-
-    private function part2Sheet(Spreadsheet $wb, array $rows): void
-    {
-        $sheet = $wb->createSheet();
-        $sheet->setTitle('Part II');
-
-        $this->put($sheet, 1, 1, 'Name of Participants', true);
-        $this->put($sheet, 2, 1, '3. Other changes in behavior as a result of the training (verbatim)', true);
-        $this->put($sheet, 3, 1, '4. Areas at work with measurable improvement (verbatim)', true);
-
-        foreach ($rows as $i => $p) {
-            $row = $i + 2;
-            $this->put($sheet, 1, $row, ($i + 1) . '. ' . $p['name'], true);
-            $this->put($sheet, 2, $row, $p['changes'], true);
-            $this->put($sheet, 3, $row, $p['improvement'], true);
-        }
-
-        $end = count($rows) + 1;
-        $this->boxStyle($sheet, "A1:C{$end}");
-        $this->headStyle($sheet, 'A1:C1');
-        $sheet->getColumnDimension('A')->setWidth(30);
-        $sheet->getColumnDimension('B')->setWidth(55);
-        $sheet->getColumnDimension('C')->setWidth(55);
-        $sheet->freezePane('B2');
-    }
-
-    private function part3Sheet(Spreadsheet $wb, array $c): void
-    {
-        $sheet = $wb->createSheet();
-        $sheet->setTitle('Part III');
-
-        $heads = [
-            'Name of Participants',
-            'I had no opportunity to use the skills',
-            "I didn't have enough time to apply the skills/knowledge",
-            'My work environment is not appropriate for the use of these skills/knowledge',
-            'My superior does not support this type of program',
-            'None',
-            'Others (please specify) (verbatim)',
-        ];
-        foreach ($heads as $i => $h) {
-            $this->put($sheet, $i + 1, 1, $h, true);
-        }
-
-        $n = count($c['people']);
-        foreach ($c['people'] as $i => $p) {
-            $row = $i + 2;
-            $this->put($sheet, 1, $row, ($i + 1) . '. ' . $p['name'], true);
-            $col = 2;
-            foreach ($p['flags'] as $f) {
-                if ($f) {
-                    $this->put($sheet, $col, $row, 1);
-                }
-                $col++;
-            }
-            $this->put($sheet, 7, $row, $p['others'], true);
-        }
-
-        $tr = $n + 2;
-        $this->put($sheet, 1, $tr, 'TOTAL:', true);
-        for ($col = 2; $col <= 6; $col++) {
-            $L = Coordinate::stringFromColumnIndex($col);
-            $this->put($sheet, $col, $tr, "=SUM({$L}2:{$L}" . ($n + 1) . ')');
-        }
-        $this->put($sheet, 1, $tr + 1, 'TOTAL', true);
-        $this->put($sheet, 2, $tr + 1, "=SUM(B{$tr}:F{$tr})");
-
-        $this->boxStyle($sheet, "A1:G{$tr}");
-        $this->headStyle($sheet, 'A1:G1');
-        $sheet->getStyle("A{$tr}:G{$tr}")->applyFromArray([
-            'font' => ['bold' => true],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'FDEEDE']],
-        ]);
-        $sheet->getStyle("A" . ($tr + 1) . ":B" . ($tr + 1))->applyFromArray([
-            'font' => ['bold' => true],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'FBD9A7']],
-        ]);
-        $sheet->getStyle("B2:F{$tr}")->getAlignment()->setHorizontal('center');
-        $sheet->getColumnDimension('A')->setWidth(30);
-        foreach (['B', 'C', 'D', 'E', 'F'] as $L) {
-            $sheet->getColumnDimension($L)->setWidth(22);
-        }
-        $sheet->getColumnDimension('G')->setWidth(40);
-        $sheet->freezePane('B2');
-    }
-
-    private function part4Sheet(Spreadsheet $wb, array $ideas): void
-    {
-        $sheet = $wb->createSheet();
-        $sheet->setTitle('Part IV');
-
-        $heads = ['Name of Participants', 'Yes', 'If yes, what are these ideas? (verbatim)', 'No', 'If no, why? (verbatim)'];
-        foreach ($heads as $i => $h) {
-            $this->put($sheet, $i + 1, 1, $h, true);
-        }
-
-        $n = count($ideas['people']);
-        foreach ($ideas['people'] as $i => $p) {
-            $row = $i + 2;
-            $this->put($sheet, 1, $row, ($i + 1) . '. ' . $p['name'], true);
-            if ($p['yes']) {
-                $this->put($sheet, 2, $row, 1);
-            } else {
-                $this->put($sheet, 4, $row, 1);
-            }
-            $this->put($sheet, 3, $row, $p['ideas'], true);
-            $this->put($sheet, 5, $row, $p['why_not'], true);
-        }
-
-        $tr = $n + 2;
-        $this->put($sheet, 1, $tr, 'TOTAL:', true);
-        $this->put($sheet, 2, $tr, '=SUM(B2:B' . ($n + 1) . ')');
-        $this->put($sheet, 4, $tr, '=SUM(D2:D' . ($n + 1) . ')');
-        $this->put($sheet, 1, $tr + 1, 'TOTAL', true);
-        $this->put($sheet, 2, $tr + 1, "=B{$tr}+D{$tr}");
-
-        $this->boxStyle($sheet, "A1:E{$tr}");
-        $this->headStyle($sheet, 'A1:E1');
-        $sheet->getStyle("A{$tr}:E{$tr}")->applyFromArray([
-            'font' => ['bold' => true],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'FDEEDE']],
-        ]);
-        $sheet->getStyle("A" . ($tr + 1) . ":B" . ($tr + 1))->applyFromArray([
-            'font' => ['bold' => true],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'FBD9A7']],
-        ]);
-        $sheet->getStyle("B2:B{$tr}")->getAlignment()->setHorizontal('center');
-        $sheet->getStyle("D2:D{$tr}")->getAlignment()->setHorizontal('center');
-        $sheet->getColumnDimension('A')->setWidth(30);
-        $sheet->getColumnDimension('B')->setWidth(10);
-        $sheet->getColumnDimension('C')->setWidth(50);
-        $sheet->getColumnDimension('D')->setWidth(10);
-        $sheet->getColumnDimension('E')->setWidth(50);
-        $sheet->freezePane('B2');
-    }
-
-    /** First sheet: Annex D-1 header, respondent profile, and the final average + adjectival rating. */
-    private function summarySheet($sheet, array $r, array $refs): void
-    {
-        $t = $r['training'];
-
-        $this->put($sheet, 1, 1, 'Republic of the Philippines', true);
-        $this->put($sheet, 1, 2, 'DEPARTMENT OF LABOR AND EMPLOYMENT', true);
-        $this->put($sheet, 1, 3, 'Intramuros, Manila', true);
-        $this->put($sheet, 1, 4, 'SUMMARY OF SELF-RATER RESPONSES (ANNEX D-1)', true);
-        $this->put($sheet, 1, 5, 'Title of the Training:', true);
-        $this->put($sheet, 2, 5, $t['training_title'], true);
-        $this->put($sheet, 1, 6, 'Training Date/s:', true);
-        $this->put($sheet, 2, 6, (string) $t['training_dates'], true);
-        $this->put($sheet, 1, 7, '1 = Strongly Disagree   2 = Disagree   3 = Agree   4 = Strongly Agree', true);
-        $sheet->getStyle('A1:A5')->getFont()->setBold(true);
-
-        // ---- respondent's profile ----
-        $row = 9;
-        $this->put($sheet, 1, $row, "Respondent's Profile", true);
-        $this->put($sheet, 2, $row, 'Headcount', true);
-        $this->headStyle($sheet, "A{$row}:B{$row}");
-        $start = $row;
-
-        $lines = fn(array $list) => implode("\n", array_map(
-            fn($o) => "{$o['label']} - {$o['total']} ({$o['percent']}%)",
-            $list
-        ));
-
-        $profile = [
-            ['No. of participants (based on attendance sheet)', (int) $r['profile']['participants']],
-            ['Total no. of survey respondents', (int) $r['profile']['respondents']],
-            ['No. of respondents per office', $lines($r['profile']['offices'])],
-            ['No. of respondents per position', $lines($r['profile']['positions'])],
-            ['Gender', 'Not collected'],
-            ['Age', 'Not collected'],
-        ];
-        foreach ($profile as [$label, $val]) {
-            $row++;
-            $this->put($sheet, 1, $row, $label, true);
-            is_int($val) ? $this->put($sheet, 2, $row, $val) : $this->put($sheet, 2, $row, $val, true);
-        }
-        $this->boxStyle($sheet, "A{$start}:B{$row}");
-
-        // ---- final summary (formulas pointing to the other sheets) ----
-        $row += 3;
-        $this->put($sheet, 1, $row, 'RESULT', true);
-        $this->put($sheet, 2, $row, 'Overall', true);
-        $this->headStyle($sheet, "A{$row}:B{$row}");
-        $sumStart = $row;
-
-        $labels = [
-            'I. Attitudinal Outcomes',
-            'II. Performance Impact',
-            '    Productivity Areas',
-            'III. Critical Success Factors (Objectives)',
-            '    Critical Success Factors (Application)',
-        ];
-        $first = $row + 1;
-        foreach ($labels as $i => $label) {
-            $row++;
-            $this->put($sheet, 1, $row, $label, true);
-            $this->put($sheet, 2, $row, '=' . $refs[$i]);
-        }
-        $lastRef = $row;
-
-        $row++;
-        $this->put($sheet, 1, $row, 'Average:', true);
-        $this->put($sheet, 2, $row, "=IFERROR(AVERAGE(B{$first}:B{$lastRef}),\"\")");
-        $avgRow = $row;
-
-        // adjectival rating from the same scale used by the web report
-        $f = '"—"';
-        foreach (array_reverse(self::SCALE) as [$min, $label]) {
-            $f = "IF(B{$avgRow}>={$min},\"{$label}\",{$f})";
-        }
-        $row++;
-        $this->put($sheet, 1, $row, 'Adjectival Rating:', true);
-        $this->put($sheet, 2, $row, "=IF(B{$avgRow}=\"\",\"—\",{$f})");
-
-        $this->boxStyle($sheet, "A{$sumStart}:B{$row}");
-        $sheet->getStyle("B{$first}:B{$avgRow}")->getNumberFormat()->setFormatCode('0.00');
-        $sheet->getStyle("A{$avgRow}:B{$row}")->getFont()->setBold(true);
-
-        $sheet->getColumnDimension('A')->setWidth(50);
-        $sheet->getColumnDimension('B')->setWidth(34);
-        $sheet->getStyle("B{$start}:B{$row}")->getAlignment()->setHorizontal('left');
-    }
-
-    /**
-     * The sample accomplished Annex E-1 averages FIVE values: its summary box lists the
-     * Critical Success Factors score twice (3.16, 2.72, 2.95, 3.6, 3.6 -> 3.206).
-     * true = match the sample exactly; false = average the four distinct scores.
-     */
-    private const E1_COUNT_CSF_TWICE = true;
-
-    /** GET /tia-report/superior?t=TRN-... -> Annex E-1 */
+    /** GET /tia-report-superior?t=TRN-... -> Annex E-1 */
     public function superior()
     {
         $model = new TiaReportModel();
@@ -629,26 +191,72 @@ class TiaReportController extends BaseController
     }
 
     // =====================================================================
-    // ANNEX H — Training Impact Assessment Form for Public Offerings
-    // (for public trainings with 1-5 attendees)
+    // EXCEL EXPORTS  (one sheet each - see app/Libraries/TiaExcelExport.php)
     // =====================================================================
 
-    /**
-     * Annex H lists FIVE adjectival levels (Very High ... No Impact).
-     * These cut-offs split the 1-4 rating range into five equal bands.
-     * VERIFY against the rating table in AO 229 before official use.
-     * Format: [minimum average, label], highest first.
-     */
-    private const SCALE_H = [
-        [3.40, 'Very High Impact'],
-        [2.80, 'High Impact'],
-        [2.20, 'Moderate Impact'],
-        [1.60, 'Low Impact'],
-        [1.00, 'No Impact'],
-    ];
+    /** GET /tia-report/export?t=TRN-... -> Annex D-1 as .xlsx */
+    public function exportD()
+    {
+        $model = new TiaReportModel();
+        $code = trim((string) $this->request->getGet('t'));
+        $training = $code !== '' ? $model->findTraining($code) : null;
 
-    /** The form is meant for public trainings with this many attendees or fewer. */
-    private const H_MAX_ATTENDEES = 5;
+        if (!$training) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Training not found.');
+        }
+
+        $r = $this->buildReport($model, $training);
+        if ($r['n'] === 0) {
+            return redirect()->to(site_url('tia-report') . '?t=' . urlencode($code))
+                ->with('msg', 'Nothing to export yet - no self-rater responses.');
+        }
+
+        $wb = (new TiaExcelExport(self::SCALE))->annexD($r);
+
+        return $this->downloadXlsx($wb, 'Annex-D1_' . $code . '.xlsx');
+    }
+
+    /** GET /tia-report-superior/export?t=TRN-... -> Annex E-1 as .xlsx */
+    public function exportE()
+    {
+        $model = new TiaReportModel();
+        $code = trim((string) $this->request->getGet('t'));
+        $training = $code !== '' ? $model->findTraining($code) : null;
+
+        if (!$training) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Training not found.');
+        }
+
+        $r = $this->buildSuperiorReport($model, $training);
+        if ($r['n'] === 0) {
+            return redirect()->to(site_url('tia-report-superior') . '?t=' . urlencode($code))
+                ->with('msg', 'Nothing to export yet - no superior-rater responses.');
+        }
+
+        $wb = (new TiaExcelExport(self::SCALE))->annexE($r);
+
+        return $this->downloadXlsx($wb, 'Annex-E1_' . $code . '.xlsx');
+    }
+
+    /** Streams a workbook to the browser as a download. */
+    private function downloadXlsx(Spreadsheet $wb, string $filename)
+    {
+        $filename = preg_replace('/[^A-Za-z0-9._-]+/', '_', $filename);
+
+        ob_start();
+        (new Xlsx($wb))->save('php://output');
+        $data = ob_get_clean();
+
+        return $this->response
+            ->setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
+            ->setHeader('Cache-Control', 'max-age=0, no-cache, must-revalidate')
+            ->setBody($data);
+    }
+
+    // =====================================================================
+    // ANNEX H  -  Training Impact Assessment Form for Public Offerings
+    // =====================================================================
 
     /**
      * GET /tia-report-annex-h            -> training picker
@@ -800,18 +408,9 @@ class TiaReportController extends BaseController
         ];
     }
 
-    private function adjectivalH(?float $avg): string
-    {
-        if ($avg === null) {
-            return '—';
-        }
-        foreach (self::SCALE_H as [$min, $label]) {
-            if ($avg >= $min) {
-                return $label;
-            }
-        }
-        return '—';
-    }
+    // =====================================================================
+    // MONITORING + READ-ONLY SHEETS
+    // =====================================================================
 
     /** GET /tia-monitoring?status=pending|rated|all&t=TRN-... */
     public function monitoring()
@@ -847,6 +446,7 @@ class TiaReportController extends BaseController
             'code' => $code,
         ]);
     }
+
     /** GET /tia-report-monitoring/view/{id} -> read-only Annex E sheet */
     public function viewSuperior(int $id)
     {
@@ -909,6 +509,10 @@ class TiaReportController extends BaseController
             'training' => $model->findTraining($r['training_code']) ?? [],
         ]);
     }
+
+    // =====================================================================
+    // ANNEX G  -  Participants list by office
+    // =====================================================================
 
     /**
      * GET /tia-report-annex-g            -> training picker
@@ -982,6 +586,10 @@ class TiaReportController extends BaseController
         ];
     }
 
+    // =====================================================================
+    // ANNEX J  -  Input form + sheet
+    // =====================================================================
+
     /**
      * GET /tia-report-annex-j            -> training picker
      * GET /tia-report-annex-j?t=TRN-...  -> input form + Annex J sheet
@@ -1024,5 +632,160 @@ class TiaReportController extends BaseController
         return redirect()
             ->to(site_url('tia-report-annex-j') . '?t=' . urlencode($code))
             ->with('msg', 'Annex J saved.');
+    }
+
+    // =====================================================================
+    // SHARED DATA HELPERS
+    // =====================================================================
+
+    /** Rows of participants x columns, with per-person and per-column averages. */
+    private function grid(array $rows, string $prefix, int $count): array
+    {
+        $people = [];
+        $cols = array_fill(1, $count, []);
+
+        foreach ($rows as $r) {
+            $vals = [];
+            for ($i = 1; $i <= $count; $i++) {
+                $v = $r["{$prefix}_{$i}"] ?? null;
+                $v = ($v === null || $v === '') ? null : (int) $v;
+                $vals[$i] = $v;
+                if ($v !== null) {
+                    $cols[$i][] = $v;
+                }
+            }
+            $people[] = [
+                'name' => $r['participant_name'],
+                'values' => $vals,
+                'avg' => $this->mean($vals),
+            ];
+        }
+
+        $colAvg = [];
+        for ($i = 1; $i <= $count; $i++) {
+            $colAvg[$i] = $this->mean($cols[$i]);
+        }
+
+        return [
+            'people' => $people,
+            'colAvg' => $colAvg,
+            'overall' => $this->mean($colAvg),
+            'count' => $count,
+        ];
+    }
+
+    private function firstTexts(array $rows, string $prefix, int $count): array
+    {
+        $out = array_fill(1, $count, '');
+        for ($i = 1; $i <= $count; $i++) {
+            foreach ($rows as $r) {
+                $t = trim((string) ($r["{$prefix}_{$i}_text"] ?? ''));
+                if ($t !== '') {
+                    $out[$i] = $t;
+                    break;
+                }
+            }
+        }
+        return $out;
+    }
+
+    private function part2(array $rows): array
+    {
+        return array_map(fn($r) => [
+            'name' => $r['participant_name'],
+            'changes' => trim((string) $r['other_behavior_changes']),
+            'improvement' => trim((string) $r['measurable_improvements']),
+        ], $rows);
+    }
+
+    /** Part III: challenges (1 per participant who ticked it) + verbatim "others". */
+    private function challenges(array $rows): array
+    {
+        $keys = ['no_opportunity', 'not_enough_time', 'work_environment', 'superior_no_support', 'none'];
+
+        $people = [];
+        $totals = array_fill_keys($keys, 0);
+
+        foreach ($rows as $r) {
+            $picked = json_decode((string) $r['barriers'], true);
+            $picked = is_array($picked) ? $picked : [];
+
+            $line = ['name' => $r['participant_name'], 'flags' => [], 'others' => ''];
+            foreach ($keys as $k) {
+                $has = in_array($k, $picked, true);
+                $line['flags'][$k] = $has ? 1 : 0;
+                $totals[$k] += $has ? 1 : 0;
+            }
+            if (in_array('others', $picked, true)) {
+                $line['others'] = trim((string) $r['barrier_others_text']);
+            }
+            $people[] = $line;
+        }
+
+        return ['people' => $people, 'totals' => $totals, 'total' => array_sum($totals)];
+    }
+
+    /** Part IV: proposed project / innovations. */
+    private function ideas(array $rows): array
+    {
+        $people = [];
+        $yes = $no = 0;
+
+        foreach ($rows as $r) {
+            $isYes = ($r['presented_ideas'] === 'Yes');
+            $yes += $isYes ? 1 : 0;
+            $no += $isYes ? 0 : 1;
+
+            $people[] = [
+                'name' => $r['participant_name'],
+                'yes' => $isYes,
+                'ideas' => $isYes ? trim((string) $r['ideas_yes']) : '',
+                'why_not' => $isYes ? '' : trim((string) $r['ideas_no']),
+            ];
+        }
+
+        return ['people' => $people, 'yes' => $yes, 'no' => $no];
+    }
+
+    private function withPercent(array $list, int $n): array
+    {
+        return array_map(fn($x) => [
+            'label' => $x['label'],
+            'total' => (int) $x['total'],
+            'percent' => $n > 0 ? round(((int) $x['total'] / $n) * 100) : 0,
+        ], $list);
+    }
+
+    /** Mean ignoring nulls; null when there is nothing to average. */
+    private function mean(array $vals): ?float
+    {
+        $vals = array_values(array_filter($vals, fn($v) => $v !== null));
+        return $vals ? array_sum($vals) / count($vals) : null;
+    }
+
+    private function adjectival(?float $avg): string
+    {
+        if ($avg === null) {
+            return '—';
+        }
+        foreach (self::SCALE as [$min, $label]) {
+            if ($avg >= $min) {
+                return $label;
+            }
+        }
+        return '—';
+    }
+
+    private function adjectivalH(?float $avg): string
+    {
+        if ($avg === null) {
+            return '—';
+        }
+        foreach (self::SCALE_H as [$min, $label]) {
+            if ($avg >= $min) {
+                return $label;
+            }
+        }
+        return '—';
     }
 }

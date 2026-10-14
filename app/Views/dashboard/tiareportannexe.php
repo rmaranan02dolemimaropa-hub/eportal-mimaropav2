@@ -3,8 +3,7 @@
 <?= $this->include('dashboard_layout/sidebar') ?>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<link rel="stylesheet" href="<?= base_url('assets/css/tia-dashboard.css') ?>">
-
+<link rel="stylesheet" href="<?= base_url('assets/css/tia-sheet.css') ?>">
 
 <?php
 $fmt = static fn($v) => $v === null ? '—' : number_format((float) $v, 2);
@@ -30,9 +29,14 @@ if ($report) {
             <p class="page-subtitle">Annex E-1 – Summary of Superior-Rater Responses</p>
         </div>
         <?php if ($report && $report['n'] > 0): ?>
-            <button type="button" class="btn btn-dole-primary" onclick="window.print()">
-                <i class="bi bi-printer me-1"></i> Print / Save as PDF
-            </button>
+            <div class="d-flex gap-2">
+                <a href="<?= site_url('tia-report-superior/export') ?>?t=<?= urlencode($code) ?>" class="btn btn-success">
+                    <i class="bi bi-file-earmark-excel me-1"></i> Export Excel
+                </a>
+                <button type="button" class="btn btn-dole-primary" onclick="window.print()">
+                    <i class="bi bi-printer me-1"></i> Print / Save as PDF
+                </button>
+            </div>
         <?php endif; ?>
     </div>
 
@@ -66,7 +70,7 @@ if ($report) {
         </div>
 
     <?php else: ?>
-        <div class="panel d1 annex-e">
+        <div class="panel d1 annex-e sheet">
 
             <!-- Header with logos -->
             <div class="header-banner">

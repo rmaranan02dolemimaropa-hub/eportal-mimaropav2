@@ -1,0 +1,265 @@
+/* ==========================================================
+   tia-sheet.css  (standalone - replaces tia-dashboard.css)
+   TIA report page: base layout + spreadsheet-style tables.
+   ========================================================== */
+
+:root {
+  --dole-blue: #0038a8;
+  --dole-blue-dark: #002a80;
+  --sheet-line: #c6c6c6;
+  --sheet-head: #e7e6e6;
+  --sheet-accent: #4472c4;
+}
+
+/* ---------- Page header ---------- */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+.page-subtitle {
+  margin: 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.btn-dole-primary {
+  background: var(--dole-blue);
+  border: 1px solid var(--dole-blue);
+  color: #fff;
+}
+.btn-dole-primary:hover {
+  background: var(--dole-blue-dark);
+  border-color: var(--dole-blue-dark);
+  color: #fff;
+}
+
+/* ---------- Panel ---------- */
+.panel {
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+}
+.panel.d1 {
+  padding: 1.25rem;
+}
+
+/* ---------- Letterhead banner ---------- */
+.header-banner {
+  display: grid;
+  grid-template-columns: 90px 1fr 110px 90px;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 2px solid var(--dole-blue);
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+}
+.header-banner img {
+  max-width: 100%;
+  max-height: 80px;
+  object-fit: contain;
+}
+.agency-title {
+  text-align: center;
+  line-height: 1.25;
+}
+.agency-title p {
+  margin: 0;
+}
+.agency-title .country {
+  font-size: 0.8rem;
+}
+.agency-title .dept {
+  font-size: 1rem;
+  font-weight: 700;
+}
+.agency-title .region {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* ---------- Misc report bits ---------- */
+.sub {
+  font-style: italic;
+  font-weight: 600;
+  margin: 0.75rem 0 0.35rem;
+}
+.overall {
+  display: inline-block;
+  background: var(--sheet-head);
+  border: 1px solid var(--sheet-line);
+  font-weight: 700;
+}
+
+/* ---------- Spreadsheet look (scoped to .sheet) ---------- */
+.sheet table {
+  border-collapse: collapse;
+  font-family: Calibri, Arial, sans-serif;
+  font-size: 12px;
+  background: #fff;
+}
+.sheet th,
+.sheet td {
+  border: 1px solid var(--sheet-line) !important;
+  padding: 3px 6px !important;
+  vertical-align: middle;
+}
+.sheet thead th {
+  background: var(--sheet-head);
+  font-weight: 700;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.sheet tbody tr:nth-child(even) td {
+  background: #f7f9fb;
+}
+.sheet tbody tr:hover td {
+  background: #e8f1fb;
+}
+.sheet td.num,
+.sheet td.text-end {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.sheet td:first-child {
+  white-space: nowrap;
+  background: #f3f3f3;
+  font-weight: 600;
+}
+.sheet tr.avg-col td,
+.sheet tr.avg-col th {
+  background: #ddebf7 !important;
+  font-weight: 700;
+  border-top: 2px solid var(--sheet-accent) !important;
+}
+.sheet .table-responsive {
+  max-height: 420px;
+  overflow: auto;
+  border: 1px solid var(--sheet-line);
+}
+.sheet h6 {
+  background: var(--sheet-accent);
+  color: #fff;
+  padding: 4px 10px;
+  margin-top: 1.25rem;
+}
+
+/* ---------- Print ---------- */
+@page {
+  size: A4 landscape;
+  margin: 10mm;
+}
+
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    width: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Hide app chrome: navbar, sidebar, page header, picker, loader */
+  .no-print,
+  .navbar,
+  .topbar,
+  .sidebar,
+  aside,
+  nav,
+  .loading,
+  #loading,
+  .loader,
+  .offcanvas {
+    display: none !important;
+  }
+
+  /* Remove the sidebar offset so the report uses the full page */
+  .main-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .panel,
+  .panel.d1 {
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    border-radius: 0;
+  }
+
+  .page-break {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  /* Smaller type so wide tables fit */
+  .sheet table {
+    font-size: 9.5px;
+    width: 100%;
+  }
+  .sheet th,
+  .sheet td {
+    padding: 2px 4px !important;
+    word-break: break-word;
+  }
+  .sheet td:first-child {
+    white-space: normal;
+  }
+
+  /* Show full tables, no inner scrollbars or frozen header */
+  .sheet .table-responsive {
+    max-height: none !important;
+    overflow: visible !important;
+    border: 0;
+  }
+  .sheet thead th {
+    position: static;
+  }
+
+  /* Repeat header on each page, keep rows and headings together */
+  .sheet thead {
+    display: table-header-group;
+  }
+  .sheet tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .sheet h6,
+  .sub {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .sheet tbody tr:nth-child(even) td {
+    background: #fff;
+  }
+  .sheet tbody tr:hover td {
+    background: inherit;
+  }
+
+  /* Keep header colors in print */
+  .sheet h6,
+  .sheet thead th,
+  .sheet td:first-child,
+  .sheet tr.avg-col td,
+  .sheet tr.avg-col th,
+  .overall {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .header-banner img {
+    max-height: 60px;
+  }
+}
