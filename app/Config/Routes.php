@@ -98,6 +98,15 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('tia-report', 'TiaReportController::index');
     $routes->get('tia-report-superior', 'TiaReportController::superior');
     $routes->get('tia-report-annex-h', 'TiaReportController::annexH');
+    $routes->get('tia-report-monitoring', 'TiaReportController::monitoring');
+    $routes->get('tia-report-monitoring/view/(:num)', 'TiaReportController::viewSuperior/$1');
+    $routes->get('tia-report-participant-monitoring', 'TiaReportController::participantMonitoring');
+    $routes->get('tia-report-participant-monitoring/view/(:num)', 'TiaReportController::viewParticipant/$1');
+    $routes->get('tia-report-annex-g', 'TiaReportController::annexG');
+    $routes->get('tia-report-annex-j', 'TiaReportController::annexJ');
+    $routes->post('tia-report-annex-j/save', 'TiaReportController::saveAnnexJ');
+
+
 
     // Logout
     $routes->get('logout', 'EportalController::logout');

@@ -302,11 +302,6 @@
   border-color: #1f2937;
 }
 
-/* ---- A4 sheet (screen): D-1, E-1 and H ---- */
-.d1 {
-  page: d1report; /* named page, see @page below */
-}
-
 .d1.annex-d,
 .d1.annex-e,
 .d1.annex-h {
@@ -613,7 +608,7 @@
    Named page so these margins apply to the reports only.
    ===================================================== */
 
-@page d1report {
+@page {
   size: A4 portrait;
   margin: 20mm;
 }
@@ -810,5 +805,43 @@
   .annex-h .ah-foot,
   .annex-h .ah-challenge-label {
     break-inside: avoid;
+  }
+
+  /* remove every layout constraint so the sheet flows across pages */
+  html:has(.d1),
+  body:has(.d1),
+  body:has(.d1) .app-body,
+  body:has(.d1) .main-content,
+  body:has(.d1) main {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    position: static !important;
+    float: none !important;
+    transform: none !important;
+  }
+
+  body:has(.d1),
+  body:has(.d1) .app-body {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .d1 .panel,
+  .d1 .table-responsive {
+    overflow: visible !important;
+  }
+
+  /* wide tables (Part II/III/IV) must fit the 170mm printable width */
+  .d1 table {
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: fixed;
+  }
+  .d1 th,
+  .d1 td {
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
   }
 }

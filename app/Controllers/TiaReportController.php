@@ -812,4 +812,217 @@ class TiaReportController extends BaseController
         }
         return '—';
     }
+
+    /** GET /tia-monitoring?status=pending|rated|all&t=TRN-... */
+    public function monitoring()
+    {
+        $model = new TiaReportModel();
+        $code = trim((string) $this->request->getGet('t'));
+        $status = $this->request->getGet('status');
+        $status = in_array($status, ['pending', 'rated', 'all'], true) ? $status : 'pending';
+
+        $data = $model->superiorMonitoring($code !== '' ? $code : null);
+
+        $totals = ['total' => 0, 'rated' => 0, 'pending' => 0];
+        foreach ($data['trainings'] as $t) {
+            $totals['total'] += $t['total'];
+            $totals['rated'] += $t['rated'];
+            $totals['pending'] += $t['pending'];
+        }
+
+        $rows = array_values(array_filter(
+            $data['rows'],
+            fn($r) =>
+                $status === 'all' || ($status === 'pending' ? !$r['rated'] : $r['rated'])
+        ));
+
+        // use the same picker data as the other pages (all trainings, for the dropdown)
+        $all = $model->superiorMonitoring(null)['trainings'];
+
+        return view('dashboard/tiamonitoring', [
+            'trainings' => $all,
+            'rows' => $rows,
+            'totals' => $totals,
+            'status' => $status,
+            'code' => $code,
+        ]);
+    }
+    /** GET /tia-report-monitoring/view/{id} -> read-only Annex E sheet */
+    public function viewSuperior(int $id)
+    {
+        $model = new TiaReportModel();
+        $r = $model->superiorResponse($id);
+        if (!$r) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Rating sheet not found.');
+        }
+        $training = $model->findTraining($r['training_code']);
+
+        return view('dashboard/tiasuperiorsheet', [
+            'r' => $r,
+            'training' => $training ?? [],
+        ]);
+    }
+
+    /** GET /tia-report-participant-monitoring?status=pending|rated|all&t=TRN-... */
+    public function participantMonitoring()
+    {
+        $model = new TiaReportModel();
+        $code = trim((string) $this->request->getGet('t'));
+        $status = $this->request->getGet('status');
+        $status = in_array($status, ['pending', 'rated', 'all'], true) ? $status : 'pending';
+
+        $data = $model->participantMonitoring($code !== '' ? $code : null);
+
+        $totals = ['total' => 0, 'rated' => 0, 'pending' => 0];
+        foreach ($data['trainings'] as $t) {
+            $totals['total'] += $t['total'];
+            $totals['rated'] += $t['rated'];
+            $totals['pending'] += $t['pending'];
+        }
+
+        $rows = array_values(array_filter(
+            $data['rows'],
+            fn($r) =>
+                $status === 'all' || ($status === 'pending' ? !$r['rated'] : $r['rated'])
+        ));
+
+        return view('dashboard/tiaparticipantmonitoring', [
+            'trainings' => $model->participantMonitoring(null)['trainings'],
+            'rows' => $rows,
+            'totals' => $totals,
+            'status' => $status,
+            'code' => $code,
+        ]);
+    }
+
+    /** GET /tia-report-participant-monitoring/view/{id} -> read-only Annex D sheet */
+    public function viewParticipant(int $id)
+    {
+        $model = new TiaReportModel();
+        $r = $model->participantResponse($id);
+        if (!$r) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Rating sheet not found.');
+        }
+
+        return view('dashboard/tiaparticipantsheet', [
+            'r' => $r,
+            'training' => $model->findTraining($r['training_code']) ?? [],
+        ]);
+    }
+
+    /**
+     * GET /tia-report-annex-g            -> training picker
+     * GET /tia-report-annex-g?t=TRN-...  -> Annex G for that training
+     */
+    public function annexG()
+    {
+        $model = new TiaReportModel();
+        $trainings = $model->trainingsWithCounts();
+        $code = trim((string) $this->request->getGet('t'));
+        $report = null;
+
+        if ($code !== '') {
+            $training = $model->findTraining($code);
+            if (!$training) {
+                throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Training not found.');
+            }
+            $report = $this->buildAnnexG($model, $training);
+        }
+
+        return view('dashboard/tiareportannexg', [
+            'trainings' => $trainings,
+            'code' => $code,
+            'report' => $report,
+        ]);
+    }
+
+    private function buildAnnexG(TiaReportModel $model, array $training): array
+    {
+        $code = $training['training_code'];
+        $norm = fn($s) => strtolower(preg_replace('/\s+/', ' ', trim((string) $s)));
+
+        // office of each person, taken from their self-rater response when they have one
+        $officeByEmail = [];
+        $officeByName = [];
+        foreach ($model->responses($code) as $r) {
+            $office = trim((string) ($r['office'] ?? ''));
+            if ($office === '') {
+                continue;
+            }
+            $officeByName[$norm($r['participant_name'])] = $office;
+            if (!empty($r['email'])) {
+                $officeByEmail[$norm($r['email'])] = $office;
+            }
+        }
+
+        $fallbackOffice = trim((string) ($training['office'] ?? '')) ?: 'Office not specified';
+        $groups = [];   // office => [rows]
+
+        foreach ($model->participants($code) as $p) {
+            $name = trim((string) ($p['participant_name'] ?? $p['name'] ?? ''));
+            $email = trim((string) ($p['email'] ?? ''));
+
+            $office = trim((string) ($p['office'] ?? ''))
+                ?: ($officeByEmail[$norm($email)] ?? null)
+                ?: ($officeByName[$norm($name)] ?? null)
+                ?: $fallbackOffice;
+
+            $groups[$office][] = [
+                'name' => $name,
+                'position' => trim((string) ($p['position'] ?? '')),
+                'email' => $email,
+            ];
+        }
+
+        return [
+            'training' => $training,
+            'groups' => $groups,
+            'total' => array_sum(array_map('count', $groups)),
+            'superior' => trim((string) ($training['immediate_superior'] ?? '')),
+        ];
+    }
+
+    /**
+     * GET /tia-report-annex-j            -> training picker
+     * GET /tia-report-annex-j?t=TRN-...  -> input form + Annex J sheet
+     */
+    public function annexJ()
+    {
+        $model = new TiaReportModel();
+        $code = trim((string) $this->request->getGet('t'));
+        $training = null;
+        $j = null;
+
+        if ($code !== '') {
+            $training = $model->findTraining($code);
+            if (!$training) {
+                throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Training not found.');
+            }
+            $j = $model->annexJ($code);
+        }
+
+        return view('dashboard/tiareportannexj', [
+            'trainings' => $model->trainingsWithCounts(),
+            'code' => $code,
+            'training' => $training,
+            'j' => $j,
+        ]);
+    }
+
+    /** POST /tia-report-annex-j/save */
+    public function saveAnnexJ()
+    {
+        $model = new TiaReportModel();
+        $code = trim((string) $this->request->getPost('training_code'));
+
+        if ($code === '' || !$model->findTraining($code)) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Training not found.');
+        }
+
+        $model->saveAnnexJ($code, $this->request->getPost());
+
+        return redirect()
+            ->to(site_url('tia-report-annex-j') . '?t=' . urlencode($code))
+            ->with('msg', 'Annex J saved.');
+    }
 }

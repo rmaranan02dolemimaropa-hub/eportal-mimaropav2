@@ -117,4 +117,220 @@ class TiaReportModel extends Model
             ->get()
             ->getResultArray();
     }
+
+    // ------------------------------------------------------------------
+    // Superior-rating monitoring
+    // ------------------------------------------------------------------
+
+    private function norm($s): string
+    {
+        return strtolower(preg_replace('/\s+/', ' ', trim((string) $s)));
+    }
+
+    /**
+     * Every participant of every training (or one training) with a
+     * 'rated' flag = has the superior already submitted Annex E for them?
+     * Returns [ 'trainings' => [...with counts...], 'rows' => [...] ]
+     */
+    public function superiorMonitoring(?string $code = null): array
+    {
+        $tq = $this->db->table('trainings');
+        if ($code) {
+            $tq->where('training_code', $code);
+        }
+        $trainings = $tq->orderBy('created_at', 'DESC')->get()->getResultArray();
+
+        $pq = $this->db->table('training_participants');
+        $sq = $this->db->table('tia_superior_responses');
+        if ($code) {
+            $pq->where('training_code', $code);
+            $sq->where('training_code', $code);
+        }
+        $participants = $pq->orderBy('id', 'ASC')->get()->getResultArray();
+        $responses = $sq->orderBy('id', 'ASC')->get()->getResultArray();
+
+        // index submitted superior sheets by training + participant (id + date)
+        $doneName = [];
+        $doneEmail = [];
+        foreach ($responses as $r) {
+            $tc = $r['training_code'];
+            $hit = ['id' => (int) $r['id'], 'at' => $r['created_at'] ?? null];
+
+            $doneName[$tc][$this->norm($r['participant_name'] ?? '')] = $hit;
+            if (!empty($r['participant_email'])) {
+                $doneEmail[$tc][$this->norm($r['participant_email'])] = $hit;
+            }
+        }
+
+        $byTraining = [];
+        foreach ($trainings as $t) {
+            $byTraining[$t['training_code']] = $t + ['total' => 0, 'rated' => 0, 'pending' => 0];
+        }
+
+        $rows = [];
+        foreach ($participants as $p) {
+            $tc = $p['training_code'];
+            if (!isset($byTraining[$tc])) {
+                continue;
+            }
+            $name = trim((string) ($p['participant_name'] ?? $p['name'] ?? ''));
+            $email = $this->norm($p['email'] ?? '');
+
+            $hit = $doneName[$tc][$this->norm($name)]
+                ?? ($email !== '' ? ($doneEmail[$tc][$email] ?? null) : null);
+            $rated = $hit !== null;
+
+            $byTraining[$tc]['total']++;
+            $byTraining[$tc][$rated ? 'rated' : 'pending']++;
+
+            $rows[] = [
+                'training_code' => $tc,
+                'training_title' => $byTraining[$tc]['training_title'],
+                'training_dates' => $byTraining[$tc]['training_dates'],
+                'superior' => $byTraining[$tc]['immediate_superior'] ?? '',
+                'name' => $name,
+                'position' => trim((string) ($p['position'] ?? '')),
+                'email' => trim((string) ($p['email'] ?? '')),
+                'rated' => $rated,
+                'rated_at' => $hit['at'] ?? null,
+                'response_id' => $hit['id'] ?? null,
+            ];
+        }
+
+        return ['trainings' => array_values($byTraining), 'rows' => $rows];
+    }
+
+    public function superiorResponse(int $id): ?array
+    {
+        return $this->db->table('tia_superior_responses')
+            ->where('id', $id)
+            ->get()
+            ->getRowArray() ?: null;
+    }
+
+    // ------------------------------------------------------------------
+    // Participant (self-rater, Annex D) monitoring
+    // ------------------------------------------------------------------
+
+    /**
+     * Every participant of every training (or one training) with a 'rated' flag =
+     * has the participant already submitted the Annex D self-rater form?
+     */
+    public function participantMonitoring(?string $code = null): array
+    {
+        $tq = $this->db->table('trainings');
+        if ($code) {
+            $tq->where('training_code', $code);
+        }
+        $trainings = $tq->orderBy('created_at', 'DESC')->get()->getResultArray();
+
+        $pq = $this->db->table('training_participants');
+        $sq = $this->db->table('tia_responses');
+        if ($code) {
+            $pq->where('training_code', $code);
+            $sq->where('training_code', $code);
+        }
+        $participants = $pq->orderBy('id', 'ASC')->get()->getResultArray();
+        $responses = $sq->orderBy('id', 'ASC')->get()->getResultArray();
+
+        $doneName = [];
+        $doneEmail = [];
+        foreach ($responses as $r) {
+            $tc = $r['training_code'];
+            $hit = ['id' => (int) $r['id'], 'at' => $r['created_at'] ?? null];
+
+            $doneName[$tc][$this->norm($r['participant_name'] ?? '')] = $hit;
+            if (!empty($r['email'])) {
+                $doneEmail[$tc][$this->norm($r['email'])] = $hit;
+            }
+        }
+
+        $byTraining = [];
+        foreach ($trainings as $t) {
+            $byTraining[$t['training_code']] = $t + ['total' => 0, 'rated' => 0, 'pending' => 0];
+        }
+
+        $rows = [];
+        foreach ($participants as $p) {
+            $tc = $p['training_code'];
+            if (!isset($byTraining[$tc])) {
+                continue;
+            }
+            $name = trim((string) ($p['participant_name'] ?? $p['name'] ?? ''));
+            $email = $this->norm($p['email'] ?? '');
+
+            $hit = ($email !== '' ? ($doneEmail[$tc][$email] ?? null) : null)
+                ?? ($doneName[$tc][$this->norm($name)] ?? null);
+            $rated = $hit !== null;
+
+            $byTraining[$tc]['total']++;
+            $byTraining[$tc][$rated ? 'rated' : 'pending']++;
+
+            $rows[] = [
+                'training_code' => $tc,
+                'training_title' => $byTraining[$tc]['training_title'],
+                'training_dates' => $byTraining[$tc]['training_dates'],
+                'name' => $name,
+                'position' => trim((string) ($p['position'] ?? '')),
+                'email' => trim((string) ($p['email'] ?? '')),
+                'rated' => $rated,
+                'rated_at' => $hit['at'] ?? null,
+                'response_id' => $hit['id'] ?? null,
+            ];
+        }
+
+        return ['trainings' => array_values($byTraining), 'rows' => $rows];
+    }
+
+    public function participantResponse(int $id): ?array
+    {
+        return $this->db->table('tia_responses')
+            ->where('id', $id)
+            ->get()
+            ->getRowArray() ?: null;
+    }
+
+    // ------------------------------------------------------------------
+    // Annex J (manually typed report)
+    // ------------------------------------------------------------------
+
+    public const J_FIELDS = [
+        'background',
+        'methodology',
+        'level1',
+        'level2',
+        'level3_a',
+        'level3_b',
+        'level3_c',
+        'level3_d',
+        'analysis',
+        'conclusion',
+        'recommendations',
+    ];
+
+    public function annexJ(string $code): array
+    {
+        $row = $this->db->table('tia_annex_j')
+            ->where('training_code', $code)
+            ->get()
+            ->getRowArray();
+
+        return $row ?: array_fill_keys(self::J_FIELDS, '');
+    }
+
+    public function saveAnnexJ(string $code, array $data): void
+    {
+        $clean = ['updated_at' => date('Y-m-d H:i:s')];
+        foreach (self::J_FIELDS as $f) {
+            $clean[$f] = trim((string) ($data[$f] ?? ''));
+        }
+
+        $exists = $this->db->table('tia_annex_j')->where('training_code', $code)->countAllResults() > 0;
+
+        if ($exists) {
+            $this->db->table('tia_annex_j')->where('training_code', $code)->update($clean);
+        } else {
+            $this->db->table('tia_annex_j')->insert($clean + ['training_code' => $code]);
+        }
+    }
 }

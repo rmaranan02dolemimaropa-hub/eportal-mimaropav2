@@ -88,6 +88,14 @@
             <a href="<?= site_url('tia_page') ?>" class="nav-link<?= $isActive('tia_page') ?>" <?= $dismiss ?>>
               <i class="bi bi-card-checklist"></i><span>TIA</span>
             </a>
+            <a href="<?= site_url('tia-report-monitoring') ?>" class="nav-link<?= $isActive('tia-report-monitoring') ?>"
+              <?= $dismiss ?>>
+              <i class="bi bi-hourglass-split"></i><span>Superior Rating Monitoring</span>
+            </a>
+            <a href="<?= site_url('tia-report-participant-monitoring') ?>" class="nav-link<?= $isActive('tia-report-participant-monitoring') ?>"
+              <?= $dismiss ?>>
+              <i class="bi bi-person-lines-fill"></i><span>Participant Rating Monitoring</span>
+            </a>
             <a href="<?= site_url('tia-report') ?>" class="nav-link<?= $currentPage === 'tia-report' ? ' active' : '' ?>"
               <?= $dismiss ?>>
               <i class="bi bi-person-check"></i><span>Annex D-1 (Self-Rater)</span>
@@ -96,9 +104,17 @@
               <?= $dismiss ?>>
               <i class="bi bi-person-workspace"></i><span>Annex E-1 (Superior)</span>
             </a>
+            <a href="<?= site_url('tia-report-annex-g') ?>" class="nav-link<?= $isActive('tia-report-annex-g') ?>"
+              <?= $dismiss ?>>
+              <i class="bi bi-journal-text"></i><span>Annex G (Directory)</span>
+            </a>
             <a href="<?= site_url('tia-report-annex-h') ?>" class="nav-link<?= $isActive('tia-report-annex-h') ?>"
               <?= $dismiss ?>>
               <i class="bi bi-people"></i><span>Annex H (Public Offerings)</span>
+            </a>
+            <a href="<?= site_url('tia-report-annex-j') ?>" class="nav-link<?= $isActive('tia-report-annex-j') ?>"
+              <?= $dismiss ?>>
+              <i class="bi bi-file-earmark-richtext"></i><span>Annex J (TIA Report)</span>
             </a>
           </div>
         </div>
