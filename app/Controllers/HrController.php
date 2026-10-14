@@ -83,6 +83,7 @@ class HrController extends BaseController
         return view('tia/ad_form', [
             'training' => $training,
             'participant' => $participant,
+            'competencies' => $training ? (json_decode($training['competencies'] ?? '[]', true) ?: []) : [],
             'offices' => EmployeeModel::OFFICES,
             'superiors' => (new SuperiorModel())->orderBy('name', 'ASC')->findAll(),
         ]);
@@ -169,6 +170,21 @@ class HrController extends BaseController
             ])->setStatusCode(409);
         }
 
+        // --- Competencies defined by HR for this training (labels come from the DB, not the form) ---
+        $comps = json_decode($training['competencies'] ?? '[]', true) ?: [];
+
+        foreach ($comps as $k => $label) {
+            $v = (string) $this->request->getPost('comp_' . ($k + 1));
+            if (!in_array($v, ['1', '2', '3', '4'], true)) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Please complete all required fields.',
+                    'errors' => ['comp_' . ($k + 1) => 'Please rate: ' . $label],
+                    'csrf' => csrf_hash(),
+                ])->setStatusCode(422);
+            }
+        }
+
         // --- Barriers (checkbox array) ---
         $allowedBarriers = [
             'no_opportunity',
@@ -217,7 +233,9 @@ class HrController extends BaseController
                 $data["{$prefix}_{$i}"] = ($val === null || $val === '') ? null : (int) $val;
 
                 if (in_array($prefix, ['comp', 'obj'], true)) {
-                    $data["{$prefix}_{$i}_text"] = trim((string) $this->request->getPost("{$prefix}_{$i}_text"));
+                    $data["{$prefix}_{$i}_text"] = ($prefix === 'comp' && $comps)
+                        ? ($comps[$i - 1] ?? '')
+                        : trim((string) $this->request->getPost("{$prefix}_{$i}_text"));
                 }
             }
         }
@@ -330,6 +348,7 @@ class HrController extends BaseController
             'conducted_by' => $this->request->getPost('conducted_by') ?: null,
             'office' => $this->request->getPost('office') ?: null,
             'immediate_superior' => $this->request->getPost('immediate_superior') ?: null,
+            'competencies' => $this->readCompetencies(),
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
         ];
@@ -730,6 +749,7 @@ class HrController extends BaseController
             'conducted_by' => $this->request->getPost('conducted_by') ?: null,
             'office' => $this->request->getPost('office') ?: null,
             'immediate_superior' => $this->request->getPost('immediate_superior') ?: null,
+            'competencies' => $this->readCompetencies(),
             'updated_at' => date('Y-m-d H:i:s'),
         ];
 
@@ -1132,13 +1152,19 @@ class HrController extends BaseController
             return ['success' => false, 'message' => 'Could not email the superior.'];
         }
 
+        $now = date('Y-m-d H:i:s');
+        $newCount = ((int) ($training['superior_notify_count'] ?? 0)) + 1;
+
         $this->trainingsModel->update($training['id'], [
-            'superior_notified_at' => date('Y-m-d H:i:s'),
+            'superior_notified_at' => $now,
+            'superior_notify_count' => $newCount,
         ]);
 
         return [
             'success' => true,
             'message' => 'Superior notified: ' . $superior['name'] . ' (' . $superior['email'] . ').',
+            'notify_count' => $newCount,
+            'notified_at' => date('M d, Y h:i A', strtotime($now)),
         ];
     }
 
@@ -1204,6 +1230,17 @@ class HrController extends BaseController
 
         return view('tia/already_submitted', ['response' => $row]);
     }
+    /** Reads competencies[] from the request -> JSON string (max 4) or null. */
+    private function readCompetencies(): ?string
+    {
+        $list = array_values(array_filter(array_map(
+            fn($v) => mb_substr(trim((string) $v), 0, 255),
+            (array) $this->request->getPost('competencies')
+        ), fn($v) => $v !== ''));
+
+        return $list ? json_encode(array_slice($list, 0, 4), JSON_UNESCAPED_UNICODE) : null;
+    }
+
 
 
 

@@ -155,7 +155,8 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
                                             data-dates="<?= esc($row['training_dates'], 'attr') ?>"
                                             data-conducted-by="<?= esc($row['conducted_by'] ?? '', 'attr') ?>"
                                             data-office="<?= esc($row['office'] ?? '', 'attr') ?>"
-                                            data-superior="<?= esc($row['immediate_superior'] ?? '', 'attr') ?>">
+                                            data-superior="<?= esc($row['immediate_superior'] ?? '', 'attr') ?>"
+                                            data-competencies="<?= esc(json_encode(json_decode($row['competencies'] ?? '[]', true) ?: []), 'attr') ?>">
                                             <i class="bi bi-pencil me-1"></i>
                                         </button>
 
@@ -223,6 +224,17 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
                             <label class="form-label">Name of Immediate Superior</label>
                             <input type="text" class="form-control" name="immediate_superior">
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label">Target Competencies / Areas</label>
+                            <small class="text-muted d-block mb-2">Shown on the self-rater form under “my productivity
+                                on the following areas have improved”. Up to 4.</small>
+                            <div class="competency-inputs" id="edit_competencies">
+                                <?php for ($c = 1; $c <= 4; $c++): ?>
+                                    <input type="text" class="form-control mb-2" name="competencies[]" maxlength="255"
+                                        placeholder="<?= $c ?>. Competency / Area">
+                                <?php endfor; ?>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -268,6 +280,17 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
                             <label class="form-label">Name of Immediate Superior</label>
                             <input type="text" class="form-control" id="edit_immediate_superior"
                                 name="immediate_superior">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Target Competencies / Areas</label>
+                            <small class="text-muted d-block mb-2">Shown on the self-rater form under “my productivity
+                                on the following areas have improved”. Up to 4.</small>
+                            <div class="competency-inputs" id="edit_competencies">
+                                <?php for ($c = 1; $c <= 4; $c++): ?>
+                                    <input type="text" class="form-control mb-2" name="competencies[]" maxlength="255"
+                                        placeholder="<?= $c ?>. Competency / Area">
+                                <?php endfor; ?>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -356,9 +379,7 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
                             <i class="bi bi-person-check"></i> Current Participants
                         </h6>
                         <div class="d-flex gap-2 flex-wrap">
-                            <button type="button" class="btn btn-sm tool-btn" id="notifySuperiorBtn">
-                                <i class="bi bi-person-check me-1"></i> Notify Superior
-                            </button>
+
                             <button type="button" class="btn btn-sm tool-btn" id="sendFormEmailsBtn">
                                 <i class="bi bi-envelope-paper me-1"></i> Send Form to All
                             </button>
@@ -619,3 +640,4 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
 <script src="<?= base_url('assets/js/employee-select.js') ?>"></script>
 <script src="<?= base_url('assets/js/tia-notify-superior.js') ?>"></script>
 <script src="<?= base_url('assets/js/tia-search.js') ?>"></script>
+<script src="<?= base_url('assets/js/tia-competencies.js') ?>"></script>

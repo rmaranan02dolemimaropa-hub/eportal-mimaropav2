@@ -1,66 +1,109 @@
-// Live search + quarter filter for the TIA tables (Trainings, Superior / Participant monitoring).
-// Search matches every column except the first (#) and the last (Actions).
-// Quarter filter uses each row's data-quarter (e.g. "2026-Q1").
+// "Notify Superior" buttons on the Superior Rating Monitoring page.
+// Needs window.TIA = { urls: { notifySuperior }, csrf: { name, header, hash } } (set in the view).
 (function () {
-  var input = document.getElementById("trainingSearch");
-  var quarter = document.getElementById("quarterFilter");
-  var table = document.querySelector(".tia-table");
-  if (!table || !table.tBodies.length || (!input && !quarter)) return;
+  var cfg = window.TIA || {};
+  if (!cfg.urls || !cfg.urls.notifySuperior || !cfg.csrf) return;
 
-  var body = table.tBodies[0];
+  var alertBox = document.getElementById("notifyAlert");
 
-  // real data rows only (skips the "nothing found" row)
-  var rows = Array.prototype.filter.call(body.rows, function (r) {
-    return !r.querySelector("td[colspan]");
-  });
-  if (!rows.length) return;
+  function show(message, ok) {
+    if (!alertBox) return;
+    alertBox.className = "alert " + (ok ? "alert-success" : "alert-danger");
+    alertBox.textContent = message;
+    alertBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
 
-  // shown when nothing matches
-  var cols =
-    table.tHead && table.tHead.rows.length
-      ? table.tHead.rows[0].cells.length
-      : 8;
-  var empty = document.createElement("tr");
-  empty.className = "d-none";
-  empty.innerHTML =
-    '<td colspan="' +
-    cols +
-    '" class="text-center text-muted py-4">No results match your filters.</td>';
-  body.appendChild(empty);
+  // update every row of the same training: "Sent N times" + last sent
+  function renderInfo(code, count, at) {
+    document
+      .querySelectorAll('.notify-cell[data-code="' + code + '"] .notify-info')
+      .forEach(function (el) {
+        el.innerHTML = "";
 
-  // text of every column except # (first) and Actions (last)
-  function rowText(r) {
-    return Array.prototype.slice
-      .call(r.cells, 1, -1)
-      .map(function (c) {
-        return c.textContent;
+        var badge = document.createElement("span");
+        badge.className = "badge bg-info text-dark";
+        badge.innerHTML = '<i class="bi bi-envelope-check me-1"></i>';
+        badge.appendChild(
+          document.createTextNode(
+            "Sent " + count + " time" + (count === 1 ? "" : "s"),
+          ),
+        );
+
+        var last = document.createElement("div");
+        last.className = "small text-muted";
+        last.textContent = "Last: " + at;
+
+        el.appendChild(badge);
+        el.appendChild(last);
+      });
+
+    document
+      .querySelectorAll('.notify-superior-btn[data-code="' + code + '"] .lbl')
+      .forEach(function (l) {
+        l.textContent = "Resend";
+      });
+  }
+
+  document.addEventListener("click", function (e) {
+    var btn = e.target.closest(".notify-superior-btn");
+    if (!btn || btn.disabled) return;
+
+    var code = btn.getAttribute("data-code");
+    var who = btn.getAttribute("data-superior") || "the superior";
+    var title = btn.getAttribute("data-training") || "this training";
+    if (
+      !window.confirm(
+        "Email " + who + ' to rate the participants of "' + title + '"?',
+      )
+    )
+      return;
+
+    var body = new FormData();
+    body.append("training_code", code);
+    body.append(cfg.csrf.name, cfg.csrf.hash);
+
+    var headers = { "X-Requested-With": "XMLHttpRequest" };
+    headers[cfg.csrf.header] = cfg.csrf.hash;
+
+    var lbl = btn.querySelector(".lbl");
+    var oldLabel = lbl.textContent;
+    btn.disabled = true;
+    lbl.textContent = "Sending…";
+
+    fetch(cfg.urls.notifySuperior, {
+      method: "POST",
+      body: body,
+      headers: headers,
+      credentials: "same-origin",
+    })
+      .then(function (r) {
+        return r.json().catch(function () {
+          return { success: false, message: "Unexpected server response." };
+        });
       })
-      .join(" ")
-      .replace(/\s+/g, " ")
-      .toLowerCase();
-  }
-  var texts = rows.map(rowText);
+      .then(function (res) {
+        if (res.csrf) cfg.csrf.hash = res.csrf; // the server issues a fresh token each time
 
-  function run() {
-    var q = input ? input.value.trim().toLowerCase() : "";
-    var qtr = quarter ? quarter.value : "";
-    var shown = 0;
+        show(
+          res.message ||
+            (res.success
+              ? "Superior notified."
+              : "Could not notify the superior."),
+          !!res.success,
+        );
 
-    rows.forEach(function (r, i) {
-      var matchText = q === "" || texts[i].indexOf(q) !== -1;
-      var matchQtr = qtr === "" || r.getAttribute("data-quarter") === qtr;
-      var match = matchText && matchQtr;
-
-      r.classList.toggle("d-none", !match);
-      if (match) {
-        shown++;
-        r.cells[0].textContent = shown; // keep the # column in order
-      }
-    });
-
-    empty.classList.toggle("d-none", shown !== 0);
-  }
-
-  if (input) input.addEventListener("input", run);
-  if (quarter) quarter.addEventListener("change", run);
+        if (res.success && res.notify_count) {
+          renderInfo(code, res.notify_count, res.notified_at);
+        } else {
+          lbl.textContent = res.success ? "Resend" : oldLabel;
+        }
+      })
+      .catch(function () {
+        show("Network error. Please try again.", false);
+        lbl.textContent = oldLabel;
+      })
+      .finally(function () {
+        btn.disabled = false;
+      });
+  });
 })();

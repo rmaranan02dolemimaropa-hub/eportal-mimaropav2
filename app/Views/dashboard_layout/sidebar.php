@@ -129,7 +129,8 @@
     <?php endif; ?>
 
     <?php if ($isSuperior): ?>
-      <a href="<?= site_url('tia-superior') ?>" class="nav-link<?= $isActive('tia-superior') ?>" <?= $dismiss ?>>
+      
+      <a href="<?= site_url('tia-superior/monitoring') ?>" class="nav-link<?= $isActive('tia-superior/monitoring') ?>" <?= $dismiss ?>>
         <i class="bi bi-file-earmark-post"></i><span>TIA (Superior)</span>
       </a>
     <?php endif; ?>

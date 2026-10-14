@@ -45,6 +45,9 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
         </div>
     </div>
 
+    <!-- Result of Notify Superior -->
+    <div id="notifyAlert" class="alert d-none" role="alert"></div>
+
     <!-- Summary cards -->
     <div class="row g-3 mb-3">
         <?php
@@ -134,6 +137,7 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
                     <?php if (!empty($rows)): ?>
                         <?php foreach ($rows as $i => $r): ?>
                             <?php
+                            $rowCode = (string) ($r['training_code'] ?? '');
                             $notifyCount = (int) ($r['notify_count'] ?? 0);
                             $notifiedAt = !empty($r['notified_at']) ? strtotime((string) $r['notified_at']) : false;
                             ?>
@@ -149,17 +153,29 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
                                 <td><?= esc($r['training_title']) ?></td>
                                 <td><?= esc($r['training_dates']) ?></td>
                                 <td><?= esc($r['superior'] ?: '—') ?></td>
-                                <td>
-                                    <?php if ($notifyCount > 0): ?>
-                                        <span class="badge bg-info text-dark">
-                                            <i class="bi bi-envelope-check me-1"></i>Sent <?= $notifyCount ?>
-                                            time<?= $notifyCount === 1 ? '' : 's' ?>
-                                        </span>
-                                        <?php if ($notifiedAt): ?>
-                                            <div class="small text-muted">Last: <?= esc(date('M d, Y h:i A', $notifiedAt)) ?></div>
+                                <td class="notify-cell" data-code="<?= esc($rowCode, 'attr') ?>">
+                                    <div class="notify-info">
+                                        <?php if ($notifyCount > 0): ?>
+                                            <span class="badge bg-info text-dark">
+                                                <i class="bi bi-envelope-check me-1"></i>Sent <?= $notifyCount ?>
+                                                time<?= $notifyCount === 1 ? '' : 's' ?>
+                                            </span>
+                                            <?php if ($notifiedAt): ?>
+                                                <div class="small text-muted">Last: <?= esc(date('M d, Y h:i A', $notifiedAt)) ?></div>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            <span class="text-muted small">Not yet notified</span>
                                         <?php endif; ?>
-                                    <?php else: ?>
-                                        <span class="text-muted small">Not yet notified</span>
+                                    </div>
+
+                                    <?php if ($rowCode !== ''): ?>
+                                        <button type="button" class="btn btn-sm tool-btn notify-superior-btn mt-1"
+                                            data-code="<?= esc($rowCode, 'attr') ?>"
+                                            data-superior="<?= esc((string) ($r['superior'] ?? ''), 'attr') ?>"
+                                            data-training="<?= esc((string) ($r['training_title'] ?? ''), 'attr') ?>">
+                                            <i class="bi bi-send me-1"></i><span
+                                                class="lbl"><?= $notifyCount > 0 ? 'Resend' : 'Notify' ?></span>
+                                        </button>
                                     <?php endif; ?>
                                 </td>
                                 <td class="text-center">
@@ -238,4 +254,18 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
 
 <?= $this->include('dashboard_layout/loading') ?>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    window.TIA = {
+        urls: {
+            notifySuperior: '<?= site_url('tia/notify-superior') ?>',
+        },
+        csrf: {
+            name: '<?= csrf_token() ?>',
+            header: '<?= csrf_header() ?>',
+            hash: '<?= csrf_hash() ?>'
+        }
+    };
+</script>
+<script src="<?= base_url('assets/js/tia-monitoring-notify.js') ?>"></script>
 <script src="<?= base_url('assets/js/tia-search.js') ?>"></script>

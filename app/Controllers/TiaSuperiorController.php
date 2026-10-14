@@ -395,4 +395,148 @@ class TiaSuperiorController extends BaseController
             'csrf' => csrf_hash(),
         ]);
     }
+
+    /** Returns ['q' => 1-4, 'y' => 2026] from a free-text training_dates value, or null. */
+    private function quarterOf(?string $dates): ?array
+    {
+        $dates = trim((string) $dates);
+        if ($dates === '') {
+            return null;
+        }
+
+        $month = null;
+        if (preg_match('/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b/i', $dates, $m)) {
+            $month = (int) date('n', strtotime('1 ' . $m[1] . ' 2000'));
+        } elseif (($ts = strtotime($dates)) !== false) {
+            $month = (int) date('n', $ts);
+        }
+        if ($month === null) {
+            return null;
+        }
+
+        $year = preg_match('/\b(20\d{2})\b/', $dates, $y) ? (int) $y[1] : (int) date('Y');
+
+        return ['q' => (int) ceil($month / 3), 'y' => $year];
+    }
+
+    /**
+     * Monitoring: every participant of this superior's trainings, rated or pending
+     * GET /tia-superior/monitoring?status=&quarter=&year=&s=
+     */
+    public function monitoring()
+    {
+        $status = $this->request->getGet('status');
+        $status = in_array($status, ['pending', 'rated', 'all'], true) ? $status : 'pending';
+
+        $quarter = (int) $this->request->getGet('quarter');
+        $quarter = ($quarter >= 1 && $quarter <= 4) ? $quarter : 0;
+        $year = (int) $this->request->getGet('year');
+        $search = trim((string) $this->request->getGet('s'));
+
+        $trainings = $this->trainingsQuery()->orderBy('created_at', 'DESC')->findAll();
+        $rows = [];
+
+        if ($trainings) {
+            $byCode = [];
+            foreach ($trainings as $t) {
+                $byCode[$t['training_code']] = $t;
+            }
+            $codes = array_keys($byCode);
+
+            $participants = $this->participantsModel
+                ->whereIn('training_code', $codes)
+                ->orderBy('id', 'ASC')
+                ->findAll();
+
+            $rated = [];
+            $res = \Config\Database::connect()
+                ->table('tia_superior_responses')
+                ->select('participant_id, reference_no, created_at')
+                ->whereIn('training_code', $codes)
+                ->get()->getResultArray();
+            foreach ($res as $r) {
+                $rated[(int) $r['participant_id']] = $r;
+            }
+
+            foreach ($participants as $p) {
+                $t = $byCode[$p['training_code']] ?? null;
+                if (!$t) {
+                    continue;
+                }
+                $qy = $this->quarterOf($t['training_dates'] ?? '');
+                $r = $rated[(int) $p['id']] ?? null;
+
+                $rows[] = [
+                    'participant_id' => (int) $p['id'],
+                    'participant_name' => $p['participant_name'] ?? '',
+                    'position' => $p['position'] ?? '',
+                    'email' => $p['email'] ?? '',
+                    'training_code' => $t['training_code'],
+                    'training_title' => $t['training_title'],
+                    'training_dates' => $t['training_dates'] ?? '',
+                    'quarter' => $qy['q'] ?? null,
+                    'year' => $qy['y'] ?? null,
+                    'rated' => $r !== null,
+                    'rating_ref' => $r['reference_no'] ?? null,
+                    'rated_at' => $r['created_at'] ?? null,
+                ];
+            }
+        }
+
+        // Years for the dropdown (before filtering)
+        $years = array_values(array_unique(array_filter(array_column($rows, 'year'))));
+        rsort($years);
+
+        // Quarter / year
+        if ($quarter || $year) {
+            $rows = array_filter(
+                $rows,
+                fn($r) =>
+                    $r['quarter'] !== null
+                    && (!$quarter || $r['quarter'] === $quarter)
+                    && (!$year || $r['year'] === $year)
+            );
+        }
+
+        // Search
+        if ($search !== '') {
+            $needle = mb_strtolower($search);
+            $rows = array_filter($rows, function ($r) use ($needle) {
+                $hay = mb_strtolower(implode(' ', [
+                    $r['participant_name'],
+                    $r['position'],
+                    $r['email'],
+                    $r['training_title'],
+                    $r['training_dates'],
+                    $r['rating_ref'] ?? '',
+                ]));
+                return str_contains($hay, $needle);
+            });
+        }
+        $rows = array_values($rows);
+
+        // Totals follow quarter/year/search, before the status tab
+        $ratedCount = count(array_filter($rows, fn($r) => $r['rated']));
+        $totals = [
+            'total' => count($rows),
+            'rated' => $ratedCount,
+            'pending' => count($rows) - $ratedCount,
+        ];
+
+        $rows = array_values(array_filter(
+            $rows,
+            fn($r) =>
+                $status === 'all' || ($status === 'pending' ? !$r['rated'] : $r['rated'])
+        ));
+
+        return view('dashboard/tiasuperiormonitoring', [
+            'rows' => $rows,
+            'totals' => $totals,
+            'status' => $status,
+            'quarter' => $quarter,
+            'year' => $year,
+            'years' => $years,
+            'search' => $search,
+        ]);
+    }
 }

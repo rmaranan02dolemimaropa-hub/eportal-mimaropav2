@@ -107,6 +107,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('tia-report-annex-j/save', 'TiaReportController::saveAnnexJ');
     $routes->get('tia-report/export', 'TiaReportController::exportD');
     $routes->get('tia-report-superior/export', 'TiaReportController::exportE');
+    $routes->get('tia-superior/monitoring', 'TiaSuperiorController::monitoring');
 
 
 

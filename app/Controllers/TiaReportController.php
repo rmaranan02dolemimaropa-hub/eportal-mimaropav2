@@ -408,6 +408,8 @@ class TiaReportController extends BaseController
         ];
     }
 
+
+
     // =====================================================================
     // MONITORING + READ-ONLY SHEETS
     // =====================================================================
@@ -435,10 +437,11 @@ class TiaReportController extends BaseController
                 $status === 'all' || ($status === 'pending' ? !$r['rated'] : $r['rated'])
         ));
 
-        // Attach "superior notified" info (count + last sent) to each row
+        // Attach training code + "superior notified" info (count + last sent) to each row
         $info = [];
         foreach ((new \App\Models\TrainingsModel())->findAll() as $tr) {
             $val = [
+                'code' => $tr['training_code'],
                 'count' => (int) ($tr['superior_notify_count'] ?? 0),
                 'at' => $tr['superior_notified_at'] ?? null,
             ];
@@ -448,7 +451,8 @@ class TiaReportController extends BaseController
         foreach ($rows as &$r) {
             $v = $info['code:' . ($r['training_code'] ?? '')]
                 ?? $info['title:' . ($r['training_title'] ?? '') . '|' . ($r['training_dates'] ?? '')]
-                ?? ['count' => 0, 'at' => null];
+                ?? ['code' => '', 'count' => 0, 'at' => null];
+            $r['training_code'] = $v['code'];
             $r['notify_count'] = $v['count'];
             $r['notified_at'] = $v['at'];
         }

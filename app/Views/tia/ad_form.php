@@ -189,14 +189,49 @@ $ratingRows = function (string $prefix, array $statements) use ($ratingRadios): 
                         have
                         improved”</div>
                     <p class="note">HRMOs to list down ALL target competencies of the program</p>
-                    <div id="competencies">
-                        <?php for ($i = 1; $i <= 4; $i++): ?>
-                            <div class="custom-row">
-                                <input type="text" name="comp_<?= $i ?>_text" placeholder="<?= $i ?>. Competency / Area">
-                                <?= $ratingRadios("comp_{$i}") ?>
-                            </div>
-                        <?php endfor; ?>
+                    <div class="comp-heading">
+                        <div class="comp-heading-title">
+                            “After attending the training, my productivity on the following areas have improved”
+                        </div>
+                        <div class="comp-heading-note">
+                            <i class="bi bi-info-circle"></i>
+                            HRMOs to list down ALL target competencies of the program
+                        </div>
                     </div>
+
+                    <?php $comps = $competencies ?? []; ?>
+                    <table class="rating-table" id="competencies">
+                        <thead>
+                            <tr>
+                                <th>Target competency / area</th>
+                                <th>Rating</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if ($comps): ?>
+                                <?php foreach ($comps as $k => $label):
+                                    $n = $k + 1; ?>
+                                    <tr>
+                                        <td>
+                                            <?= $n ?>. <?= esc($label) ?>
+                                            <input type="hidden" name="comp_<?= $n ?>_text" value="<?= esc($label, 'attr') ?>">
+                                        </td>
+                                        <td><?= $ratingRadios("comp_{$n}", true) ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <?php for ($i = 1; $i <= 4; $i++): ?>
+                                    <tr>
+                                        <td>
+                                            <input type="text" class="table-input" name="comp_<?= $i ?>_text"
+                                                placeholder="<?= $i ?>. Competency / Area">
+                                        </td>
+                                        <td><?= $ratingRadios("comp_{$i}") ?></td>
+                                    </tr>
+                                <?php endfor; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
                 </div>
 
                 <!-- CRITICAL SUCCESS FACTORS -->

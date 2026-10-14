@@ -20,6 +20,7 @@ class TrainingsModel extends Model
         'conducted_by',
         'office',
         'immediate_superior',
+        'competencies',
         'status',
         'cancel_reason',
         'canceled_at',
