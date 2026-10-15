@@ -1,0 +1,814 @@
+/* =====================================================
+   TIA REPORT — printable annex sheets (A4)
+   Load AFTER tia-base.css on report pages.
+   Page: A4 portrait, 20mm margin (Annex G: A4 landscape, 15mm).
+   Sheet text: 9pt (inherits the page font, same as before).
+   Standalone Annex D page: Arial.
+   ===================================================== */
+
+/* ---------- Sheet base (portrait) ---------- */
+.d1.annex-d,
+.d1.annex-e,
+.d1.annex-h {
+  box-sizing: border-box;
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 20mm;
+  background: #fff;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+  color: #000;
+}
+.d1 table {
+  font-size: 0.85rem;
+}
+.d1 th,
+.d1 td {
+  vertical-align: middle;
+}
+.d1 .avg-col {
+  background: #fdeede;
+  font-weight: 600;
+  text-align: center;
+}
+.d1 .overall {
+  background: #fbd9a7;
+  font-weight: 700;
+}
+.d1 h6 {
+  font-weight: 700;
+  margin: 22px 0 6px;
+}
+.d1 .sub {
+  font-style: italic;
+  margin: 10px 0 4px;
+}
+.d1 td.num {
+  text-align: center;
+}
+
+/* ---------- Letterhead banner (D-1 / E-1) ---------- */
+.d1 .header-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding-bottom: 10px;
+  margin: 0 auto 14px;
+  border-bottom: 1px solid #000;
+  width: 60%;
+}
+.d1 :is(.dole-cell, .iso-cell, .bp-cell) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 50px;
+  min-height: 50px;
+}
+.d1 :is(.dole-cell, .iso-cell, .bp-cell) img {
+  width: 50px;
+  height: auto;
+  object-fit: contain;
+  margin: 0;
+}
+.d1 .agency-title {
+  text-align: center;
+  padding: 0 8px;
+  flex: 0;
+  white-space: nowrap;
+}
+.d1 .agency-title .country,
+.d1 .agency-title .dept {
+  font-size: 10pt;
+  margin: 0;
+  line-height: 1.2;
+}
+.d1 .agency-title .dept {
+  font-weight: bold;
+}
+.d1 .agency-title .region {
+  font-size: 9.5pt;
+  margin: 0;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+
+@media (max-width: 992px) {
+  .d1 .header-banner {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .d1 .agency-title {
+    white-space: normal;
+  }
+}
+
+/* ---------- Letterhead table (D / E / G / H / J) ---------- */
+.annex-h {
+  font-size: 9pt;
+}
+.annex-h .header-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 3px;
+}
+.annex-h .header-table tr {
+  height: 70px;
+}
+.annex-h .header-table td {
+  vertical-align: middle;
+  padding: 4px 6px;
+  border: 0;
+}
+.annex-h .logo-cell {
+  width: 70px;
+  text-align: center;
+}
+.annex-h .logo-cell img {
+  width: 75px;
+  height: auto;
+  vertical-align: middle;
+  margin-left: 10px;
+}
+.annex-h .agency-title {
+  text-align: center;
+  padding: 4px 20px;
+}
+.annex-h .agency-title :is(.country, .dept, .region) {
+  font-size: 11pt;
+  margin: 0;
+  line-height: 1.3;
+}
+.annex-h .agency-title .dept {
+  font-weight: bold;
+}
+.annex-h .agency-title .region {
+  letter-spacing: 0.5px;
+}
+.annex-h .cert-cell {
+  width: 150px;
+  text-align: center;
+  padding: 4px;
+  white-space: nowrap;
+}
+.annex-h .cert-cell img {
+  width: 70px;
+  height: auto;
+  vertical-align: middle;
+}
+.annex-h .cert-cell img:last-child {
+  margin-right: 10px;
+}
+
+.annex-h .ah-annex-tag {
+  text-align: right;
+  color: #e60000;
+  font-size: 1.6rem;
+  font-weight: 500;
+  line-height: 1;
+  margin: 2px 4px 10px 0;
+}
+
+/* ---------- Annex H ---------- */
+.annex-h .ah-date {
+  text-align: right;
+  margin-bottom: 14px;
+}
+.annex-h .ah-fill {
+  display: inline-block;
+  min-width: 110px;
+  padding: 0 6px;
+  border-bottom: 1px solid #000;
+  font-weight: 700;
+  text-align: center;
+}
+.annex-h .ah-fill-date {
+  min-width: 130px;
+}
+.annex-h .ah-title {
+  text-align: center;
+  line-height: 1.45;
+  margin-bottom: 14px;
+}
+.annex-h .ah-title .t1 {
+  font-weight: 700;
+  font-size: 1rem;
+}
+.annex-h .ah-title .t2 {
+  font-weight: 700;
+  font-style: italic;
+}
+
+.annex-h .ah-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 6px;
+  font-size: 0.88rem;
+}
+.annex-h .ah-table :is(th, td) {
+  border: 1px solid #000;
+  padding: 2px 6px;
+  vertical-align: middle;
+}
+.annex-h .ah-table th {
+  text-align: center;
+  font-weight: 700;
+  background: #fff;
+}
+.annex-h .ah-table td.ah-left {
+  text-align: left;
+}
+.annex-h .ah-table td.ah-right {
+  text-align: right;
+}
+.annex-h .ah-table td.ah-center {
+  text-align: center;
+}
+.annex-h .ah-yesno {
+  text-align: center;
+  white-space: nowrap;
+}
+.annex-h .ah-yn {
+  display: inline-block;
+  min-width: 80px;
+  text-align: left;
+}
+.annex-h .cb {
+  font-size: 1.05em;
+}
+.annex-h .ah-heading {
+  text-align: center;
+  font-weight: 700;
+  margin: 18px 0 6px;
+}
+.annex-h .ah-challenge-label {
+  margin: 14px 0 4px;
+}
+.annex-h .ah-lines {
+  min-height: 34px;
+  border-bottom: 1px solid #000;
+  padding-bottom: 4px;
+  font-size: 0.85rem;
+}
+.annex-h .ah-sign {
+  margin-top: 18px;
+}
+.annex-h .ah-sign-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+.annex-h .ah-sign-row.ah-center-row {
+  justify-content: center;
+  margin-top: 10px;
+}
+.annex-h .ah-sign-box {
+  min-width: 220px;
+}
+.annex-h .ah-sign-space {
+  height: 28px;
+}
+.annex-h .ah-foot {
+  margin-top: 18px;
+  font-size: 0.78rem;
+}
+
+/* ---------- Annex G (landscape, own named page) ---------- */
+.annex-g {
+  box-sizing: border-box;
+  width: 297mm;
+  min-height: 210mm;
+  margin: 0 auto;
+  padding: 15mm;
+  background: #fff;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+  color: #000;
+  font-size: 10pt;
+  page: annexg;
+}
+.annex-g .ag-title {
+  text-align: center;
+  line-height: 1.5;
+  margin: 6px 0 14px;
+}
+.annex-g .ag-title b {
+  font-size: 11pt;
+}
+.annex-g table.ag-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.annex-g .ag-table :is(th, td) {
+  border: 1px solid #000;
+  padding: 6px 8px;
+  vertical-align: middle;
+}
+.annex-g .ag-table th {
+  text-align: center;
+  font-weight: 400;
+  background: #fff;
+}
+.annex-g .ag-table td.ag-office {
+  font-weight: 600;
+}
+.annex-g .ag-table td.ag-name {
+  text-align: left;
+}
+.annex-g .ag-table tr.ag-row td {
+  height: 18mm;
+  vertical-align: middle;
+  word-break: break-word;
+}
+
+/* ---------- Annex J (narrative) ---------- */
+.annex-j-sheet {
+  font-size: 11pt;
+}
+.annex-j-sheet .aj-title {
+  text-align: center;
+  margin: 8px 0 18px;
+  line-height: 1.5;
+}
+.annex-j-sheet .aj-h {
+  margin: 16px 0 4px;
+  font-weight: 400;
+  font-size: 11pt;
+}
+.annex-j-sheet .aj-lvl {
+  margin: 10px 0 2px 14px;
+}
+.annex-j-sheet .aj-note {
+  margin: 0 0 4px 40px;
+  font-style: italic;
+  font-size: 10pt;
+}
+.annex-j-sheet .aj-note.deep {
+  margin-left: 64px;
+}
+.annex-j-sheet .aj-sub {
+  margin: 8px 0 2px 40px;
+}
+.annex-j-sheet .aj-body {
+  white-space: pre-wrap;
+  text-align: justify;
+  margin: 4px 0 8px 40px;
+  min-height: 18px;
+}
+.annex-j-sheet .aj-body.top {
+  margin-left: 28px;
+}
+
+/* ---------- Annex E sheet (superior rater form) ---------- */
+.annex-e-sheet {
+  font-size: 10pt;
+}
+.annex-e-sheet table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.annex-e-sheet .title {
+  text-align: center;
+  margin: 4px 0 10px;
+}
+.annex-e-sheet .title b {
+  font-size: 12pt;
+}
+.annex-e-sheet .title .subtitle {
+  color: #f26522;
+  font-weight: 700;
+  font-size: 10pt;
+}
+.annex-e-sheet table.info td {
+  border: 1px solid #000;
+  padding: 4px 8px;
+}
+.annex-e-sheet table.info td.l {
+  text-align: right;
+  width: 22%;
+}
+.annex-e-sheet table.info td.l small {
+  font-style: italic;
+  font-size: 8pt;
+}
+.annex-e-sheet .direction {
+  margin: 14px 0 8px;
+  text-align: justify;
+}
+.annex-e-sheet .scale {
+  margin: 0 0 12px 40px;
+  font-style: italic;
+  line-height: 1.6;
+}
+.annex-e-sheet h4 {
+  margin: 14px 0 6px;
+  font-size: 10pt;
+}
+.annex-e-sheet h4 em {
+  font-weight: 400;
+}
+.annex-e-sheet table.rate {
+  width: 80%;
+  margin: 6px auto 12px;
+}
+.annex-e-sheet table.rate td {
+  border: 1px solid #000;
+  padding: 3px 8px;
+  vertical-align: top;
+}
+.annex-e-sheet table.rate td.s {
+  width: 90px;
+  text-align: center;
+  font-weight: 700;
+}
+.annex-e-sheet table.rate td.head,
+.annex-e-sheet table.rate td.s.head {
+  font-weight: 400;
+}
+.annex-e-sheet .line {
+  border-bottom: 1px solid #000;
+  min-height: 22px;
+  margin: 4px 0 10px 24px;
+  white-space: pre-wrap;
+  padding: 2px 0;
+}
+.annex-e-sheet .line.flat {
+  margin-left: 0;
+}
+.annex-e-sheet .reasons {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.annex-e-sheet .reasons div {
+  width: 50%;
+  padding: 2px 0 2px 26px;
+}
+.annex-e-sheet .cb {
+  display: inline-block;
+  width: 26px;
+  border-bottom: 1px solid #000;
+  text-align: center;
+  font-weight: 700;
+  margin-right: 4px;
+  height: 15px;
+  line-height: 14px;
+}
+.annex-e-sheet .others-line {
+  display: inline-block;
+  min-width: 200px;
+  border-bottom: 1px solid #000;
+  padding: 0 4px;
+}
+
+/* ---------- Annex D sheet (self-rater form) ---------- */
+.annex-d-sheet {
+  font-size: 10pt;
+}
+.annex-d-sheet table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.annex-d-sheet .title {
+  text-align: center;
+  margin: 4px 0 10px;
+  line-height: 1.4;
+}
+.annex-d-sheet .title b {
+  font-size: 12pt;
+}
+.annex-d-sheet .title .for {
+  font-style: italic;
+}
+.annex-d-sheet .title .subtitle {
+  color: #2f75b5;
+  font-weight: 700;
+  font-size: 10pt;
+}
+.annex-d-sheet table.info td {
+  border: 1px solid #000;
+  padding: 4px 8px;
+}
+.annex-d-sheet table.info td.l {
+  text-align: right;
+  width: 24%;
+}
+.annex-d-sheet .direction {
+  margin: 14px 0 8px;
+  text-align: justify;
+}
+.annex-d-sheet .scale {
+  margin: 0 0 12px 40px;
+  font-style: italic;
+  line-height: 1.6;
+}
+.annex-d-sheet h4 {
+  margin: 14px 0 6px;
+  font-size: 10pt;
+}
+.annex-d-sheet h4 em {
+  font-weight: 400;
+}
+.annex-d-sheet .sub {
+  margin: 8px 0 2px;
+}
+.annex-d-sheet table.rate {
+  width: 80%;
+  margin: 6px auto 12px;
+}
+.annex-d-sheet table.rate td {
+  border: 1px solid #000;
+  padding: 3px 8px;
+  vertical-align: top;
+}
+.annex-d-sheet table.rate td.s {
+  width: 90px;
+  text-align: center;
+  font-weight: 700;
+}
+.annex-d-sheet table.rate td.head {
+  font-weight: 400;
+}
+.annex-d-sheet .line {
+  border-bottom: 1px solid #000;
+  min-height: 22px;
+  margin: 4px 0 10px 24px;
+  white-space: pre-wrap;
+  padding: 2px 0;
+}
+.annex-d-sheet .line.flat {
+  margin-left: 0;
+}
+.annex-d-sheet .opt {
+  padding: 2px 0 2px 40px;
+}
+.annex-d-sheet .cb {
+  display: inline-block;
+  width: 26px;
+  border-bottom: 1px solid #000;
+  text-align: center;
+  font-weight: 700;
+  margin-right: 4px;
+  height: 15px;
+  line-height: 14px;
+}
+.annex-d-sheet .others-line {
+  display: inline-block;
+  min-width: 260px;
+  border-bottom: 1px solid #000;
+  padding: 0 4px;
+  white-space: pre-wrap;
+}
+
+/* ---------- Standalone sheet pages (own <html>, no app layout) ---------- */
+body.tia-standalone {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f1f1f1;
+  margin: 0;
+  padding: 16px;
+}
+.sheet-toolbar {
+  width: 210mm;
+  margin: 0 auto 10px;
+  text-align: right;
+}
+.sheet-toolbar button {
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #fff;
+  background: var(--tia-ink);
+  border: 1px solid var(--tia-ink);
+  border-radius: var(--tia-radius);
+  cursor: pointer;
+}
+.sheet-toolbar button:hover {
+  background: var(--tia-ink-hover);
+}
+
+/* ---------- Training picker (above reports) ---------- */
+.tia-picker .btn {
+  padding: 9px 16px;
+}
+
+/* =====================================================
+   PRINT
+   ===================================================== */
+@page {
+  size: A4 portrait;
+  margin: 20mm;
+}
+@page annexg {
+  size: A4 landscape;
+  margin: 15mm;
+}
+
+@media print {
+  :is(.d1, .annex-g),
+  :is(.d1, .annex-g) * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body:has(:is(.d1, .annex-g)) {
+    background: #fff !important;
+  }
+  body:has(.d1) {
+    font-size: 7.5pt !important;
+  }
+  body:has(.annex-h) {
+    font-size: 9pt !important;
+  }
+  body.tia-standalone {
+    padding: 0;
+  }
+
+  /* hide app chrome */
+  body:has(:is(.d1, .annex-g))
+    :is(
+      .no-print,
+      .topbar,
+      .sidebar,
+      .navbar,
+      .app-header,
+      .app-footer,
+      .sidebar-offcanvas
+    ) {
+    display: none !important;
+  }
+  body:has(:is(.d1, .annex-g)) .app-body {
+    display: block !important;
+  }
+  body:has(:is(.d1, .annex-g)) .main-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  body:has(.d1) .table-responsive {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  /* page margin replaces the sheet padding */
+  .d1,
+  .d1.panel,
+  .d1.annex-d,
+  .d1.annex-e,
+  .d1.annex-h,
+  .annex-g {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    animation: none !important;
+  }
+
+  .d1 table {
+    font-size: 7pt !important;
+    margin-bottom: 2px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: fixed;
+  }
+  .d1 :is(th, td) {
+    padding: 1px 3px !important;
+    line-height: 1.15 !important;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+  }
+  .d1 h5 {
+    font-size: 10pt;
+    margin: 2px 0 !important;
+  }
+  .d1 h6 {
+    font-size: 8pt;
+    margin: 6px 0 2px !important;
+  }
+  .d1 .sub {
+    margin: 4px 0 2px !important;
+  }
+  .d1 :is(.mb-3, .mt-3, .mt-4) {
+    margin-top: 2px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .d1 .header-banner {
+    width: 70%;
+    gap: 8px;
+    padding-bottom: 4px;
+    margin-bottom: 2mm !important;
+  }
+  .d1 :is(.dole-cell, .iso-cell, .bp-cell) {
+    min-width: 14mm;
+    min-height: 14mm;
+  }
+  .d1 :is(.dole-cell, .iso-cell, .bp-cell) img {
+    width: 14mm !important;
+  }
+  .d1 .agency-title :is(.country, .dept) {
+    font-size: 8pt;
+  }
+  .d1 .agency-title .region {
+    font-size: 7.5pt;
+  }
+
+  /* page flow */
+  :is(.d1, .annex-g) thead {
+    display: table-header-group;
+  }
+  :is(.d1, .annex-g) tr {
+    break-inside: avoid;
+  }
+  .d1 :is(h5, h6, .sub) {
+    break-after: avoid;
+  }
+  .d1 .page-break {
+    break-before: page;
+    margin-top: 0 !important;
+  }
+
+  /* Annex H / G / J / E / D letterhead + sizes */
+  .d1.annex-h {
+    font-size: 9pt !important;
+  }
+  .d1.annex-h table {
+    font-size: 8.5pt !important;
+    margin-bottom: 4px !important;
+  }
+  .d1.annex-h .ah-table :is(th, td) {
+    padding: 1px 5px !important;
+    line-height: 1.2 !important;
+  }
+  :is(.d1.annex-h, .annex-g) .header-table tr {
+    height: auto;
+  }
+  :is(.d1.annex-h, .annex-g) .logo-cell img {
+    width: 20mm !important;
+    margin-left: 4mm;
+  }
+  :is(.d1.annex-h, .annex-g) .cert-cell img {
+    width: 18mm !important;
+  }
+  .d1.annex-h .cert-cell img:last-child {
+    margin-right: 4mm;
+  }
+  .d1.annex-h .agency-title :is(.country, .dept, .region) {
+    font-size: 9pt;
+  }
+  :is(.d1.annex-h, .annex-g) .ah-annex-tag {
+    font-size: 16pt;
+  }
+  .d1.annex-h .ah-heading {
+    margin: 10px 0 4px !important;
+    break-after: avoid;
+  }
+  .d1.annex-h .ah-sign-space {
+    height: 22px;
+  }
+  .d1.annex-h .ah-foot {
+    font-size: 7.5pt;
+  }
+  .annex-h :is(.ah-sign, .ah-foot, .ah-challenge-label) {
+    break-inside: avoid;
+  }
+
+  .annex-j-sheet {
+    font-size: 10.5pt !important;
+  }
+  .annex-j-sheet :is(.aj-h, .aj-sub) {
+    break-after: avoid;
+  }
+
+  .annex-e-sheet :is(table.rate, .line) {
+    break-inside: avoid;
+  }
+  .annex-d-sheet :is(table.rate, .line) {
+    break-inside: avoid;
+  }
+
+  /* release every layout constraint so the sheet flows across pages */
+  html:has(.d1),
+  body:has(.d1),
+  body:has(.d1) :is(.app-body, .main-content, main) {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    position: static !important;
+    float: none !important;
+    transform: none !important;
+  }
+  body:has(.d1),
+  body:has(.d1) .app-body {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .d1 :is(.panel, .table-responsive) {
+    overflow: visible !important;
+  }
+}

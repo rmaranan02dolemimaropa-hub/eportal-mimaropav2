@@ -1,0 +1,395 @@
+/* =====================================================
+   TIA BASE — tokens + reusable UI (tables, modals,
+   forms, buttons). Load on every dashboard page.
+   Requires Manrope (loaded in dashboard_layout/head):
+   https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap
+   ===================================================== */
+
+:root {
+  --tia-font:
+    "Manrope", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --bs-body-font-family: var(--tia-font);
+
+  --tia-ink: #111827;
+  --tia-ink-hover: #1f2937;
+  --tia-text: #374151;
+  --tia-muted: #6b7280;
+  --tia-line: #e5e7eb;
+  --tia-line-strong: #d1d5db;
+  --tia-focus: #9ca3af;
+  --tia-field: #fafafa;
+  --tia-surface: #fff;
+  --tia-hover: #f3f4f6;
+  --tia-th-bg: #f9fafc;
+  --tia-row-hover: #f8fafc;
+  --tia-danger: #b91c1c;
+  --tia-danger-hover: #991b1b;
+  --tia-danger-bg: #fef2f2;
+  --tia-danger-line: #fecaca;
+  --tia-radius: 6px;
+  --tia-radius-lg: 10px;
+}
+
+body {
+  font-family: var(--tia-font);
+}
+.ts-dropdown,
+.ts-control {
+  font-family: inherit;
+}
+
+/* Scope helpers: any of these classes gets the shared look.
+   New pages only need `tia-page` / `tia-modal` / `tia-picker`;
+   the old class names keep working. */
+
+/* ---------- Table ---------- */
+.tia-table {
+  min-width: 640px;
+  font-size: 0.86rem;
+}
+.tia-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--tia-th-bg);
+  color: var(--color-text-muted, var(--tia-muted));
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--color-border, var(--tia-line));
+  padding: 12px 16px;
+  white-space: nowrap;
+}
+.tia-table tbody td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--color-border, var(--tia-line));
+  vertical-align: middle;
+}
+.tia-table tbody tr:hover {
+  background-color: var(--tia-row-hover);
+}
+.tia-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.tia-picker .form-control {
+  border: 1px solid var(--tia-line);
+  border-radius: var(--tia-radius);
+  font-size: 14px;
+  padding: 9px 12px;
+  color: var(--tia-ink);
+  background-color: var(--tia-field);
+  box-shadow: none;
+}
+.tia-picker .form-control:focus {
+  border-color: var(--tia-focus);
+  background-color: #fff;
+  box-shadow: none;
+}
+
+@media (max-width: 768px) {
+  .tia-table thead th,
+  .tia-table tbody td {
+    padding: 10px 12px;
+    font-size: 0.82rem;
+  }
+}
+
+/* ---------- Modal ----------
+   Works whether the class is on .modal (employees page)
+   or on .modal-content (trainings page). */
+:is(
+  .tia-modal,
+  .add-training-modal,
+  .manage-participants-modal,
+  .edit-participant-modal
+).modal-content,
+:is(
+    .tia-modal,
+    .add-training-modal,
+    .manage-participants-modal,
+    .edit-participant-modal
+  )
+  .modal-content {
+  border: 1px solid var(--tia-line);
+  border-radius: var(--tia-radius-lg);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+:is(
+    .tia-modal,
+    .add-training-modal,
+    .manage-participants-modal,
+    .edit-participant-modal
+  )
+  .modal-header {
+  background: #fff !important;
+  color: var(--tia-ink) !important;
+  border-bottom: 1px solid var(--tia-line);
+  padding: 20px 24px;
+}
+:is(
+    .tia-modal,
+    .add-training-modal,
+    .manage-participants-modal,
+    .edit-participant-modal
+  )
+  .modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--tia-ink);
+}
+:is(
+    .tia-modal,
+    .add-training-modal,
+    .manage-participants-modal,
+    .edit-participant-modal
+  )
+  .btn-close {
+  filter: none;
+  opacity: 0.5;
+}
+:is(
+    .tia-modal,
+    .add-training-modal,
+    .manage-participants-modal,
+    .edit-participant-modal
+  )
+  .modal-body {
+  padding: 24px;
+}
+:is(
+    .tia-modal,
+    .add-training-modal,
+    .manage-participants-modal,
+    .edit-participant-modal
+  )
+  .modal-footer {
+  border-top: 1px solid var(--tia-line);
+  padding: 16px 24px;
+}
+
+/* ---------- Form controls ---------- */
+:is(
+    .tia-modal,
+    .add-training-modal,
+    .manage-participants-modal,
+    .edit-participant-modal,
+    .tia-page,
+    .employees-page,
+    .tia-picker
+  )
+  .form-label {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--tia-muted);
+  margin-bottom: 6px;
+}
+
+:is(
+    .tia-modal,
+    .add-training-modal,
+    .manage-participants-modal,
+    .edit-participant-modal,
+    .tia-page,
+    .employees-page
+  )
+  .form-control,
+:is(
+    .tia-modal,
+    .add-training-modal,
+    .manage-participants-modal,
+    .edit-participant-modal,
+    .tia-page,
+    .employees-page,
+    .tia-picker
+  )
+  .form-select {
+  border: 1px solid var(--tia-line);
+  border-radius: var(--tia-radius);
+  font-size: 14px;
+  padding: 9px 12px;
+  color: var(--tia-ink);
+  background-color: var(--tia-field);
+  box-shadow: none;
+}
+:is(
+    .tia-modal,
+    .add-training-modal,
+    .manage-participants-modal,
+    .edit-participant-modal,
+    .tia-page,
+    .employees-page
+  )
+  .form-control:focus,
+:is(
+    .tia-modal,
+    .add-training-modal,
+    .manage-participants-modal,
+    .edit-participant-modal,
+    .tia-page,
+    .employees-page,
+    .tia-picker
+  )
+  .form-select:focus {
+  border-color: var(--tia-focus);
+  background-color: #fff;
+  box-shadow: none;
+}
+
+/* ---------- Buttons ---------- */
+:is(
+    .tia-modal,
+    .add-training-modal,
+    .manage-participants-modal,
+    .edit-participant-modal,
+    .tia-page,
+    .employees-page,
+    .tia-picker
+  )
+  .btn {
+  font-size: 13.5px;
+  font-weight: 500;
+  border-radius: var(--tia-radius);
+  padding: 8px 16px;
+  box-shadow: none;
+}
+:is(.tia-page, .employees-page) .btn-sm {
+  font-size: 12.5px;
+  padding: 5px 12px;
+}
+
+/* primary */
+:is(
+    .tia-modal,
+    .add-training-modal,
+    .manage-participants-modal,
+    .edit-participant-modal,
+    .tia-page,
+    .employees-page,
+    .tia-picker
+  )
+  .btn-primary {
+  background: var(--tia-ink);
+  border-color: var(--tia-ink);
+  color: #fff;
+}
+:is(
+    .tia-modal,
+    .add-training-modal,
+    .manage-participants-modal,
+    .edit-participant-modal,
+    .tia-page,
+    .employees-page,
+    .tia-picker
+  )
+  .btn-primary:hover,
+:is(.tia-page, .employees-page) .btn-primary:focus {
+  background: var(--tia-ink-hover);
+  border-color: var(--tia-ink-hover);
+  color: #fff;
+}
+
+/* secondary (modal Cancel) */
+:is(
+    .tia-modal,
+    .add-training-modal,
+    .manage-participants-modal,
+    .edit-participant-modal
+  )
+  .btn-secondary {
+  background: #fff;
+  color: var(--tia-muted);
+  border: 1px solid var(--tia-line);
+}
+:is(
+    .tia-modal,
+    .add-training-modal,
+    .manage-participants-modal,
+    .edit-participant-modal
+  )
+  .btn-secondary:hover {
+  background: var(--tia-hover);
+  color: var(--tia-ink);
+}
+
+/* outline actions (CSV Template / Import / Export / Edit / Rate) */
+:is(.tia-page, .employees-page)
+  :is(.btn-outline-secondary, .btn-outline-primary, .btn-outline-success) {
+  background: #fff;
+  color: var(--tia-text);
+  border: 1px solid var(--tia-line);
+}
+:is(.tia-page, .employees-page)
+  :is(
+    .btn-outline-secondary,
+    .btn-outline-primary,
+    .btn-outline-success
+  ):hover {
+  background: var(--tia-hover);
+  color: var(--tia-ink);
+  border-color: var(--tia-line-strong);
+}
+
+/* delete */
+:is(.tia-page, .employees-page) .btn-outline-danger {
+  background: #fff;
+  color: var(--tia-danger);
+  border: 1px solid var(--tia-danger-line);
+}
+:is(.tia-page, .employees-page) .btn-outline-danger:hover {
+  background: var(--tia-danger-bg);
+  color: var(--tia-danger-hover);
+  border-color: #fca5a5;
+}
+
+/* ---------- Status pills (Pending / Rated / All) ---------- */
+.tia-page .nav-pills .nav-link {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tia-muted);
+  border-radius: var(--tia-radius);
+}
+.tia-page .nav-pills .nav-link:hover {
+  background: var(--tia-hover);
+  color: var(--tia-ink);
+}
+.tia-page .nav-pills .nav-link.active {
+  background: var(--tia-ink);
+  color: #fff;
+}
+
+/* ---------- Inline-editable table (add participants) ---------- */
+#newParticipantsTable input,
+.tia-inline-table input {
+  border: 1px solid var(--tia-line);
+  border-radius: var(--tia-radius);
+  padding: 8px 12px;
+  width: 100%;
+  font-size: 0.88rem;
+  background: var(--tia-field);
+}
+#newParticipantsTable input:focus,
+.tia-inline-table input:focus {
+  border-color: var(--tia-focus);
+  background: #fff;
+  box-shadow: none;
+  outline: none;
+}
+#newParticipantsTable td,
+.tia-inline-table td {
+  padding: 8px 6px;
+  vertical-align: middle;
+}
+
+/* ---------- Tom Select inside modals ---------- */
+.ts-dropdown {
+  z-index: 2000;
+}
+.modal .ts-wrapper {
+  width: 100%;
+}

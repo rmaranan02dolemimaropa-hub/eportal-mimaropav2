@@ -3,7 +3,7 @@
 <?= $this->include('dashboard_layout/sidebar') ?>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<link rel="stylesheet" href="<?= base_url('assets/css/tia-dashboard.css') ?>">
+<link rel="stylesheet" href="<?= base_url('assets/css/tia-base.css') ?>">
 
 <?php
 // Quarter of each row (from the training date text, e.g. "March 10-14, 2026")
@@ -40,7 +40,8 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
     <div class="page-header">
         <div>
             <h1 class="page-title">Participant Rating Monitoring</h1>
-            <p class="page-subtitle">Track which participants have not yet submitted their self-rater form (Annex D)</p>
+            <p class="page-subtitle">Track pending self-rater forms (Annex D)</p>
+            <p></p>
         </div>
     </div>
 
@@ -94,16 +95,18 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
                     </select>
                 </form>
 
-                <!-- Quarter + search (filter the rows on this page instantly) -->
-                <select id="quarterFilter" class="form-select form-select-sm" autocomplete="off"
-                    style="width:200px; flex:0 0 auto;">
-                    <option value="">All quarters</option>
+                <!-- Year + Quarter + search (filter the rows on this page instantly) -->
+                <select id="filterYear" class="form-select" autocomplete="off" style="width:130px; flex:0 0 auto;">
+                    <option value="">All years</option>
                     <?php foreach ($years as $yr): ?>
-                        <optgroup label="<?= $yr ?>">
-                            <?php for ($qn = 1; $qn <= 4; $qn++): ?>
-                                <option value="<?= $yr ?>-Q<?= $qn ?>">Q<?= $qn ?>         <?= $yr ?> (<?= $qMonths[$qn] ?>)</option>
-                            <?php endfor; ?>
-                        </optgroup>
+                        <option value="<?= $yr ?>"><?= $yr ?></option>
+                    <?php endforeach; ?>
+                </select>
+
+                <select id="filterQuarter" class="form-select" autocomplete="off" style="width:170px; flex:0 0 auto;">
+                    <option value="">All quarters</option>
+                    <?php foreach ($qMonths as $qn => $label): ?>
+                        <option value="<?= $qn ?>">Q<?= $qn ?> (<?= $label ?>)</option>
                     <?php endforeach; ?>
                 </select>
 

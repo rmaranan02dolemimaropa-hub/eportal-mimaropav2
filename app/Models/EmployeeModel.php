@@ -17,6 +17,7 @@ class EmployeeModel extends Model
         'name',
         'email',
         'position',
+        'position_type',
         'office',
         'division',
         'superior_id',
@@ -45,6 +46,7 @@ class EmployeeModel extends Model
         'name' => 'required|max_length[150]',
         'email' => 'required|valid_email|max_length[150]',
         'position' => 'required|max_length[150]',
+        'position_type' => 'permit_empty|in_list[Permanent,Non-Permanent]',
         'office' => 'permit_empty|max_length[150]',
         'division' => 'permit_empty|max_length[150]',
         'superior_id' => 'permit_empty|is_natural_no_zero|is_not_unique[superiors.id]',
@@ -80,6 +82,19 @@ class EmployeeModel extends Model
         'ROMBLON PROVINCIAL OFFICE',
         'PALAWAN PROVINCIAL OFFICE',
     ];
+    public const POSITION_TYPES = ['Permanent', 'Non-Permanent'];
+
+    /** Returns the official type (case-insensitive; accepts "Non Permanent"/"NonPermanent"), or null */
+    public static function normalizePositionType(?string $value): ?string
+    {
+        $v = strtoupper(preg_replace('/[\s\-_]+/', '', (string) $value));
+        foreach (self::POSITION_TYPES as $t) {
+            if (strtoupper(preg_replace('/[\s\-_]+/', '', $t)) === $v && $v !== '') {
+                return $t;
+            }
+        }
+        return null;
+    }
 
     /** Returns the official office name (case-insensitive match), or null if empty/not in the list */
     public static function normalizeOffice(?string $value): ?string

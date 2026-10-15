@@ -3,7 +3,7 @@
 <?= $this->include('dashboard_layout/sidebar') ?>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<link rel="stylesheet" href="<?= base_url('assets/css/tia-dashboard.css') ?>">
+<link rel="stylesheet" href="<?= base_url('assets/css/tia-base.css') ?>">
 
 <?php
 $qs = fn(array $over = []) => http_build_query(array_merge(
@@ -12,16 +12,13 @@ $qs = fn(array $over = []) => http_build_query(array_merge(
 ));
 ?>
 
-<main class="main-content">
+<main class="main-content tia-page">
 
     <div class="page-header">
         <div>
             <h1 class="page-title">Rating Monitoring</h1>
             <p class="page-subtitle">See which participants you still need to rate</p>
         </div>
-        <a href="<?= site_url('tia-superior') ?>" class="btn btn-sm btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i> Trainings
-        </a>
     </div>
 
     <!-- Summary -->
@@ -62,34 +59,35 @@ $qs = fn(array $over = []) => http_build_query(array_merge(
         <form method="get" class="d-flex flex-wrap gap-2 align-items-end p-3">
             <input type="hidden" name="status" value="<?= esc($status, 'attr') ?>">
 
-            <div>
-                <label class="form-label small mb-1">Quarter</label>
-                <select name="quarter" class="form-select form-select-sm">
-                    <option value="0">All quarters</option>
-                    <?php foreach ([1 => 'Q1 (Jan–Mar)', 2 => 'Q2 (Apr–Jun)', 3 => 'Q3 (Jul–Sep)', 4 => 'Q4 (Oct–Dec)'] as $n => $l): ?>
-                        <option value="<?= $n ?>" <?= $quarter === $n ? 'selected' : '' ?>><?= $l ?></option>
+            <div class="col-md-2">
+                <label class="form-label">Year</label>
+                <select id="filterYear" class="form-select" autocomplete="off">
+                    <option value="">All years</option>
+                    <?php foreach ($years as $yr): ?>
+                        <option value="<?= $yr ?>"><?= $yr ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
-
-            <div>
-                <label class="form-label small mb-1">Year</label>
-                <select name="year" class="form-select form-select-sm">
-                    <option value="0">All years</option>
-                    <?php foreach ($years as $y): ?>
-                        <option value="<?= $y ?>" <?= $year === (int) $y ? 'selected' : '' ?>><?= $y ?></option>
+            <div class="col-md-2">
+                <label class="form-label">Quarter</label>
+                <select id="filterQuarter" class="form-select" autocomplete="off">
+                    <option value="">All quarters</option>
+                    <?php foreach ($qMonths as $qn => $label): ?>
+                        <option value="<?= $qn ?>">Q<?= $qn ?> (<?= $label ?>)</option>
                     <?php endforeach; ?>
                 </select>
             </div>
-
-            <div class="flex-grow-1" style="min-width:200px;">
-                <label class="form-label small mb-1">Search</label>
-                <input type="search" name="s" value="<?= esc($search, 'attr') ?>" class="form-control form-control-sm"
-                    placeholder="Participant, training, position…">
+            <div class="col-md-2">
+                <label class="form-label">Search</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="search" id="trainingSearch" class="form-control" placeholder="Search trainings..."
+                        autocomplete="off">
+                </div>
             </div>
 
-            <button class="btn btn-sm btn-primary" type="submit"><i class="bi bi-funnel me-1"></i>Apply</button>
-            <a class="btn btn-sm btn-outline-secondary" href="<?= site_url('tia-superior/monitoring') ?>">Reset</a>
+            <button class="btn btn-primary" type="submit"><i class="bi bi-funnel me-1"></i>Apply</button>
+            <a class="btn btn-outline-secondary" href="<?= site_url('tia-superior/monitoring') ?>">Reset</a>
         </form>
 
         <div class="table-responsive">
@@ -125,7 +123,7 @@ $qs = fn(array $over = []) => http_build_query(array_merge(
                                 </td>
                                 <td class="text-center">
                                     <?php if (!$r['rated']): ?>
-                                        <button type="button" class="btn btn-sm tool-btn open-rating"
+                                        <button type="button" class="btn btn-sm btn-outline-secondary open-rating"
                                             data-url="<?= esc(site_url('tia-superior/rate/' . rawurlencode($r['training_code']) . '/' . $r['participant_id']), 'attr') ?>"
                                             data-name="<?= esc($r['participant_name'], 'attr') ?>">
                                             <i class="bi bi-star me-1"></i> Rate
@@ -148,7 +146,7 @@ $qs = fn(array $over = []) => http_build_query(array_merge(
     </div>
 
     <!-- Rating sheet modal -->
-    <div class="modal fade" id="ratingSheetModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal fade tia-modal" id="ratingSheetModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">

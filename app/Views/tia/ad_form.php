@@ -239,7 +239,7 @@ $ratingRows = function (string $prefix, array $statements) use ($ratingRadios): 
                     <div class="section-title"><span>CSF</span> Critical Success Factors</div>
 
                     <div class="subsection">A. Achieving Training Objectives</div>
-                    <p class="note">HRMO to align each statement with the objectives of the program</p>
+                    <p class="note">Participants shall alligned each statement with the program</p>
                     <div id="objectives">
                         <?php for ($i = 1; $i <= 4; $i++): ?>
                             <div class="custom-row">

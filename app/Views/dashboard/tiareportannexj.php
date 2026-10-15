@@ -3,7 +3,8 @@
 <?= $this->include('dashboard_layout/sidebar') ?>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<link rel="stylesheet" href="<?= base_url('assets/css/tia-dashboard.css') ?>">
+<link rel="stylesheet" href="<?= base_url('assets/css/tia-base.css') ?>">
+<link rel="stylesheet" href="<?= base_url('assets/css/tia-report.css') ?>">
 
 <?php
 // Input form definition: [field, label, hint]
@@ -54,61 +55,9 @@ rsort($years);
 $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–Dec'];
 ?>
 
-<style>
-    .annex-j-sheet {
-        font-size: 11pt;
-    }
 
-    .annex-j-sheet .aj-title {
-        text-align: center;
-        margin: 8px 0 18px;
-        line-height: 1.5;
-    }
 
-    .annex-j-sheet .aj-h {
-        margin: 16px 0 4px;
-        font-weight: 400;
-        font-size: 11pt;
-    }
-
-    .annex-j-sheet .aj-lvl {
-        margin: 10px 0 2px 14px;
-    }
-
-    .annex-j-sheet .aj-note {
-        margin: 0 0 4px 40px;
-        font-style: italic;
-        font-size: 10pt;
-    }
-
-    .annex-j-sheet .aj-sub {
-        margin: 8px 0 2px 40px;
-    }
-
-    .annex-j-sheet .aj-body {
-        white-space: pre-wrap;
-        text-align: justify;
-        margin: 4px 0 8px 40px;
-        min-height: 18px;
-    }
-
-    .annex-j-sheet .aj-body.top {
-        margin-left: 28px;
-    }
-
-    @media print {
-        .annex-j-sheet {
-            font-size: 10.5pt !important;
-        }
-
-        .annex-j-sheet .aj-h,
-        .annex-j-sheet .aj-sub {
-            break-after: avoid;
-        }
-    }
-</style>
-
-<main class="main-content">
+<main class="main-content tia-page">
 
     <div class="page-header no-print">
         <div>
@@ -116,7 +65,7 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
             <p class="page-subtitle">Annex J – Training Impact Assessment Report</p>
         </div>
         <?php if ($training): ?>
-            <button type="button" class="btn btn-dole-primary" onclick="window.print()">
+            <button type="button" class="btn btn-primary" onclick="window.print()">
                 <i class="bi bi-printer me-1"></i> Print / Save as PDF
             </button>
         <?php endif; ?>
@@ -129,20 +78,25 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
     <!-- Training picker -->
     <div class="panel mb-3 no-print tia-picker">
         <form method="get" action="<?= site_url('tia-report-annex-j') ?>" class="row g-2 align-items-end p-3">
-            <div class="col-md-3">
-                <label class="form-label">Quarter</label>
-                <select id="quarterFilter" class="form-select" autocomplete="off">
-                    <option value="">All quarters</option>
+            <div class="col-md-2">
+                <label class="form-label">Year</label>
+                <select id="filterYear" class="form-select" autocomplete="off">
+                    <option value="">All years</option>
                     <?php foreach ($years as $yr): ?>
-                        <optgroup label="<?= $yr ?>">
-                            <?php for ($qn = 1; $qn <= 4; $qn++): ?>
-                                <option value="<?= $yr ?>-Q<?= $qn ?>">Q<?= $qn ?>         <?= $yr ?> (<?= $qMonths[$qn] ?>)</option>
-                            <?php endfor; ?>
-                        </optgroup>
+                        <option value="<?= $yr ?>"><?= $yr ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
+                <label class="form-label">Quarter</label>
+                <select id="filterQuarter" class="form-select" autocomplete="off">
+                    <option value="">All quarters</option>
+                    <?php foreach ($qMonths as $qn => $label): ?>
+                        <option value="<?= $qn ?>">Q<?= $qn ?> (<?= $label ?>)</option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-md-2">
                 <label class="form-label">Search</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-search"></i></span>
@@ -248,16 +202,16 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
             <div class="aj-body"><?= $v('level3_a') ?></div>
 
             <div class="aj-sub">B.&nbsp; Application of learning</div>
-            <div class="aj-note" style="margin-left:64px;">o Percentage of participants' application of learning</div>
+            <div class="aj-note deep">o Percentage of participants' application of learning</div>
             <div class="aj-body"><?= $v('level3_b') ?></div>
 
             <div class="aj-sub">C.&nbsp; Achievement with the application of learning</div>
-            <div class="aj-note" style="margin-left:64px;">o Percentage on organizational and personal application of
+            <div class="aj-note deep">o Percentage on organizational and personal application of
                 participants' learning</div>
             <div class="aj-body"><?= $v('level3_c') ?></div>
 
             <div class="aj-sub">D.&nbsp; Focus Group Discussion Result</div>
-            <div class="aj-note" style="margin-left:64px;">• Qualitative discussion on the result of the FGD according to:
+            <div class="aj-note deep">• Qualitative discussion on the result of the FGD according to:
                 Application of Learning, Benefits Gained, Planned Sustainability</div>
             <div class="aj-body"><?= $v('level3_d') ?></div>
 

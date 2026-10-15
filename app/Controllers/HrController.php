@@ -1241,6 +1241,197 @@ class HrController extends BaseController
         return $list ? json_encode(array_slice($list, 0, 4), JSON_UNESCAPED_UNICODE) : null;
     }
 
+    // -------------------------------------------------------------------------
+    // Trainings CSV: template / export / import
+    // -------------------------------------------------------------------------
+
+    private const TRAINING_CSV_HEADER = [
+        'TRAINING CODE',
+        'TRAINING TITLE',
+        'TRAINING DATES',
+        'CONDUCTED BY',
+        'OFFICE',
+        'IMMEDIATE SUPERIOR',
+        'COMPETENCY 1',
+        'COMPETENCY 2',
+        'COMPETENCY 3',
+        'COMPETENCY 4',
+    ];
+
+    /** GET /tia/trainings-template */
+    public function trainingsTemplate()
+    {
+        $out = fopen('php://temp', 'r+');
+        fwrite($out, "\xEF\xBB\xBF");
+        fputcsv($out, self::TRAINING_CSV_HEADER);
+        fputcsv($out, [
+            '',
+            'Leadership Training',
+            'March 10-12, 2026',
+            'HR Division',
+            'DOLE MIMAROPA REGIONAL OFFICE',
+            'John Doe',
+            'Communication',
+            'Teamwork',
+            'Decision Making',
+            '',
+        ]);
+        rewind($out);
+        $csv = stream_get_contents($out);
+        fclose($out);
+
+        return $this->response
+            ->setHeader('Content-Type', 'text/csv; charset=utf-8')
+            ->setHeader('Content-Disposition', 'attachment; filename="trainings_template.csv"')
+            ->setBody($csv);
+    }
+
+    /** GET /tia/export-trainings */
+    public function exportTrainings()
+    {
+        $rows = $this->trainingsModel->orderBy('created_at', 'DESC')->findAll();
+
+        $out = fopen('php://temp', 'r+');
+        fwrite($out, "\xEF\xBB\xBF"); // UTF-8 BOM so Excel reads it correctly
+        fputcsv($out, array_merge(self::TRAINING_CSV_HEADER, ['STATUS']));
+
+        foreach ($rows as $r) {
+            $comps = json_decode($r['competencies'] ?? '[]', true) ?: [];
+            fputcsv($out, [
+                $r['training_code'],
+                $r['training_title'],
+                $r['training_dates'],
+                $r['conducted_by'] ?? '',
+                $r['office'] ?? '',
+                $r['immediate_superior'] ?? '',
+                $comps[0] ?? '',
+                $comps[1] ?? '',
+                $comps[2] ?? '',
+                $comps[3] ?? '',
+                $r['status'] ?? 'active',
+            ]);
+        }
+        rewind($out);
+        $csv = stream_get_contents($out);
+        fclose($out);
+
+        return $this->response
+            ->setHeader('Content-Type', 'text/csv; charset=utf-8')
+            ->setHeader('Content-Disposition', 'attachment; filename="trainings_' . date('Ymd_His') . '.csv"')
+            ->setBody($csv);
+    }
+
+    /** POST /tia/import-trainings */
+    public function importTrainings()
+    {
+        $back = redirect()->to('/tia_page');
+        $file = $this->request->getFile('csv_file');
+
+        if (!$file || !$file->isValid() || strtolower($file->getClientExtension()) !== 'csv') {
+            return $back->with('error', 'Please upload a valid .csv file.');
+        }
+
+        $handle = fopen($file->getTempName(), 'r');
+        $header = fgetcsv($handle);
+        if (!$header) {
+            fclose($handle);
+            return $back->with('error', 'CSV file is empty.');
+        }
+
+        // strip BOM, normalize header names
+        $header[0] = preg_replace('/^\xEF\xBB\xBF/', '', $header[0]);
+        $header = array_map(fn($h) => strtoupper(trim((string) $h)), $header);
+
+        $iCode = array_search('TRAINING CODE', $header);       // optional
+        $iTitle = array_search('TRAINING TITLE', $header);     // required
+        $iDates = array_search('TRAINING DATES', $header);     // required
+        $iBy = array_search('CONDUCTED BY', $header);          // optional
+        $iOffice = array_search('OFFICE', $header);            // optional
+        $iSup = array_search('IMMEDIATE SUPERIOR', $header);   // optional
+        $iComp = [];
+        for ($n = 1; $n <= 4; $n++) {
+            $iComp[$n] = array_search('COMPETENCY ' . $n, $header);   // optional
+        }
+        $hasComps = count(array_filter($iComp, fn($i) => $i !== false)) > 0;
+
+        if ($iTitle === false || $iDates === false) {
+            fclose($handle);
+            return $back->with('error', 'Invalid header. Required columns: TRAINING TITLE, TRAINING DATES.');
+        }
+
+        $cell = fn(array $row, $idx, int $max) => $idx === false
+            ? ''
+            : mb_substr(trim((string) ($row[$idx] ?? '')), 0, $max);
+
+        $inserted = $updated = $skipped = 0;
+        $now = date('Y-m-d H:i:s');
+        $db = db_connect();
+        $db->transStart();
+
+        while (($row = fgetcsv($handle)) !== false) {
+            if (count(array_filter($row, fn($v) => trim((string) $v) !== '')) === 0) {
+                continue; // blank line
+            }
+
+            $title = $cell($row, $iTitle, 255);
+            $dates = $cell($row, $iDates, 100);
+            if ($title === '' || $dates === '') {
+                $skipped++;
+                continue;
+            }
+
+            $data = ['training_title' => $title, 'training_dates' => $dates, 'updated_at' => $now];
+
+            // optional columns: only touched when present in the CSV
+            if ($iBy !== false) {
+                $data['conducted_by'] = $cell($row, $iBy, 150) ?: null;
+            }
+            if ($iOffice !== false) {
+                $data['office'] = $cell($row, $iOffice, 150) ?: null;
+            }
+            if ($iSup !== false) {
+                $data['immediate_superior'] = $cell($row, $iSup, 150) ?: null;
+            }
+            if ($hasComps) {
+                $comps = [];
+                foreach ($iComp as $idx) {
+                    $v = $cell($row, $idx, 255);
+                    if ($v !== '') {
+                        $comps[] = $v;
+                    }
+                }
+                $data['competencies'] = $comps ? json_encode($comps, JSON_UNESCAPED_UNICODE) : null;
+            }
+
+            // find existing: by code first, then by title + dates
+            $existing = null;
+            $code = $cell($row, $iCode, 50);
+            if ($code !== '') {
+                $existing = $this->trainingsModel->where('training_code', $code)->first();
+            }
+            if (!$existing) {
+                $existing = $this->trainingsModel
+                    ->where('LOWER(TRIM(training_title))', strtolower($title))
+                    ->where('LOWER(TRIM(training_dates))', strtolower($dates))
+                    ->first();
+            }
+
+            if ($existing) {
+                $this->trainingsModel->update($existing['id'], $data) !== false ? $updated++ : $skipped++;
+            } else {
+                $data['training_code'] = $code !== ''
+                    ? $code
+                    : 'TRN-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(3)));
+                $data['created_at'] = $now;
+                $this->trainingsModel->insert($data) ? $inserted++ : $skipped++;
+            }
+        }
+        fclose($handle);
+        $db->transComplete();
+
+        return $back->with('success', "Import done: {$inserted} added, {$updated} updated, {$skipped} skipped.");
+    }
+
 
 
 

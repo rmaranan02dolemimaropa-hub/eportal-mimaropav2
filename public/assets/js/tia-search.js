@@ -1,109 +1,46 @@
-// "Notify Superior" buttons on the Superior Rating Monitoring page.
-// Needs window.TIA = { urls: { notifySuperior }, csrf: { name, header, hash } } (set in the view).
+/**
+ * Trainings table filters: Year + Quarter + text search.
+ *
+ * Needs (in the Trainings view):
+ *   #filterYear      <select>  value "" or "2026"
+ *   #filterQuarter   <select>  value "" or "1".."4"
+ *   #trainingSearch  <input>
+ *   table rows:      <tr data-quarter="2026-Q1">   (empty when unknown)
+ */
 (function () {
-  var cfg = window.TIA || {};
-  if (!cfg.urls || !cfg.urls.notifySuperior || !cfg.csrf) return;
+  "use strict";
 
-  var alertBox = document.getElementById("notifyAlert");
+  var yearSel = document.getElementById("filterYear");
+  var quarterSel = document.getElementById("filterQuarter");
+  var search = document.getElementById("trainingSearch");
 
-  function show(message, ok) {
-    if (!alertBox) return;
-    alertBox.className = "alert " + (ok ? "alert-success" : "alert-danger");
-    alertBox.textContent = message;
-    alertBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  if (!yearSel || !quarterSel || !search) {
+    console.warn(
+      "tia-search: #filterYear, #filterQuarter or #trainingSearch not found",
+    );
+    return;
   }
 
-  // update every row of the same training: "Sent N times" + last sent
-  function renderInfo(code, count, at) {
-    document
-      .querySelectorAll('.notify-cell[data-code="' + code + '"] .notify-info')
-      .forEach(function (el) {
-        el.innerHTML = "";
+  var rows = document.querySelectorAll(".tia-table tbody tr[data-quarter]");
 
-        var badge = document.createElement("span");
-        badge.className = "badge bg-info text-dark";
-        badge.innerHTML = '<i class="bi bi-envelope-check me-1"></i>';
-        badge.appendChild(
-          document.createTextNode(
-            "Sent " + count + " time" + (count === 1 ? "" : "s"),
-          ),
-        );
+  function apply() {
+    var year = yearSel.value; // "" or "2026"
+    var qtr = quarterSel.value; // "" or "1".."4"
+    var text = search.value.trim().toLowerCase();
 
-        var last = document.createElement("div");
-        last.className = "small text-muted";
-        last.textContent = "Last: " + at;
+    rows.forEach(function (tr) {
+      var dq = tr.getAttribute("data-quarter") || ""; // "2026-Q1" or ""
+      var okYear = !year || dq.slice(0, 4) === year;
+      var okQtr = !qtr || dq.slice(-1) === qtr;
+      var okText = !text || tr.textContent.toLowerCase().indexOf(text) > -1;
 
-        el.appendChild(badge);
-        el.appendChild(last);
-      });
-
-    document
-      .querySelectorAll('.notify-superior-btn[data-code="' + code + '"] .lbl')
-      .forEach(function (l) {
-        l.textContent = "Resend";
-      });
+      tr.style.display = okYear && okQtr && okText ? "" : "none";
+    });
   }
 
-  document.addEventListener("click", function (e) {
-    var btn = e.target.closest(".notify-superior-btn");
-    if (!btn || btn.disabled) return;
+  yearSel.addEventListener("change", apply);
+  quarterSel.addEventListener("change", apply);
+  search.addEventListener("input", apply);
 
-    var code = btn.getAttribute("data-code");
-    var who = btn.getAttribute("data-superior") || "the superior";
-    var title = btn.getAttribute("data-training") || "this training";
-    if (
-      !window.confirm(
-        "Email " + who + ' to rate the participants of "' + title + '"?',
-      )
-    )
-      return;
-
-    var body = new FormData();
-    body.append("training_code", code);
-    body.append(cfg.csrf.name, cfg.csrf.hash);
-
-    var headers = { "X-Requested-With": "XMLHttpRequest" };
-    headers[cfg.csrf.header] = cfg.csrf.hash;
-
-    var lbl = btn.querySelector(".lbl");
-    var oldLabel = lbl.textContent;
-    btn.disabled = true;
-    lbl.textContent = "Sending…";
-
-    fetch(cfg.urls.notifySuperior, {
-      method: "POST",
-      body: body,
-      headers: headers,
-      credentials: "same-origin",
-    })
-      .then(function (r) {
-        return r.json().catch(function () {
-          return { success: false, message: "Unexpected server response." };
-        });
-      })
-      .then(function (res) {
-        if (res.csrf) cfg.csrf.hash = res.csrf; // the server issues a fresh token each time
-
-        show(
-          res.message ||
-            (res.success
-              ? "Superior notified."
-              : "Could not notify the superior."),
-          !!res.success,
-        );
-
-        if (res.success && res.notify_count) {
-          renderInfo(code, res.notify_count, res.notified_at);
-        } else {
-          lbl.textContent = res.success ? "Resend" : oldLabel;
-        }
-      })
-      .catch(function () {
-        show("Network error. Please try again.", false);
-        lbl.textContent = oldLabel;
-      })
-      .finally(function () {
-        btn.disabled = false;
-      });
-  });
+  apply();
 })();

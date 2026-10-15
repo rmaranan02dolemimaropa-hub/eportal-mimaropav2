@@ -1,73 +1,55 @@
-// Quarter filter + search for the training picker (report pages).
-//  - #quarterFilter narrows <select name="t"> by each option's data-quarter (e.g. "2026-Q1")
-//  - #trainingSearch narrows it by text (title, dates, respondent count)
-// Both work together. Enter in the search box opens the report when exactly one training matches.
+/**
+ * Report pages (D-1, E-1, G, H, J): narrow the "Training" dropdown by
+ * Year + Quarter + text search.
+ *
+ * Needs:
+ *   #filterYear      <select>  value "" or "2026"
+ *   #filterQuarter   <select>  value "" or "1".."4"
+ *   #trainingSearch  <input>
+ *   select[name="t"] with <option data-quarter="2026-Q1"> per training
+ *                    (the "— Select a training —" option has no data-quarter)
+ */
 (function () {
-  var quarter = document.getElementById("quarterFilter");
+  "use strict";
+
+  var yearSel = document.getElementById("filterYear");
+  var quarterSel = document.getElementById("filterQuarter");
   var search = document.getElementById("trainingSearch");
-  var select = document.querySelector('select[name="t"]');
-  if (!select || (!quarter && !search)) return;
+  var training = document.querySelector('select[name="t"]');
 
-  // remember every option once, so filtering never loses any
-  var all = Array.prototype.map.call(select.options, function (o) {
-    return {
-      value: o.value,
-      text: o.text,
-      lower: o.text.toLowerCase(),
-      quarter: o.getAttribute("data-quarter") || "",
-    };
-  });
-
-  function render() {
-    var q = quarter ? quarter.value : "";
-    var term = search ? search.value.trim().toLowerCase() : "";
-    var current = select.value;
-    var matches = 0;
-
-    select.innerHTML = "";
-
-    all.forEach(function (o) {
-      var isPlaceholder = o.value === "";
-      if (!isPlaceholder) {
-        if (q !== "" && o.quarter !== q) return;
-        if (term !== "" && o.lower.indexOf(term) === -1) return;
-      }
-
-      var opt = document.createElement("option");
-      opt.value = o.value;
-      opt.textContent = o.text;
-      opt.setAttribute("data-quarter", o.quarter);
-      if (o.value === current) opt.selected = true;
-      select.appendChild(opt);
-      if (!isPlaceholder) matches++;
-    });
-
-    if (matches === 0) {
-      var none = document.createElement("option");
-      none.value = "";
-      none.disabled = true;
-      none.textContent = "No trainings found";
-      select.appendChild(none);
-    }
+  if (!yearSel || !quarterSel || !search || !training) {
+    console.warn(
+      "tia-quarter-picker: #filterYear, #filterQuarter, #trainingSearch or select[name=t] not found",
+    );
+    return;
   }
 
-  if (quarter) quarter.addEventListener("change", render);
+  var options = Array.prototype.slice.call(
+    training.querySelectorAll("option[data-quarter]"),
+  );
 
-  if (search) {
-    search.addEventListener("input", render);
+  function apply() {
+    var year = yearSel.value; // "" or "2026"
+    var qtr = quarterSel.value; // "" or "1".."4"
+    var text = search.value.trim().toLowerCase();
 
-    // Enter: don't submit an empty form; open the report if only one training matches
-    search.addEventListener("keydown", function (e) {
-      if (e.key !== "Enter") return;
-      e.preventDefault();
+    options.forEach(function (opt) {
+      var dq = opt.getAttribute("data-quarter") || ""; // "2026-Q1" or ""
+      var okYear = !year || dq.slice(0, 4) === year;
+      var okQtr = !qtr || dq.slice(-1) === qtr;
+      var okText = !text || opt.textContent.toLowerCase().indexOf(text) > -1;
 
-      var found = Array.prototype.filter.call(select.options, function (o) {
-        return o.value !== "";
-      });
-      if (found.length === 1) {
-        select.value = found[0].value;
-        select.form.submit();
-      }
+      // never hide the training that is currently open
+      var show = (okYear && okQtr && okText) || opt.selected;
+
+      opt.hidden = !show;
+      opt.disabled = !show; // Safari ignores `hidden` on <option>
     });
   }
+
+  yearSel.addEventListener("change", apply);
+  quarterSel.addEventListener("change", apply);
+  search.addEventListener("input", apply);
+
+  apply();
 })();

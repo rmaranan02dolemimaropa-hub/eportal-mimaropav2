@@ -87,6 +87,9 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('tia/delete-participant/(:num)', 'HrController::deleteParticipant/$1');
     $routes->post('tia/send-form-emails', 'HrController::sendFormEmails');
     $routes->post('tia/notify-superior', 'HrController::notifySuperior');
+    $routes->get('tia/trainings-template', 'HrController::trainingsTemplate');
+    $routes->get('tia/export-trainings', 'HrController::exportTrainings');
+    $routes->post('tia/import-trainings', 'HrController::importTrainings');
 
     $routes->post('tia/send-superior-emails', 'TiaSuperiorController::sendEmails');
     $routes->get('tia-superior/rate/(:segment)/(:num)', 'TiaSuperiorController::rate/$1/$2');
@@ -178,6 +181,17 @@ $routes->group('', ['filter' => 'auth:admin'], function ($routes) {
 
     /*
     |--------------------------------------------------------------------------
+    | FEEDBACK
+    |--------------------------------------------------------------------------
+    */
+    $routes->get('users', 'UserController::index');
+    $routes->post('users/store', 'UserController::store');
+    $routes->post('users/update/(:num)', 'UserController::update/$1');
+    $routes->post('users/delete/(:num)', 'UserController::delete/$1');
+
+
+    /*
+    |--------------------------------------------------------------------------
     | EMPLOYEES
     |--------------------------------------------------------------------------
     */
@@ -190,6 +204,8 @@ $routes->group('', ['filter' => 'auth:admin'], function ($routes) {
     $routes->get('employees/template', 'EmployeeController::template');
     $routes->post('employees/import', 'EmployeeController::import');
     $routes->get('employees/all', 'EmployeeController::all');
+    $routes->get('employees/permanent', 'EmployeeController::permanent');
+    $routes->get('employees/non-permanent', 'EmployeeController::nonPermanent');
 
 
     /*
@@ -207,17 +223,3 @@ $routes->group('', ['filter' => 'auth:admin'], function ($routes) {
 });
 
 
-/*
-|--------------------------------------------------------------------------
-| IT ADMINISTRATOR ONLY
-|--------------------------------------------------------------------------
-*/
-
-$routes->group('', ['filter' => 'auth:it'], function ($routes) {
-
-    // USER MANAGEMENT (UserController)
-    $routes->get('users', 'UserController::index');
-    $routes->post('users/store', 'UserController::store');
-    $routes->post('users/update/(:num)', 'UserController::update/$1');
-    $routes->post('users/delete/(:num)', 'UserController::delete/$1');
-});

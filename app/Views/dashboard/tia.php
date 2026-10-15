@@ -3,7 +3,7 @@
 <?= $this->include('dashboard_layout/sidebar') ?>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<link rel="stylesheet" href="<?= base_url('assets/css/tia-dashboard.css') ?>">
+<link rel="stylesheet" href="<?= base_url('assets/css/tia-base.css') ?>">
 
 <?php
 // Quarter of each training (from its date text; falls back to when it was added)
@@ -44,7 +44,20 @@ rsort($years);
 $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–Dec'];
 ?>
 
-<main class="main-content">
+<main class="main-content tia-page">
+
+    <?php if (session()->getFlashdata('success')): ?>
+        <div class="alert alert-success alert-dismissible fade show">
+            <?= esc(session()->getFlashdata('success')) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+    <?php if (session()->getFlashdata('error')): ?>
+        <div class="alert alert-danger alert-dismissible fade show">
+            <?= esc(session()->getFlashdata('error')) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
 
     <!-- Page Header -->
     <div class="page-header">
@@ -52,9 +65,21 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
             <h1 class="page-title">Training Impact Assessment</h1>
             <p class="page-subtitle">Manage trainings and their participants</p>
         </div>
-        <button type="button" class="btn btn-dole-primary" data-bs-toggle="modal" data-bs-target="#addTrainingModal">
-            <i class="bi bi-plus-lg me-1"></i> Add Training
-        </button>
+        <div class="d-flex flex-wrap gap-2 tia-page">
+            <a href="<?= site_url('tia/trainings-template') ?>" class="btn btn-outline-secondary">
+                <i class="bi bi-file-earmark-arrow-down me-1"></i> CSV Template
+            </a>
+            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                data-bs-target="#importTrainingsModal">
+                <i class="bi bi-upload me-1"></i> Import CSV
+            </button>
+            <a href="<?= site_url('tia/export-trainings') ?>" class="btn btn-outline-success">
+                <i class="bi bi-download me-1"></i> Export CSV
+            </a>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTrainingModal">
+                <i class="bi bi-plus-lg me-1"></i> Add Training
+            </button>
+        </div>
     </div>
 
     <!-- Training Table Panel -->
@@ -63,15 +88,19 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
             <h2 class="panel-title mb-0">Trainings</h2>
 
             <div class="d-flex align-items-center gap-2 flex-wrap ms-auto">
-                <select id="quarterFilter" class="form-select form-select-sm" autocomplete="off"
-                    style="width:200px; flex:0 0 auto;">
-                    <option value="">All quarters</option>
+                <select id="filterYear" class="form-select form-select-sm" autocomplete="off"
+                    style="width:130px; flex:0 0 auto;">
+                    <option value="">All years</option>
                     <?php foreach ($years as $yr): ?>
-                        <optgroup label="<?= $yr ?>">
-                            <?php for ($qn = 1; $qn <= 4; $qn++): ?>
-                                <option value="<?= $yr ?>-Q<?= $qn ?>">Q<?= $qn ?>         <?= $yr ?> (<?= $qMonths[$qn] ?>)</option>
-                            <?php endfor; ?>
-                        </optgroup>
+                        <option value="<?= $yr ?>"><?= $yr ?></option>
+                    <?php endforeach; ?>
+                </select>
+
+                <select id="filterQuarter" class="form-select form-select-sm" autocomplete="off"
+                    style="width:170px; flex:0 0 auto;">
+                    <option value="">All quarters</option>
+                    <?php foreach ($qMonths as $qn => $label): ?>
+                        <option value="<?= $qn ?>">Q<?= $qn ?> (<?= $label ?>)</option>
                     <?php endforeach; ?>
                 </select>
 
@@ -228,7 +257,7 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
                             <label class="form-label">Target Competencies / Areas</label>
                             <small class="text-muted d-block mb-2">Shown on the self-rater form under “my productivity
                                 on the following areas have improved”. Up to 4.</small>
-                            <div class="competency-inputs" id="edit_competencies">
+                            <div class="competency-inputs" id="add_competencies">
                                 <?php for ($c = 1; $c <= 4; $c++): ?>
                                     <input type="text" class="form-control mb-2" name="competencies[]" maxlength="255"
                                         placeholder="<?= $c ?>. Competency / Area">
@@ -594,6 +623,34 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
                     </button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- ===================== IMPORT TRAININGS MODAL ===================== -->
+    <div class="modal fade" id="importTrainingsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <form class="modal-content add-training-modal" action="<?= site_url('tia/import-trainings') ?>"
+                method="post" enctype="multipart/form-data">
+                <?= csrf_field() ?>
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-upload me-2"></i> Import Trainings (CSV)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small text-muted mb-2">
+                        Columns required: <code>TRAINING TITLE, TRAINING DATES</code>.<br>
+                        Optional: <code>TRAINING CODE</code> (blank = auto-generate; if the code, or the same
+                        title and dates, already exists, that training is updated),
+                        <code>CONDUCTED BY</code>, <code>OFFICE</code>, <code>IMMEDIATE SUPERIOR</code>,
+                        <code>COMPETENCY 1</code> to <code>COMPETENCY 4</code>.
+                    </p>
+                    <input type="file" name="csv_file" class="form-control" accept=".csv" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Import</button>
+                </div>
+            </form>
         </div>
     </div>
 

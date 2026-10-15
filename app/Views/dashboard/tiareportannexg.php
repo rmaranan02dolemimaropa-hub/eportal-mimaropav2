@@ -3,7 +3,8 @@
 <?= $this->include('dashboard_layout/sidebar') ?>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<link rel="stylesheet" href="<?= base_url('assets/css/tia-dashboard.css') ?>">
+<link rel="stylesheet" href="<?= base_url('assets/css/tia-base.css') ?>">
+<link rel="stylesheet" href="<?= base_url('assets/css/tia-report.css') ?>">
 
 <style>
     /* Annex G is LANDSCAPE, so it has its own sheet and print page (no .d1 class, which is portrait) */
@@ -177,29 +178,36 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
             <p class="page-subtitle">Annex G – Directory of Participants and Immediate Superior</p>
         </div>
         <?php if ($report && $report['total'] > 0): ?>
-            <button type="button" class="btn btn-dole-primary" onclick="window.print()">
-                <i class="bi bi-printer me-1"></i> Print / Save as PDF
-            </button>
+            <div class="tia-page">
+                <button type="button" class="btn btn-primary" onclick="window.print()">
+                    <i class="bi bi-printer me-1"></i> Print / Save as PDF
+                </button>
+            </div>
         <?php endif; ?>
     </div>
 
     <!-- Training picker -->
     <div class="panel mb-3 no-print tia-picker">
         <form method="get" action="<?= site_url('tia-report-annex-g') ?>" class="row g-2 align-items-end p-3">
-            <div class="col-md-3">
-                <label class="form-label">Quarter</label>
-                <select id="quarterFilter" class="form-select" autocomplete="off">
-                    <option value="">All quarters</option>
+            <div class="col-md-2">
+                <label class="form-label">Year</label>
+                <select id="filterYear" class="form-select" autocomplete="off">
+                    <option value="">All years</option>
                     <?php foreach ($years as $yr): ?>
-                        <optgroup label="<?= $yr ?>">
-                            <?php for ($qn = 1; $qn <= 4; $qn++): ?>
-                                <option value="<?= $yr ?>-Q<?= $qn ?>">Q<?= $qn ?>         <?= $yr ?> (<?= $qMonths[$qn] ?>)</option>
-                            <?php endfor; ?>
-                        </optgroup>
+                        <option value="<?= $yr ?>"><?= $yr ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
+                <label class="form-label">Quarter</label>
+                <select id="filterQuarter" class="form-select" autocomplete="off">
+                    <option value="">All quarters</option>
+                    <?php foreach ($qMonths as $qn => $label): ?>
+                        <option value="<?= $qn ?>">Q<?= $qn ?> (<?= $label ?>)</option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-md-2">
                 <label class="form-label">Search</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-search"></i></span>
@@ -212,8 +220,9 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
                 <select name="t" class="form-select" onchange="this.form.submit()">
                     <option value="">— Select a training —</option>
                     <?php foreach ($trainings as $t): ?>
+                        <?php $isSel = $t['training_code'] === $code ? 'selected' : ''; ?>
                         <option value="<?= esc($t['training_code'], 'attr') ?>"
-                            data-quarter="<?= esc($quarterOf($t), 'attr') ?>" <?= $t['training_code'] === $code ? 'selected' : '' ?>>
+                            data-quarter="<?= esc($quarterOf($t), 'attr') ?>" <?= $isSel ?>>
                             <?= esc($t['training_title']) ?> (<?= esc($t['training_dates']) ?>)
                         </option>
                     <?php endforeach; ?>

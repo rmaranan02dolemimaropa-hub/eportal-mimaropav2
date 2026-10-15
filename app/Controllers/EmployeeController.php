@@ -26,25 +26,53 @@ class EmployeeController extends BaseController
             ->orderBy('employees.name', 'ASC');
     }
 
+    /* ------------------------------------------------------------------
+     | Lists (all / Permanent / Non-Permanent)
+     * ------------------------------------------------------------------ */
+
     public function index()
     {
+        return $this->listByType(null);
+    }
+
+    public function permanent()
+    {
+        return $this->listByType('Permanent');
+    }
+
+    public function nonPermanent()
+    {
+        return $this->listByType('Non-Permanent');
+    }
+
+    private function listByType(?string $type)
+    {
+        $builder = $this->employeesWithSuperior();
+        if ($type !== null) {
+            $builder->where('employees.position_type', $type);
+        }
+
         return view('dashboard/dole-employees', [
-            'employees' => $this->employeesWithSuperior()->findAll(),
+            'employees' => $builder->findAll(),
             'superiors' => $this->superiors->orderBy('name', 'ASC')->findAll(),
             'offices' => EmployeeModel::OFFICES,
-
+            'positionTypes' => EmployeeModel::POSITION_TYPES,
+            'currentType' => $type,
         ]);
     }
+
+    /* ------------------------------------------------------------------
+     | CRUD  (redirect back so the user stays on the list they came from)
+     * ------------------------------------------------------------------ */
 
     public function store()
     {
         $data = $this->payload();
 
-
         if (!$this->model->insert($data)) {
             return redirect()->back()->withInput()->with('error', implode(' ', $this->model->errors()));
         }
-        return redirect()->to('/employees')->with('success', 'Employee added.');
+        return redirect()->back()->with('success', 'Employee added.');
     }
 
     public function update($id)
@@ -52,7 +80,7 @@ class EmployeeController extends BaseController
         $id = (int) $id;
         $existing = $this->model->find($id);
         if (!$existing) {
-            return redirect()->to('/employees')->with('error', 'Employee not found.');
+            return redirect()->back()->with('error', 'Employee not found.');
         }
 
         $data = $this->payload();
@@ -61,14 +89,18 @@ class EmployeeController extends BaseController
         if (!$this->model->update($id, $data)) {
             return redirect()->back()->withInput()->with('error', implode(' ', $this->model->errors()));
         }
-        return redirect()->to('/employees')->with('success', 'Employee updated.');
+        return redirect()->back()->with('success', 'Employee updated.');
     }
 
     public function delete($id)
     {
         $this->model->delete((int) $id);
-        return redirect()->to('/employees')->with('success', 'Employee deleted.');
+        return redirect()->back()->with('success', 'Employee deleted.');
     }
+
+    /* ------------------------------------------------------------------
+     | CSV export / template / import
+     * ------------------------------------------------------------------ */
 
     public function export()
     {
@@ -81,6 +113,7 @@ class EmployeeController extends BaseController
             'NAME',
             'EMAIL',
             'POSITION',
+            'POSITION TYPE',
             'OFFICE',
             'IMMEDIATE SUPERIOR CODE',
             'IMMEDIATE SUPERIOR',
@@ -92,6 +125,7 @@ class EmployeeController extends BaseController
                 $r['name'],
                 $r['email'],
                 $r['position'],
+                $r['position_type'] ?? '',
                 $r['office'] ?? '',
                 $r['superior_code'],
                 $r['superior_name'],
@@ -110,8 +144,8 @@ class EmployeeController extends BaseController
 
     public function template()
     {
-        $csv = "\xEF\xBB\xBF" . "EMPLOYEE CODE,NAME,EMAIL,POSITION,OFFICE,IMMEDIATE SUPERIOR\r\n"
-            . "EMP-1001,Juan Dela Cruz,juan@example.com,Clerk I,DOLE MIMAROPA REGIONAL OFFICE,John Doe\r\n";
+        $csv = "\xEF\xBB\xBF" . "EMPLOYEE CODE,NAME,EMAIL,POSITION,POSITION TYPE,OFFICE,IMMEDIATE SUPERIOR\r\n"
+            . "EMP-1001,Juan Dela Cruz,juan@example.com,Clerk I,Permanent,DOLE MIMAROPA REGIONAL OFFICE,John Doe\r\n";
 
         return $this->response
             ->setHeader('Content-Type', 'text/csv; charset=utf-8')
@@ -124,14 +158,14 @@ class EmployeeController extends BaseController
         $file = $this->request->getFile('csv_file');
 
         if (!$file || !$file->isValid() || strtolower($file->getClientExtension()) !== 'csv') {
-            return redirect()->to('/employees')->with('error', 'Please upload a valid .csv file.');
+            return redirect()->back()->with('error', 'Please upload a valid .csv file.');
         }
 
         $handle = fopen($file->getTempName(), 'r');
         $header = fgetcsv($handle);
         if (!$header) {
             fclose($handle);
-            return redirect()->to('/employees')->with('error', 'CSV file is empty.');
+            return redirect()->back()->with('error', 'CSV file is empty.');
         }
 
         // strip BOM, normalize header names
@@ -144,7 +178,8 @@ class EmployeeController extends BaseController
             'email' => array_search('EMAIL', $header),
             'position' => array_search('POSITION', $header),
         ];
-        $officeIdx = array_search('OFFICE', $header); // optional
+        $officeIdx = array_search('OFFICE', $header);          // optional
+        $typeIdx = array_search('POSITION TYPE', $header);     // optional
 
         $superiorCols = [
             'code' => array_search('IMMEDIATE SUPERIOR CODE', $header),
@@ -153,13 +188,13 @@ class EmployeeController extends BaseController
         ];
         $hasSuperiorCols = $superiorCols['code'] !== false || $superiorCols['name'] !== false;
 
-        // EMPLOYEE CODE, NAME, EMAIL, POSITION are required; OFFICE and the superior columns are optional
+        // EMPLOYEE CODE, NAME, EMAIL, POSITION are required; the rest are optional
         if (
             $map['employee_code'] === false || $map['name'] === false
             || $map['email'] === false || $map['position'] === false
         ) {
             fclose($handle);
-            return redirect()->to('/employees')
+            return redirect()->back()
                 ->with('error', 'Invalid header. Required columns: EMPLOYEE CODE, NAME, EMAIL, POSITION.');
         }
 
@@ -179,7 +214,7 @@ class EmployeeController extends BaseController
                 $data[$field] = trim($row[$idx] ?? '');
             }
 
-            // No code -> skip (codes are no longer auto-generated)
+            // No code -> skip
             if ($data['employee_code'] === '') {
                 $skipped++;
                 continue;
@@ -188,6 +223,11 @@ class EmployeeController extends BaseController
             // Office: only touched when the CSV has an OFFICE column
             if ($officeIdx !== false) {
                 $data['office'] = EmployeeModel::normalizeOffice($row[$officeIdx] ?? '');
+            }
+
+            // Position Type: only touched when the CSV has a POSITION TYPE column
+            if ($typeIdx !== false) {
+                $data['position_type'] = EmployeeModel::normalizePositionType($row[$typeIdx] ?? '');
             }
 
             // Superior: only touched when the CSV has a superior column,
@@ -219,9 +259,14 @@ class EmployeeController extends BaseController
         fclose($handle);
         $db->transComplete();
 
-        return redirect()->to('/employees')
+        return redirect()->back()
             ->with('success', "Import done: {$inserted} added, {$updated} updated, {$skipped} skipped.");
     }
+
+    /* ------------------------------------------------------------------
+     | Helpers
+     * ------------------------------------------------------------------ */
+
     /**
      * Find a superior by code, then by name; create one if not found.
      * Returns the superior id, or null when the CSV cell is empty.
@@ -270,36 +315,41 @@ class EmployeeController extends BaseController
             $s = $this->superiors->find($sid);
             $name = $s['name'] ?? null;
         }
-        $office = trim((string) $this->request->getPost('office'));
 
         return [
             'employee_code' => trim((string) $this->request->getPost('employee_code')),
             'name' => trim((string) $this->request->getPost('name')),
             'email' => trim((string) $this->request->getPost('email')),
             'position' => trim((string) $this->request->getPost('position')),
+            'position_type' => EmployeeModel::normalizePositionType($this->request->getPost('position_type')),
             'office' => EmployeeModel::normalizeOffice($this->request->getPost('office')),
             'superior_id' => $sid > 0 ? $sid : null,
             'immediate_superior' => $name,
         ];
     }
 
+    /* ------------------------------------------------------------------
+     | JSON endpoints
+     * ------------------------------------------------------------------ */
+
     public function all()
     {
         return $this->response->setJSON(
             $this->model
-                ->select('employees.id, employees.employee_code, employees.name, employees.email, employees.position, employees.office, employees.division, employees.superior_id, s.name AS superior_name')
+                ->select('employees.id, employees.employee_code, employees.name, employees.email, employees.position, employees.position_type, employees.office, employees.division, employees.superior_id, s.name AS superior_name')
                 ->join('superiors s', 's.id = employees.superior_id', 'left')
                 ->orderBy('employees.name', 'ASC')
                 ->findAll()
         );
     }
+
     /** Public: used by the TIA form to autofill Office / Immediate Superior by email */
     public function lookup()
     {
         $email = strtolower(trim((string) $this->request->getGet('email')));
 
         $row = $email === '' ? null : $this->model
-            ->select('employees.name, employees.position, employees.office, s.name AS superior_name')
+            ->select('employees.name, employees.position, employees.position_type, employees.office, s.name AS superior_name')
             ->join('superiors s', 's.id = employees.superior_id', 'left')
             ->where('LOWER(employees.email)', $email)
             ->first();

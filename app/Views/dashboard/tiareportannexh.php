@@ -3,7 +3,8 @@
 <?= $this->include('dashboard_layout/sidebar') ?>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<link rel="stylesheet" href="<?= base_url('assets/css/tia-dashboard.css') ?>">
+<link rel="stylesheet" href="<?= base_url('assets/css/tia-base.css') ?>">
+<link rel="stylesheet" href="<?= base_url('assets/css/tia-report.css') ?>">
 
 <?php
 $fmt = static fn($v) => $v === null ? '' : number_format((float) $v, 2);
@@ -47,29 +48,36 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
             <p class="page-subtitle">Annex H – Training Impact Assessment Form for Public Offerings</p>
         </div>
         <?php if ($report && ($report['n'] > 0 || $report['participants'] > 0)): ?>
-            <button type="button" class="btn btn-dole-primary" onclick="window.print()">
-                <i class="bi bi-printer me-1"></i> Print / Save as PDF
-            </button>
+            <div class="tia-page">
+                <button type="button" class="btn btn-primary" onclick="window.print()">
+                    <i class="bi bi-printer me-1"></i> Print / Save as PDF
+                </button>
+            </div>
         <?php endif; ?>
     </div>
 
     <!-- Training picker -->
     <div class="panel mb-3 no-print tia-picker">
         <form method="get" action="<?= site_url('tia-report-annex-h') ?>" class="row g-2 align-items-end p-3">
-            <div class="col-md-3">
-                <label class="form-label">Quarter</label>
-                <select id="quarterFilter" class="form-select" autocomplete="off">
-                    <option value="">All quarters</option>
+            <div class="col-md-2">
+                <label class="form-label">Year</label>
+                <select id="filterYear" class="form-select" autocomplete="off">
+                    <option value="">All years</option>
                     <?php foreach ($years as $yr): ?>
-                        <optgroup label="<?= $yr ?>">
-                            <?php for ($qn = 1; $qn <= 4; $qn++): ?>
-                                <option value="<?= $yr ?>-Q<?= $qn ?>">Q<?= $qn ?>         <?= $yr ?> (<?= $qMonths[$qn] ?>)</option>
-                            <?php endfor; ?>
-                        </optgroup>
+                        <option value="<?= $yr ?>"><?= $yr ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
+                <label class="form-label">Quarter</label>
+                <select id="filterQuarter" class="form-select" autocomplete="off">
+                    <option value="">All quarters</option>
+                    <?php foreach ($qMonths as $qn => $label): ?>
+                        <option value="<?= $qn ?>">Q<?= $qn ?> (<?= $label ?>)</option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-md-2">
                 <label class="form-label">Search</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-search"></i></span>
@@ -82,10 +90,14 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
                 <select name="t" class="form-select" onchange="this.form.submit()">
                     <option value="">— Select a training —</option>
                     <?php foreach ($trainings as $t): ?>
+                        <?php
+                        $isSel = $t['training_code'] === $code ? 'selected' : '';
+                        $n = (int) $t['respondents'];
+                        ?>
                         <option value="<?= esc($t['training_code'], 'attr') ?>"
-                            data-quarter="<?= esc($quarterOf($t), 'attr') ?>" <?= $t['training_code'] === $code ? 'selected' : '' ?>>
-                            <?= esc($t['training_title']) ?> (<?= esc($t['training_dates']) ?>)
-                            – <?= (int) $t['respondents'] ?> respondent<?= (int) $t['respondents'] === 1 ? '' : 's' ?>
+                            data-quarter="<?= esc($quarterOf($t), 'attr') ?>" <?= $isSel ?>>
+                            <?= esc($t['training_title']) ?> (<?= esc($t['training_dates']) ?>) – <?= $n ?>
+                            respondent<?= $n === 1 ? '' : 's' ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -162,20 +174,18 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
                     </tr>
                 </thead>
                 <tbody>
-                    <?php for ($i = 0; $i < $attendeeRows; $i++):
-                        $a = $report['attendees'][$i] ?? null; ?>
+                    <?php for ($i = 0; $i < $attendeeRows; $i++): ?>
+                        <?php
+                        $a = $report['attendees'][$i] ?? null;
+                        $who = $a ? $a['name'] . ($a['position'] !== '' ? ', ' . $a['position'] : '') : '';
+                        $yes = ($a && $a['submitted']) ? '☑' : '☐';
+                        $no = ($a && !$a['submitted']) ? '☑' : '☐';
+                        ?>
                         <tr>
-                            <td class="ah-left">
-                                <?= $i + 1 ?>.
-                                <?php if ($a): ?>
-                                    <?= esc($a['name']) ?>            <?= $a['position'] !== '' ? ', ' . esc($a['position']) : '' ?>
-                                <?php endif; ?>
-                            </td>
+                            <td class="ah-left"><?= $i + 1 ?>. <?= esc($who) ?></td>
                             <td class="ah-yesno">
-                                <span class="ah-yn"><span class="cb"><?= ($a && $a['submitted']) ? '☑' : '☐' ?></span>
-                                    Yes</span>
-                                <span class="ah-yn"><span class="cb"><?= ($a && !$a['submitted']) ? '☑' : '☐' ?></span>
-                                    No</span>
+                                <span class="ah-yn"><span class="cb"><?= $yes ?></span> Yes</span>
+                                <span class="ah-yn"><span class="cb"><?= $no ?></span> No</span>
                             </td>
                         </tr>
                     <?php endfor; ?>

@@ -361,7 +361,7 @@ class EportalController extends BaseController
     private function homeFor(?string $role): string
     {
         return strtoupper(trim((string) $role)) === 'SUPERIOR'
-            ? site_url('tia-superior')
+            ? site_url('tia-superior/monitoring')
             : site_url('dashboard');
     }
 }

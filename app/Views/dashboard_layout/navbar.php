@@ -48,7 +48,8 @@
         </li>
         <hr class="dropdown-divider">
         </li>
-        <li><a class="dropdown-item text-danger" href="logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+        <li><a class="dropdown-item text-danger" href="<?= site_url('logout') ?>"><i
+              class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
       </ul>
     </div>
 

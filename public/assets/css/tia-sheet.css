@@ -1,14 +1,23 @@
 /* ==========================================================
    tia-sheet.css  (standalone - replaces tia-dashboard.css)
    TIA report page: base layout + spreadsheet-style tables.
+   Requires Manrope (loaded in dashboard_layout/head).
    ========================================================== */
 
 :root {
+  --tia-font:
+    "Manrope", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --bs-body-font-family: var(--tia-font);
+
   --dole-blue: #0038a8;
   --dole-blue-dark: #002a80;
   --sheet-line: #c6c6c6;
   --sheet-head: #e7e6e6;
   --sheet-accent: #4472c4;
+}
+
+body {
+  font-family: var(--tia-font);
 }
 
 /* ---------- Page header ---------- */

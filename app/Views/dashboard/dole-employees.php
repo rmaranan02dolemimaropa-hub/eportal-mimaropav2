@@ -3,7 +3,8 @@
 <?= $this->include('dashboard_layout/sidebar') ?>
 
 <!-- TIA dashboard styles (remove this line if your head layout already loads it) -->
-<link rel="stylesheet" href="<?= base_url('assets/css/tia-dashboard.css') ?>">
+<!-- TIA shared styles -->
+<link rel="stylesheet" href="<?= base_url('assets/css/tia-base.css') ?>">
 <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 
 <style>
@@ -27,7 +28,7 @@ $superiorLabel = function (array $s): string {
 ?>
 
 <main class="main-content">
-    <div class="container-fluid py-3 employees-page">
+    <div class="container-fluid py-3 tia-page">
 
         <?php if (session()->getFlashdata('success')): ?>
             <div class="alert alert-success alert-dismissible fade show">
@@ -43,7 +44,7 @@ $superiorLabel = function (array $s): string {
         <?php endif; ?>
 
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
-            <h4 class="mb-0">Employees</h4>
+            <h4 class="mb-0">Employees<?= !empty($currentType) ? ' – ' . esc($currentType) : '' ?></h4>
             <div class="d-flex flex-wrap gap-2">
                 <input type="text" id="searchBox" class="form-control" placeholder="Search..." style="width:220px">
                 <a href="<?= site_url('employees/template') ?>" class="btn btn-outline-secondary">CSV Template</a>
@@ -64,6 +65,7 @@ $superiorLabel = function (array $s): string {
                         <th>Name</th>
                         <th>Email</th>
                         <th>Position</th>
+                        <th>Position Type</th>
                         <th>Office</th>
                         <th>Immediate Superior</th>
                         <th style="width:150px">Actions</th>
@@ -72,7 +74,7 @@ $superiorLabel = function (array $s): string {
                 <tbody>
                     <?php if (empty($employees)): ?>
                         <tr>
-                            <td colspan="7" class="text-center text-muted">No records found.</td>
+                            <td colspan="9" class="text-center text-muted">No records found.</td>
                         </tr>
                     <?php else:
                         foreach ($employees as $i => $e): ?>
@@ -84,6 +86,9 @@ $superiorLabel = function (array $s): string {
                                 <td><?= esc($e['name']) ?></td>
                                 <td><?= esc($e['email']) ?></td>
                                 <td><?= esc($e['position']) ?></td>
+                                <td>
+                                    <?= esc($e['position_type'] ?? '') ?>
+                                </td>
                                 <td><?= esc($e['office'] ?? '') ?></td>
                                 <td>
                                     <?= esc($e['superior_name'] ?? '') ?>
@@ -93,6 +98,7 @@ $superiorLabel = function (array $s): string {
                                         data-code="<?= esc($e['employee_code'], 'attr') ?>"
                                         data-name="<?= esc($e['name'], 'attr') ?>" data-email="<?= esc($e['email'], 'attr') ?>"
                                         data-position="<?= esc($e['position'], 'attr') ?>"
+                                        data-position-type="<?= esc($e['position_type'] ?? '', 'attr') ?>"
                                         data-office="<?= esc($e['office'] ?? '', 'attr') ?>"
                                         data-superior-id="<?= (int) ($e['superior_id'] ?? 0) ?>">Edit</button>
                                     <form action="<?= site_url('employees/delete/' . $e['id']) ?>" method="post"
@@ -131,6 +137,16 @@ $superiorLabel = function (array $s): string {
                     <div class="mb-3"><label class="form-label">Position</label>
                         <input type="text" name="position" class="form-control" value="<?= esc(old('position')) ?>"
                             required>
+                    </div>
+                    <div class="mb-3"><label class="form-label">Type of Position</label>
+                        <select name="position_type" class="form-select" required>
+                            <option value="">-- Select type --</option>
+                            <?php foreach (($positionTypes ?? []) as $t): ?>
+                                <option value="<?= esc($t, 'attr') ?>" <?= (old('position_type') ?? ($currentType ?? '')) === $t ? 'selected' : '' ?>>
+                                    <?= esc($t) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                     <div class="mb-3"><label class="form-label">Office</label>
                         <select name="office" class="form-select">
@@ -183,6 +199,16 @@ $superiorLabel = function (array $s): string {
                     </div>
                     <div class="mb-3"><label class="form-label">Position</label>
                         <input type="text" name="position" id="e_position" class="form-control" required>
+                    </div>
+                    <div class="mb-3"><label class="form-label">Type of Position</label>
+                        <select name="position_type" id="e_position_type" class="form-select" required>
+                            <option value="">-- Select type --</option>
+                            <?php foreach (($positionTypes ?? []) as $t): ?>
+                                <option value="<?= esc($t, 'attr') ?>">
+                                    <?= esc($t) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                     <div class="mb-3"><label class="form-label">Office</label>
                         <select name="office" id="e_office" class="form-select">
@@ -295,6 +321,7 @@ $superiorLabel = function (array $s): string {
                     document.getElementById('e_name').value = this.dataset.name;
                     document.getElementById('e_email').value = this.dataset.email;
                     document.getElementById('e_position').value = this.dataset.position;
+                    document.getElementById('e_position_type').value = this.dataset.positionType || '';
                     document.getElementById('e_office').value = this.dataset.office || '';
 
                     var sid = this.dataset.superiorId;
