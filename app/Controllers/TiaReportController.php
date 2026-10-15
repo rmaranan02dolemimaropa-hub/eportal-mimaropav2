@@ -811,4 +811,224 @@ class TiaReportController extends BaseController
         }
         return '—';
     }
+    /** GET /tia-report-bulk?annex=h&year=2026&quarter=1 (quarter 0 = whole year) */
+    public function bulk()
+    {
+        $model = new TiaReportModel();
+
+        $annex = strtolower((string) $this->request->getGet('annex'));
+        $annex = in_array($annex, ['d', 'e', 'g', 'h', 'j'], true) ? $annex : 'h';
+        $year = (int) $this->request->getGet('year');
+        $quarter = (int) $this->request->getGet('quarter');
+        $quarter = ($quarter >= 1 && $quarter <= 4) ? $quarter : 0;
+
+        $all = $model->allTrainings();
+
+        $years = [(int) date('Y')];
+        foreach ($all as $t) {
+            $q = $this->quarterOf($t);
+            if ($q !== '') {
+                $years[] = (int) substr($q, 0, 4);
+            }
+        }
+        $years = array_values(array_unique($years));
+        rsort($years);
+
+        [$items, $skipped] = $this->bulkCollect($model, $annex, $year, $quarter);
+
+        return view('dashboard/tiareportbulk', [
+            'annex' => $annex,
+            'year' => $year,
+            'quarter' => $quarter,
+            'years' => $years,
+            'items' => $items,
+            'skipped' => $skipped,
+            'maxAttendees' => self::H_MAX_ATTENDEES,
+        ]);
+    }
+
+    /** Builds one training's data for the chosen annex; null = nothing to print yet. */
+    private function bulkItem(TiaReportModel $model, string $annex, array $training): ?array
+    {
+        switch ($annex) {
+            case 'd':
+                $r = $this->buildReport($model, $training);
+                return $r['n'] > 0 ? ['training' => $training, 'report' => $r] : null;
+
+            case 'e':
+                $r = $this->buildSuperiorReport($model, $training);
+                return $r['n'] > 0 ? ['training' => $training, 'report' => $r] : null;
+
+            case 'g':
+                $r = $this->buildAnnexG($model, $training);
+                return $r['total'] > 0 ? ['training' => $training, 'report' => $r] : null;
+
+            case 'h':
+                $r = $this->buildAnnexH($model, $training);
+                return ($r['n'] > 0 || $r['participants'] > 0) ? ['training' => $training, 'report' => $r] : null;
+
+            case 'j':
+                $j = $model->annexJ($training['training_code']);
+                foreach (TiaReportModel::J_FIELDS as $f) {
+                    if (trim((string) ($j[$f] ?? '')) !== '') {
+                        return ['training' => $training, 'j' => $j];
+                    }
+                }
+                return null;
+        }
+        return null;
+    }
+
+    /** "2026-Q1" from the date text (falls back to when the training was added). */
+    private function quarterOf(array $t): string
+    {
+        $months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+        $text = (string) ($t['training_dates'] ?? '');
+        $created = strtotime((string) ($t['created_at'] ?? '')) ?: null;
+        $month = 0;
+        $year = 0;
+        $m = [];
+        $y = [];
+
+        if (preg_match('/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*/i', $text, $m)) {
+            $month = (int) array_search(strtolower($m[1]), $months, true) + 1;
+        }
+        if (preg_match('/\b(20\d{2})\b/', $text, $y)) {
+            $year = (int) $y[1];
+        }
+        if ($month === 0 && $created) {
+            $month = (int) date('n', $created);
+        }
+        if ($year === 0 && $created) {
+            $year = (int) date('Y', $created);
+        }
+        return ($month > 0 && $year > 0) ? $year . '-Q' . (int) ceil($month / 3) : '';
+    }
+
+    /** GET /tia-report-bulk/export?annex=d|e&year=2026&quarter=1 (quarter 0 = whole year) */
+    public function bulkExport()
+    {
+        $model = new TiaReportModel();
+
+        $annex = strtolower((string) $this->request->getGet('annex'));
+        $year = (int) $this->request->getGet('year');
+        $quarter = (int) $this->request->getGet('quarter');
+        $quarter = ($quarter >= 1 && $quarter <= 4) ? $quarter : 0;
+
+        if (!in_array($annex, ['d', 'e'], true) || $year <= 0) {
+            return redirect()->to(site_url('tia-report-bulk'))
+                ->with('msg', 'Excel export is available for Annex D-1 and E-1 only.');
+        }
+
+        [$items] = $this->bulkCollect($model, $annex, $year, $quarter);
+
+        if (!$items) {
+            return redirect()
+                ->to(site_url('tia-report-bulk') . '?' . http_build_query(['annex' => $annex, 'year' => $year, 'quarter' => $quarter]))
+                ->with('msg', 'Nothing to export for that period.');
+        }
+
+        $export = new TiaExcelExport(self::SCALE);
+
+        $wb = new Spreadsheet();
+        $summary = $wb->getActiveSheet();
+        $summary->setTitle('Summary');
+        $this->bulkSummarySheet($summary, $annex, $items);
+
+        foreach ($items as $i => $item) {
+            $one = $annex === 'd' ? $export->annexD($item['report']) : $export->annexE($item['report']);
+            $sheet = $one->getActiveSheet();
+
+            // sheet names: max 31 chars, no \ / ? * [ ] :, and unique
+            $title = preg_replace('/[\\\\\/?*\[\]:]/', '', (string) $item['training']['training_title']);
+            $sheet->setTitle(sprintf('%02d ', $i + 1) . mb_substr($title, 0, 27));
+
+            $wb->addExternalSheet($sheet);
+        }
+        $wb->setActiveSheetIndex(0);
+
+        $name = ($annex === 'd' ? 'Annex-D1' : 'Annex-E1') . '_' . $year . ($quarter ? '-Q' . $quarter : '-all');
+
+        return $this->downloadXlsx($wb, 'Bulk_' . $name . '.xlsx');
+    }
+
+    /** First sheet of the bulk workbook: one row per training. */
+    private function bulkSummarySheet(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet, string $annex, array $items): void
+    {
+        $heads = $annex === 'd'
+            ? ['#', 'Training', 'Dates', 'Respondents', 'Attitudinal', 'Performance', 'Competencies', 'Objectives', 'Application', 'Average', 'Adjectival Rating']
+            : ['#', 'Training', 'Dates', 'Superiors rated', 'Attitudinal', 'Performance', 'Competencies', 'Application', 'Average', 'Adjectival Rating'];
+
+        $sheet->fromArray($heads, null, 'A1');
+
+        $f = fn($v) => $v === null ? null : round((float) $v, 2);
+
+        foreach ($items as $i => $it) {
+            $r = $it['report'];
+            $s = $r['summary'];
+            $avg = $s['average'] === null ? null : round((float) $s['average'], 3);
+
+            $row = $annex === 'd'
+                ? [
+                    $i + 1,
+                    $r['training']['training_title'],
+                    $r['training']['training_dates'],
+                    $r['n'],
+                    $f($s['att']),
+                    $f($s['perf']),
+                    $f($s['comp']),
+                    $f($s['obj']),
+                    $f($s['app']),
+                    $avg,
+                    $s['rating']
+                ]
+                : [
+                    $i + 1,
+                    $r['training']['training_title'],
+                    $r['training']['training_dates'],
+                    $r['n'],
+                    $f($s['att']),
+                    $f($s['perf']),
+                    $f($s['comp']),
+                    $f($s['app']),
+                    $avg,
+                    $s['rating']
+                ];
+
+            $sheet->fromArray($row, null, 'A' . ($i + 2));
+        }
+
+        $last = $annex === 'd' ? 'K' : 'J';
+        $sheet->getStyle("A1:{$last}1")->getFont()->setBold(true);
+        foreach (range('A', $last) as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+    }
+
+    /** Trainings of the chosen period that have data for this annex: [items, skipped titles]. */
+    private function bulkCollect(TiaReportModel $model, string $annex, int $year, int $quarter): array
+    {
+        $items = [];
+        $skipped = [];
+        if ($year <= 0) {
+            return [$items, $skipped];
+        }
+
+        foreach ($model->allTrainings() as $t) {
+            $q = $this->quarterOf($t);
+            if ($q === '' || (int) substr($q, 0, 4) !== $year) {
+                continue;
+            }
+            if ($quarter > 0 && (int) substr($q, -1) !== $quarter) {
+                continue;
+            }
+            $item = $this->bulkItem($model, $annex, $t);
+            if ($item === null) {
+                $skipped[] = $t['training_title'];
+            } else {
+                $items[] = $item;
+            }
+        }
+        return [$items, $skipped];
+    }
 }

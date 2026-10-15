@@ -333,4 +333,10 @@ class TiaReportModel extends Model
             $this->db->table('tia_annex_j')->insert($clean + ['training_code' => $code]);
         }
     }
+
+    /** Every training, oldest first (used by the bulk report). */
+    public function allTrainings(): array
+    {
+        return $this->db->table('trainings')->orderBy('created_at', 'ASC')->get()->getResultArray();
+    }
 }

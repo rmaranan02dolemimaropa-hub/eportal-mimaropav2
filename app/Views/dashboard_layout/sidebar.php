@@ -111,6 +111,9 @@
           <a href="<?= site_url('tia-report-annex-j') ?>" class="nav-link<?= $isActive('tia-report-annex-j') ?>" <?= $dismiss ?>>
             <i class="bi bi-file-earmark-richtext"></i><span>Annex J (TIA Report)</span>
           </a>
+          <a href="<?= site_url('tia-report-bulk') ?>" class="nav-link<?= $isActive('tia-report-bulk') ?>" <?= $dismiss ?>>
+            <i class="bi bi-printer"></i><span>Bulk Print by Quarter</span>
+          </a>
         </div>
       </div>
 

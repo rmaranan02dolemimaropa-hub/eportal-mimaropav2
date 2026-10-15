@@ -88,6 +88,19 @@ body {
   box-shadow: none;
 }
 
+/* ---------- Bulk print (several sheets in one print job) ---------- */
+.bulk-sheet {
+  margin-bottom: 24px;
+}
+@media print {
+  .bulk-sheet {
+    margin: 0;
+  }
+  .bulk-sheet:not(:last-child) {
+    break-after: page;
+  }
+}
+
 @media (max-width: 768px) {
   .tia-table thead th,
   .tia-table tbody td {

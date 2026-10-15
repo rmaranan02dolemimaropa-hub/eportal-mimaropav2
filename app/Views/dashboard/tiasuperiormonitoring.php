@@ -9,7 +9,10 @@
 $qs = fn(array $over = []) => http_build_query(array_merge(
     ['status' => $status, 'quarter' => $quarter, 'year' => $year, 's' => $search],
     $over
+
+
 ));
+$qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–Dec'];
 ?>
 
 <main class="main-content tia-page">
@@ -59,31 +62,30 @@ $qs = fn(array $over = []) => http_build_query(array_merge(
         <form method="get" class="d-flex flex-wrap gap-2 align-items-end p-3">
             <input type="hidden" name="status" value="<?= esc($status, 'attr') ?>">
 
-            <div class="col-md-2">
+            <div>
                 <label class="form-label">Year</label>
-                <select id="filterYear" class="form-select" autocomplete="off">
-                    <option value="">All years</option>
-                    <?php foreach ($years as $yr): ?>
-                        <option value="<?= $yr ?>"><?= $yr ?></option>
+                <select name="year" class="form-select" style="width:130px;">
+                    <option value="0">All years</option>
+                    <?php foreach ($years as $y): ?>
+                        <option value="<?= $y ?>" <?= $year === (int) $y ? 'selected' : '' ?>><?= $y ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="col-md-2">
+
+            <div>
                 <label class="form-label">Quarter</label>
-                <select id="filterQuarter" class="form-select" autocomplete="off">
-                    <option value="">All quarters</option>
-                    <?php foreach ($qMonths as $qn => $label): ?>
-                        <option value="<?= $qn ?>">Q<?= $qn ?> (<?= $label ?>)</option>
+                <select name="quarter" class="form-select" style="width:170px;">
+                    <option value="0">All quarters</option>
+                    <?php foreach ($qMonths as $n => $l): ?>
+                        <option value="<?= $n ?>" <?= $quarter === $n ? 'selected' : '' ?>>Q<?= $n ?> (<?= $l ?>)</option>
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="col-md-2">
+
+            <div class="flex-grow-1" style="min-width:200px;">
                 <label class="form-label">Search</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-search"></i></span>
-                    <input type="search" id="trainingSearch" class="form-control" placeholder="Search trainings..."
-                        autocomplete="off">
-                </div>
+                <input type="search" name="s" value="<?= esc($search, 'attr') ?>" class="form-control"
+                    placeholder="Participant, training, position…">
             </div>
 
             <button class="btn btn-primary" type="submit"><i class="bi bi-funnel me-1"></i>Apply</button>
