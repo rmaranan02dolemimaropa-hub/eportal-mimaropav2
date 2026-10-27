@@ -8,7 +8,7 @@
   | ROLES  (add new roles here)
   |--------------------------------------------------------------------------
   */
-  $role = strtoupper((string) session('role'));
+  $role = strtoupper(trim((string) session('role')));
 
   $isIT = ($role === 'IT ADMINISTRATOR');
   $isHR = ($role === 'HR ADMINISTRATOR');
@@ -62,6 +62,13 @@
       <a href="<?= site_url('users') ?>" class="nav-link<?= $isActive('users') ?>" <?= $dismiss ?>>
         <i class="bi bi-people"></i><span>Users</span>
       </a>
+
+      <?php if ($isIT): ?>
+        <a href="<?= site_url('activity-logs') ?>" class="nav-link<?= $isActive('activity-logs') ?>" <?= $dismiss ?>>
+          <i class="bi bi-clock-history"></i><span>Activity Logs</span>
+        </a>
+      <?php endif; ?>
+
       <a href="<?= site_url('reports') ?>" class="nav-link<?= $isActive('reports') ?>" <?= $dismiss ?>>
         <i class="bi bi-bar-chart"></i><span>Reports</span>
       </a>

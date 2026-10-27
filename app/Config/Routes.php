@@ -14,6 +14,13 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('login', 'EportalController::login');
 $routes->post('login/login_process', 'EportalController::login_process');
 
+// --- MFA (half-finished login: password OK, second step pending) ---
+$routes->get('mfa/setup', 'MfaController::setup');
+$routes->post('mfa/setup', 'MfaController::confirm');
+$routes->get('mfa/verify', 'MfaController::verify');
+$routes->post('mfa/verify', 'MfaController::verifyProcess');
+$routes->get('mfa/cancel', 'MfaController::cancel');
+
 // Shown by AuthFilter when a logged-in user opens a page their role cannot access
 $routes->get('unauthorized', static function () {
     return service('response')
@@ -93,10 +100,10 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
 
     $routes->post('tia/send-superior-emails', 'TiaSuperiorController::sendEmails');
     $routes->get('tia-superior/rate/(:segment)/(:num)', 'TiaSuperiorController::rate/$1/$2');
-    $routes->post('tia_superior_store', 'TiaSuperiorController::store');
 
     $routes->get('tia-superior', 'TiaSuperiorController::index');
     $routes->get('tia-superior/participants/(:segment)', 'TiaSuperiorController::getParticipants/$1');
+    $routes->get('tia-superior/monitoring', 'TiaSuperiorController::monitoring');
 
     $routes->get('tia-report', 'TiaReportController::index');
     $routes->get('tia-report-superior', 'TiaReportController::superior');
@@ -112,11 +119,6 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('tia-report-superior/export', 'TiaReportController::exportE');
     $routes->get('tia-report-bulk', 'TiaReportController::bulk');
     $routes->get('tia-report-bulk/export', 'TiaReportController::bulkExport');
-
-
-    $routes->get('tia-superior/monitoring', 'TiaSuperiorController::monitoring');
-
-
 
     // Logout
     $routes->get('logout', 'EportalController::logout');
@@ -185,14 +187,26 @@ $routes->group('', ['filter' => 'auth:admin'], function ($routes) {
 
     /*
     |--------------------------------------------------------------------------
-    | FEEDBACK
+    | USERS
     |--------------------------------------------------------------------------
     */
+
     $routes->get('users', 'UserController::index');
     $routes->post('users/store', 'UserController::store');
     $routes->post('users/update/(:num)', 'UserController::update/$1');
     $routes->post('users/deactivate/(:num)', 'UserController::deactivate/$1');
     $routes->post('users/activate/(:num)', 'UserController::activate/$1');
+    $routes->post('users/reset-mfa/(:num)', 'UserController::resetMfa/$1');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ACTIVITY LOGS  (IT Administrator only - checked in the controller)
+    |--------------------------------------------------------------------------
+    */
+
+    $routes->get('activity-logs', 'ActivityLogController::index');
+    $routes->get('activity-logs/export', 'ActivityLogController::export');
 
 
     /*
@@ -226,5 +240,3 @@ $routes->group('', ['filter' => 'auth:admin'], function ($routes) {
     $routes->post('superiors/quick-add', 'SuperiorController::quickAdd');
     $routes->get('superiors/all', 'SuperiorController::all');
 });
-
-

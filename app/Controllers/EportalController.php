@@ -77,17 +77,10 @@ class EportalController extends BaseController
                 ->with('error', 'Invalid username or password.');
         }
 
-        session()->regenerate(true);
-
-        session()->set([
-            'user_id' => $user['id'],
-            'fullname' => $user['fullname'],
-            'username' => $user['username'],
-            'role' => $user['role'],
-            'logged_in' => true,
-        ]);
-
-        return redirect()->to($this->homeFor($user['role']));
+        // Password is correct -> now the second step (authenticator code, or
+        // first-time setup). The real logged-in session is only created by
+        // MfaService::completeLogin() after that step succeeds.
+        return (new \App\Libraries\MfaService())->startChallenge($user);
     }
 
     public function logout()

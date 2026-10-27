@@ -81,6 +81,7 @@ $roleLabel = static function (?string $role) use ($roles): string {
                         <th>Username</th>
                         <th>Role</th>
                         <th>Status</th>
+                        <th>Two-Step</th>
                         <th class="text-end">Action</th>
                     </tr>
                 </thead>
@@ -95,6 +96,13 @@ $roleLabel = static function (?string $role) use ($roles): string {
                                     <span class="badge badge-completed">ACTIVE</span>
                                 <?php else: ?>
                                     <span class="badge badge-rejected">INACTIVE</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <?php if ((int) ($row['mfa_enabled'] ?? 0) === 1): ?>
+                                    <span class="badge badge-completed"><i class="bi bi-shield-check"></i> ENABLED</span>
+                                <?php else: ?>
+                                    <span class="badge bg-secondary"><i class="bi bi-shield-exclamation"></i> NOT SET UP</span>
                                 <?php endif; ?>
                             </td>
 
@@ -117,6 +125,16 @@ $roleLabel = static function (?string $role) use ($roles): string {
                                             <i class="bi bi-person-check"></i>
                                         </button>
                                     <?php endif; ?>
+
+                                    <?php $mfaOn = (int) ($row['mfa_enabled'] ?? 0) === 1; ?>
+                                    <form action="<?= base_url('users/reset-mfa/' . $row['id']) ?>" method="post"
+                                        class="d-inline"
+                                        onsubmit="return confirm('Reset two-step verification for this user? They will have to set it up again at next login.');">
+                                        <?= csrf_field() ?>
+                                        <button class="row-action-btn"
+                                            title="<?= $mfaOn ? 'Reset two-step verification' : 'Not set up yet' ?>"
+                                            <?= $mfaOn ? '' : 'disabled' ?>><i class="bi bi-shield-lock"></i></button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
@@ -228,8 +246,8 @@ $roleLabel = static function (?string $role) use ($roles): string {
                             <select name="role" id="addRole" class="form-select" required>
                                 <option value="" selected disabled>Select Role</option>
                                 <?php foreach ($roles as $value => $label): ?>
-                                    <option value="<?= esc($value, 'attr') ?>" <?= strtoupper(trim((string) $row['role'])) === $value ? 'selected' : '' ?>>
-                                    <?php endforeach; ?>
+                                    <option value="<?= esc($value, 'attr') ?>"><?= esc($label) ?></option>
+                                <?php endforeach; ?>
                             </select>
 
                             <small class="text-muted" id="roleHint"></small>
@@ -406,6 +424,16 @@ $roleLabel = static function (?string $role) use ($roles): string {
                                     <span class="badge badge-completed">ACTIVE</span>
                                 <?php else: ?>
                                     <span class="badge badge-rejected">INACTIVE</span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Two-Step Verification</th>
+                            <td>
+                                <?php if ((int) ($row['mfa_enabled'] ?? 0) === 1): ?>
+                                    <span class="badge badge-completed">ENABLED</span>
+                                <?php else: ?>
+                                    <span class="badge bg-secondary">NOT SET UP</span>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -611,9 +639,11 @@ $roleLabel = static function (?string $role) use ($roles): string {
     const statusToggle = document.getElementById('statusToggle');
     const statusLabel = document.getElementById('statusLabel');
 
-    statusToggle.addEventListener('change', function () {
-        statusLabel.textContent = this.checked ? 'ACTIVE' : 'INACTIVE';
-    });
+    if (statusToggle) {
+        statusToggle.addEventListener('change', function () {
+            statusLabel.textContent = this.checked ? 'ACTIVE' : 'INACTIVE';
+        });
+    }
 
     // Short explanation of what each role can access
     const roleDescriptions = {

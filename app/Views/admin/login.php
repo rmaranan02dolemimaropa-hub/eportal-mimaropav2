@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="assets/css/login.css" />
+  <link rel="stylesheet" href="<?= base_url('assets/css/login.css') ?>" />
 </head>
 
 <body>
@@ -50,7 +50,7 @@
 
           <i class="bi bi-exclamation-circle-fill me-2"></i>
 
-          <?= session()->getFlashdata('error') ?>
+          <?= esc(session()->getFlashdata('error')) ?>
 
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
           </button>
@@ -61,6 +61,7 @@
 
       <!-- Login form -->
       <form class="login-form" action="<?= base_url('login/login_process') ?>" method="post" novalidate>
+        <?= csrf_field() ?>
 
         <!-- Username -->
         <div class="mb-3 input-group-custom">
@@ -85,7 +86,7 @@
               name="password" placeholder="Enter your password" minlength="8"
               pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$"
               title="Minimum 8 characters with uppercase, lowercase, number, and special character."
-              autocomplete="new-password" required>
+              autocomplete="current-password" required>
 
             <!-- Show / Hide Password -->
             <button type="button" class="password-toggle-btn" id="passwordToggle" aria-label="Show password"
@@ -100,7 +101,7 @@
           </small>
         </div>
 
-        <!-- Remember me + Forgot password -->
+        <!-- Remember me -->
         <div class="d-flex justify-content-between align-items-center mb-4 form-utility-row">
           <div class="form-check">
             <input class="form-check-input" type="checkbox" id="rememberMe" />
@@ -115,13 +116,6 @@
           Log In
           <i class="bi bi-arrow-right-short"></i>
         </button>
-        <div class="text-center mt-3">
-
-
-
-
-
-        </div>
 
       </form>
 
@@ -133,42 +127,37 @@
     </section>
   </main>
 
+  <script>
+    // Show / hide password
+    (function () {
+      const passwordInput = document.getElementById('password');
+      const toggleButton = document.getElementById('passwordToggle');
+      const toggleIcon = document.getElementById('passwordToggleIcon');
+
+      toggleButton.addEventListener('click', function () {
+        const isHidden = passwordInput.type === 'password';
+        passwordInput.type = isHidden ? 'text' : 'password';
+        toggleIcon.classList.toggle('bi-eye', !isHidden);
+        toggleIcon.classList.toggle('bi-eye-slash', isHidden);
+        this.setAttribute('aria-pressed', isHidden);
+      });
+    })();
+
+    // Auto-dismiss alerts
+    document.addEventListener('DOMContentLoaded', function () {
+      ['loginAlert', 'loginSuccess'].forEach(function (id) {
+        const alert = document.getElementById(id);
+        if (!alert) return;
+
+        setTimeout(function () {
+          alert.style.transition = 'opacity .5s';
+          alert.style.opacity = '0';
+          setTimeout(function () { alert.remove(); }, 500);
+        }, 5000);
+      });
+    });
+  </script>
+
 </body>
 
 </html>
-<script>
-
-  const passwordInput = document.getElementById('password'); const
-    toggleButton = document.getElementById('passwordToggle'); const
-      toggleIcon = document.getElementById('passwordToggleIcon'); toggleButton.addEventListener('click', function () {
-        const
-          isHidden = passwordInput.type === 'password'; passwordInput.type = isHidden ? 'text' : 'password';
-        toggleIcon.classList.toggle('bi-eye', !isHidden); toggleIcon.classList.toggle('bi-eye-slash', isHidden);
-        this.setAttribute('aria-pressed', isHidden);
-      }); </script>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-
-    ['loginAlert', 'loginSuccess'].forEach(function (id) {
-
-      const alert = document.getElementById(id);
-
-      if (alert) {
-
-        setTimeout(function () {
-
-          alert.style.transition = "opacity .5s";
-          alert.style.opacity = "0";
-
-          setTimeout(function () {
-            alert.remove();
-          }, 500);
-
-        }, 5000);
-
-      }
-
-    });
-
-  });
-</scriptconst>

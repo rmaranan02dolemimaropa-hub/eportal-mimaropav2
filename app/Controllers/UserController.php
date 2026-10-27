@@ -159,4 +159,24 @@ class UserController extends BaseController
 
         return redirect()->back()->with('success', $user['fullname'] . ' has been activated.');
     }
+
+    //===================================================
+    // RESET MFA (lost phone / lost passkey)
+    //===================================================
+
+    public function resetMfa($id)
+    {
+        $id = (int) $id;
+
+        $user = $this->model->find($id);
+        if (!$user) {
+            return redirect()->back()->with('error', 'User not found.');
+        }
+
+        // Wipes authenticator secret, backup codes and passkeys.
+        // The user must enrol again at their next login.
+        (new \App\Libraries\MfaService())->resetUser($id);
+
+        return redirect()->back()->with('success', 'Two-step verification was reset for ' . $user['fullname'] . '. They must set it up again at next login.');
+    }
 }
