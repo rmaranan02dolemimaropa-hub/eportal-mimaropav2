@@ -44,7 +44,8 @@
             <div class="stat-body">
                 <span class="stat-number" data-target="<?= $new_application ?? 0 ?>">0</span>
                 <span class="stat-label">New Request</span>
-                <span class="stat-trend trend-up"><i class="bi bi-calendar-check me-1"></i> <?= $new_today ?? 0 ?> received
+                <span class="stat-trend trend-up"><i class="bi bi-calendar-check me-1"></i> <?= $new_today ?? 0 ?>
+                    received
                     today</span>
             </div>
         </div>
@@ -64,7 +65,8 @@
             <div class="stat-body">
                 <span class="stat-number" data-target="<?= $for_releasing ?? 0 ?>">0</span>
                 <span class="stat-label">For Releasing</span>
-                <span class="stat-trend trend-up"><i class="bi bi-box-seam me-1"></i><?= $releasing_today ?? 0 ?> ready today
+                <span class="stat-trend trend-up"><i class="bi bi-box-seam me-1"></i><?= $releasing_today ?? 0 ?> ready
+                    today
                 </span>
             </div>
         </div>
@@ -84,7 +86,8 @@
             <div class="stat-body">
                 <span class="stat-number" data-target="<?= $rejected ?? 0 ?>">0</span>
                 <span class="stat-label">Rejected</span>
-                <span class="stat-trend trend-down"><i class="bi bi-calendar-x me-1"></i><?= $rejected_month ?? 0 ?> rejected
+                <span class="stat-trend trend-down"><i class="bi bi-calendar-x me-1"></i><?= $rejected_month ?? 0 ?>
+                    rejected
                     this month</span>
             </div>
         </div>
@@ -121,94 +124,50 @@
 
                     <tbody>
 
+                    <tbody>
                         <?php
                         $requests = $requests ?? [];
-                        $allowedStatus = [
-                            'New Application',
-                            'Processing',
-                            'For Releasing'
-                        ];
-
+                        $allowedStatus = ['New Application', 'Processing', 'For Releasing'];
                         $statusClass = [
                             'New Application' => 'badge-new-application',
                             'Processing' => 'badge-processing',
                             'For Releasing' => 'badge-for-released',
                         ];
-
                         $hasData = false;
                         ?>
 
-                        <?php if (!empty($requests)): ?>
-
-                            <?php foreach ($requests as $row): ?>
-
-                                <?php if (!in_array($row['status'], $allowedStatus))
-                                    continue; ?>
-
-                                <?php $hasData = true; ?>
-
-                                <tr>
-
-                                    <td class="ref-no">
-                                        <?= esc($row['reference_no']) ?>
-                                    </td>
-
-                                    <td>
-                                        <?= esc($row['fullname']) ?>
-                                    </td>
-
-                                    <td>
-                                        <?= esc($row['service_availed']) ?>
-                                    </td>
-
-                                    <td>
-                                        <?php
-
-                                        $displayDate = $row['date_requested'];
-
-                                        if ($row['status'] == 'Processing' && $row['date_processing']) {
-
-                                            $displayDate = $row['date_processing'];
-                                        } elseif ($row['status'] == 'For Releasing' && $row['date_released']) {
-
-                                            $displayDate = $row['date_released'];
-                                        } elseif ($row['status'] == 'Completed' && $row['date_completed']) {
-
-                                            $displayDate = $row['date_completed'];
-                                        } elseif ($row['status'] == 'Rejected' && $row['date_rejected']) {
-
-                                            $displayDate = $row['date_rejected'];
-                                        }
-
-                                        ?>
-
-                                        <?= date('F d, Y', strtotime($displayDate)) ?>
-                                    </td>
-
-                                    <td>
-                                        <span class="badge <?= $statusClass[$row['status']] ?>">
-                                            <?= esc($row['status']) ?>
-                                        </span>
-                                    </td>
-
-                                </tr>
-
-                            <?php endforeach; ?>
-
-                        <?php endif; ?>
+                        <?php foreach ($requests as $row): ?>
+                            <?php if (!in_array($row['status'], $allowedStatus))
+                                continue; ?>
+                            <?php
+                            $hasData = true;
+                            $displayDate = $row['date_requested'];
+                            if ($row['status'] == 'Processing' && $row['date_processing']) {
+                                $displayDate = $row['date_processing'];
+                            } elseif ($row['status'] == 'For Releasing' && $row['date_released']) {
+                                $displayDate = $row['date_released'];
+                            }
+                            ?>
+                            <tr>
+                                <td class="ref-no" data-label="Reference No."><?= esc($row['reference_no']) ?></td>
+                                <td data-label="Requestor"><?= esc($row['fullname']) ?></td>
+                                <td data-label="Service"><?= esc($row['service_availed']) ?></td>
+                                <td data-label="Date Requested"><?= date('F d, Y', strtotime($displayDate)) ?></td>
+                                <td data-label="Status">
+                                    <span
+                                        class="badge <?= $statusClass[$row['status']] ?>"><?= esc($row['status']) ?></span>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
 
                         <?php if (!$hasData): ?>
-
-                            <tr>
-                                <td colspan="6" class="text-center py-5">
-                                    <i class="bi bi-inbox fs-1 text-muted"></i>
-                                    <br>
+                            <tr class="empty-row">
+                                <td colspan="5" class="text-center py-5">
+                                    <i class="bi bi-inbox fs-1 text-muted"></i><br>
                                     No service requests found.
                                 </td>
                             </tr>
-
                         <?php endif; ?>
-
                     </tbody>
                 </table>
             </div>
@@ -289,7 +248,7 @@
    No external dependencies beyond the Bootstrap bundle already loaded.
    ========================================================================== */
 
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
         setCurrentDate();
         animateStatCounters();
         enableTableSearch();
@@ -321,7 +280,7 @@
         const counters = document.querySelectorAll(".stat-number");
         const duration = 900; // milliseconds
 
-        counters.forEach(function(counter) {
+        counters.forEach(function (counter) {
             const target = parseInt(counter.getAttribute("data-target"), 10) || 0;
             const startTime = performance.now();
 
@@ -356,10 +315,10 @@
 
         if (!searchInput || !tableRows.length) return;
 
-        searchInput.addEventListener("input", function() {
+        searchInput.addEventListener("input", function () {
             const query = searchInput.value.trim().toLowerCase();
 
-            tableRows.forEach(function(row) {
+            tableRows.forEach(function (row) {
                 const rowText = row.textContent.toLowerCase();
                 row.style.display = rowText.includes(query) ? "" : "none";
             });
@@ -368,20 +327,20 @@
 </script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
 
-        ['loginAlert', 'loginSuccess'].forEach(function(id) {
+        ['loginAlert', 'loginSuccess'].forEach(function (id) {
 
             const alert = document.getElementById(id);
 
             if (alert) {
 
-                setTimeout(function() {
+                setTimeout(function () {
 
                     alert.style.transition = "opacity .5s";
                     alert.style.opacity = "0";
 
-                    setTimeout(function() {
+                    setTimeout(function () {
                         alert.remove();
                     }, 500);
 
@@ -393,7 +352,7 @@
 
     });
 
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
 
         const counters = document.querySelectorAll(".stat-number");
 

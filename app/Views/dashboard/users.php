@@ -86,59 +86,74 @@ $roleLabel = static function (?string $role) use ($roles): string {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($users as $row): ?>
-                        <tr>
-                            <td><?= esc($row['fullname']) ?></td>
-                            <td><?= esc($row['username']) ?></td>
-                            <td><?= esc($roleLabel($row['role'])) ?></td>
-                            <td>
-                                <?php if ($row['status'] === 'ACTIVE'): ?>
-                                    <span class="badge badge-completed">ACTIVE</span>
-                                <?php else: ?>
-                                    <span class="badge badge-rejected">INACTIVE</span>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <?php if ((int) ($row['mfa_enabled'] ?? 0) === 1): ?>
-                                    <span class="badge badge-completed"><i class="bi bi-shield-check"></i> ENABLED</span>
-                                <?php else: ?>
-                                    <span class="badge bg-secondary"><i class="bi bi-shield-exclamation"></i> NOT SET UP</span>
-                                <?php endif; ?>
-                            </td>
+                    <?php if (!empty($users)): ?>
 
-                            <td class="text-end">
-                                <div class="row-actions">
-                                    <button class="row-action-btn" title="View" data-bs-toggle="modal"
-                                        data-bs-target="#view<?= $row['id'] ?>"><i class="bi bi-eye"></i></button>
+                        <?php foreach ($users as $row): ?>
+                            <tr>
+                                <td data-label="Full Name"><?= esc($row['fullname']) ?></td>
+                                <td data-label="Username"><?= esc($row['username']) ?></td>
+                                <td data-label="Role"><?= esc($roleLabel($row['role'])) ?></td>
 
-                                    <button class="row-action-btn" title="Edit" data-bs-toggle="modal"
-                                        data-bs-target="#edit<?= $row['id'] ?>"><i class="bi bi-pencil"></i></button>
-
+                                <td data-label="Status">
                                     <?php if ($row['status'] === 'ACTIVE'): ?>
-                                        <button class="row-action-btn row-action-danger" title="Deactivate"
-                                            data-bs-toggle="modal" data-bs-target="#status<?= $row['id'] ?>">
-                                            <i class="bi bi-person-slash"></i>
-                                        </button>
+                                        <span class="badge badge-completed">ACTIVE</span>
                                     <?php else: ?>
-                                        <button class="row-action-btn" title="Activate" data-bs-toggle="modal"
-                                            data-bs-target="#status<?= $row['id'] ?>">
-                                            <i class="bi bi-person-check"></i>
-                                        </button>
+                                        <span class="badge badge-rejected">INACTIVE</span>
                                     <?php endif; ?>
+                                </td>
 
-                                    <?php $mfaOn = (int) ($row['mfa_enabled'] ?? 0) === 1; ?>
-                                    <form action="<?= base_url('users/reset-mfa/' . $row['id']) ?>" method="post"
-                                        class="d-inline"
-                                        onsubmit="return confirm('Reset two-step verification for this user? They will have to set it up again at next login.');">
-                                        <?= csrf_field() ?>
-                                        <button class="row-action-btn"
-                                            title="<?= $mfaOn ? 'Reset two-step verification' : 'Not set up yet' ?>"
-                                            <?= $mfaOn ? '' : 'disabled' ?>><i class="bi bi-shield-lock"></i></button>
-                                    </form>
-                                </div>
+                                <td data-label="Two-Step">
+                                    <?php if ((int) ($row['mfa_enabled'] ?? 0) === 1): ?>
+                                        <span class="badge badge-completed"><i class="bi bi-shield-check"></i> ENABLED</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-secondary"><i class="bi bi-shield-exclamation"></i> NOT SET UP</span>
+                                    <?php endif; ?>
+                                </td>
+
+                                <td class="text-end" data-label="Action">
+                                    <div class="row-actions">
+                                        <button class="row-action-btn" title="View" data-bs-toggle="modal"
+                                            data-bs-target="#view<?= $row['id'] ?>"><i class="bi bi-eye"></i></button>
+
+                                        <button class="row-action-btn" title="Edit" data-bs-toggle="modal"
+                                            data-bs-target="#edit<?= $row['id'] ?>"><i class="bi bi-pencil"></i></button>
+
+                                        <?php if ($row['status'] === 'ACTIVE'): ?>
+                                            <button class="row-action-btn row-action-danger" title="Deactivate"
+                                                data-bs-toggle="modal" data-bs-target="#status<?= $row['id'] ?>">
+                                                <i class="bi bi-person-slash"></i>
+                                            </button>
+                                        <?php else: ?>
+                                            <button class="row-action-btn" title="Activate" data-bs-toggle="modal"
+                                                data-bs-target="#status<?= $row['id'] ?>">
+                                                <i class="bi bi-person-check"></i>
+                                            </button>
+                                        <?php endif; ?>
+
+                                        <?php $mfaOn = (int) ($row['mfa_enabled'] ?? 0) === 1; ?>
+                                        <form action="<?= base_url('users/reset-mfa/' . $row['id']) ?>" method="post"
+                                            class="d-inline"
+                                            onsubmit="return confirm('Reset two-step verification for this user? They will have to set it up again at next login.');">
+                                            <?= csrf_field() ?>
+                                            <button class="row-action-btn"
+                                                title="<?= $mfaOn ? 'Reset two-step verification' : 'Not set up yet' ?>"
+                                                <?= $mfaOn ? '' : 'disabled' ?>><i class="bi bi-shield-lock"></i></button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+
+                    <?php else: ?>
+
+                        <tr class="empty-row">
+                            <td colspan="6" class="text-center py-5">
+                                <i class="bi bi-people fs-1 text-muted"></i><br>
+                                No users found.
                             </td>
                         </tr>
-                    <?php endforeach; ?>
+
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>

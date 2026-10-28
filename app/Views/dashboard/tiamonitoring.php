@@ -144,45 +144,58 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
                             $notifiedAt = !empty($r['notified_at']) ? strtotime((string) $r['notified_at']) : false;
                             ?>
                             <tr data-quarter="<?= esc($quarters[$i] ?? '', 'attr') ?>">
-                                <td><?= $i + 1 ?></td>
-                                <td>
-                                    <?= esc($r['name']) ?>
-                                    <?php if ($r['email']): ?>
-                                        <div class="small text-muted"><?= esc($r['email']) ?></div>
-                                    <?php endif; ?>
-                                </td>
-                                <td><?= esc($r['position'] ?: '—') ?></td>
-                                <td><?= esc($r['training_title']) ?></td>
-                                <td><?= esc($r['training_dates']) ?></td>
-                                <td><?= esc($r['superior'] ?: '—') ?></td>
-                                <td class="notify-cell" data-code="<?= esc($rowCode, 'attr') ?>">
-                                    <div class="notify-info">
-                                        <?php if ($notifyCount > 0): ?>
-                                            <span class="badge bg-info text-dark">
-                                                <i class="bi bi-envelope-check me-1"></i>Sent <?= $notifyCount ?>
-                                                time<?= $notifyCount === 1 ? '' : 's' ?>
-                                            </span>
-                                            <?php if ($notifiedAt): ?>
-                                                <div class="small text-muted">Last: <?= esc(date('M d, Y h:i A', $notifiedAt)) ?></div>
-                                            <?php endif; ?>
-                                        <?php else: ?>
-                                            <span class="text-muted small">Not yet notified</span>
+
+                                <td data-label="#"><?= $i + 1 ?></td>
+
+                                <td data-label="Participant">
+                                    <div>
+                                        <?= esc($r['name']) ?>
+                                        <?php if (!empty($r['email'])): ?>
+                                            <div class="small text-muted"><?= esc($r['email']) ?></div>
                                         <?php endif; ?>
                                     </div>
-
-                                    <?php if ($rowCode !== ''): ?>
-                                        <button type="button" class="btn btn-sm tool-btn notify-superior-btn mt-1"
-                                            data-code="<?= esc($rowCode, 'attr') ?>"
-                                            data-superior="<?= esc((string) ($r['superior'] ?? ''), 'attr') ?>"
-                                            data-training="<?= esc((string) ($r['training_title'] ?? ''), 'attr') ?>">
-                                            <i class="bi bi-send me-1"></i><span
-                                                class="lbl"><?= $notifyCount > 0 ? 'Resend' : 'Notify' ?></span>
-                                        </button>
-                                    <?php endif; ?>
                                 </td>
-                                <td class="text-center">
-                                    <?php if ($r['rated']): ?>
-                                        <span class="badge bg-success" <?= $r['rated_at'] ? 'title="Rated ' . esc($r['rated_at'], 'attr') . '"' : '' ?>>
+
+                                <td data-label="Position"><?= esc($r['position'] ?: '—') ?></td>
+
+                                <td data-label="Training"><?= esc($r['training_title']) ?></td>
+
+                                <td data-label="Date(s)"><?= esc($r['training_dates']) ?></td>
+
+                                <td data-label="Superior"><?= esc($r['superior'] ?: '—') ?></td>
+
+                                <td class="notify-cell" data-label="Notification" data-code="<?= esc($rowCode, 'attr') ?>">
+                                    <div class="notify-wrap">
+                                        <div class="notify-info">
+                                            <?php if ($notifyCount > 0): ?>
+                                                <span class="badge bg-info text-dark">
+                                                    <i class="bi bi-envelope-check me-1"></i>Sent <?= $notifyCount ?>
+                                                    time<?= $notifyCount === 1 ? '' : 's' ?>
+                                                </span>
+                                                <?php if ($notifiedAt): ?>
+                                                    <div class="small text-muted">Last: <?= esc(date('M d, Y h:i A', $notifiedAt)) ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                            <?php else: ?>
+                                                <span class="text-muted small">Not yet notified</span>
+                                            <?php endif; ?>
+                                        </div>
+
+                                        <?php if ($rowCode !== ''): ?>
+                                            <button type="button" class="btn btn-sm tool-btn notify-superior-btn mt-1"
+                                                data-code="<?= esc($rowCode, 'attr') ?>"
+                                                data-superior="<?= esc((string) ($r['superior'] ?? ''), 'attr') ?>"
+                                                data-training="<?= esc((string) ($r['training_title'] ?? ''), 'attr') ?>">
+                                                <i class="bi bi-send me-1"></i><span
+                                                    class="lbl"><?= $notifyCount > 0 ? 'Resend' : 'Notify' ?></span>
+                                            </button>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+
+                                <td class="text-center" data-label="Rating">
+                                    <?php if (!empty($r['rated'])): ?>
+                                        <span class="badge bg-success" <?= !empty($r['rated_at']) ? 'title="Rated ' . esc($r['rated_at'], 'attr') . '"' : '' ?>>
                                             <i class="bi bi-check-circle me-1"></i>Rated
                                         </span>
                                     <?php else: ?>
@@ -191,24 +204,28 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
                                         </span>
                                     <?php endif; ?>
                                 </td>
-                                <td class="text-center">
-                                    <?php if ($r['rated']): ?>
-                                        <button type="button" class="btn btn-sm tool-btn view-sheet-btn" title="View rating sheet"
-                                            aria-label="View rating sheet" data-bs-toggle="modal" data-bs-target="#sheetModal"
-                                            data-name="<?= esc($r['name'], 'attr') ?>"
-                                            data-url="<?= esc(site_url('tia-report-monitoring/view/' . $r['response_id']), 'attr') ?>">
-                                            <i class="bi bi-eye me-1"></i>View
-                                        </button>
-                                    <?php else: ?>
-                                        <button type="button" class="btn btn-sm tool-btn" disabled title="Not yet rated">
-                                            <i class="bi bi-eye-slash me-1"></i>View
-                                        </button>
-                                    <?php endif; ?>
+
+                                <td class="text-center" data-label="Action">
+                                    <div class="row-actions">
+                                        <?php if (!empty($r['rated'])): ?>
+                                            <button type="button" class="btn btn-sm tool-btn view-sheet-btn"
+                                                title="View rating sheet" aria-label="View rating sheet" data-bs-toggle="modal"
+                                                data-bs-target="#sheetModal" data-name="<?= esc($r['name'], 'attr') ?>"
+                                                data-url="<?= esc(site_url('tia-report-monitoring/view/' . $r['response_id']), 'attr') ?>">
+                                                <i class="bi bi-eye me-1"></i>View
+                                            </button>
+                                        <?php else: ?>
+                                            <button type="button" class="btn btn-sm tool-btn" disabled title="Not yet rated">
+                                                <i class="bi bi-eye-slash me-1"></i>View
+                                            </button>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
+
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <tr>
+                        <tr class="empty-row">
                             <td colspan="9" class="text-center text-muted py-5">
                                 <?= $status === 'pending' ? 'Nothing pending 🎉 All superiors have rated.' : 'No participants found.' ?>
                             </td>

@@ -2,10 +2,10 @@
 <?= $this->include('dashboard_layout/navbar') ?>
 <?= $this->include('dashboard_layout/sidebar') ?>
 
-<link rel="stylesheet" href="<?= base_url('assets/css/tia-dashboard.css') ?>">
+<link rel="stylesheet" href="<?= base_url('assets/css/tia-base.css') ?>?v=2">
 
 <main class="main-content">
-    <div class="container-fluid py-3 employees-page">
+    <div class="container-fluid py-3 tia-page">
 
         <?php if (session()->getFlashdata('success')): ?>
             <div class="alert alert-success alert-dismissible fade show">
@@ -24,7 +24,7 @@
             <h4 class="mb-0">Immediate Superiors</h4>
             <div class="d-flex flex-wrap gap-2">
                 <input type="text" id="searchBox" class="form-control" placeholder="Search..." style="width:220px">
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">+ Add
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">+ Add
                     Superior</button>
             </div>
         </div>
@@ -43,31 +43,41 @@
                 </thead>
                 <tbody>
                     <?php if (empty($superiors)): ?>
-                        <tr>
-                            <td colspan="6" class="text-center text-muted">No records found.</td>
+                        <tr class="empty-row">
+                            <td colspan="6" class="text-center text-muted py-5">No records found.</td>
                         </tr>
-                    <?php else:
-                        foreach ($superiors as $i => $s): ?>
+                    <?php else: ?>
+                        <?php foreach ($superiors as $i => $s): ?>
                             <tr>
-                                <td><?= $i + 1 ?></td>
-                                <td><?= esc($s['employee_code'] ?? '') ?></td>
-                                <td><?= esc($s['name']) ?></td>
-                                <td><?= esc($s['email'] ?? '') ?></td>
-                                <td><?= esc($s['position'] ?? '') ?></td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-secondary btn-edit" data-id="<?= $s['id'] ?>"
-                                        data-code="<?= esc($s['employee_code'] ?? '', 'attr') ?>"
-                                        data-name="<?= esc($s['name'], 'attr') ?>"
-                                        data-email="<?= esc($s['email'] ?? '', 'attr') ?>"
-                                        data-position="<?= esc($s['position'] ?? '', 'attr') ?>">Edit</button>
-                                    <form action="<?= site_url('superiors/delete/' . $s['id']) ?>" method="post"
-                                        class="d-inline" onsubmit="return confirm('Delete this superior?')">
-                                        <?= csrf_field() ?>
-                                        <button class="btn btn-sm btn-outline-danger">Delete</button>
-                                    </form>
+                                <td data-label="#"><?= $i + 1 ?></td>
+                                <td data-label="Employee Code"><?= esc($s['employee_code'] ?? '') ?></td>
+                                <td data-label="Name"><?= esc($s['name']) ?></td>
+                                <td data-label="Email"><?= esc($s['email'] ?? '') ?></td>
+                                <td data-label="Position"><?= esc($s['position'] ?? '') ?></td>
+
+                                <td class="text-end" data-label="Actions">
+                                    <div class="row-actions">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary btn-edit"
+                                            data-id="<?= (int) $s['id'] ?>"
+                                            data-code="<?= esc($s['employee_code'] ?? '', 'attr') ?>"
+                                            data-name="<?= esc($s['name'], 'attr') ?>"
+                                            data-email="<?= esc($s['email'] ?? '', 'attr') ?>"
+                                            data-position="<?= esc($s['position'] ?? '', 'attr') ?>">
+                                            <i class="bi bi-pencil me-1"></i>Edit
+                                        </button>
+
+                                        <form action="<?= site_url('superiors/delete/' . (int) $s['id']) ?>" method="post"
+                                            class="d-inline" onsubmit="return confirm('Delete this superior?')">
+                                            <?= csrf_field() ?>
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash me-1"></i>Delete
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
-                        <?php endforeach; endif; ?>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
@@ -137,23 +147,37 @@
     </div>
 </main>
 
+<!-- Bootstrap JS (head.php only loads the CSS) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
     (function () {
-        function initSuperiors() {
-            // Edit button -> fill modal
+        'use strict';
+
+        var updateUrl = '<?= site_url('superiors/update') ?>/';
+
+        // Edit button -> fill modal
+        function initEditButtons() {
             document.querySelectorAll('.btn-edit').forEach(function (btn) {
                 btn.addEventListener('click', function () {
-                    document.getElementById('editForm').action = '<?= site_url('superiors/update') ?>/' + this.dataset.id;
-                    document.getElementById('e_code').value = this.dataset.code || '';
-                    document.getElementById('e_name').value = this.dataset.name || '';
-                    document.getElementById('e_email').value = this.dataset.email || '';
-                    document.getElementById('e_position').value = this.dataset.position || '';
+                    var d = this.dataset;
+
+                    document.getElementById('editForm').action = updateUrl + d.id;
+                    document.getElementById('e_code').value = d.code || '';
+                    document.getElementById('e_name').value = d.name || '';
+                    document.getElementById('e_email').value = d.email || '';
+                    document.getElementById('e_position').value = d.position || '';
+
                     bootstrap.Modal.getOrCreateInstance(document.getElementById('editModal')).show();
                 });
             });
+        }
 
-            // Quick search
-            document.getElementById('searchBox').addEventListener('keyup', function () {
+        // Quick search
+        function initSearch() {
+            var box = document.getElementById('searchBox');
+            if (!box) return;
+            box.addEventListener('input', function () {
                 var q = this.value.toLowerCase();
                 document.querySelectorAll('#superiorTable tbody tr').forEach(function (tr) {
                     tr.style.display = tr.textContent.toLowerCase().indexOf(q) > -1 ? '' : 'none';
@@ -161,21 +185,17 @@
             });
         }
 
-        function ready() {
-            if (typeof bootstrap === 'undefined') {
-                var s = document.createElement('script');
-                s.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js';
-                s.onload = initSuperiors;
-                document.body.appendChild(s);
-            } else {
-                initSuperiors();
-            }
+        function init() {
+            [initEditButtons, initSearch].forEach(function (fn) {
+                try { fn(); } catch (err) { console.error('[superiors] ' + fn.name + ' failed:', err); }
+            });
         }
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', ready);
+        // 'load' fires after Bootstrap above has finished loading
+        if (document.readyState === 'complete') {
+            init();
         } else {
-            ready();
+            window.addEventListener('load', init);
         }
     })();
 </script>

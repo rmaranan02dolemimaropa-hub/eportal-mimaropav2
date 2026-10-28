@@ -150,49 +150,39 @@ $pager = $pager ?? null;
 
                             <tr>
 
-                                <td class="ref-no">
+                                <td class="ref-no" data-label="Reference No.">
                                     <?= esc($row['reference_no']) ?>
                                 </td>
 
-                                <td>
+                                <td data-label="Requestor">
                                     <?= esc($row['fullname']) ?>
                                 </td>
 
-                                <td>
+                                <td data-label="Service">
                                     <?= esc($row['service_availed']) ?>
                                 </td>
 
-                                <td>
+                                <td data-label="Date">
                                     <?php
-
                                     $displayDate = $row['date_requested'];
 
                                     if ($row['status'] == 'Processing' && $row['date_processing']) {
-
                                         $displayDate = $row['date_processing'];
                                     } elseif ($row['status'] == 'For Releasing' && $row['date_released']) {
-
                                         $displayDate = $row['date_released'];
                                     } elseif ($row['status'] == 'Completed' && $row['date_completed']) {
-
                                         $displayDate = $row['date_completed'];
                                     } elseif ($row['status'] == 'Rejected' && $row['date_rejected']) {
-
                                         $displayDate = $row['date_rejected'];
                                     } elseif ($row['status'] == 'Canceled' && $row['date_canceled']) {
-
                                         $displayDate = $row['date_canceled'];
                                     }
-
                                     ?>
-
                                     <?= date('F d, Y', strtotime($displayDate)) ?>
                                 </td>
 
-                                <td>
-
+                                <td data-label="Status">
                                     <?php
-
                                     $statusClass = [
                                         'New Application' => 'badge-new-application',
                                         'Processing' => 'badge-processing',
@@ -201,43 +191,29 @@ $pager = $pager ?? null;
                                         'Rejected' => 'badge-rejected',
                                         'Canceled' => 'badge-canceled',
                                     ];
-
                                     ?>
-
                                     <span class="badge <?= $statusClass[$row['status']] ?? 'bg-secondary' ?>">
-
                                         <?= esc($row['status']) ?>
-
                                     </span>
-
                                 </td>
-                                <td>
+
+                                <td data-label="Feedback">
                                     <?php if (!empty($row['feedback_id'])): ?>
-
                                         <span class="badge bg-success">
-                                            <i class="bi bi-check-circle-fill"></i>
-                                            Submitted
+                                            <i class="bi bi-check-circle-fill"></i> Submitted
                                         </span>
-
                                     <?php elseif ($row['status'] == 'For Releasing'): ?>
-
                                         <span class="badge bg-warning text-dark">
-                                            <i class="bi bi-hourglass-split"></i>
-                                            Waiting for Client
+                                            <i class="bi bi-hourglass-split"></i> Waiting for Client
                                         </span>
-
                                     <?php else: ?>
-
                                         <span class="badge bg-secondary">
-                                            <i class="bi bi-dash-circle"></i>
-                                            Not Yet Available
+                                            <i class="bi bi-dash-circle"></i> Not Yet Available
                                         </span>
-
                                     <?php endif; ?>
                                 </td>
 
-                                <td class="text-end">
-
+                                <td class="text-end" data-label="Action">
                                     <div class="row-actions">
 
                                         <!-- View (Everyone) -->
@@ -264,16 +240,13 @@ $pager = $pager ?? null;
                                             <i class="bi bi-eye"></i>
                                         </button>
 
-
                                         <?php if (in_array($row['status'], ['Processing', 'For Releasing'])): ?>
 
-                                            <!-- Edit -->
                                             <button class="row-action-btn" title="Edit" data-bs-toggle="modal"
                                                 data-bs-target="#edit<?= $row['id'] ?>">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
 
-                                            <!-- Cancel -->
                                             <button class="row-action-btn row-action-warning" title="Cancel" data-bs-toggle="modal"
                                                 data-bs-target="#cancel<?= $row['id'] ?>">
                                                 <i class="bi bi-x-circle"></i>
@@ -281,10 +254,7 @@ $pager = $pager ?? null;
 
                                         <?php endif; ?>
 
-
-
                                     </div>
-
                                 </td>
 
                             </tr>
@@ -293,18 +263,12 @@ $pager = $pager ?? null;
 
                     <?php else: ?>
 
-                        <tr>
-
-                            <td colspan="6" class="text-center py-5">
-
+                        <tr class="empty-row">
+                            <td colspan="7" class="text-center py-5">
                                 <i class="bi bi-inbox fs-1 text-muted"></i>
-
                                 <br>
-
                                 No service requests found.
-
                             </td>
-
                         </tr>
 
                     <?php endif; ?>
@@ -572,7 +536,7 @@ $pager = $pager ?? null;
    No external dependencies beyond the Bootstrap bundle already loaded.
    ========================================================================== */
 
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
         setCurrentDate();
         animateStatCounters();
         enableTableSearch();
@@ -604,7 +568,7 @@ $pager = $pager ?? null;
         const counters = document.querySelectorAll(".stat-number");
         const duration = 900; // milliseconds
 
-        counters.forEach(function(counter) {
+        counters.forEach(function (counter) {
             const target = parseInt(counter.getAttribute("data-target"), 10) || 0;
             const startTime = performance.now();
 
@@ -643,7 +607,7 @@ $pager = $pager ?? null;
         let timer;
 
 
-        searchInput.addEventListener("input", function() {
+        searchInput.addEventListener("input", function () {
 
 
             clearTimeout(timer);
@@ -682,20 +646,20 @@ $pager = $pager ?? null;
 
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
 
-        ['loginAlert', 'loginSuccess'].forEach(function(id) {
+        ['loginAlert', 'loginSuccess'].forEach(function (id) {
 
             const alert = document.getElementById(id);
 
             if (alert) {
 
-                setTimeout(function() {
+                setTimeout(function () {
 
                     alert.style.transition = "opacity .5s";
                     alert.style.opacity = "0";
 
-                    setTimeout(function() {
+                    setTimeout(function () {
                         alert.remove();
                     }, 500);
 
@@ -707,7 +671,7 @@ $pager = $pager ?? null;
 
     });
 
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
 
         const counters = document.querySelectorAll(".stat-number");
 
@@ -737,7 +701,7 @@ $pager = $pager ?? null;
 
     });
 
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
 
         const button = document.getElementById("exportButton");
         const overlay = document.getElementById("exportOverlay");
@@ -745,7 +709,7 @@ $pager = $pager ?? null;
         const percent = document.getElementById("progressValue");
         const text = document.getElementById("exportText");
 
-        button.addEventListener("click", async function() {
+        button.addEventListener("click", async function () {
 
             button.disabled = true;
             overlay.classList.add("is-visible");
@@ -786,8 +750,8 @@ $pager = $pager ?? null;
 
                 const response = await fetch(
                     "<?= site_url('export/hr-request') ?>" + currentParams, {
-                        credentials: "same-origin"
-                    }
+                    credentials: "same-origin"
+                }
                 );
 
                 if (!response.ok) {
@@ -858,7 +822,7 @@ $pager = $pager ?? null;
             return detailItem('Employment History', 'No employment records found.');
         }
 
-        const rows = histories.map(function(history, index) {
+        const rows = histories.map(function (history, index) {
             return `
             <tr>
                 <td>${index + 1}</td>
@@ -908,7 +872,7 @@ $pager = $pager ?? null;
         return div.innerHTML;
     }
 
-    viewRequestModal.addEventListener('show.bs.modal', function(event) {
+    viewRequestModal.addEventListener('show.bs.modal', function (event) {
 
         const button = event.relatedTarget;
         const data = button.dataset;
@@ -1136,7 +1100,7 @@ $pager = $pager ?? null;
     const processingText = document.getElementById("processingText");
 
     document.getElementById("startProcessingBtn")
-        .addEventListener("click", function() {
+        .addEventListener("click", function () {
 
             const id = this.dataset.id;
 
@@ -1150,19 +1114,15 @@ $pager = $pager ?? null;
                 "Updating request...<br>Please wait.";
 
             fetch("<?= site_url('request/start-processing') ?>", {
-
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-Requested-With": "XMLHttpRequest"
-                    },
-
-                    body: JSON.stringify({
-                        id: id
-                    })
-
-                })
+                method: "POST",
+                credentials: "same-origin",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Requested-With": "XMLHttpRequest",
+                    "<?= csrf_header() ?>": "<?= csrf_hash() ?>"
+                },
+                body: JSON.stringify({ id: id })
+            })
                 .then(res => res.json())
                 .then(result => {
 
@@ -1199,7 +1159,7 @@ $pager = $pager ?? null;
 
     document.querySelectorAll(".updateRequestForm").forEach(form => {
 
-        form.addEventListener("submit", function() {
+        form.addEventListener("submit", function () {
 
             const status = form.querySelector(".requestStatus").value;
 
@@ -1247,6 +1207,60 @@ $pager = $pager ?? null;
         });
 
     });
+</script>
+
+<style>
+    .notif-highlight {
+        background: #fff7ed !important;
+        outline: 2px solid #fdba74;
+        outline-offset: -2px;
+    }
+
+    .notif-highlight td {
+        background: #fff7ed !important;
+    }
+</style>
+
+<script>
+    (function () {
+        'use strict';
+
+        var params = new URLSearchParams(window.location.search);
+        if (params.get('notif') !== '1') return;
+
+        var ref = (params.get('ref') || '').trim();
+        var svc = (params.get('svc') || '').trim();
+
+        function highlight() {
+            if (!ref) return;
+
+            var hit = null;
+            document.querySelectorAll('.requests-table tbody tr').forEach(function (tr) {
+                if (hit) return;
+                var refCell = tr.querySelector('.ref-no');
+                var svcCell = tr.querySelector('[data-label="Service"]');
+                if (!refCell) return;
+
+                var sameRef = refCell.textContent.trim() === ref;
+                var sameSvc = !svc || (svcCell && svcCell.textContent.trim() === svc);
+                if (sameRef && sameSvc) hit = tr;
+            });
+
+            if (hit) {
+                hit.classList.add('notif-highlight');
+                hit.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                setTimeout(function () { hit.classList.remove('notif-highlight'); }, 6000);
+            }
+
+            // keep ?status=..., drop the notification params so a refresh doesn't re-highlight
+            ['notif', 'ref', 'svc'].forEach(function (k) { params.delete(k); });
+            var qs = params.toString();
+            history.replaceState(null, '', window.location.pathname + (qs ? '?' + qs : ''));
+        }
+
+        if (document.readyState === 'complete') { highlight(); }
+        else { window.addEventListener('load', highlight); }
+    })();
 </script>
 
 <?= $this->include('dashboard_layout/loading') ?>

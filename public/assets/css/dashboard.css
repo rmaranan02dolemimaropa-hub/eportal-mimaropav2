@@ -1235,3 +1235,166 @@ body:has(.offcanvas.show) .export-overlay {
   background: #10058c;
   border-radius: 10px;
 }
+
+/* ==========================================================================
+   RESPONSIVE TABLE → CARDS (tablet & mobile)
+   Each <td> needs a data-label="..." attribute (see HTML below).
+   ========================================================================== */
+@media (max-width: 992px) {
+  /* Remove the scroll box; cards flow naturally */
+  .table-responsive {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .requests-table {
+    min-width: 0;
+    width: 100%;
+  }
+
+  /* Hide header visually but keep it for screen readers */
+  .requests-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .requests-table,
+  .requests-table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  /* Tablet: 2 cards per row */
+  .requests-table tbody {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    padding: 0 22px 18px;
+  }
+
+  /* The card */
+  .requests-table tbody tr {
+    display: block;
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 6px 16px;
+    transition:
+      box-shadow var(--transition-base),
+      transform var(--transition-base);
+  }
+
+  .requests-table tbody tr:hover {
+    background-color: #ffffff;
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  /* Each row inside the card: label on the left, value on the right */
+  .requests-table tbody tr td,
+  .requests-table tbody tr:last-child td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 11px 0;
+    border-bottom: 1px dashed var(--color-border);
+    text-align: right;
+    word-break: break-word;
+  }
+
+  .requests-table tbody tr td:last-child,
+  .requests-table tbody tr:last-child td:last-child {
+    border-bottom: 0;
+  }
+
+  .requests-table tbody td::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-muted);
+    text-align: left;
+  }
+
+  /* Actions row: buttons sit on the right, no label needed */
+  .requests-table tbody td[data-label="Actions"],
+  .requests-table tbody td[data-label="Action"] {
+    justify-content: space-between;
+  }
+
+  /* Empty-state row ("No records found") should not get a label */
+  .requests-table tbody td[colspan] {
+    display: block;
+    text-align: center;
+  }
+  .requests-table tbody td[colspan]::before {
+    content: none;
+  }
+
+  /* Same treatment for the Reports page table */
+  .report-page .r-table,
+  .report-page .r-table tbody {
+    display: block;
+    width: 100%;
+  }
+  .report-page .r-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .report-page .r-table tbody {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+  .report-page .r-table tbody tr {
+    display: block;
+    border: 1px solid var(--r-line);
+    border-radius: 10px;
+    padding: 6px 16px;
+  }
+  .report-page .r-table tbody tr td,
+  .report-page .r-table tbody tr:last-child td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--r-line);
+    text-align: right;
+  }
+  .report-page .r-table tbody tr td:last-child {
+    border-bottom: 0;
+  }
+  .report-page .r-table tbody td::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--r-ink-soft);
+    text-align: left;
+  }
+}
+
+/* Mobile: 1 card per row */
+@media (max-width: 576px) {
+  .requests-table tbody,
+  .report-page .r-table tbody {
+    grid-template-columns: 1fr;
+  }
+
+  .requests-table tbody {
+    padding: 0 18px 16px;
+  }
+}

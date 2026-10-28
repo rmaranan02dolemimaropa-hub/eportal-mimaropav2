@@ -129,52 +129,60 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
                 <tbody>
                     <?php if (!empty($trainings)): ?>
                         <?php foreach ($trainings as $index => $row): ?>
+
+                            <?php
+                            $status = $row['status'] ?? 'active';
+                            $badgeMap = [
+                                'active' => 'bg-success',
+                                'canceled' => 'bg-danger',
+                                'rescheduled' => 'bg-warning text-dark',
+                                'completed' => 'bg-primary',
+                            ];
+                            $badge = $badgeMap[$status] ?? 'bg-secondary';
+                            $reason = $status === 'canceled'
+                                ? ($row['cancel_reason'] ?? '')
+                                : ($status === 'rescheduled' ? ($row['reschedule_reason'] ?? '') : '');
+                            ?>
+
                             <tr data-quarter="<?= esc($quarters[$index] ?? '', 'attr') ?>">
-                                <td><?= $index + 1 ?></td>
-                                <td>
+
+                                <td data-label="#"><?= $index + 1 ?></td>
+
+                                <td data-label="Training Title">
                                     <span class="ref-no"><?= esc($row['training_title']) ?></span>
                                 </td>
-                                <td><?= esc($row['training_dates']) ?></td>
-                                <td><?= esc($row['conducted_by'] ?? '—') ?></td>
-                                <td><?= esc($row['office'] ?? '—') ?></td>
-                                <td><?= esc($row['immediate_superior'] ?? '—') ?>
-                                    <?php if (!empty($row['superior_notified_at'])): ?>
-                                        <i class="bi bi-envelope-check text-success ms-1"
-                                            title="Superior notified <?= (int) ($row['superior_notify_count'] ?? 1) ?>x · last <?= esc(date('M d, Y h:i A', strtotime($row['superior_notified_at'])), 'attr') ?>"></i>
-                                    <?php endif; ?>
-                                </td>
-                                <?php
-                                $status = $row['status'] ?? 'active';
-                                $badgeMap = [
-                                    'active' => 'bg-success',
-                                    'canceled' => 'bg-danger',
-                                    'rescheduled' => 'bg-warning text-dark',
-                                    'completed' => 'bg-primary',
-                                ];
-                                $badge = $badgeMap[$status] ?? 'bg-secondary';
-                                $reason = $status === 'canceled'
-                                    ? ($row['cancel_reason'] ?? '')
-                                    : ($status === 'rescheduled' ? ($row['reschedule_reason'] ?? '') : '');
-                                ?>
 
-                                <td>
-                                    <?php if ($reason): ?>
-                                        <span class="badge <?= esc($badge, 'attr') ?>" title="<?= esc($reason, 'attr') ?>">
-                                        <?php else: ?>
-                                            <span class="badge <?= esc($badge, 'attr') ?>">
-                                            <?php endif; ?>
-                                            <?= esc(ucfirst($status)) ?>
-                                        </span>
-                                </td>
-                                <td class="text-center">
+                                <td data-label="Date(s)"><?= esc($row['training_dates']) ?></td>
 
-                                    <div class="d-flex gap-1 justify-content-center flex-wrap">
+                                <td data-label="Conducted By"><?= esc($row['conducted_by'] ?? '—') ?></td>
+
+                                <td data-label="Office"><?= esc($row['office'] ?? '—') ?></td>
+
+                                <td data-label="Immediate Superior">
+                                    <span>
+                                        <?= esc($row['immediate_superior'] ?? '—') ?>
+                                        <?php if (!empty($row['superior_notified_at'])): ?>
+                                            <i class="bi bi-envelope-check text-success ms-1"
+                                                title="Superior notified <?= (int) ($row['superior_notify_count'] ?? 1) ?>x · last <?= esc(date('M d, Y h:i A', strtotime($row['superior_notified_at'])), 'attr') ?>"></i>
+                                        <?php endif; ?>
+                                    </span>
+                                </td>
+
+                                <td data-label="Status">
+                                    <span class="badge <?= esc($badge, 'attr') ?>" <?= $reason ? 'title="' . esc($reason, 'attr') . '"' : '' ?>>
+                                        <?= esc(ucfirst($status)) ?>
+                                    </span>
+                                </td>
+
+                                <td class="text-center" data-label="Action">
+                                    <div class="row-actions">
+
                                         <button type="button" class="btn btn-sm tool-btn manage-participants-btn"
                                             title="Manage Participants" aria-label="Manage Participants" data-bs-toggle="modal"
                                             data-bs-target="#manageParticipantsModal"
                                             data-training-code="<?= esc($row['training_code'], 'attr') ?>"
                                             data-training-title="<?= esc($row['training_title'], 'attr') ?>">
-                                            <i class="bi bi-people me-1"></i>
+                                            <i class="bi bi-people"></i>
                                         </button>
 
                                         <button type="button" class="btn btn-sm tool-btn edit-training-btn"
@@ -186,7 +194,7 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
                                             data-office="<?= esc($row['office'] ?? '', 'attr') ?>"
                                             data-superior="<?= esc($row['immediate_superior'] ?? '', 'attr') ?>"
                                             data-competencies="<?= esc(json_encode(json_decode($row['competencies'] ?? '[]', true) ?: []), 'attr') ?>">
-                                            <i class="bi bi-pencil me-1"></i>
+                                            <i class="bi bi-pencil"></i>
                                         </button>
 
                                         <button type="button" class="btn btn-sm tool-btn status-training-btn"
@@ -195,21 +203,23 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
                                             data-title="<?= esc($row['training_title'], 'attr') ?>"
                                             data-status="<?= esc($status, 'attr') ?>"
                                             data-dates="<?= esc($row['training_dates'], 'attr') ?>">
-                                            <i class="bi bi-flag me-1"></i>
+                                            <i class="bi bi-flag"></i>
                                         </button>
 
                                         <button type="button" class="btn btn-sm tool-btn text-danger delete-training-btn"
                                             title="Delete Training" aria-label="Delete Training"
                                             data-code="<?= esc($row['training_code'], 'attr') ?>"
                                             data-title="<?= esc($row['training_title'], 'attr') ?>">
-                                            <i class="bi bi-trash me-1"></i>
+                                            <i class="bi bi-trash"></i>
                                         </button>
+
                                     </div>
                                 </td>
                             </tr>
+
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <tr>
+                        <tr class="empty-row">
                             <td colspan="8" class="text-center text-muted py-5">
                                 No trainings found. Click “Add Training” to create one.
                             </td>

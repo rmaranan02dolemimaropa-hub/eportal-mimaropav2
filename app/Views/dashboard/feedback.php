@@ -184,74 +184,65 @@ $search = $_GET['search'] ?? '';
 
                         <?php foreach ($feedbacks as $row): ?>
 
+                            <?php
+                            $scores = [
+                                $row['rating_1'],
+                                $row['rating_2'],
+                                $row['rating_3'],
+                                $row['rating_6'],
+                                $row['rating_7'],
+                                $row['rating_8'],
+                            ];
+                            $count = array_count_values($scores);
+                            $ref = rawurlencode($row['reference_no']);
+                            ?>
+
                             <tr>
 
-                                <td>
+                                <td class="ref-no" data-label="Reference No.">
                                     <?= esc($row['reference_no']) ?>
                                 </td>
 
-                                <td>
+                                <td data-label="Service Availed">
                                     <?= esc($row['other_service']) ?>
                                 </td>
 
-                                <td>
+                                <td data-label="Client">
                                     <?= esc($row['name'] ?: 'Anonymous') ?>
                                 </td>
 
-                                <td>
+                                <td data-label="Client Type">
                                     <?= esc($row['client_type']) ?>
                                 </td>
 
-                                <td>
+                                <td data-label="Date Submitted">
                                     <?= date('F d, Y', strtotime($row['created_at'])) ?>
                                 </td>
 
-                                <td>
-
-                                    <?php
-
-                                    $scores = [
-                                        $row['rating_1'],
-                                        $row['rating_2'],
-                                        $row['rating_3'],
-                                        $row['rating_6'],
-                                        $row['rating_7'],
-                                        $row['rating_8'],
-                                    ];
-
-                                    $count = array_count_values($scores);
-
-                                    if (($count['Strongly agree'] ?? 0) >= 4) {
-
-                                        echo '<span class="badge bg-success">Excellent</span>';
-                                    } elseif (($count['Agree'] ?? 0) >= 4) {
-
-                                        echo '<span class="badge bg-primary">Very Satisfied</span>';
-                                    } else {
-
-                                        echo '<span class="badge bg-warning text-dark">Needs Review</span>';
-                                    }
-
-                                    ?>
-
+                                <td data-label="Overall Rating">
+                                    <?php if (($count['Strongly agree'] ?? 0) >= 4): ?>
+                                        <span class="badge bg-success">Excellent</span>
+                                    <?php elseif (($count['Agree'] ?? 0) >= 4): ?>
+                                        <span class="badge bg-primary">Very Satisfied</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-warning text-dark">Needs Review</span>
+                                    <?php endif; ?>
                                 </td>
 
-                                <td>
+                                <td class="text-end" data-label="Action">
+                                    <div class="row-actions">
 
-                                    <a href="<?= base_url('feedback/print/hr/' . $row['reference_no']) ?>" target="_blank"
-                                        class="btn btn-sm btn-outline-secondary">
+                                        <a href="<?= base_url('feedback/print/hr/' . $ref) ?>" target="_blank"
+                                            class="btn btn-sm btn-outline-secondary" title="Print feedback">
+                                            <i class="bi bi-printer"></i>
+                                        </a>
 
-                                        <i class="bi bi-printer"></i>
+                                        <a href="<?= base_url('exports/satisfaction-excel/' . $ref) ?>" target="_blank"
+                                            class="btn btn-sm btn-outline-secondary" title="Export this response to Excel">
+                                            <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                                        </a>
 
-                                    </a>
-                                    <a href="<?= base_url('exports/satisfaction-excel/' . $row['reference_no']) ?>"
-                                        target="_blank" class="btn btn-sm btn-outline-secondary"
-                                        title="Export this response to Excel">
-
-                                        <i class="bi bi-file-earmark-spreadsheet-fill"></i>
-
-                                    </a>
-
+                                    </div>
                                 </td>
 
                             </tr>
@@ -260,23 +251,14 @@ $search = $_GET['search'] ?? '';
 
                     <?php else: ?>
 
-                        <tr>
+                        <tr class="empty-row">
                             <td colspan="7" class="text-center py-5">
-
                                 <div class="text-muted">
-
                                     <i class="bi bi-inbox" style="font-size: 2.5rem;"></i>
-
-                                    <div class="mt-2 fw-semibold">
-                                        No Feedback found.
-                                    </div>
-
-                                    <small>
-                                        There are currently no client satisfaction responses matching your filters.
-                                    </small>
-
+                                    <div class="mt-2 fw-semibold">No Feedback found.</div>
+                                    <small>There are currently no client satisfaction responses matching your
+                                        filters.</small>
                                 </div>
-
                             </td>
                         </tr>
 

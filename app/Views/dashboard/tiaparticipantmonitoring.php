@@ -136,63 +136,75 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
                 <tbody>
                     <?php if (!empty($rows)): ?>
                         <?php foreach ($rows as $i => $r): ?>
+                            <?php
+                            $sentCount = (int) ($r['form_send_count'] ?? 0);
+                            $sentAt = !empty($r['form_sent_at']) ? strtotime((string) $r['form_sent_at']) : false;
+                            $dueAt = !empty($r['form_deadline_at']) ? strtotime((string) $r['form_deadline_at']) : false;
+                            $closed = $dueAt && $dueAt < time();
+                            $daysLeft = $dueAt ? (int) ceil(($dueAt - time()) / 86400) : 0;
+                            ?>
                             <tr data-quarter="<?= esc($quarters[$i] ?? '', 'attr') ?>">
-                                <td><?= $i + 1 ?></td>
-                                <td>
-                                    <?= esc($r['name']) ?>
-                                    <?php if ($r['email']): ?>
-                                        <div class="small text-muted"><?= esc($r['email']) ?></div>
-                                    <?php endif; ?>
-                                </td>
-                                <td><?= esc($r['position'] ?: '—') ?></td>
-                                <td><?= esc($r['training_title']) ?></td>
-                                <td><?= esc($r['training_dates']) ?></td>
-                                <?php
-                                $sentCount = (int) ($r['form_send_count'] ?? 0);
-                                $sentAt = !empty($r['form_sent_at']) ? strtotime((string) $r['form_sent_at']) : false;
-                                $dueAt = !empty($r['form_deadline_at']) ? strtotime((string) $r['form_deadline_at']) : false;
-                                $closed = $dueAt && $dueAt < time();
-                                $daysLeft = $dueAt ? (int) ceil(($dueAt - time()) / 86400) : 0;
-                                ?>
-                                <td>
-                                    <?php if ($sentCount > 0): ?>
-                                        <span class="badge bg-info text-dark">
-                                            <i class="bi bi-envelope-check me-1"></i>Sent
-                                            <?= $sentCount ?> time
-                                            <?= $sentCount === 1 ? '' : 's' ?>
-                                        </span>
-                                        <?php if ($sentAt): ?>
-                                            <div class="small text-muted">Last:
-                                                <?= esc(date('M d, Y h:i A', $sentAt)) ?>
-                                            </div>
+
+                                <td data-label="#"><?= $i + 1 ?></td>
+
+                                <td data-label="Participant">
+                                    <div>
+                                        <?= esc($r['name']) ?>
+                                        <?php if (!empty($r['email'])): ?>
+                                            <div class="small text-muted"><?= esc($r['email']) ?></div>
                                         <?php endif; ?>
-                                    <?php else: ?>
-                                        <span class="text-muted small">Not yet sent</span>
-                                    <?php endif; ?>
+                                    </div>
                                 </td>
-                                <td>
+
+                                <td data-label="Position"><?= esc($r['position'] ?: '—') ?></td>
+
+                                <td data-label="Training"><?= esc($r['training_title']) ?></td>
+
+                                <td data-label="Date(s)"><?= esc($r['training_dates']) ?></td>
+
+                                <td data-label="Form Sent">
+                                    <div class="notify-wrap">
+                                        <div class="notify-info">
+                                            <?php if ($sentCount > 0): ?>
+                                                <span class="notify-status is-sent">
+                                                    <i class="bi bi-envelope-check"></i>
+                                                    Sent <?= $sentCount ?>×
+                                                </span>
+                                                <?php if ($sentAt): ?>
+                                                    <span class="notify-last"><?= esc(date('M d, Y · h:i A', $sentAt)) ?></span>
+                                                <?php endif; ?>
+                                            <?php else: ?>
+                                                <span class="notify-status is-none">
+                                                    <i class="bi bi-envelope"></i>
+                                                    Not yet sent
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td data-label="Deadline">
                                     <?php if (!$dueAt): ?>
                                         <span class="text-muted small">—</span>
                                     <?php else: ?>
-                                        <div>
-                                            <?= esc(date('M d, Y', $dueAt)) ?>
+                                        <div class="deadline-wrap">
+                                            <div><?= esc(date('M d, Y', $dueAt)) ?></div>
+                                            <?php if (!empty($r['rated'])): ?>
+                                                <span class="badge bg-success">On time</span>
+                                            <?php elseif ($closed): ?>
+                                                <span class="badge bg-danger">Closed</span>
+                                            <?php else: ?>
+                                                <span class="badge <?= $daysLeft <= 1 ? 'bg-warning text-dark' : 'bg-secondary' ?>">
+                                                    <?= $daysLeft ?> day<?= $daysLeft === 1 ? '' : 's' ?> left
+                                                </span>
+                                            <?php endif; ?>
                                         </div>
-                                        <?php if ($r['rated']): ?>
-                                            <span class="badge bg-success">On time</span>
-                                        <?php elseif ($closed): ?>
-                                            <span class="badge bg-danger">Closed</span>
-                                        <?php else: ?>
-                                            <span class="badge <?= $daysLeft <= 1 ? 'bg-warning text-dark' : 'bg-secondary' ?>">
-                                                <?= $daysLeft ?> day
-                                                <?= $daysLeft === 1 ? '' : 's' ?> left
-                                            </span>
-                                        <?php endif; ?>
                                     <?php endif; ?>
                                 </td>
 
-                                <td class="text-center">
-                                    <?php if ($r['rated']): ?>
-                                        <span class="badge bg-success" <?= $r['rated_at'] ? 'title="Submitted ' . esc($r['rated_at'], 'attr') . '"' : '' ?>>
+                                <td class="text-center" data-label="Status">
+                                    <?php if (!empty($r['rated'])): ?>
+                                        <span class="badge bg-success" <?= !empty($r['rated_at']) ? 'title="Submitted ' . esc($r['rated_at'], 'attr') . '"' : '' ?>>
                                             <i class="bi bi-check-circle me-1"></i>Submitted
                                         </span>
                                     <?php else: ?>
@@ -201,25 +213,29 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
                                         </span>
                                     <?php endif; ?>
                                 </td>
-                                <td class="text-center">
-                                    <?php if ($r['rated']): ?>
-                                        <button type="button" class="btn btn-sm tool-btn view-sheet-btn" title="View rating sheet"
-                                            aria-label="View rating sheet" data-bs-toggle="modal" data-bs-target="#sheetModal"
-                                            data-name="<?= esc($r['name'], 'attr') ?>"
-                                            data-url="<?= esc(site_url('tia-report-participant-monitoring/view/' . $r['response_id']), 'attr') ?>">
-                                            <i class="bi bi-eye me-1"></i>View
-                                        </button>
-                                    <?php else: ?>
-                                        <button type="button" class="btn btn-sm tool-btn" disabled title="Not yet submitted">
-                                            <i class="bi bi-eye-slash me-1"></i>View
-                                        </button>
-                                    <?php endif; ?>
+
+                                <td class="text-center" data-label="Action">
+                                    <div class="row-actions">
+                                        <?php if (!empty($r['rated'])): ?>
+                                            <button type="button" class="btn btn-sm tool-btn view-sheet-btn"
+                                                title="View rating sheet" aria-label="View rating sheet" data-bs-toggle="modal"
+                                                data-bs-target="#sheetModal" data-name="<?= esc($r['name'], 'attr') ?>"
+                                                data-url="<?= esc(site_url('tia-report-participant-monitoring/view/' . $r['response_id']), 'attr') ?>">
+                                                <i class="bi bi-eye me-1"></i>View
+                                            </button>
+                                        <?php else: ?>
+                                            <button type="button" class="btn btn-sm tool-btn" disabled title="Not yet submitted">
+                                                <i class="bi bi-eye-slash me-1"></i>View
+                                            </button>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
+
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <tr>
-                            <td colspan="7" class="text-center text-muted py-5">
+                        <tr class="empty-row">
+                            <td colspan="9" class="text-center text-muted py-5">
                                 <?= $status === 'pending' ? 'Nothing pending 🎉 Everyone has submitted.' : 'No participants found.' ?>
                             </td>
                         </tr>

@@ -181,62 +181,51 @@ $pager = $pager ?? service('pager');
 
                             <tr>
 
-                                <td class="ref-no">
+                                <td class="ref-no" data-label="Reference No.">
                                     <?= esc($row['reference_no']) ?>
                                 </td>
 
-                                <td>
+                                <td data-label="Requestor">
                                     <?= esc($row['fullname']) ?>
                                 </td>
 
-                                <td>
+                                <td data-label="Service">
                                     <?= esc($row['service_availed']) ?>
                                 </td>
 
-                                <td>
+                                <td data-label="Date">
                                     <?php
-
                                     $displayDate = $row['date_requested'];
 
                                     if ($row['status'] == 'Processing' && $row['date_processing']) {
-
                                         $displayDate = $row['date_processing'];
-                                    } elseif ($row['status'] == 'For Released' && $row['date_released']) {
-
+                                    } elseif ($row['status'] == 'For Releasing' && $row['date_released']) {
                                         $displayDate = $row['date_released'];
                                     } elseif ($row['status'] == 'Completed' && $row['date_completed']) {
-
                                         $displayDate = $row['date_completed'];
                                     } elseif ($row['status'] == 'Rejected' && $row['date_rejected']) {
-
                                         $displayDate = $row['date_rejected'];
+                                    } elseif ($row['status'] == 'Canceled' && !empty($row['date_canceled'])) {
+                                        $displayDate = $row['date_canceled'];
                                     }
-
                                     ?>
-
                                     <?= date('F d, Y', strtotime($displayDate)) ?>
                                 </td>
 
-                                <td class="text-end">
-
+                                <td class="text-end" data-label="Status">
                                     <?php
-
                                     $statusClass = [
                                         'New Application' => 'badge-new-application',
                                         'Processing' => 'badge-processing',
                                         'Completed' => 'badge-completed',
-                                        'For Released' => 'badge-for-released',
+                                        'For Releasing' => 'badge-for-released',
                                         'Rejected' => 'badge-rejected',
+                                        'Canceled' => 'badge-canceled',
                                     ];
-
                                     ?>
-
                                     <span class="badge <?= $statusClass[$row['status']] ?? 'bg-secondary' ?>">
-
                                         <?= esc($row['status']) ?>
-
                                     </span>
-
                                 </td>
 
                             </tr>
@@ -245,18 +234,12 @@ $pager = $pager ?? service('pager');
 
                     <?php else: ?>
 
-                        <tr>
-
-                            <td colspan="6" class="text-center py-5">
-
+                        <tr class="empty-row">
+                            <td colspan="5" class="text-center py-5">
                                 <i class="bi bi-inbox fs-1 text-muted"></i>
-
                                 <br>
-
                                 No service requests found.
-
                             </td>
-
                         </tr>
 
                     <?php endif; ?>
@@ -308,16 +291,16 @@ $pager = $pager ?? service('pager');
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
 
         const searchInput = document.getElementById("fSearch");
         const tableRows = document.querySelectorAll(".requests-table tbody tr");
 
-        searchInput.addEventListener("keyup", function() {
+        searchInput.addEventListener("keyup", function () {
 
             const keyword = this.value.toLowerCase().trim();
 
-            tableRows.forEach(function(row) {
+            tableRows.forEach(function (row) {
 
                 const text = row.textContent.toLowerCase();
 
@@ -333,14 +316,14 @@ $pager = $pager ?? service('pager');
 
     });
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
 
         function getFilters() {
             return new URLSearchParams(window.location.search).toString();
         }
 
         // PRINT
-        document.getElementById('btnPrint').addEventListener('click', function() {
+        document.getElementById('btnPrint').addEventListener('click', function () {
             window.open(
                 "<?= site_url('reports/print') ?>?" + getFilters(),
                 "_blank"
@@ -349,7 +332,7 @@ $pager = $pager ?? service('pager');
     });
 </script>
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
 
         const overlay = document.getElementById("exportOverlay");
         const bar = document.getElementById("progressBar");
@@ -447,11 +430,11 @@ $pager = $pager ?? service('pager');
 
         }
 
-        document.getElementById("exportButton").addEventListener("click", function() {
+        document.getElementById("exportButton").addEventListener("click", function () {
             exportReport(this, "<?= site_url('export/reports-pdf') ?>", "HR_Request_Report.pdf", "pdf");
         });
 
-        document.getElementById("btnCsv").addEventListener("click", function() {
+        document.getElementById("btnCsv").addEventListener("click", function () {
             exportReport(this, "<?= site_url('export/reports-csv') ?>", "HR_Request_Report.csv", "csv");
         });
 

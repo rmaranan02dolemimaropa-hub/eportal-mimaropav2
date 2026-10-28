@@ -2653,12 +2653,20 @@ body:has(.offcanvas.show) .export-overlay {
 
   .request-modal-ref {
     font-size: 1.1rem;
+    flex-wrap: wrap;
+    row-gap: 8px;
   }
 
   .request-modal-body {
     padding: 1.25rem;
   }
 
+  .request-modal-ref .ref-status-divider {
+    display: none;
+  }
+  .request-modal-header > div:first-child {
+    min-width: 0; /* lets the flex child shrink instead of overflowing */
+  }
   .detail-grid {
     grid-template-columns: 1fr;
   }
@@ -2666,6 +2674,10 @@ body:has(.offcanvas.show) .export-overlay {
   .request-modal-footer {
     padding: 1rem 1.25rem;
     flex-direction: column-reverse;
+  }
+  .modal-status-pill {
+    font-size: 0.68rem;
+    padding: 5px 12px;
   }
 
   .request-modal-footer .btn {
@@ -2680,4 +2692,401 @@ body:has(.offcanvas.show) .export-overlay {
     width: 2.75em;
     height: 1.55em;
   }
+}
+
+/* ==========================================================================
+   TABLE → CARDS (tablet & mobile)
+   Needs data-label="..." on every <td> and class="empty-row" on the empty <tr>.
+   ========================================================================== */
+@media (max-width: 992px) {
+  /* No scrolling or clipping around the table */
+  .table-responsive,
+  .table-panel {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  /* Stop behaving like a table */
+  .requests-table,
+  .requests-table tbody,
+  .report-page .r-table,
+  .report-page .r-table tbody {
+    display: block;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .requests-table tbody td {
+    overflow-wrap: anywhere;
+  }
+  .requests-table .row-actions {
+    gap: 8px;
+  }
+  .requests-table thead th {
+    position: static;
+  }
+
+  /* Hide the header visually (kept for screen readers) */
+  .requests-table thead,
+  .report-page .r-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  /* Tablet: 2 cards per row */
+  .requests-table tbody {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    padding: 0 22px 18px;
+  }
+
+  .report-page .r-table tbody {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  /* The card */
+  .requests-table tbody tr,
+  .report-page .r-table tbody tr {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 4px 16px;
+  }
+
+  .requests-table tbody tr:hover,
+  .report-page .r-table tbody tr:hover {
+    background: #fff;
+  }
+
+  /* Each cell becomes a "label ... value" row */
+  .requests-table tbody tr td,
+  .requests-table tbody tr:last-child td,
+  .report-page .r-table tbody tr td,
+  .report-page .r-table tbody tr:last-child td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+    padding: 11px 0;
+    background: transparent;
+    box-shadow: none; /* removes Bootstrap's .table cell shading */
+    border: 0;
+    border-bottom: 1px dashed var(--color-border);
+    text-align: right;
+    white-space: normal;
+    overflow-wrap: break-word; /* wraps at words, not letters */
+    word-break: normal;
+  }
+
+  .requests-table tbody tr td:last-child,
+  .report-page .r-table tbody tr td:last-child {
+    border-bottom: 0;
+  }
+
+  /* Label text comes from data-label */
+  .requests-table tbody td::before,
+  .report-page .r-table tbody td::before {
+    content: attr(data-label);
+    flex: 0 0 auto;
+    max-width: 45%;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-muted);
+    text-align: left;
+  }
+
+  .row-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  /* Empty state: full width, no label */
+  .requests-table tbody tr.empty-row {
+    grid-column: 1 / -1;
+    box-shadow: none;
+    border: 1px dashed var(--color-border);
+  }
+
+  .requests-table tbody tr.empty-row td {
+    display: block;
+    text-align: center;
+    border-bottom: 0;
+  }
+
+  .requests-table tbody tr.empty-row td::before {
+    content: none;
+  }
+}
+
+/* Mobile: 1 card per row */
+@media (max-width: 576px) {
+  .requests-table tbody {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 0 16px 16px;
+  }
+
+  .report-page .r-table tbody {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+}
+
+/* ==========================================================================
+   REQUESTS PAGE: card layout guards + filter chips (tablet & mobile)
+   ========================================================================== */
+@media (max-width: 992px) {
+  /* Card layout guards */
+  .requests-table,
+  .requests-table tbody {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .requests-table tbody {
+    display: grid !important;
+  }
+
+  /* Status filter: wrapped chips */
+  .status-filter {
+    display: flex;
+    flex-wrap: wrap !important;
+    overflow: visible !important;
+    gap: 8px;
+    margin: 0 22px 16px !important;
+    padding-bottom: 0 !important;
+  }
+
+  .status-filter .status-pill {
+    flex: 0 0 auto;
+    padding: 8px 14px;
+    font-size: 0.82rem;
+    white-space: nowrap;
+    color: var(--color-text-muted);
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    position: relative;
+    z-index: 2;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Remove the desktop dividers and underline bar */
+  .status-filter .status-pill::before,
+  .status-filter .status-pill::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  .status-filter .status-pill:hover {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+
+  .status-filter .status-pill.active,
+  .status-filter .status-pill.active:hover {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #fff !important;
+  }
+
+  .status-filter {
+    position: relative;
+    z-index: 5; /* keep the pills above the table area */
+  }
+
+  .status-filter .status-pill {
+    z-index: 6;
+    display: inline-block;
+  }
+
+  /* the header is visually hidden on cards, so don't let it sticky-overlap anything */
+  .requests-table thead th {
+    position: static;
+  }
+
+  /* make sure the card grid can't sit over the filter row */
+  .requests-table tbody {
+    position: relative;
+    z-index: 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .requests-table tbody {
+    grid-template-columns: 1fr !important;
+  }
+
+  .status-filter {
+    margin: 0 16px 14px !important;
+  }
+
+  .status-filter .status-pill {
+    padding: 7px 12px;
+    font-size: 0.78rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .requests-table tbody {
+    grid-template-columns: 1fr !important;
+  }
+
+  .status-filter {
+    margin: 0 16px 14px !important;
+  }
+
+  .status-filter .status-pill {
+    padding: 7px 12px;
+    font-size: 0.78rem;
+  }
+}
+
+.notif-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  color: #374151;
+  font-size: 1.1rem;
+}
+.notif-btn:hover {
+  background: #f3f4f6;
+}
+
+.notif-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}
+
+.notif-menu {
+  width: 340px;
+  max-width: calc(100vw - 24px);
+  padding: 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+.notif-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.notif-list {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.notif-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  text-decoration: none;
+  color: inherit;
+}
+.notif-item:hover {
+  background: #f8fafc;
+}
+.notif-item.is-unread {
+  background: #fff7ed;
+}
+
+.notif-icon {
+  flex: 0 0 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #ffedd5;
+  color: #c2410c;
+}
+.notif-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.notif-title {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #111827;
+}
+.notif-sub {
+  font-size: 0.8rem;
+  color: #374151;
+  overflow-wrap: anywhere;
+}
+.notif-time {
+  font-size: 0.72rem;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.notif-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 28px 16px;
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+.notif-empty i {
+  font-size: 1.6rem;
+}
+
+.notif-footer {
+  display: block;
+  padding: 10px 16px;
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #111827;
+  background: #f9fafc;
+  text-decoration: none;
+}
+.notif-footer:hover {
+  background: #f3f4f6;
 }

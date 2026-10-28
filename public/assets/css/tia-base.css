@@ -406,3 +406,121 @@ body {
 .modal .ts-wrapper {
   width: 100%;
 }
+
+/* =====================================================
+   RESPONSIVE TABLE -> CARDS
+   Cards when the table area is narrower than 1100px
+   (phone, tablet, narrow laptop). Normal table above that.
+   Cells need data-label="..." for the field names.
+   ===================================================== */
+.table-responsive {
+  container-type: inline-size;
+}
+
+@container (max-width: 1099.98px) {
+  .tia-table {
+    min-width: 0;
+  }
+
+  .tia-table thead {
+    display: none;
+  }
+
+  .tia-table,
+  .tia-table tbody,
+  .tia-table tr,
+  .tia-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .tia-table tbody tr {
+    background: var(--tia-surface);
+    border: 1px solid var(--tia-line);
+    border-radius: var(--tia-radius-lg);
+    padding: 6px 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  .tia-table tbody tr:hover {
+    background-color: var(--tia-surface);
+  }
+
+  .tia-table tbody td {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 9px 0;
+    border-bottom: 1px dashed var(--tia-line);
+    text-align: right;
+    overflow-wrap: anywhere;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .tia-table tbody td:last-child {
+    border-bottom: none;
+  }
+
+  .tia-table tbody td::before {
+    content: attr(data-label);
+    flex: 0 0 38%;
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--tia-muted);
+    padding-top: 2px;
+  }
+
+  /* hide the row number on cards */
+  .tia-table tbody td[data-label="#"] {
+    display: none;
+  }
+
+  /* action buttons: full-width row at the bottom of the card */
+  .tia-table tbody td[data-label="Action"],
+  .tia-table tbody td[data-label="Actions"] {
+    display: block;
+    padding-top: 12px;
+  }
+
+  .tia-table tbody td[data-label="Action"]::before,
+  .tia-table tbody td[data-label="Actions"]::before {
+    display: none;
+  }
+
+  .tia-table .row-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .tia-table .row-actions > *,
+  .tia-table .row-actions form {
+    flex: 1;
+  }
+
+  .tia-table .row-actions .btn {
+    width: 100%;
+  }
+
+  /* "No records found" row */
+  .tia-table tr.empty-row td {
+    display: block;
+    text-align: center;
+  }
+  .tia-table tr.empty-row td::before {
+    display: none;
+  }
+}
+
+/* search box full width on phones (it has an inline width:220px) */
+@media (max-width: 575.98px) {
+  .tia-page #searchBox,
+  .employees-page #searchBox {
+    width: 100% !important;
+  }
+}
