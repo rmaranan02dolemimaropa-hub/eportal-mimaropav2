@@ -14,12 +14,14 @@ use PragmaRX\Google2FA\Google2FA;
  *
  * Needs:  composer require pragmarx/google2fa bacon/bacon-qr-code
  * Needs:  encryption.key set in .env (the TOTP secret is stored encrypted)
+ * Needs:  password_expiry.sql applied (users.password_changed_at, users.must_change_password)
  */
 class MfaService
 {
     public const ISSUER = 'DOLE MIMAROPA E-Portal';
     public const PENDING_TTL = 600;   // seconds a half-finished login stays valid
     public const BACKUP_COUNT = 8;
+    public const PASSWORD_MAX_AGE = '-3 months';   // older than this = must change
 
     private Google2FA $g2fa;
 
@@ -91,11 +93,45 @@ class MfaService
             'role' => $user['role'],
             'logged_in' => true,
         ]);
+
+        // 'first' (new / just enrolled) or 'expired' (older than 3 months). The filter
+        // keeps the user on the change-password page until this is cleared.
+        $reason = $this->passwordChangeReason($user);
+        if ($reason !== null) {
+            $session->set('pw_change_reason', $reason);
+        } else {
+            $session->remove('pw_change_reason');
+        }
+
+        ActivityLogger::record('LOGIN_SUCCESS', 'AUTH', 'Signed in', $user);
+    }
+
+    /**
+     * Why this user must pick a new password right now, or null if they don't.
+     *   first   = flagged (new account, admin-set password, or just finished MFA set-up)
+     *   expired = never set, or older than PASSWORD_MAX_AGE
+     */
+    public function passwordChangeReason(array $user): ?string
+    {
+        if ((int) ($user['must_change_password'] ?? 0) === 1) {
+            return 'first';
+        }
+
+        $changed = $user['password_changed_at'] ?? null;
+        if (empty($changed)) {
+            return 'expired';
+        }
+
+        return strtotime($changed) <= strtotime(self::PASSWORD_MAX_AGE) ? 'expired' : null;
     }
 
     /** Where a freshly logged-in user goes. SUPERIOR cannot open the admin-only dashboard. */
     public function landingUrl(?string $role): string
     {
+        if (session()->get('pw_change_reason')) {
+            return base_url('password/change');
+        }
+
         return base_url(strtoupper(trim((string) $role)) === 'SUPERIOR' ? 'tia-superior/monitoring' : 'dashboard');
     }
 
@@ -222,14 +258,18 @@ class MfaService
     // Admin reset
     // ------------------------------------------------------------------
 
-    /** Wipe every second factor so the user must re-enrol at next login. */
     /** Wipe the second factor so the user must re-enrol at next login. */
     public function resetUser(int $userId): void
     {
-        db_connect()->table('users')->where('id', $userId)->update([
+        $db = db_connect();
+        $target = $db->table('users')->select('username')->where('id', $userId)->get()->getRowArray();
+
+        $db->table('users')->where('id', $userId)->update([
             'mfa_secret' => null,
             'mfa_enabled' => 0,
             'mfa_last_ts' => null,
         ]);
+
+        ActivityLogger::record('MFA_RESET', 'USERS', 'Reset authenticator for ' . ($target['username'] ?? 'user #' . $userId));
     }
 }

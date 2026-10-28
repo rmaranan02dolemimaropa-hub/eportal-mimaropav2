@@ -12,9 +12,6 @@ class ActivityLogController extends BaseController
 
     public function index()
     {
-
-
-
         if (!$this->allowed()) {
             return redirect()->to(base_url('unauthorized'));
         }
@@ -38,6 +35,7 @@ class ActivityLogController extends BaseController
             'page' => $page,
             'pages' => $pages,
             'perPage' => self::PER_PAGE,
+            'groupCounts' => $this->groupCounts($db, $filters),
             'modules' => array_column($db->query('SELECT DISTINCT module FROM activity_logs ORDER BY module')->getResultArray(), 'module'),
             'actions' => array_column($db->query('SELECT DISTINCT action FROM activity_logs ORDER BY action')->getResultArray(), 'action'),
         ]);
@@ -95,8 +93,11 @@ class ActivityLogController extends BaseController
     {
         $get = $this->request->getGet();
         $date = static fn($v) => preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $v) ? (string) $v : '';
+        $view = (string) ($get['view'] ?? '');
 
         return [
+            // '' = all events, 'activity' = everything except sign-ins, 'signin' = sign-ins only
+            'view' => in_array($view, ['activity', 'signin'], true) ? $view : '',
             'q' => mb_substr(trim((string) ($get['q'] ?? '')), 0, 100),
             'module' => mb_substr(trim((string) ($get['module'] ?? '')), 0, 30),
             'action' => mb_substr(trim((string) ($get['action'] ?? '')), 0, 60),
@@ -109,6 +110,11 @@ class ActivityLogController extends BaseController
     {
         $b = $db->table('activity_logs');
 
+        if ($f['view'] === 'signin') {
+            $b->where('module', 'AUTH');
+        } elseif ($f['view'] === 'activity') {
+            $b->where('module !=', 'AUTH');
+        }
         if ($f['q'] !== '') {
             $b->groupStart()
                 ->like('username', $f['q'])
@@ -131,6 +137,24 @@ class ActivityLogController extends BaseController
         }
 
         return $b;
+    }
+
+    /** Entries per year and per month for the current filters (not just the current page). */
+    private function groupCounts($db, array $f): array
+    {
+        $rows = $this->query($db, $f)
+            ->select('YEAR(created_at) AS y, MONTH(created_at) AS m, COUNT(*) AS c', false)
+            ->groupBy('y, m')
+            ->get()->getResultArray();
+
+        $counts = ['years' => [], 'months' => []];
+        foreach ($rows as $r) {
+            $year = (string) $r['y'];
+            $counts['months'][sprintf('%04d-%02d', $r['y'], $r['m'])] = (int) $r['c'];
+            $counts['years'][$year] = ($counts['years'][$year] ?? 0) + (int) $r['c'];
+        }
+
+        return $counts;
     }
 
     /** Stop spreadsheet formulas: failed-login rows contain text typed by strangers. */

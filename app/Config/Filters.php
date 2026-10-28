@@ -35,6 +35,7 @@ class Filters extends BaseFilters
         'pagecache' => PageCache::class,
         'performance' => PerformanceMetrics::class,
         'auth' => \App\Filters\AuthFilter::class,
+        'pwchange' => \App\Filters\PasswordChangeFilter::class
     ];
 
     /**

@@ -52,12 +52,24 @@ class EmployeeController extends BaseController
             $builder->where('employees.position_type', $type);
         }
 
+        $q = trim((string) $this->request->getGet('q'));
+        if ($q !== '') {
+            $builder->groupStart()
+                ->like('employees.name', $q)
+                ->orLike('employees.employee_code', $q)
+                ->orLike('employees.email', $q)
+                ->orLike('employees.position', $q)
+                ->orLike('employees.office', $q)
+                ->groupEnd();
+        }
+
         return view('dashboard/dole-employees', [
             'employees' => $builder->findAll(),
             'superiors' => $this->superiors->orderBy('name', 'ASC')->findAll(),
             'offices' => EmployeeModel::OFFICES,
             'positionTypes' => EmployeeModel::POSITION_TYPES,
             'currentType' => $type,
+            'q' => $q,
         ]);
     }
 

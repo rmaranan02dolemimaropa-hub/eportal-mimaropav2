@@ -17,8 +17,20 @@ class SuperiorController extends BaseController
     /** List page */
     public function index()
     {
+        $q = trim((string) $this->request->getGet('q'));
+
+        if ($q !== '') {
+            $this->model->groupStart()
+                ->like('name', $q)
+                ->orLike('employee_code', $q)
+                ->orLike('email', $q)
+                ->orLike('position', $q)
+                ->groupEnd();
+        }
+
         return view('dashboard/dole-superiors', [
             'superiors' => $this->model->orderBy('name', 'ASC')->findAll(),
+            'q' => $q,
         ]);
     }
 

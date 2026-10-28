@@ -454,7 +454,7 @@ $pager = $pager ?? null;
         <div class="modal fade" id="cancel<?= $row['id'] ?>" tabindex="-1">
             <div class="modal-dialog">
                 <form method="post" action="<?= site_url('request/cancel/' . $row['id']) ?>"
-                    class="modal-content request-modal">
+                    class="modal-content request-modal cancelRequestForm">
 
                     <?= csrf_field() ?>
 
@@ -513,6 +513,13 @@ $pager = $pager ?? null;
             <p id="updateText">
                 Please wait while we update the request status and send the email notification.
             </p>
+        </div>
+    </div>
+    <div id="cancelOverlay" class="processing-overlay d-none">
+        <div class="processing-card">
+            <div class="spinner-border text-danger mb-3" role="status"></div>
+            <h5>Canceling Request...</h5>
+            <p>Please wait while we cancel the request and send the email notification.</p>
         </div>
     </div>
 
@@ -1206,6 +1213,27 @@ $pager = $pager ?? null;
         `;
         });
 
+    });
+
+    const cancelOverlay = document.getElementById("cancelOverlay");
+
+    document.querySelectorAll(".cancelRequestForm").forEach(form => {
+        form.addEventListener("submit", function () {
+            cancelOverlay.classList.remove("d-none");
+
+            // Prevent double submission
+            const submitBtn = form.querySelector("button[type='submit']");
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Canceling...
+        `;
+        });
+    });
+
+    // If the user comes back with the browser's Back button, don't leave the overlay stuck
+    window.addEventListener("pageshow", function (e) {
+        if (e.persisted) cancelOverlay.classList.add("d-none");
     });
 </script>
 

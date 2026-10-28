@@ -7,43 +7,126 @@ $logs = $logs ?? [];
 $filters = $filters ?? [];
 $modules = $modules ?? [];
 $actions = $actions ?? [];
+$groupCounts = $groupCounts ?? [];   // optional, see controller patch
 $total = (int) ($total ?? 0);
 $page = (int) ($page ?? 1);
 $pages = (int) ($pages ?? 1);
 $perPage = (int) ($perPage ?? 25);
 
-// Only the filters that are actually set, so page links and the export keep them
+$view = $filters['view'] ?? '';
 $active = array_filter($filters, static fn($v) => $v !== '' && $v !== null);
+$activeNoView = array_diff_key($active, ['view' => 1]);
+$hasPanelFilters = (bool) $activeNoView;
+
 $pageUrl = static fn(int $p): string => base_url('activity-logs') . '?' . http_build_query($active + ['page' => $p]);
+$viewUrl = static fn(string $v): string => base_url('activity-logs') . ($v !== '' || $activeNoView
+    ? '?' . http_build_query($activeNoView + ($v !== '' ? ['view' => $v] : []))
+    : '');
 $exportUrl = base_url('activity-logs/export') . ($active ? '?' . http_build_query($active) : '');
 
 $first = $total > 0 ? (($page - 1) * $perPage) + 1 : 0;
 $last = min($total, $page * $perPage);
 
-// Badge colour by what the action means
-$badgeClass = static function (string $action): string {
+// Row highlight: critical = red, needs attention = amber (Bootstrap table variants)
+$rowClass = static function (string $action): string {
     $a = strtoupper($action);
     foreach (['FAILED', 'BLOCKED', 'THROTTLED', 'DELETE'] as $k) {
         if (str_contains($a, $k))
-            return 'bg-danger';
+            return 'table-danger';
     }
     foreach (['RESET', 'DEACTIVATE'] as $k) {
         if (str_contains($a, $k))
-            return 'bg-warning text-dark';
+            return 'table-warning';
+    }
+    return '';
+};
+
+// Badge tone by what the action means (colours live in the stylesheet)
+$badgeClass = static function (string $action): string {
+    $a = strtoupper($action);
+    // Request statuses: same colours as the status badges on the dashboard / Requests page
+    $status = [
+        'NEW_APPLICATION' => 'badge-new-application',
+        'PROCESSING' => 'badge-processing',
+        'RELEASING' => 'badge-for-released',
+        'COMPLETE' => 'badge-completed',
+        'REJECT' => 'badge-rejected',
+        'CANCEL' => 'badge-canceled',
+    ];
+    foreach ($status as $k => $class) {
+        if (str_contains($a, $k))
+            return $class;
+    }
+    foreach (['FAILED', 'BLOCKED', 'THROTTLED', 'DELETE'] as $k) {
+        if (str_contains($a, $k))
+            return 'log-badge-danger';
+    }
+    foreach (['RESET', 'DEACTIVATE'] as $k) {
+        if (str_contains($a, $k))
+            return 'log-badge-warning';
     }
     foreach (['LOGIN_SUCCESS', 'ACTIVATE', 'ENROLLED'] as $k) {
         if (str_contains($a, $k))
-            return 'bg-success';
+            return 'log-badge-success';
     }
     foreach (['CREATE', 'ADD', 'SAVE', 'SUBMITTED', 'IMPORT'] as $k) {
         if (str_contains($a, $k))
-            return 'bg-primary';
+            return 'log-badge-primary';
     }
-    if (str_contains($a, 'UPDATE') || str_contains($a, 'STATUS'))
-        return 'bg-info text-dark';
-    return 'bg-secondary';
+    foreach (['UPDATE', 'STATUS', 'PROCESSING'] as $k) {
+        if (str_contains($a, $k))
+            return 'log-badge-info';
+    }
+    if (str_contains($a, 'EXPORT'))
+        return 'log-badge-purple';
+    return 'log-badge-neutral';
 };
+
+// Bootstrap icon per action
+$icon = static function (string $action): string {
+    $a = strtoupper($action);
+    $map = [
+        'NEW_APPLICATION' => 'bi-hourglass-split',
+        'RELEASING' => 'bi-box-arrow-up-right',
+        'COMPLETE' => 'bi-check-circle',
+        'REJECT' => 'bi-x-circle',
+        'CANCEL' => 'bi-slash-circle',
+        'FAILED' => 'bi-shield-exclamation',
+        'BLOCKED' => 'bi-slash-circle',
+        'THROTTLED' => 'bi-speedometer2',
+        'DELETE' => 'bi-trash3',
+        'RESET' => 'bi-key',
+        'DEACTIVATE' => 'bi-person-dash',
+        'ACTIVATE' => 'bi-person-check',
+        'LOGIN' => 'bi-box-arrow-in-right',
+        'LOGOUT' => 'bi-box-arrow-right',
+        'EXPORT' => 'bi-download',
+        'IMPORT' => 'bi-upload',
+        'PROCESSING' => 'bi-arrow-repeat',
+        'UPDATE' => 'bi-pencil-square',
+        'STATUS' => 'bi-arrow-left-right',
+        'CREATE' => 'bi-plus-circle',
+        'ADD' => 'bi-plus-circle',
+        'SAVE' => 'bi-check2-circle',
+        'SUBMITTED' => 'bi-send-check',
+        'ENROLLED' => 'bi-phone',
+    ];
+    foreach ($map as $k => $i) {
+        if (str_contains($a, $k))
+            return $i;
+    }
+    return 'bi-activity';
+};
+
 $actionLabel = static fn(string $a): string => ucwords(strtolower(str_replace('_', ' ', $a)));
+$eventsWord = static fn(int $n): string => $n . ($n === 1 ? ' event' : ' events');
+
+// Group the rows on this page: year > month
+$groups = [];
+foreach ($logs as $log) {
+    $ts = strtotime($log['created_at']);
+    $groups[date('Y', $ts)][date('Y-m', $ts)][] = $log;
+}
 ?>
 
 <!-- ============ MAIN CONTENT ============ -->
@@ -52,114 +135,167 @@ $actionLabel = static fn(string $a): string => ucwords(strtolower(str_replace('_
     <div class="page-header">
         <div>
             <h1 class="page-title">Activity Logs</h1>
-            <p class="page-subtitle">Who signed in, what they changed and when. Newest first.</p>
+            <p class="page-subtitle">Who signed in, what they changed and when. Newest first. Highlighted entries are
+                worth a closer look.</p>
         </div>
     </div>
 
-    <!-- Filters -->
-    <section class="panel mb-3">
-        <form method="get" action="<?= base_url('activity-logs') ?>" class="row g-2 align-items-end p-3">
-            <div class="col-md-3">
-                <label for="fq" class="form-label small mb-1">Search</label>
-                <input type="text" id="fq" name="q" class="form-control" maxlength="100"
-                    placeholder="Name, username, IP or description" value="<?= esc($filters['q'] ?? '', 'attr') ?>">
-            </div>
-            <div class="col-md-2">
-                <label for="fmodule" class="form-label small mb-1">Module</label>
-                <select id="fmodule" name="module" class="form-select">
-                    <option value="">All modules</option>
-                    <?php foreach ($modules as $m): ?>
-                        <option value="<?= esc($m, 'attr') ?>" <?= ($filters['module'] ?? '') === $m ? 'selected' : '' ?>>
-                            <?= esc($m) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label for="faction" class="form-label small mb-1">Action</label>
-                <select id="faction" name="action" class="form-select">
-                    <option value="">All actions</option>
-                    <?php foreach ($actions as $a): ?>
-                        <option value="<?= esc($a, 'attr') ?>" <?= ($filters['action'] ?? '') === $a ? 'selected' : '' ?>>
-                            <?= esc($actionLabel($a)) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="col-md-2 col-6">
-                <label for="ffrom" class="form-label small mb-1">From</label>
-                <input type="date" id="ffrom" name="date_from" class="form-control"
-                    value="<?= esc($filters['date_from'] ?? '', 'attr') ?>">
-            </div>
-            <div class="col-md-2 col-6">
-                <label for="fto" class="form-label small mb-1">To</label>
-                <input type="date" id="fto" name="date_to" class="form-control"
-                    value="<?= esc($filters['date_to'] ?? '', 'attr') ?>">
-            </div>
-            <div class="col-md-1 d-flex gap-1">
-                <button class="btn btn-primary" title="Apply filters"><i class="bi bi-funnel"></i></button>
-                <a href="<?= base_url('activity-logs') ?>" class="btn btn-outline-secondary" title="Clear filters"><i
-                        class="bi bi-x-lg"></i></a>
-            </div>
-        </form>
-    </section>
+    <!-- Filters (collapsible) -->
+    <div id="logsFilters" class="collapse <?= $hasPanelFilters ? 'show' : '' ?>">
+        <section class="panel mb-3 p-0">
+            <form method="get" action="<?= base_url('activity-logs') ?>" class="logs-filter">
+                <?php if ($view !== ''): ?>
+                    <input type="hidden" name="view" value="<?= esc($view, 'attr') ?>">
+                <?php endif; ?>
+                <div class="lf-search">
+                    <label for="fq" class="form-label small mb-1">Search</label>
+                    <input type="text" id="fq" name="q" class="form-control" maxlength="100"
+                        placeholder="Name, username or description" value="<?= esc($filters['q'] ?? '', 'attr') ?>">
+                </div>
+                <div>
+                    <label for="fmodule" class="form-label small mb-1">Module</label>
+                    <select id="fmodule" name="module" class="form-select">
+                        <option value="">All modules</option>
+                        <?php foreach ($modules as $m): ?>
+                            <option value="<?= esc($m, 'attr') ?>" <?= ($filters['module'] ?? '') === $m ? 'selected' : '' ?>>
+                                <?= esc($m) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div>
+                    <label for="faction" class="form-label small mb-1">Action</label>
+                    <select id="faction" name="action" class="form-select">
+                        <option value="">All actions</option>
+                        <?php foreach ($actions as $a): ?>
+                            <option value="<?= esc($a, 'attr') ?>" <?= ($filters['action'] ?? '') === $a ? 'selected' : '' ?>>
+                                <?= esc($actionLabel($a)) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div>
+                    <label for="ffrom" class="form-label small mb-1">From</label>
+                    <input type="date" id="ffrom" name="date_from" class="form-control"
+                        value="<?= esc($filters['date_from'] ?? '', 'attr') ?>">
+                </div>
+                <div>
+                    <label for="fto" class="form-label small mb-1">To</label>
+                    <input type="date" id="fto" name="date_to" class="form-control"
+                        value="<?= esc($filters['date_to'] ?? '', 'attr') ?>">
+                </div>
+                <div class="lf-actions">
+                    <button type="submit" class="btn tool-btn" title="Apply filters">
+                        <i class="bi bi-funnel"></i> Apply
+                    </button>
+                    <a href="<?= esc($viewUrl($view), 'attr') ?>" class="btn tool-btn" title="Clear filters">
+                        <i class="bi bi-x-lg"></i> Clear
+                    </a>
+                </div>
+            </form>
+        </section>
+    </div>
 
-    <!-- Log table -->
-    <section class="panel table-panel">
+    <!-- Log entries -->
+    <section class="panel table-panel logs-panel">
         <div class="panel-header">
             <h2 class="panel-title">Log Entries</h2>
             <div class="panel-tools">
+                <button type="button" class="btn tool-btn" data-bs-toggle="collapse" data-bs-target="#logsFilters"
+                    aria-expanded="<?= $hasPanelFilters ? 'true' : 'false' ?>" aria-controls="logsFilters">
+                    <i class="bi bi-sliders"></i><span
+                        class="d-none d-md-inline">Filters<?= $hasPanelFilters ? ' (' . count($activeNoView) . ')' : '' ?></span>
+                </button>
                 <a class="btn tool-btn" href="<?= esc($exportUrl, 'attr') ?>">
                     <i class="bi bi-download"></i><span class="d-none d-md-inline">Export CSV</span>
                 </a>
             </div>
         </div>
 
-        <div class="table-responsive">
-            <table class="table requests-table align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th>Date &amp; Time</th>
-                        <th>User</th>
-                        <th>Module</th>
-                        <th>Action</th>
-                        <th>Description</th>
-                        <th>IP Address</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($logs)): ?>
-                        <tr>
-                            <td colspan="6" class="text-center text-muted py-4">
-                                <?= $active ? 'No entries match these filters. Clear them to see everything.' : 'No activity recorded yet.' ?>
-                            </td>
-                        </tr>
-                    <?php endif; ?>
+        <!-- View pills -->
+        <nav class="status-filter" aria-label="Log views">
+            <a href="<?= esc($viewUrl(''), 'attr') ?>" class="status-pill <?= $view === '' ? 'active' : '' ?>">All
+                events</a>
+            <a href="<?= esc($viewUrl('activity'), 'attr') ?>"
+                class="status-pill <?= $view === 'activity' ? 'active' : '' ?>">Activity only</a>
+            <a href="<?= esc($viewUrl('signin'), 'attr') ?>"
+                class="status-pill <?= $view === 'signin' ? 'active' : '' ?>">Sign-in activity</a>
+        </nav>
 
-                    <?php foreach ($logs as $log): ?>
-                        <tr>
-                            <td class="text-nowrap"><?= esc(date('M d, Y h:i:s A', strtotime($log['created_at']))) ?></td>
-                            <td>
-                                <?php if (!empty($log['fullname'])): ?>
-                                    <div><?= esc($log['fullname']) ?></div>
-                                    <div class="small text-muted"><?= esc($log['username']) ?></div>
-                                <?php else: ?>
-                                    <div><?= esc($log['username'] ?: 'Unknown') ?></div>
-                                <?php endif; ?>
-                            </td>
-                            <td><?= esc($log['module']) ?></td>
-                            <td><span
-                                    class="badge <?= $badgeClass($log['action']) ?>"><?= esc($actionLabel($log['action'])) ?></span>
-                            </td>
-                            <td><?= esc($log['description']) ?></td>
-                            <td class="text-nowrap" title="<?= esc($log['user_agent'] ?? '', 'attr') ?>">
-                                <?= esc($log['ip_address'] ?: '—') ?>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
+        <?php if (empty($logs)): ?>
+            <div class="log-empty">
+                <?= $active ? 'No entries match these filters. Clear them to see everything.' : 'No activity recorded yet.' ?>
+            </div>
+        <?php endif; ?>
+
+        <?php foreach ($groups as $year => $months):
+            $yearCount = $groupCounts['years'][$year] ?? array_sum(array_map('count', $months)); ?>
+            <details class="log-year" open>
+                <summary>
+                    <h3 class="panel-title"><?= esc($year) ?></h3>
+                    <span class="log-count"><?= esc($eventsWord((int) $yearCount)) ?></span>
+                </summary>
+
+                <?php foreach ($months as $ym => $rows):
+                    $monthCount = $groupCounts['months'][$ym] ?? count($rows); ?>
+                    <details class="log-month" open>
+                        <summary>
+                            <span><?= esc(date('F', strtotime($ym . '-01'))) ?></span>
+                            <span class="log-count"><?= esc($eventsWord((int) $monthCount)) ?></span>
+                        </summary>
+
+                        <div class="table-responsive mh-100">
+                            <table class="table requests-table logs-table align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Event</th>
+                                        <th>Person</th>
+                                        <th>Module</th>
+                                        <th>When</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($rows as $log):
+                                        $ts = strtotime($log['created_at']); ?>
+                                        <tr class="<?= $rowClass($log['action']) ?>">
+                                            <td data-label="Event">
+                                                <div>
+                                                    <span class="badge <?= $badgeClass($log['action']) ?>">
+                                                        <i class="bi <?= $icon($log['action']) ?>"></i>
+                                                        <?= esc($actionLabel($log['action'])) ?>
+                                                    </span>
+                                                    <?php if (!empty($log['description'])): ?>
+                                                        <div class="log-desc"><?= esc($log['description']) ?></div>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </td>
+                                            <td data-label="Person">
+                                                <div>
+                                                    <?php if (!empty($log['fullname'])): ?>
+                                                        <div><?= esc($log['fullname']) ?></div>
+                                                        <div class="small text-muted"><?= esc($log['username']) ?></div>
+                                                    <?php else: ?>
+                                                        <div><?= esc($log['username'] ?: 'Unknown') ?></div>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </td>
+                                            <td data-label="Module"><?= esc($log['module']) ?></td>
+                                            <td class="text-nowrap" data-label="When"
+                                                title="<?= esc(date('M d, Y h:i:s A', $ts), 'attr') ?>">
+                                                <div>
+                                                    <div><?= esc(date('D j', $ts)) ?></div>
+                                                    <div class="small text-muted"><?= esc(date('g:i A', $ts)) ?></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </details>
+                <?php endforeach; ?>
+            </details>
+        <?php endforeach; ?>
 
         <nav class="table-pagination">
             <span class="pagination-summary">Showing <?= $first ?>–<?= $last ?> of <?= $total ?> entries</span>

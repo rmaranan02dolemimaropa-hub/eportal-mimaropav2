@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Models\UserModel;
 
+
 class UserController extends BaseController
 {
     protected UserModel $model;
@@ -23,9 +24,21 @@ class UserController extends BaseController
 
     public function index()
     {
+        $q = trim((string) $this->request->getGet('q'));
+
+        if ($q !== '') {
+            $this->model->groupStart()
+                ->like('fullname', $q)
+                ->orLike('username', $q)
+                ->orLike('email', $q)
+                ->orLike('role', $q)
+                ->groupEnd();
+        }
+
         return view('dashboard/users', [
             'users' => $this->model->paginate(10),
             'pager' => $this->model->pager,
+            'q' => $q,
         ]);
     }
 
@@ -60,6 +73,8 @@ class UserController extends BaseController
             ),
             'role' => $this->request->getPost('role'),
             'status' => $this->request->getPost('status'),
+            'must_change_password' => 1,
+            'password_changed_at' => null,
         ]);
 
         return redirect()->back()->with('success', 'User added successfully.');
@@ -108,10 +123,11 @@ class UserController extends BaseController
             'status' => $status,
         ];
 
-        // Password is optional: blank means keep the current one
         $password = trim((string) $this->request->getPost('password'));
         if ($password !== '') {
             $data['password'] = password_hash($password, PASSWORD_DEFAULT);
+            $data['must_change_password'] = 1;   // set by an admin, so it is temporary
+            $data['password_changed_at'] = null;
         }
 
         $this->model->update($id, $data);

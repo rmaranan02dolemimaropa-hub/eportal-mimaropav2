@@ -64,11 +64,15 @@ class MfaController extends BaseController
             'mfa_secret' => $this->mfa->encrypt($secret),
             'mfa_enabled' => 1,
             'mfa_last_ts' => $ts,
+            // The password used to get here may be a temporary one: make them choose their own now.
+            'must_change_password' => 1,
         ]);
 
         $user['mfa_enabled'] = 1;
+        $user['must_change_password'] = 1;
         $this->mfa->completeLogin($user);
 
+        // landingUrl() sends them to password/change while the flag is set
         return redirect()->to($this->mfa->landingUrl($user['role']));
     }
 
@@ -104,6 +108,7 @@ class MfaController extends BaseController
 
         $this->mfa->completeLogin($user);
 
+        // Goes to password/change instead when the password is flagged or older than 3 months
         return redirect()->to($this->mfa->landingUrl($user['role']));
     }
 

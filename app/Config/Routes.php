@@ -2,6 +2,7 @@
 
 use CodeIgniter\Router\RouteCollection;
 
+
 /** @var RouteCollection $routes */
 
 
@@ -13,6 +14,12 @@ use CodeIgniter\Router\RouteCollection;
 
 $routes->get('login', 'EportalController::login');
 $routes->post('login/login_process', 'EportalController::login_process');
+
+
+// Routes.php: add both to the same logged-in group as your other pages,
+// and add 'pwchange' next to your existing auth filter on that group
+$routes->get('password/change', 'PasswordController::change');
+$routes->post('password/update', 'PasswordController::update');
 
 // --- MFA (half-finished login: password OK, second step pending) ---
 $routes->get('mfa/setup', 'MfaController::setup');
@@ -36,6 +43,8 @@ $routes->get('unauthorized', static function () {
 */
 
 $routes->get('/', 'EportalController::index');
+
+$routes->get('search', 'GlobalSearchController::index');
 
 $routes->get('service-record', 'EportalController::service_record');
 $routes->post('service-record/save', 'EportalController::save');

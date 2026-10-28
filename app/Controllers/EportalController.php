@@ -7,6 +7,8 @@ use App\Models\HrRequestModel;
 use App\Models\HrEmploymentHistoryModel;
 use App\Models\UserModel;
 use App\Libraries\Mailer;
+use App\Libraries\ActivityLogger;
+
 
 class EportalController extends BaseController
 {
@@ -51,13 +53,20 @@ class EportalController extends BaseController
     {
         $model = new UserModel();
 
-        $username = trim($this->request->getPost('username'));
-        $password = $this->request->getPost('password');
+        $username = trim((string) $this->request->getPost('username'));
+        $password = (string) $this->request->getPost('password');
 
         $user = $model->where('username', $username)->first();
 
         // Username not found
         if (!$user) {
+            ActivityLogger::record('LOGIN_FAILED', 'AUTH', 'Failed sign-in: unknown username "' . $username . '"', [
+                'id' => null,
+                'username' => $username,
+                'fullname' => null,
+                'role' => null,
+            ]);
+
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Invalid username or password.');
@@ -65,27 +74,39 @@ class EportalController extends BaseController
 
         // Account inactive
         if ($user['status'] !== 'ACTIVE') {
+            ActivityLogger::record('LOGIN_BLOCKED', 'AUTH', 'Sign-in blocked: account is inactive', $user);
+
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Your account is inactive. Please contact the administrator.');
         }
 
         // Verify hashed password
-        if (!password_verify($password, $user['password'])) {
+        if (!password_verify($password, (string) $user['password'])) {
+            ActivityLogger::record('LOGIN_FAILED', 'AUTH', 'Failed sign-in: wrong password', $user);
+
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Invalid username or password.');
         }
 
-        // Password is correct -> now the second step (authenticator code, or
-        // first-time setup). The real logged-in session is only created by
-        // MfaService::completeLogin() after that step succeeds.
+        // Password is correct -> second step (authenticator code, or first-time setup).
+        // LOGIN_SUCCESS is recorded in MfaService::completeLogin(), after that step.
         return (new \App\Libraries\MfaService())->startChallenge($user);
     }
 
     public function logout()
     {
-        session()->destroy();
+        // Record before destroying the session, while we still know who it is
+        $s = session();
+        ActivityLogger::record('LOGOUT', 'AUTH', 'Signed out', [
+            'id' => $s->get('user_id') ?? $s->get('id'),
+            'username' => $s->get('username'),
+            'fullname' => $s->get('fullname'),
+            'role' => $s->get('role'),
+        ]);
+
+        $s->destroy();
 
         return redirect()->to('login')->with('success', 'You have been logged out successfully.');
     }

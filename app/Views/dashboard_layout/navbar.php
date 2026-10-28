@@ -53,7 +53,22 @@ if ($showNotif) {
     </div>
   </div>
 
+  <!-- Global search -->
+  <div class="gsearch" id="gsearch" role="search">
+    <i class="bi bi-search gsearch-icon"></i>
+    <input type="search" id="gsearchInput" class="form-control" placeholder="Search requests, people, trainings…"
+      autocomplete="off" maxlength="100" aria-label="Search everything" aria-controls="gsearchResults"
+      aria-expanded="false">
+    <kbd class="gsearch-kbd d-none d-xl-inline">Ctrl K</kbd>
+    <div class="gsearch-results d-none" id="gsearchResults" role="listbox" aria-label="Search results"></div>
+  </div>
+
   <div class="topbar-right d-flex align-items-center gap-2">
+
+    <!-- Search toggle (phones only) -->
+    <button type="button" class="notif-btn d-md-none" id="gsearchToggle" aria-label="Search">
+      <i class="bi bi-search"></i>
+    </button>
 
     <?php if ($showNotif): ?>
       <!-- Notification bell -->
@@ -153,3 +168,186 @@ if ($showNotif) {
     </div>
   </div>
 </div>
+
+<script>
+  (function () {
+    'use strict';
+
+    var box = document.getElementById('gsearch');
+    var input = document.getElementById('gsearchInput');
+    var panel = document.getElementById('gsearchResults');
+    var toggle = document.getElementById('gsearchToggle');
+    if (!box || !input || !panel) return;
+
+    var ENDPOINT = <?= json_encode(site_url('search')) ?>;
+    var STATUS_CLASS = {
+      'New Application': 'badge-new-application',
+      'Processing': 'badge-processing',
+      'For Releasing': 'badge-for-released',
+      'Completed': 'badge-completed',
+      'Rejected': 'badge-rejected',
+      'Canceled': 'badge-canceled',
+      'ACTIVE': 'bg-success',
+      'INACTIVE': 'bg-secondary'
+    };
+
+    var timer = null, controller = null, active = -1;
+
+    function el(tag, cls, text) {
+      var n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (text !== undefined) n.textContent = text;
+      return n;
+    }
+
+    function open() {
+      panel.classList.remove('d-none');
+      input.setAttribute('aria-expanded', 'true');
+    }
+
+    function close() {
+      panel.classList.add('d-none');
+      input.setAttribute('aria-expanded', 'false');
+      active = -1;
+    }
+
+    function message(text) {
+      panel.replaceChildren(el('div', 'gsearch-empty', text));
+      open();
+    }
+
+    function items() {
+      return panel.querySelectorAll('.gsearch-item, .gsearch-more');
+    }
+
+    function setActive(i) {
+      var list = items();
+      if (!list.length) return;
+      active = (i + list.length) % list.length;
+      list.forEach(function (n, idx) { n.classList.toggle('is-active', idx === active); });
+      list[active].scrollIntoView({ block: 'nearest' });
+    }
+
+    function render(groups, q) {
+      if (!groups.length) {
+        message('No results for “' + q + '”');
+        return;
+      }
+
+      var frag = document.createDocumentFragment();
+
+      groups.forEach(function (g) {
+        frag.appendChild(el('div', 'gsearch-group', g.label));
+
+        g.items.forEach(function (it) {
+          var a = el('a', 'gsearch-item');
+          a.href = it.url;
+          a.setAttribute('role', 'option');
+
+          var ico = el('span', 'gsearch-ico');
+          ico.appendChild(el('i', 'bi ' + (it.icon || 'bi-search')));
+          a.appendChild(ico);
+
+          var txt = el('span', 'gsearch-text');
+          txt.appendChild(el('span', 'gsearch-title', it.title));
+          txt.appendChild(el('span', 'gsearch-sub', it.sub || ''));
+          a.appendChild(txt);
+
+          if (it.badge) {
+            a.appendChild(el('span', 'badge ' + (STATUS_CLASS[it.badge] || 'bg-secondary'), it.badge));
+          }
+          frag.appendChild(a);
+        });
+
+        if (g.more) {
+          var m = el('a', 'gsearch-more', g.more.text);
+          m.href = g.more.url;
+          frag.appendChild(m);
+        }
+      });
+
+      panel.replaceChildren(frag);
+      active = -1;
+      open();
+    }
+
+    function run() {
+      var q = input.value.trim();
+      if (controller) controller.abort();
+
+      if (q.length < 2) {
+        if (q.length === 0) close(); else message('Keep typing…');
+        return;
+      }
+
+      controller = new AbortController();
+      message('Searching…');
+
+      fetch(ENDPOINT + '?q=' + encodeURIComponent(q), {
+        credentials: 'same-origin',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        signal: controller.signal
+      })
+        .then(function (r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        })
+        .then(function (data) { render(data.groups || [], q); })
+        .catch(function (err) {
+          if (err.name !== 'AbortError') message('Search is unavailable right now.');
+        });
+    }
+
+    input.addEventListener('input', function () {
+      clearTimeout(timer);
+      timer = setTimeout(run, 250);
+    });
+
+    input.addEventListener('focus', function () {
+      if (input.value.trim().length >= 2 && panel.children.length) open();
+    });
+
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); setActive(active + 1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(active - 1); }
+      else if (e.key === 'Enter') {
+        var list = items();
+        var target = list[active] || list[0];
+        if (target && !panel.classList.contains('d-none')) { e.preventDefault(); window.location.href = target.href; }
+      }
+      else if (e.key === 'Escape') {
+        if (input.value) { input.value = ''; }
+        close();
+        box.classList.remove('is-open');
+        input.blur();
+      }
+    });
+
+    // Ctrl/Cmd + K from anywhere
+    document.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        box.classList.add('is-open');
+        input.focus();
+        input.select();
+      }
+    });
+
+    // Click outside closes the list
+    document.addEventListener('click', function (e) {
+      if (!box.contains(e.target) && !(toggle && toggle.contains(e.target))) {
+        close();
+        box.classList.remove('is-open');
+      }
+    });
+
+    // Phones: the search icon shows / hides the box
+    if (toggle) {
+      toggle.addEventListener('click', function () {
+        var opening = !box.classList.contains('is-open');
+        box.classList.toggle('is-open', opening);
+        if (opening) input.focus(); else close();
+      });
+    }
+  })();
+</script>

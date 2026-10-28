@@ -3090,3 +3090,461 @@ body:has(.offcanvas.show) .export-overlay {
 .notif-footer:hover {
   background: #f3f4f6;
 }
+
+/* =====================================================
+   ACTIVITY LOGS — filters + table/card layout
+   ===================================================== */
+
+/* ---------- Filters: wrap neatly at any width ---------- */
+.logs-filter {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  align-items: end;
+  padding: 20px;
+}
+.logs-filter .form-control,
+.logs-filter .form-select {
+  width: 100%;
+  min-width: 0;
+}
+.logs-filter .lf-actions {
+  display: flex;
+  gap: 8px;
+}
+.logs-filter .lf-actions .tool-btn {
+  flex: 1;
+  justify-content: center;
+  white-space: nowrap;
+  min-height: 38px; /* same height as the inputs */
+}
+@media (min-width: 768px) {
+  .logs-filter .lf-search {
+    grid-column: span 2;
+  }
+}
+@media (max-width: 575.98px) {
+  .logs-filter .lf-search,
+  .logs-filter .lf-actions {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ---------- Table -> cards when the panel is narrow ---------- */
+.logs-panel .table-responsive {
+  container-type: inline-size;
+}
+
+@container (max-width: 899.98px) {
+  .logs-panel .logs-table {
+    min-width: 0;
+  }
+  .logs-panel .logs-table thead {
+    display: none;
+  }
+
+  .logs-panel .logs-table,
+  .logs-panel .logs-table tbody,
+  .logs-panel .logs-table tr,
+  .logs-panel .logs-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .logs-panel .logs-table tbody {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 12px;
+  }
+
+  .logs-panel .logs-table tbody tr {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 6px 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  .logs-panel .logs-table tbody td {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 9px 0;
+    border: 0;
+    border-bottom: 1px dashed #e5e7eb;
+    text-align: right;
+    overflow-wrap: anywhere;
+    white-space: normal;
+    background: transparent;
+  }
+  .logs-panel .logs-table tbody td:last-child {
+    border-bottom: 0;
+  }
+
+  .logs-panel .logs-table tbody td::before {
+    content: attr(data-label);
+    flex: 0 0 32%;
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #6b7280;
+    padding-top: 2px;
+  }
+
+  /* empty state */
+  .logs-panel .logs-table tr.empty-row {
+    grid-column: 1 / -1;
+  }
+  .logs-panel .logs-table tr.empty-row td {
+    display: block;
+    text-align: center;
+  }
+  .logs-panel .logs-table tr.empty-row td::before {
+    display: none;
+  }
+}
+
+/* =====================================================
+   ACTIVITY LOGS — year/month groups, event badge, empty state
+   Append to the "ACTIVITY LOGS" section of your stylesheet.
+   Uses your existing tokens only (--color-*, --transition-base).
+   ===================================================== */
+
+/* ---------- Year / month groups (<details>) ---------- */
+.log-year > summary,
+.log-month > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+/* drop the browser's default triangle */
+.log-year > summary::-webkit-details-marker,
+.log-month > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* one chevron for both levels: points down when open, right when closed */
+.log-year > summary::before,
+.log-month > summary::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-right: 2px solid var(--color-text-muted);
+  border-bottom: 2px solid var(--color-text-muted);
+  transform: rotate(45deg);
+  transition: transform var(--transition-base);
+}
+
+.log-year:not([open]) > summary::before,
+.log-month:not([open]) > summary::before {
+  transform: rotate(-45deg);
+}
+
+.log-year > summary:focus-visible,
+.log-month > summary:focus-visible {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: -2px;
+}
+
+.log-year {
+  border-top: 1px solid var(--color-border);
+}
+
+.log-year > summary {
+  padding: 16px 22px;
+}
+
+.log-year > summary .panel-title {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.log-month > summary {
+  padding: 10px 22px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.log-count {
+  margin-left: auto;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-text-muted);
+}
+
+/* ---------- Event badge: icon sits apart from the text ---------- */
+.logs-table .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.logs-table .badge i {
+  font-size: 0.8rem;
+}
+
+.log-desc {
+  margin-top: 6px;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Empty state ---------- */
+.log-empty {
+  padding: 32px 22px;
+  text-align: center;
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+}
+
+/* ---------- Mobile: the same gutters as the cards ---------- */
+@media (max-width: 576px) {
+  .log-year > summary,
+  .log-month > summary {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+/* ---------- Event badge colours (flat, same look as the status badges) ---------- */
+.log-badge-danger {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.log-badge-warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.log-badge-success {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.log-badge-primary {
+  background: #e0e7ff;
+  color: var(--color-primary);
+}
+
+.log-badge-info {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.log-badge-purple {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.log-badge-neutral {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+/* =====================================================
+   GLOBAL SEARCH (navbar)
+   Append to your stylesheet. Uses your existing tokens only.
+   ===================================================== */
+
+.gsearch {
+  position: relative;
+  flex: 1 1 auto;
+  max-width: 420px;
+  margin: 0 20px;
+}
+
+.gsearch-icon {
+  position: absolute;
+  top: 50%;
+  left: 13px;
+  transform: translateY(-50%);
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.gsearch .form-control {
+  height: 40px;
+  padding: 0 52px 0 36px;
+  border-radius: 999px;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-bg);
+  font-size: 0.86rem;
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    background-color var(--transition-base);
+}
+
+.gsearch .form-control:focus {
+  outline: none;
+  background: #ffffff;
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* hide the browser's own clear (x) so it doesn't fight the shortcut hint */
+.gsearch .form-control::-webkit-search-cancel-button {
+  display: none;
+}
+
+.gsearch-kbd {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  padding: 2px 7px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.gsearch:focus-within .gsearch-kbd {
+  display: none !important;
+}
+
+/* ---------- Results panel ---------- */
+.gsearch-results {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  min-width: 340px;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 6px 0;
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: 1040;
+}
+
+.gsearch-group {
+  padding: 10px 16px 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.gsearch-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 16px;
+  color: var(--color-text);
+}
+
+.gsearch-item:hover,
+.gsearch-item.is-active,
+.gsearch-more:hover,
+.gsearch-more.is-active {
+  background: var(--color-bg);
+}
+
+.gsearch-ico {
+  flex: 0 0 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(16, 5, 140, 0.08);
+  color: var(--color-primary);
+}
+
+.gsearch-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.gsearch-title {
+  font-size: 0.86rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gsearch-sub {
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gsearch-item .badge {
+  flex-shrink: 0;
+}
+
+.gsearch-more {
+  display: block;
+  padding: 8px 16px 8px 62px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-secondary);
+}
+
+.gsearch-empty {
+  padding: 22px 16px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+/* ---------- Phones: the box drops under the top bar ---------- */
+@media (max-width: 767.98px) {
+  .gsearch {
+    display: none;
+    position: fixed;
+    top: var(--topbar-height);
+    left: 0;
+    right: 0;
+    max-width: none;
+    margin: 0;
+    padding: 10px 14px;
+    background: #ffffff;
+    border-bottom: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+    z-index: 1029;
+  }
+
+  .gsearch.is-open {
+    display: block;
+  }
+
+  .gsearch-icon {
+    left: 27px;
+  }
+
+  .gsearch-results {
+    left: 14px;
+    right: 14px;
+    min-width: 0;
+  }
+}

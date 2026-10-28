@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use App\Models\HrRequestModel;
 use App\Models\HrEmploymentHistoryModel;
 use App\Libraries\Mailer;
+use App\Libraries\ActivityLogger;
 
 class RequestController extends BaseController
 {
@@ -137,7 +138,13 @@ END
             ? implode(', ', $certification)
             : $certification;
 
-        $requestModel->insert($data);
+        if ($requestModel->insert($data)) {
+            ActivityLogger::record(
+                'REQUEST_SUBMITTED',
+                'REQUESTS',
+                'Manual entry: ' . $data['reference_no'] . ' - ' . $serviceAvailed . ' (' . ($data['fullname'] ?? '') . ')'
+            );
+        }
 
         return redirect()
             ->to(site_url('request'))
@@ -187,13 +194,44 @@ END
                 break;
         }
 
+        // Old status, for the activity log
+        $before = $requestModel->find($id);
+
         $requestModel->update($id, $data);
+
+        $request = $requestModel->find($id);
+
+        //===================================================
+        // ACTIVITY LOG
+        //===================================================
+
+        if ($request) {
+            $oldStatus = $before['status'] ?? '';
+            $label = $request['reference_no'] . ' - ' . $request['service_availed'] . ' (' . $request['fullname'] . ')';
+
+            if ($status !== $oldStatus) {
+                $actionMap = [
+                    'Processing' => 'REQUEST_PROCESSING',
+                    'For Releasing' => 'REQUEST_FOR_RELEASING',
+                    'Completed' => 'REQUEST_COMPLETED',
+                    'Rejected' => 'REQUEST_REJECTED',
+                    'Canceled' => 'REQUEST_CANCELED',
+                ];
+
+                ActivityLogger::record(
+                    $actionMap[$status] ?? 'REQUEST_UPDATED',
+                    'REQUESTS',
+                    $label . ': ' . ($oldStatus ?: '?') . ' → ' . $status
+                );
+            } else {
+                // Same status: only the details/remarks were edited
+                ActivityLogger::record('REQUEST_UPDATED', 'REQUESTS', 'Edited details: ' . $label);
+            }
+        }
 
         //===================================================
         // SEND STATUS UPDATE EMAIL TO CLIENT
         //===================================================
-
-        $request = $requestModel->find($id);
 
         if ($request && !empty($request['email_address'])) {
 
@@ -326,6 +364,18 @@ END
         ]);
 
         //===================================================
+        // ACTIVITY LOG
+        //===================================================
+
+        ActivityLogger::record(
+            'REQUEST_CANCELED',
+            'REQUESTS',
+            $request['reference_no'] . ' - ' . $request['service_availed'] . ' (' . $request['fullname'] . '): '
+            . $request['status'] . ' → Canceled'
+            . ($cancellationReason ? ' | Reason: ' . $cancellationReason : '')
+        );
+
+        //===================================================
         // SEND CANCELLATION EMAIL TO CLIENT
         //===================================================
 
@@ -392,6 +442,12 @@ END
             'date_processing' => date('Y-m-d H:i:s')
         ]);
 
+        ActivityLogger::record(
+            'REQUEST_PROCESSING',
+            'REQUESTS',
+            'Started processing ' . $request['reference_no'] . ' - ' . $request['service_availed'] . ' (' . $request['fullname'] . ')'
+        );
+
         // Send Processing Email
         $mailer = new Mailer();
 
@@ -444,3 +500,7 @@ END
         ]);
     }
 }
+
+
+
+
