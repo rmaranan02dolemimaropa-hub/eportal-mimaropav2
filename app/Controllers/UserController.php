@@ -2,9 +2,8 @@
 
 namespace App\Controllers;
 
-use App\Controllers\BaseController;
+use App\Libraries\MfaService;
 use App\Models\UserModel;
-
 
 class UserController extends BaseController
 {
@@ -24,21 +23,9 @@ class UserController extends BaseController
 
     public function index()
     {
-        $q = trim((string) $this->request->getGet('q'));
-
-        if ($q !== '') {
-            $this->model->groupStart()
-                ->like('fullname', $q)
-                ->orLike('username', $q)
-                ->orLike('email', $q)
-                ->orLike('role', $q)
-                ->groupEnd();
-        }
-
         return view('dashboard/users', [
             'users' => $this->model->paginate(10),
             'pager' => $this->model->pager,
-            'q' => $q,
         ]);
     }
 
@@ -67,13 +54,10 @@ class UserController extends BaseController
             'fullname' => trim($this->request->getPost('fullname')),
             'username' => trim($this->request->getPost('username')),
             'email' => trim($this->request->getPost('email')),
-            'password' => password_hash(
-                $this->request->getPost('password'),
-                PASSWORD_DEFAULT
-            ),
+            'password' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
             'role' => $this->request->getPost('role'),
             'status' => $this->request->getPost('status'),
-            'must_change_password' => 1,
+            'must_change_password' => 1,       // temporary password set by an admin
             'password_changed_at' => null,
         ]);
 
@@ -97,12 +81,10 @@ class UserController extends BaseController
         $role = strtoupper(trim((string) $this->request->getPost('role')));
         $status = $this->request->getPost('status');
 
-        // Another user already uses this username?
         if ($this->model->where('username', $username)->where('id !=', $id)->first()) {
             return redirect()->back()->withInput()->with('error', 'Username already exists.');
         }
 
-        // Another user already uses this email?
         if ($this->model->where('email', $email)->where('id !=', $id)->first()) {
             return redirect()->back()->withInput()->with('error', 'Email address already exists.');
         }
@@ -113,6 +95,11 @@ class UserController extends BaseController
 
         if (!in_array($status, ['ACTIVE', 'INACTIVE'], true)) {
             return redirect()->back()->withInput()->with('error', 'Invalid status.');
+        }
+
+        // Prevent locking yourself out through the edit form
+        if ($id === (int) session()->get('user_id') && $status === 'INACTIVE') {
+            return redirect()->back()->withInput()->with('error', 'You cannot deactivate your own account.');
         }
 
         $data = [
@@ -136,14 +123,13 @@ class UserController extends BaseController
     }
 
     //===================================================
-// DEACTIVATE USER
-//===================================================
+    // DEACTIVATE USER
+    //===================================================
 
     public function deactivate($id)
     {
         $id = (int) $id;
 
-        // Prevent locking yourself out
         if ($id === (int) session()->get('user_id')) {
             return redirect()->back()->with('error', 'You cannot deactivate your own account.');
         }
@@ -159,8 +145,8 @@ class UserController extends BaseController
     }
 
     //===================================================
-// ACTIVATE USER
-//===================================================
+    // ACTIVATE USER
+    //===================================================
 
     public function activate($id)
     {
@@ -177,7 +163,7 @@ class UserController extends BaseController
     }
 
     //===================================================
-    // RESET MFA (lost phone / lost passkey)
+    // RESET MFA (lost phone / lost authenticator)
     //===================================================
 
     public function resetMfa($id)
@@ -189,10 +175,18 @@ class UserController extends BaseController
             return redirect()->back()->with('error', 'User not found.');
         }
 
-        // Wipes authenticator secret, backup codes and passkeys.
-        // The user must enrol again at their next login.
-        (new \App\Libraries\MfaService())->resetUser($id);
+        try {
+            // Clears the authenticator secret and backup codes; the user
+            // must enrol again at their next login.
+            (new MfaService())->resetUser($id);
+        } catch (\Throwable $e) {
+            log_message('error', 'MFA reset failed for user {id}: {msg}', ['id' => $id, 'msg' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Reset failed: ' . $e->getMessage());
+        }
 
-        return redirect()->back()->with('success', 'Two-step verification was reset for ' . $user['fullname'] . '. They must set it up again at next login.');
+        return redirect()->back()->with(
+            'success',
+            'Two-step verification was reset for ' . $user['fullname'] . '. They must set it up again at next login.'
+        );
     }
 }

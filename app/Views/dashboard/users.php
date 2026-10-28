@@ -23,7 +23,6 @@ $roleLabel = static function (?string $role) use ($roles): string {
 <!-- ============ MAIN CONTENT ============ -->
 <main class="main-content">
 
-
     <!-- Page Header -->
     <div class="page-header">
         <div>
@@ -89,13 +88,14 @@ $roleLabel = static function (?string $role) use ($roles): string {
                     <?php if (!empty($users)): ?>
 
                         <?php foreach ($users as $row): ?>
+                            <?php $isActive = $row['status'] === 'ACTIVE'; ?>
                             <tr>
                                 <td data-label="Full Name"><?= esc($row['fullname']) ?></td>
                                 <td data-label="Username"><?= esc($row['username']) ?></td>
                                 <td data-label="Role"><?= esc($roleLabel($row['role'])) ?></td>
 
                                 <td data-label="Status">
-                                    <?php if ($row['status'] === 'ACTIVE'): ?>
+                                    <?php if ($isActive): ?>
                                         <span class="badge badge-completed">ACTIVE</span>
                                     <?php else: ?>
                                         <span class="badge badge-rejected">INACTIVE</span>
@@ -112,33 +112,34 @@ $roleLabel = static function (?string $role) use ($roles): string {
 
                                 <td class="text-end" data-label="Action">
                                     <div class="row-actions">
-                                        <button class="row-action-btn" title="View" data-bs-toggle="modal"
+                                        <button class="row-action-btn" type="button" title="View" data-bs-toggle="modal"
                                             data-bs-target="#view<?= $row['id'] ?>"><i class="bi bi-eye"></i></button>
 
-                                        <button class="row-action-btn" title="Edit" data-bs-toggle="modal"
+                                        <button class="row-action-btn" type="button" title="Edit" data-bs-toggle="modal"
                                             data-bs-target="#edit<?= $row['id'] ?>"><i class="bi bi-pencil"></i></button>
 
-                                        <?php if ($row['status'] === 'ACTIVE'): ?>
-                                            <button class="row-action-btn row-action-danger" title="Deactivate"
+                                        <?php if ($isActive): ?>
+                                            <button class="row-action-btn row-action-danger" type="button" title="Deactivate"
                                                 data-bs-toggle="modal" data-bs-target="#status<?= $row['id'] ?>">
                                                 <i class="bi bi-person-slash"></i>
                                             </button>
                                         <?php else: ?>
-                                            <button class="row-action-btn" title="Activate" data-bs-toggle="modal"
+                                            <button class="row-action-btn" type="button" title="Activate" data-bs-toggle="modal"
                                                 data-bs-target="#status<?= $row['id'] ?>">
                                                 <i class="bi bi-person-check"></i>
                                             </button>
                                         <?php endif; ?>
 
-                                        <?php $mfaOn = (int) ($row['mfa_enabled'] ?? 0) === 1; ?>
-                                        <form action="<?= base_url('users/reset-mfa/' . $row['id']) ?>" method="post"
-                                            class="d-inline"
-                                            onsubmit="return confirm('Reset two-step verification for this user? They will have to set it up again at next login.');">
-                                            <?= csrf_field() ?>
-                                            <button class="row-action-btn"
-                                                title="<?= $mfaOn ? 'Reset two-step verification' : 'Not set up yet' ?>"
-                                                <?= $mfaOn ? '' : 'disabled' ?>><i class="bi bi-shield-lock"></i></button>
-                                        </form>
+                                        <?php if ((int) ($row['mfa_enabled'] ?? 0) === 1): ?>
+                                            <button class="row-action-btn" type="button" title="Reset two-step verification"
+                                                data-bs-toggle="modal" data-bs-target="#resetMfa<?= $row['id'] ?>">
+                                                <i class="bi bi-shield-lock"></i>
+                                            </button>
+                                        <?php else: ?>
+                                            <button class="row-action-btn" type="button" title="Not set up yet" disabled>
+                                                <i class="bi bi-shield-lock"></i>
+                                            </button>
+                                        <?php endif; ?>
                                     </div>
                                 </td>
                             </tr>
@@ -245,7 +246,8 @@ $roleLabel = static function (?string $role) use ($roles): string {
                                     placeholder="Enter a strong password" minlength="8" autocomplete="new-password"
                                     required>
 
-                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <button class="btn btn-outline-secondary toggle-password" type="button"
+                                    data-target="password">
                                     <i class="bi bi-eye"></i>
                                 </button>
                             </div>
@@ -274,10 +276,10 @@ $roleLabel = static function (?string $role) use ($roles): string {
                             <input type="hidden" name="status" value="INACTIVE">
 
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="statusToggle" name="status"
-                                    value="ACTIVE" checked>
+                                <input class="form-check-input status-toggle" type="checkbox" id="statusToggle"
+                                    name="status" value="ACTIVE" checked>
 
-                                <label class="form-check-label" for="statusToggle" id="statusLabel">
+                                <label class="form-check-label status-label" for="statusToggle" id="statusLabel">
                                     ACTIVE
                                 </label>
                             </div>
@@ -300,7 +302,7 @@ $roleLabel = static function (?string $role) use ($roles): string {
 <!-- ===================== EDIT USER MODALS ===================== -->
 <?php foreach ($users as $row): ?>
 
-    <div class="modal fade edit-user-modal" id="edit<?= $row['id'] ?>">
+    <div class="modal fade edit-user-modal" id="edit<?= $row['id'] ?>" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
 
@@ -404,7 +406,7 @@ $roleLabel = static function (?string $role) use ($roles): string {
 <!-- ===================== VIEW USER MODALS ===================== -->
 <?php foreach ($users as $row): ?>
 
-    <div class="modal fade view-user-modal" id="view<?= $row['id'] ?>">
+    <div class="modal fade view-user-modal" id="view<?= $row['id'] ?>" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
 
@@ -456,7 +458,7 @@ $roleLabel = static function (?string $role) use ($roles): string {
                 </div>
 
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
                 </div>
 
             </div>
@@ -477,8 +479,7 @@ $roleLabel = static function (?string $role) use ($roles): string {
                     method="post">
                     <?= csrf_field() ?>
 
-                    <?php $headerClass = $isActive ? 'bg-danger' : 'bg-success'; ?>
-                    <div class="modal-header <?= $headerClass ?> text-white">
+                    <div class="modal-header <?= $isActive ? 'bg-danger' : 'bg-success' ?> text-white">
                         <h5 class="modal-title">
                             <?= $isActive ? 'Deactivate User' : 'Activate User' ?>
                         </h5>
@@ -515,278 +516,202 @@ $roleLabel = static function (?string $role) use ($roles): string {
         </div>
     </div>
 
+    <!-- ===================== RESET TWO-STEP (MFA) MODALS ===================== -->
+    <?php foreach ($users as $row): ?>
+        <?php if ((int) ($row['mfa_enabled'] ?? 0) === 1): ?>
+
+            <div class="modal fade" id="resetMfa<?= $row['id'] ?>" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+
+                        <form action="<?= base_url('users/reset-mfa/' . $row['id']) ?>" method="post">
+                            <?= csrf_field() ?>
+
+                            <div class="modal-header bg-warning">
+                                <h5 class="modal-title">
+                                    <i class="bi bi-shield-lock"></i> Reset Two-Step Verification
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+
+                            <div class="modal-body text-center">
+                                <i class="bi bi-shield-exclamation text-warning" style="font-size: 3rem;"></i>
+
+                                <h5 class="mt-2">
+                                    Are you sure you want to reset the two-step verification of this user?
+                                </h5>
+
+                                <hr>
+
+                                <h4 class="mb-1">
+                                    <?= esc($row['fullname']) ?>
+                                </h4>
+                                <p class="text-muted mb-3">
+                                    <?= esc($row['username']) ?> ·
+                                    <?= esc($roleLabel($row['role'])) ?>
+                                </p>
+
+                                <p class="text-muted small mb-0">
+                                    Their authenticator app will stop working. They will have to scan a new
+                                    QR code and set up two-step verification again at their next login.
+                                </p>
+
+                                <?php if ((int) $row['id'] === (int) session()->get('user_id')): ?>
+                                    <div class="alert alert-warning small mt-3 mb-0">
+                                        This is your own account. You will need to set it up again the next
+                                        time you log in.
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-warning">Reset Two-Step</button>
+                            </div>
+
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+
+        <?php endif; ?>
+    <?php endforeach; ?>
+
 <?php endforeach; ?>
 
 
-</div>
 
-
-<?= $this->include('dashboard_layout/footer') ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
 
-        /* ==========================================
-           ACTIVE SIDEBAR MENU
-        ========================================== */
+        /* ---------- Today's date in the page header ---------- */
+        const dateEl = document.getElementById('currentDate');
+        if (dateEl) {
+            dateEl.textContent = new Date().toLocaleDateString('en-US', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+        }
 
+        /* ---------- Active sidebar menu ---------- */
         const currentPath = window.location.pathname.replace(/\/+$/, '');
 
         document.querySelectorAll('.nav-link:not(.nav-link-logout)').forEach(function (link) {
-
             const href = link.getAttribute('href');
-
             if (!href || href === '#') return;
 
             try {
-
                 const linkPath = new URL(link.href).pathname.replace(/\/+$/, '');
-
-                const active =
-                    currentPath === linkPath ||
-                    currentPath.startsWith(linkPath + '/');
-
+                const active = currentPath === linkPath || currentPath.startsWith(linkPath + '/');
                 link.classList.toggle('active', active);
-
             } catch (error) {
-
                 console.warn('Invalid navigation link:', href);
-
             }
-
         });
 
-        /* ==========================================
-           MODAL FUNCTIONS
-        ========================================== */
-
+        /* ---------- Focus the first field when a modal opens ---------- */
         document.querySelectorAll('.modal').forEach(function (modal) {
-
-            // Focus first input when modal opens
             modal.addEventListener('shown.bs.modal', function () {
-
-                const firstField = modal.querySelector(
-                    'input:not([type="hidden"]), select, textarea'
-                );
-
-                if (firstField) {
-                    firstField.focus();
-                }
-
+                const firstField = modal.querySelector('input:not([type="hidden"]), select, textarea');
+                if (firstField) firstField.focus();
             });
-
         });
 
-        /* ==========================================
-           RESET ONLY ADD USER MODAL
-        ========================================== */
-
+        /* ---------- Reset the Add User modal when it closes ---------- */
         const addUserModal = document.getElementById('addUserModal');
-
         if (addUserModal) {
-
             addUserModal.addEventListener('hidden.bs.modal', function () {
-
                 const form = this.querySelector('form');
+                if (!form) return;
 
-                if (form) {
+                form.reset();
+                form.querySelectorAll('.is-invalid, .is-valid').forEach(function (input) {
+                    input.classList.remove('is-invalid', 'is-valid');
+                });
 
-                    form.reset();
-
-                    form.querySelectorAll('.is-invalid').forEach(function (input) {
-                        input.classList.remove('is-invalid');
-                    });
-
-                    form.querySelectorAll('.is-valid').forEach(function (input) {
-                        input.classList.remove('is-valid');
-                    });
-
-                    document.getElementById('statusLabel').textContent = 'ACTIVE';
-                    document.getElementById('roleHint').textContent = '';
-
-                }
-
+                const statusLabel = document.getElementById('statusLabel');
+                const roleHint = document.getElementById('roleHint');
+                if (statusLabel) statusLabel.textContent = 'ACTIVE';
+                if (roleHint) roleHint.textContent = '';
             });
-
         }
 
-    });
-
-    document.addEventListener('DOMContentLoaded', function () {
-
+        /* ---------- Auto-close the success alert ---------- */
         const successAlert = document.getElementById('successAlert');
-
         if (successAlert) {
             setTimeout(function () {
-                const bsAlert = bootstrap.Alert.getOrCreateInstance(successAlert);
-                bsAlert.close();
-            }, 3000); // Auto close after 3 seconds
+                bootstrap.Alert.getOrCreateInstance(successAlert).close();
+            }, 3000);
         }
 
-    });
+        /* ---------- ACTIVE / INACTIVE switch label (add + edit modals) ---------- */
+        document.querySelectorAll('.status-toggle').forEach(function (toggle) {
+            toggle.addEventListener('change', function () {
+                const label = this.closest('.form-switch').querySelector('.status-label');
+                if (label) label.textContent = this.checked ? 'ACTIVE' : 'INACTIVE';
+            });
+        });
 
-    document.addEventListener("DOMContentLoaded", function () {
-        setCurrentDate();
-    });
-
-    /**
-     * Displays today's date in a readable, localized format
-     * inside the #currentDate element in the page header.
-     */
-    function setCurrentDate() {
-        const dateEl = document.getElementById("currentDate");
-        if (!dateEl) return;
-
-        const today = new Date();
-        const options = {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric"
+        /* ---------- Short explanation of what each role can access ---------- */
+        const roleDescriptions = {
+            'IT ADMINISTRATOR': 'Full access, including user management.',
+            'HR ADMINISTRATOR': 'Dashboard, requests, reports, feedback, TIA, employees and superiors.',
+            'SUPERIOR': 'Training Impact Assessment (TIA) page only.'
         };
-        dateEl.textContent = today.toLocaleDateString("en-US", options);
-    }
-</script>
 
-<script>
-    const statusToggle = document.getElementById('statusToggle');
-    const statusLabel = document.getElementById('statusLabel');
-
-    if (statusToggle) {
-        statusToggle.addEventListener('change', function () {
-            statusLabel.textContent = this.checked ? 'ACTIVE' : 'INACTIVE';
-        });
-    }
-
-    // Short explanation of what each role can access
-    const roleDescriptions = {
-        'IT ADMINISTRATOR': 'Full access, including user management.',
-        'HR ADMINISTRATOR': 'Dashboard, requests, reports, feedback, TIA, employees and superiors.',
-        'SUPERIOR': 'Training Impact Assessment (TIA) page only.'
-    };
-
-    document.getElementById('addRole').addEventListener('change', function () {
-        document.getElementById('roleHint').textContent = roleDescriptions[this.value] || '';
-    });
-
-    document.querySelectorAll(".toggle-password").forEach(button => {
-
-        button.addEventListener("click", function () {
-
-            const input = document.getElementById(this.dataset.target);
-            const icon = this.querySelector("i");
-
-            if (input.type === "password") {
-                input.type = "text";
-                icon.classList.replace("bi-eye", "bi-eye-slash");
-            } else {
-                input.type = "password";
-                icon.classList.replace("bi-eye-slash", "bi-eye");
-            }
-
-        });
-
-    });
-</script>
-<script>
-    document.getElementById('togglePassword').addEventListener('click', function () {
-
-        const password = document.getElementById('password');
-        const icon = this.querySelector('i');
-
-        if (password.type === 'password') {
-            password.type = 'text';
-            icon.classList.replace('bi-eye', 'bi-eye-slash');
-        } else {
-            password.type = 'password';
-            icon.classList.replace('bi-eye-slash', 'bi-eye');
+        const addRole = document.getElementById('addRole');
+        if (addRole) {
+            addRole.addEventListener('change', function () {
+                document.getElementById('roleHint').textContent = roleDescriptions[this.value] || '';
+            });
         }
-    });
-</script>
 
-<script>
-    document.querySelectorAll('.status-toggle').forEach(toggle => {
-        toggle.addEventListener('change', function () {
-            const label = this.closest('.form-switch').querySelector('.status-label');
-            label.textContent = this.checked ? 'ACTIVE' : 'INACTIVE';
+        /* ---------- Show / hide password (add + edit modals) ---------- */
+        document.querySelectorAll('.toggle-password').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const input = document.getElementById(this.dataset.target);
+                const icon = this.querySelector('i');
+                if (!input) return;
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.replace('bi-eye', 'bi-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.replace('bi-eye-slash', 'bi-eye');
+                }
+            });
         });
-    });
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
 
-        const loadingScreen =
-            document.getElementById('doleLoadingScreen');
+        /* ---------- Loading screen when using the sidebar ---------- */
+        const loadingScreen = document.getElementById('doleLoadingScreen');
 
-        if (!loadingScreen) return;
+        if (loadingScreen) {
+            document.querySelectorAll('.nav-link').forEach(function (link) {
+                link.addEventListener('click', function (event) {
+                    const href = this.getAttribute('href');
 
-        const sidebarLinks =
-            document.querySelectorAll('.nav-link');
+                    if (!href || href === '#' || href === 'javascript:void(0)') return;
 
+                    // Let Ctrl / Cmd / Shift / middle click behave normally
+                    if (event.ctrlKey || event.metaKey || event.shiftKey || event.button === 1) return;
 
-        sidebarLinks.forEach(function (link) {
-
-            link.addEventListener('click', function (event) {
-
-                const href = this.getAttribute('href');
-
-                if (
-                    !href ||
-                    href === '#' ||
-                    href === 'javascript:void(0)'
-                ) {
-                    return;
-                }
-
-
-                /* Allow Ctrl / CMD / Shift / Middle Click */
-
-                if (
-                    event.ctrlKey ||
-                    event.metaKey ||
-                    event.shiftKey ||
-                    event.button === 1
-                ) {
-                    return;
-                }
-
-
-                /* Stop normal navigation temporarily */
-
-                event.preventDefault();
-
-
-                /* Show loading screen */
-
-                loadingScreen.classList.add('show');
-
-                document.body.style.overflow = 'hidden';
-
-
-                /*
-                 * Navigate immediately.
-                 * The loading screen will remain visible
-                 * while the next page is loading.
-                 */
-
-                window.location.href = href;
-
+                    event.preventDefault();
+                    loadingScreen.classList.add('show');
+                    document.body.style.overflow = 'hidden';
+                    window.location.href = href;
+                });
             });
 
-        });
-
-
-        /* Back / Forward */
-
-        window.addEventListener('pageshow', function () {
-
-            loadingScreen.classList.remove('show');
-
-            document.body.style.overflow = '';
-
-        });
+            // Back / Forward
+            window.addEventListener('pageshow', function () {
+                loadingScreen.classList.remove('show');
+                document.body.style.overflow = '';
+            });
+        }
 
     });
 </script>

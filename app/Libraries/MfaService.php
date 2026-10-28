@@ -258,11 +258,15 @@ class MfaService
     // Admin reset
     // ------------------------------------------------------------------
 
+    /**
+     * Wipe the second factor so the user must re-enrol at next login.
+     *
+     * Needs users.mfa_secret and users.mfa_last_ts to be NULLable.
+     */
     /** Wipe the second factor so the user must re-enrol at next login. */
     public function resetUser(int $userId): void
     {
         $db = db_connect();
-        $target = $db->table('users')->select('username')->where('id', $userId)->get()->getRowArray();
 
         $db->table('users')->where('id', $userId)->update([
             'mfa_secret' => null,
@@ -270,6 +274,9 @@ class MfaService
             'mfa_last_ts' => null,
         ]);
 
-        ActivityLogger::record('MFA_RESET', 'USERS', 'Reset authenticator for ' . ($target['username'] ?? 'user #' . $userId));
+        // Only if the backup-codes table actually exists in this database
+        if ($db->tableExists('user_backup_codes')) {
+            $db->table('user_backup_codes')->where('user_id', $userId)->delete();
+        }
     }
 }

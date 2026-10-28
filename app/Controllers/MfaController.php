@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Libraries\MfaService;
+use CodeIgniter\HTTP\RedirectResponse;
 
 /**
  * TOTP enrolment + verification (pending-login routes: setup, confirm, verify, verifyProcess, cancel).
@@ -22,7 +23,7 @@ class MfaController extends BaseController
     {
         $user = $this->mfa->pendingUser();
         if (!$user) {
-            return redirect()->to(base_url('login'))->with('error', 'Your sign-in session expired. Please log in again.');
+            return $this->sessionExpired();
         }
         if ((int) $user['mfa_enabled'] === 1) {
             return redirect()->to(base_url('mfa/verify'));
@@ -48,11 +49,11 @@ class MfaController extends BaseController
         $user = $this->mfa->pendingUser();
         $secret = session()->get('mfa_new_secret');
         if (!$user || !$secret) {
-            return redirect()->to(base_url('login'))->with('error', 'Your sign-in session expired. Please log in again.');
+            return $this->sessionExpired();
         }
 
         if (!$this->throttle('mfa-setup-' . $user['id'])) {
-            return redirect()->back()->with('error', 'Too many attempts. Wait a few minutes and try again.');
+            return $this->tooManyAttempts();
         }
 
         $ts = $this->mfa->checkCode($secret, (string) $this->request->getPost('code'));
@@ -82,7 +83,7 @@ class MfaController extends BaseController
     {
         $user = $this->mfa->pendingUser();
         if (!$user) {
-            return redirect()->to(base_url('login'))->with('error', 'Your sign-in session expired. Please log in again.');
+            return $this->sessionExpired();
         }
         if ((int) $user['mfa_enabled'] !== 1) {
             return redirect()->to(base_url('mfa/setup'));
@@ -95,11 +96,11 @@ class MfaController extends BaseController
     {
         $user = $this->mfa->pendingUser();
         if (!$user) {
-            return redirect()->to(base_url('login'))->with('error', 'Your sign-in session expired. Please log in again.');
+            return $this->sessionExpired();
         }
 
         if (!$this->throttle('mfa-verify-' . $user['id'])) {
-            return redirect()->back()->with('error', 'Too many attempts. Wait a few minutes and try again.');
+            return $this->tooManyAttempts();
         }
 
         if (!$this->mfa->verifyUserTotp($user, (string) $this->request->getPost('code'))) {
@@ -116,6 +117,20 @@ class MfaController extends BaseController
     {
         $this->mfa->clearPending();
         return redirect()->to(base_url('login'));
+    }
+
+    // ============ HELPERS ============
+
+    private function sessionExpired(): RedirectResponse
+    {
+        return redirect()->to(base_url('login'))
+            ->with('error', 'Your sign-in session expired. Please log in again.');
+    }
+
+    private function tooManyAttempts(): RedirectResponse
+    {
+        return redirect()->back()
+            ->with('error', 'Too many attempts. Wait a few minutes and try again.');
     }
 
     /** 5 attempts per 5 minutes per key. */
