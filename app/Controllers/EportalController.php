@@ -56,6 +56,24 @@ class EportalController extends BaseController
         $username = trim((string) $this->request->getPost('username'));
         $password = (string) $this->request->getPost('password');
 
+        // Brute-force protection: 5 tries / 5 min per username, 20 tries / 5 min per IP
+        $throttler = service('throttler');
+        $ipKey = 'login-ip-' . md5($this->request->getIPAddress());
+        $userKey = 'login-user-' . md5(strtolower($username));
+
+        if (!$throttler->check($ipKey, 20, 300) || !$throttler->check($userKey, 5, 300)) {
+            ActivityLogger::record('LOGIN_THROTTLED', 'AUTH', 'Sign-in blocked: too many attempts for "' . mb_substr($username, 0, 100) . '"', [
+                'id' => null,
+                'username' => mb_substr($username, 0, 100),
+                'fullname' => null,
+                'role' => null,
+            ]);
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Too many sign-in attempts. Please wait a few minutes and try again.');
+        }
+
         $user = $model->where('username', $username)->first();
 
         // Username not found

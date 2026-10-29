@@ -143,8 +143,13 @@ if ($showNotif) {
         <li>
           <hr class="dropdown-divider">
         </li>
-        <li><a class="dropdown-item text-danger" href="<?= site_url('logout') ?>"><i
-              class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+        <li>
+          <form method="post" action="<?= site_url('logout') ?>" class="m-0">
+            <?php helper('form'); ?><?= csrf_field() ?>
+            <button type="submit" class="dropdown-item text-danger"><i
+                class="bi bi-box-arrow-right me-2"></i>Logout</button>
+          </form>
+        </li>
       </ul>
     </div>
 

@@ -114,6 +114,21 @@ $email = $email ?? (session()->get('email') ?? '');
             text-decoration: underline;
         }
 
+        .pw-actions .pw-logout {
+            background: none;
+            border: 0;
+            padding: 0;
+            font: inherit;
+            font-weight: 600;
+            font-size: .9rem;
+            color: inherit;
+            cursor: pointer;
+        }
+
+        .pw-actions .pw-logout:hover {
+            text-decoration: underline;
+        }
+
         .pw-actions .login-btn {
             width: auto;
             padding-left: 1.75rem;
@@ -180,7 +195,8 @@ $email = $email ?? (session()->get('email') ?? '');
                     <?php if ($reason === 'voluntary'): ?>
                         <a href="<?= base_url('dashboard') ?>">Cancel</a>
                     <?php else: ?>
-                        <a href="<?= base_url('logout') ?>">Log out</a>
+                        <button type="submit" formaction="<?= base_url('logout') ?>" formmethod="post" formnovalidate
+                            class="pw-logout">Log out</button>
                     <?php endif; ?>
                     <button type="submit" class="btn login-btn">Save password</button>
                 </div>

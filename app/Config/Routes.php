@@ -120,7 +120,9 @@ $routes->group('', ['filter' => ['auth', 'pwchange']], function ($routes) {
     $routes->get('tia-report-bulk/export', 'TiaReportController::bulkExport');
 
     // Logout
-    $routes->get('logout', 'EportalController::logout');
+    $routes->post('logout', 'EportalController::logout');
+    // Typing /logout in the address bar no longer logs anyone out (prevents forced logout from other sites)
+    $routes->get('logout', static fn() => redirect()->to(site_url('dashboard')));
 });
 
 

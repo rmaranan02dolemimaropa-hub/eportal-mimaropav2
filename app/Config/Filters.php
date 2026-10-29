@@ -112,5 +112,25 @@ class Filters extends BaseFilters
      *
      * @var array<string, array<string, list<string>>>
      */
-    public array $filters = [];
+    public array $filters = [
+        // Hidden trap field on the public forms: bots that fill it are rejected.
+        // 'after' = pages that show the form (adds the hidden field), 'before' = the POST that receives it.
+        'honeypot' => [
+            'before' => [
+                'service-record/save',
+                'submit-csm',
+                'feedback/save',
+                'tia_store',
+                'tia_superior_store',
+            ],
+            'after' => [
+                'service-record',
+                'csm/*',
+                'csmtagalog/*',
+                'feedback/hr/*',
+                'tia_ad',
+                'tia_ae',
+            ],
+        ],
+    ];
 }

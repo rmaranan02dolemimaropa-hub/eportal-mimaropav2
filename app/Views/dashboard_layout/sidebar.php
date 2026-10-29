@@ -157,9 +157,13 @@
 
     <div class="nav-divider"></div>
 
-    <a href="<?= site_url('logout') ?>" class="nav-link nav-link-logout">
-      <i class="bi bi-box-arrow-right"></i><span>Logout</span>
-    </a>
+    <form method="post" action="<?= site_url('logout') ?>" class="m-0">
+      <?php helper('form'); ?>  <?= csrf_field() ?>
+      <button type="submit" class="nav-link nav-link-logout"
+        style="width:100%;background:none;border:0;text-align:left;font:inherit;font-weight:600;font-size:.9rem;cursor:pointer;">
+        <i class="bi bi-box-arrow-right"></i><span>Logout</span>
+      </button>
+    </form>
     <?php
     return (string) ob_get_clean();
   };
