@@ -57,10 +57,8 @@ $routes->post('submit-csm', 'FeedbackController::submitCSM');
 
 $routes->get('feedback/hr/(:segment)', 'FeedbackController::form/$1');
 $routes->post('feedback/save', 'FeedbackController::save');
-$routes->get('feedback/print/hr/(:segment)', 'FeedbackController::printHr/$1');
-
-$routes->get('feedback/print/english/(:num)', 'FeedbackController::printEnglish/$1');
-$routes->get('feedback/print/tagalog/(:num)', 'FeedbackController::printTagalog/$1');
+// feedback/print/* moved to the IT + HR administrators group below:
+// the print views show client names, addresses and ages and must not be public.
 
 
 /*
@@ -197,6 +195,9 @@ $routes->group('', ['filter' => ['auth:admin', 'pwchange']], function ($routes) 
     */
 
     $routes->get('feedback', 'FeedbackController::index');
+    $routes->get('feedback/print/hr/(:segment)', 'FeedbackController::printHr/$1');
+    $routes->get('feedback/print/english/(:num)', 'FeedbackController::printEnglish/$1');
+    $routes->get('feedback/print/tagalog/(:num)', 'FeedbackController::printTagalog/$1');
 
 
     /*
