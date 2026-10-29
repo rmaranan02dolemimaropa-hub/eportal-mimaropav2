@@ -315,10 +315,11 @@ class FeedbackController extends BaseController
         $result = $csmModel->insert($data);
 
         if (!$result) {
-            dd(
-                $csmModel->errors(),
-                $csmModel->db->error(),
-                $data
+            log_message('error', 'CSM insert failed: ' . json_encode($csmModel->errors()));
+
+            return redirect()->back()->withInput()->with(
+                'error',
+                'Sorry, we could not save your response. Please try again.'
             );
         }
 

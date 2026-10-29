@@ -75,10 +75,11 @@ class Filters extends BaseFilters
     public array $globals = [
         'before' => [
             // 'honeypot',
-            // 'csrf',
+            'csrf',            // ENABLED: all POST/PUT/DELETE need a valid CSRF token
             // 'invalidchars',
         ],
         'after' => [
+            'secureheaders',   // X-Frame-Options, X-Content-Type-Options, etc.
             'toolbar' => [
                 'except' => [
                     'export/hr-request',

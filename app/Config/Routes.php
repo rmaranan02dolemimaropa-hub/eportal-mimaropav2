@@ -18,8 +18,7 @@ $routes->post('login/login_process', 'EportalController::login_process');
 
 // Routes.php: add both to the same logged-in group as your other pages,
 // and add 'pwchange' next to your existing auth filter on that group
-$routes->get('password/change', 'PasswordController::change');
-$routes->post('password/update', 'PasswordController::update');
+// password/change + password/update now live in the logged-in group below
 
 // --- MFA (half-finished login: password OK, second step pending) ---
 $routes->get('mfa/setup', 'MfaController::setup');
@@ -87,25 +86,16 @@ $routes->post('tia_superior_store', 'TiaSuperiorController::store');
 |--------------------------------------------------------------------------
 */
 
-$routes->group('', ['filter' => 'auth'], function ($routes) {
+$routes->group('', ['filter' => ['auth', 'pwchange']], function ($routes) {
+    $routes->get('password/change', 'PasswordController::change');
+    $routes->post('password/update', 'PasswordController::update');
 
     // Training Impact Assessment - Dashboard
     $routes->get('tia_page', 'HrController::tia_page');
-    $routes->post('tia/store-training', 'HrController::storeTraining');
-    $routes->post('tia/add-participant', 'HrController::addParticipant');
     $routes->get('tia/participants/(:any)', 'HrController::getParticipants/$1');
-    $routes->post('tia/add-participants-bulk', 'HrController::addParticipantsBulk');
     $routes->get('tia/export-participants/(:any)', 'HrController::exportParticipants/$1');
-    $routes->post('tia/update-participant/(:num)', 'HrController::updateParticipant/$1');
-    $routes->post('tia/update-training/(:segment)', 'HrController::updateTraining/$1');
-    $routes->post('tia/delete-training/(:segment)', 'HrController::deleteTraining/$1');
-    $routes->post('tia/update-status/(:segment)', 'HrController::updateTrainingStatus/$1');
-    $routes->post('tia/delete-participant/(:num)', 'HrController::deleteParticipant/$1');
-    $routes->post('tia/send-form-emails', 'HrController::sendFormEmails');
-    $routes->post('tia/notify-superior', 'HrController::notifySuperior');
     $routes->get('tia/trainings-template', 'HrController::trainingsTemplate');
     $routes->get('tia/export-trainings', 'HrController::exportTrainings');
-    $routes->post('tia/import-trainings', 'HrController::importTrainings');
 
     $routes->post('tia/send-superior-emails', 'TiaSuperiorController::sendEmails');
     $routes->get('tia-superior/rate/(:segment)/(:num)', 'TiaSuperiorController::rate/$1/$2');
@@ -140,7 +130,20 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
 |--------------------------------------------------------------------------
 */
 
-$routes->group('', ['filter' => 'auth:admin'], function ($routes) {
+$routes->group('', ['filter' => ['auth:admin', 'pwchange']], function ($routes) {
+
+    // --- TIA actions that change data: IT/HR administrators only (moved out of the 'any role' group) ---
+    $routes->post('tia/store-training', 'HrController::storeTraining');
+    $routes->post('tia/add-participant', 'HrController::addParticipant');
+    $routes->post('tia/add-participants-bulk', 'HrController::addParticipantsBulk');
+    $routes->post('tia/update-participant/(:num)', 'HrController::updateParticipant/$1');
+    $routes->post('tia/update-training/(:segment)', 'HrController::updateTraining/$1');
+    $routes->post('tia/delete-training/(:segment)', 'HrController::deleteTraining/$1');
+    $routes->post('tia/update-status/(:segment)', 'HrController::updateTrainingStatus/$1');
+    $routes->post('tia/delete-participant/(:num)', 'HrController::deleteParticipant/$1');
+    $routes->post('tia/send-form-emails', 'HrController::sendFormEmails');
+    $routes->post('tia/notify-superior', 'HrController::notifySuperior');
+    $routes->post('tia/import-trainings', 'HrController::importTrainings');
 
     /*
     |--------------------------------------------------------------------------
