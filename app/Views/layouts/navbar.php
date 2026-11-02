@@ -21,8 +21,8 @@
       <div class="collapse navbar-collapse" id="navMain">
         <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
           <li class="nav-item"><a class="nav-link nav-link-gov active" href="#home">Home</a></li>
-          <li class="nav-item"><a class="nav-link nav-link-gov" href="#services">Services</a></li>
           <li class="nav-item"><a class="nav-link nav-link-gov" href="#hr-services">HR Services</a></li>
+          <li class="nav-item"><a class="nav-link nav-link-gov" href="#services">Services</a></li>
           <li class="nav-item"><a class="nav-link nav-link-gov" href="#mission">Mission &amp; Vision</a></li>
           <li class="nav-item"><a class="nav-link nav-link-gov" href="#contact">Contact</a></li>
           <!-- <li class="nav-item ms-lg-2">
