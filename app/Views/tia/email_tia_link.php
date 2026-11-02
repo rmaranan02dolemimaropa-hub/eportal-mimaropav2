@@ -72,10 +72,34 @@
                                                     </td>
                                                 </tr>
                                             <?php endif; ?>
+                                            <?php if (!empty($deadline)): ?>
+                                                <tr>
+                                                    <td style="padding:6px 0; font-size:13px; color:#777777;">
+                                                        Submit on or before</td>
+                                                    <td
+                                                        style="padding:6px 0; font-size:14px; color:#c0392b; font-weight:bold;">
+                                                        <?= esc($deadline) ?>
+                                                    </td>
+                                                </tr>
+                                            <?php endif; ?>
                                         </table>
                                     </td>
                                 </tr>
                             </table>
+
+                            <?php if (!empty($deadline)): ?>
+                                <p style="margin:0 0 24px 0; font-size:14px; color:#333333; line-height:1.6;">
+                                    Please submit your assessment on or before
+                                    <strong style="color:#c0392b;"><?= esc($deadline) ?></strong>
+                                    (within 5 days). The form will close after this date.
+                                    <br>
+                                    <span style="color:#555555; font-style:italic;">
+                                        Mangyaring isumite ito bago o sa mismong
+                                        <strong><?= esc($deadline) ?></strong> (sa loob ng 5 araw).
+                                        Magsasara ang form pagkatapos ng petsang ito.
+                                    </span>
+                                </p>
+                            <?php endif; ?>
 
                             <!-- Button -->
                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0">

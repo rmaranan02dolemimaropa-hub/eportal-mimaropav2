@@ -80,6 +80,10 @@ class HrController extends BaseController
             }
         }
 
+        if ($training && $this->isFormClosed($training)) {
+            return view('tia/form_closed', ['training' => $training]);
+        }
+
         return view('tia/ad_form', [
             'training' => $training,
             'participant' => $participant,
@@ -160,6 +164,14 @@ class HrController extends BaseController
             ->where('email', $email)
             ->first();
 
+        if ($this->isFormClosed($training)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'The deadline for this assessment has passed. Please contact HR.',
+                'csrf' => csrf_hash(),
+            ])->setStatusCode(403);
+        }
+
         if ($exists) {
             return $this->response->setJSON([
                 'success' => false,
@@ -168,6 +180,14 @@ class HrController extends BaseController
                 'reference_no' => $exists['reference_no'],
                 'csrf' => csrf_hash(),
             ])->setStatusCode(409);
+        }
+
+        if ($this->isFormClosed($training)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'The deadline for this assessment has passed. Please contact HR.',
+                'csrf' => csrf_hash(),
+            ])->setStatusCode(403);
         }
 
         // --- Competencies defined by HR for this training (labels come from the DB, not the form) ---
@@ -987,6 +1007,8 @@ class HrController extends BaseController
 
 
 
+    private const FORM_DEADLINE_DAYS = 5;
+
     public function sendFormEmails()
     {
         if (!$this->request->isAJAX()) {
@@ -1037,6 +1059,11 @@ class HrController extends BaseController
         $mailer = \Config\Services::email();
         $cfg = config('Email');
 
+        // Deadline: FORM_DEADLINE_DAYS days from now, until 11:59 PM of that day
+        $now = date('Y-m-d H:i:s');
+        $deadlineAt = date('Y-m-d 23:59:59', strtotime('+' . self::FORM_DEADLINE_DAYS . ' days'));
+        $deadlineTxt = date('F j, Y', strtotime($deadlineAt));
+
         $sent = 0;
         $failed = [];
         $seen = [];
@@ -1072,6 +1099,7 @@ class HrController extends BaseController
                 'training_title' => $training['training_title'],
                 'training_dates' => $training['training_dates'] ?? '',
                 'formUrl' => $formUrl,
+                'deadline' => $deadlineTxt,
             ]));
 
             if ($mailer->send(false)) {
@@ -1086,7 +1114,19 @@ class HrController extends BaseController
             }
         }
 
+        // Record the send: count, last sent, and the new deadline (only if at least one email went out)
+        if ($sent > 0) {
+            $this->trainingsModel->update($training['id'], [
+                'form_sent_at' => $now,
+                'form_deadline_at' => $deadlineAt,
+                'form_send_count' => ((int) ($training['form_send_count'] ?? 0)) + 1,
+            ]);
+        }
+
         $message = "Form sent to {$sent} participant" . ($sent === 1 ? '' : 's') . '.';
+        if ($sent > 0) {
+            $message .= " Deadline: {$deadlineTxt}.";
+        }
         if ($failed) {
             $message .= ' Failed: ' . implode(', ', $failed) . '.';
             if (ENVIRONMENT === 'development' && $failReason !== '') {
@@ -1099,6 +1139,7 @@ class HrController extends BaseController
             'message' => $message,
             'sent' => $sent,
             'failed' => $failed,
+            'deadline' => $sent > 0 ? $deadlineTxt : null,
             'csrf' => csrf_hash(),
         ]);
     }
@@ -1430,6 +1471,12 @@ class HrController extends BaseController
         $db->transComplete();
 
         return $back->with('success', "Import done: {$inserted} added, {$updated} updated, {$skipped} skipped.");
+    }
+
+    private function isFormClosed(array $training): bool
+    {
+        return !empty($training['form_deadline_at'])
+            && strtotime($training['form_deadline_at']) < time();
     }
 
 

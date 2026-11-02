@@ -29,6 +29,9 @@ class TrainingsModel extends Model
         'rescheduled_at',
         'superior_notified_at',
         'superior_notify_count',
+        'form_sent_at',
+        'form_send_count',
+        'form_deadline_at',
         'created_at',
         'updated_at'
 

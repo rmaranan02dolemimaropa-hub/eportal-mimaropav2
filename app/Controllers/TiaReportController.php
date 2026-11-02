@@ -509,6 +509,27 @@ class TiaReportController extends BaseController
                 $status === 'all' || ($status === 'pending' ? !$r['rated'] : $r['rated'])
         ));
 
+        // Attach "form sent" info (count, last sent, deadline) to each row
+        $info = [];
+        foreach ((new \App\Models\TrainingsModel())->findAll() as $tr) {
+            $val = [
+                'sent_at' => $tr['form_sent_at'] ?? null,
+                'count' => (int) ($tr['form_send_count'] ?? 0),
+                'deadline' => $tr['form_deadline_at'] ?? null,
+            ];
+            $info['code:' . $tr['training_code']] = $val;
+            $info['title:' . $tr['training_title'] . '|' . $tr['training_dates']] = $val;
+        }
+        foreach ($rows as &$r) {
+            $v = $info['code:' . ($r['training_code'] ?? '')]
+                ?? $info['title:' . ($r['training_title'] ?? '') . '|' . ($r['training_dates'] ?? '')]
+                ?? ['sent_at' => null, 'count' => 0, 'deadline' => null];
+            $r['form_sent_at'] = $v['sent_at'];
+            $r['form_send_count'] = $v['count'];
+            $r['form_deadline_at'] = $v['deadline'];
+        }
+        unset($r);
+
         return view('dashboard/tiaparticipantmonitoring', [
             'trainings' => $model->participantMonitoring(null)['trainings'],
             'rows' => $rows,

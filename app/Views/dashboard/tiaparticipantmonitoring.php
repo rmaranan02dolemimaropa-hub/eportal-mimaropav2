@@ -127,6 +127,8 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
                         <th>Position</th>
                         <th>Training</th>
                         <th>Training Date</th>
+                        <th>Form Sent</th>
+                        <th>Deadline</th>
                         <th class="text-center">TIA Status</th>
                         <th class="text-center">Action</th>
                     </tr>
@@ -145,6 +147,49 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
                                 <td><?= esc($r['position'] ?: '—') ?></td>
                                 <td><?= esc($r['training_title']) ?></td>
                                 <td><?= esc($r['training_dates']) ?></td>
+                                <?php
+                                $sentCount = (int) ($r['form_send_count'] ?? 0);
+                                $sentAt = !empty($r['form_sent_at']) ? strtotime((string) $r['form_sent_at']) : false;
+                                $dueAt = !empty($r['form_deadline_at']) ? strtotime((string) $r['form_deadline_at']) : false;
+                                $closed = $dueAt && $dueAt < time();
+                                $daysLeft = $dueAt ? (int) ceil(($dueAt - time()) / 86400) : 0;
+                                ?>
+                                <td>
+                                    <?php if ($sentCount > 0): ?>
+                                        <span class="badge bg-info text-dark">
+                                            <i class="bi bi-envelope-check me-1"></i>Sent
+                                            <?= $sentCount ?> time
+                                            <?= $sentCount === 1 ? '' : 's' ?>
+                                        </span>
+                                        <?php if ($sentAt): ?>
+                                            <div class="small text-muted">Last:
+                                                <?= esc(date('M d, Y h:i A', $sentAt)) ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    <?php else: ?>
+                                        <span class="text-muted small">Not yet sent</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if (!$dueAt): ?>
+                                        <span class="text-muted small">—</span>
+                                    <?php else: ?>
+                                        <div>
+                                            <?= esc(date('M d, Y', $dueAt)) ?>
+                                        </div>
+                                        <?php if ($r['rated']): ?>
+                                            <span class="badge bg-success">On time</span>
+                                        <?php elseif ($closed): ?>
+                                            <span class="badge bg-danger">Closed</span>
+                                        <?php else: ?>
+                                            <span class="badge <?= $daysLeft <= 1 ? 'bg-warning text-dark' : 'bg-secondary' ?>">
+                                                <?= $daysLeft ?> day
+                                                <?= $daysLeft === 1 ? '' : 's' ?> left
+                                            </span>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                </td>
+
                                 <td class="text-center">
                                     <?php if ($r['rated']): ?>
                                         <span class="badge bg-success" <?= $r['rated_at'] ? 'title="Submitted ' . esc($r['rated_at'], 'attr') . '"' : '' ?>>

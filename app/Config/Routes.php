@@ -191,7 +191,8 @@ $routes->group('', ['filter' => 'auth:admin'], function ($routes) {
     $routes->get('users', 'UserController::index');
     $routes->post('users/store', 'UserController::store');
     $routes->post('users/update/(:num)', 'UserController::update/$1');
-    $routes->post('users/delete/(:num)', 'UserController::delete/$1');
+    $routes->post('users/deactivate/(:num)', 'UserController::deactivate/$1');
+    $routes->post('users/activate/(:num)', 'UserController::activate/$1');
 
 
     /*

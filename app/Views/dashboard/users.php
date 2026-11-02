@@ -9,7 +9,7 @@ $users = $users ?? [];
 $roles = [
     'IT ADMINISTRATOR' => 'IT Administrator',
     'HR ADMINISTRATOR' => 'HR Administrator',
-    'SUPERIOR'         => 'Superior',
+    'SUPERIOR' => 'Superior',
 ];
 
 // Display label for a role value coming from the database (case-insensitive)
@@ -40,44 +40,26 @@ $roleLabel = static function (?string $role) use ($roles): string {
     </div>
 
     <?php if (session()->getFlashdata('success')): ?>
-
         <div class="alert alert-success alert-dismissible fade show" id="successAlert">
-
             <?= esc(session()->getFlashdata('success')); ?>
-
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-            </button>
-
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-
     <?php endif; ?>
 
     <?php if (session()->getFlashdata('error')): ?>
-
         <div class="alert alert-danger alert-dismissible fade show">
-
             <?= esc(session()->getFlashdata('error')); ?>
-
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-            </button>
-
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-
     <?php endif; ?>
 
     <?php if (session()->getFlashdata('errors')): ?>
-
         <div class="alert alert-danger alert-dismissible fade show">
-
             <?php foreach ((array) session()->getFlashdata('errors') as $err): ?>
                 <div><?= esc($err) ?></div>
             <?php endforeach; ?>
-
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-            </button>
-
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-
     <?php endif; ?>
 
     <!-- User Accounts Table -->
@@ -109,7 +91,7 @@ $roleLabel = static function (?string $role) use ($roles): string {
                             <td><?= esc($row['username']) ?></td>
                             <td><?= esc($roleLabel($row['role'])) ?></td>
                             <td>
-                                <?php if ($row['status'] == 'ACTIVE'): ?>
+                                <?php if ($row['status'] === 'ACTIVE'): ?>
                                     <span class="badge badge-completed">ACTIVE</span>
                                 <?php else: ?>
                                     <span class="badge badge-rejected">INACTIVE</span>
@@ -120,16 +102,24 @@ $roleLabel = static function (?string $role) use ($roles): string {
                                 <div class="row-actions">
                                     <button class="row-action-btn" title="View" data-bs-toggle="modal"
                                         data-bs-target="#view<?= $row['id'] ?>"><i class="bi bi-eye"></i></button>
+
                                     <button class="row-action-btn" title="Edit" data-bs-toggle="modal"
                                         data-bs-target="#edit<?= $row['id'] ?>"><i class="bi bi-pencil"></i></button>
-                                    <button class="row-action-btn row-action-danger" title="Delete" data-bs-toggle="modal"
-                                        data-bs-target="#delete<?= $row['id'] ?>"><i class="bi bi-trash"></i></button>
 
-
+                                    <?php if ($row['status'] === 'ACTIVE'): ?>
+                                        <button class="row-action-btn row-action-danger" title="Deactivate"
+                                            data-bs-toggle="modal" data-bs-target="#status<?= $row['id'] ?>">
+                                            <i class="bi bi-person-slash"></i>
+                                        </button>
+                                    <?php else: ?>
+                                        <button class="row-action-btn" title="Activate" data-bs-toggle="modal"
+                                            data-bs-target="#status<?= $row['id'] ?>">
+                                            <i class="bi bi-person-check"></i>
+                                        </button>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>
-
                     <?php endforeach; ?>
                 </tbody>
             </table>
@@ -174,10 +164,10 @@ $roleLabel = static function (?string $role) use ($roles): string {
             </nav>
         <?php endif; ?>
 
-
     </section>
 </main>
-<!-- Add User Modal -->
+
+<!-- ===================== ADD USER MODAL ===================== -->
 <div class="modal fade" id="addUserModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -189,13 +179,11 @@ $roleLabel = static function (?string $role) use ($roles): string {
                     <h5 class="modal-title">
                         <i class="bi bi-person-plus"></i> Add User
                     </h5>
-
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close">
-                    </button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
 
                 <div class="modal-body">
-
                     <div class="row">
 
                         <div class="col-md-6 mb-3">
@@ -207,6 +195,7 @@ $roleLabel = static function (?string $role) use ($roles): string {
                             <label>Username</label>
                             <input type="text" name="username" class="form-control" required>
                         </div>
+
                         <div class="col-md-6 mb-3">
                             <label>Email Address</label>
                             <input type="email" name="email" class="form-control" placeholder="example@dole.gov.ph"
@@ -237,17 +226,13 @@ $roleLabel = static function (?string $role) use ($roles): string {
                             <label>Role</label>
 
                             <select name="role" id="addRole" class="form-select" required>
-
                                 <option value="" selected disabled>Select Role</option>
-
                                 <?php foreach ($roles as $value => $label): ?>
-                                    <option value="<?= esc($value, 'attr') ?>"><?= esc($label) ?></option>
-                                <?php endforeach; ?>
-
+                                    <option value="<?= esc($value, 'attr') ?>" <?= strtoupper(trim((string) $row['role'])) === $value ? 'selected' : '' ?>>
+                                    <?php endforeach; ?>
                             </select>
 
                             <small class="text-muted" id="roleHint"></small>
-
                         </div>
 
                         <div class="col-md-6 mb-3">
@@ -266,19 +251,11 @@ $roleLabel = static function (?string $role) use ($roles): string {
                         </div>
 
                     </div>
-
                 </div>
 
                 <div class="modal-footer">
-
-                    <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">
-                        Cancel
-                    </button>
-
-                    <button class="btn btn-primary">
-                        Save User
-                    </button>
-
+                    <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
+                    <button class="btn btn-primary">Save User</button>
                 </div>
 
             </form>
@@ -287,48 +264,35 @@ $roleLabel = static function (?string $role) use ($roles): string {
     </div>
 </div>
 
+<!-- ===================== EDIT USER MODALS ===================== -->
 <?php foreach ($users as $row): ?>
 
     <div class="modal fade edit-user-modal" id="edit<?= $row['id'] ?>">
-
         <div class="modal-dialog modal-lg">
-
             <div class="modal-content">
 
                 <form action="<?= base_url('users/update/' . $row['id']) ?>" method="post">
                     <?= csrf_field() ?>
 
                     <div class="modal-header bg-warning">
-
-                        <h5 class="modal-title">
-                            Edit User
-                        </h5>
-
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close">
-                        </button>
-
+                        <h5 class="modal-title">Edit User</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
 
                     <div class="modal-body">
-
                         <div class="row">
 
                             <div class="col-md-6 mb-3">
-
                                 <label>Full Name</label>
-
                                 <input type="text" name="fullname" class="form-control"
                                     value="<?= esc($row['fullname'], 'attr') ?>" required>
-
                             </div>
 
                             <div class="col-md-6 mb-3">
-
                                 <label>Username</label>
-
                                 <input type="text" name="username" class="form-control"
                                     value="<?= esc($row['username'], 'attr') ?>" required>
-
                             </div>
 
                             <div class="col-md-6 mb-3">
@@ -338,9 +302,7 @@ $roleLabel = static function (?string $role) use ($roles): string {
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="password<?= $row['id'] ?>" class="form-label">
-                                    New Password
-                                </label>
+                                <label for="password<?= $row['id'] ?>" class="form-label">New Password</label>
 
                                 <div class="input-group">
                                     <input type="password" id="password<?= $row['id'] ?>" name="password"
@@ -362,20 +324,16 @@ $roleLabel = static function (?string $role) use ($roles): string {
                             </div>
 
                             <div class="col-md-6 mb-3">
-
                                 <label>Role</label>
 
                                 <select name="role" class="form-select" required>
-
                                     <?php foreach ($roles as $value => $label): ?>
-                                        <option value="<?= esc($value, 'attr') ?>"
-                                            <?= strtoupper(trim((string) $row['role'])) === $value ? 'selected' : '' ?>>
+                                        <?php $sel = strtoupper(trim((string) $row['role'])) === $value ? 'selected' : ''; ?>
+                                        <option value="<?= esc($value, 'attr') ?>" <?= $sel ?>>
                                             <?= esc($label) ?>
                                         </option>
                                     <?php endforeach; ?>
-
                                 </select>
-
                             </div>
 
                             <div class="col-md-6">
@@ -395,169 +353,123 @@ $roleLabel = static function (?string $role) use ($roles): string {
                             </div>
 
                         </div>
-
                     </div>
 
                     <div class="modal-footer">
-
-                        <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">
-                            Cancel
-                        </button>
-
-                        <button class="btn btn-warning">
-                            Update User
-                        </button>
-
+                        <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
+                        <button class="btn btn-warning">Update User</button>
                     </div>
 
                 </form>
 
             </div>
-
         </div>
-
     </div>
 
 <?php endforeach; ?>
 
+<!-- ===================== VIEW USER MODALS ===================== -->
 <?php foreach ($users as $row): ?>
 
     <div class="modal fade view-user-modal" id="view<?= $row['id'] ?>">
-
         <div class="modal-dialog">
-
             <div class="modal-content">
 
                 <div class="modal-header bg-info text-white">
-
-                    <h5 class="modal-title">
-
-                        View User
-
-                    </h5>
-
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close">
-                    </button>
-
+                    <h5 class="modal-title">View User</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
 
                 <div class="modal-body">
-
                     <table class="table table-bordered">
-
                         <tr>
                             <th>Full Name</th>
                             <td><?= esc($row['fullname']) ?></td>
                         </tr>
-
                         <tr>
                             <th>Username</th>
                             <td><?= esc($row['username']) ?></td>
                         </tr>
-
                         <tr>
                             <th>Email</th>
                             <td><?= esc($row['email']) ?></td>
                         </tr>
-
                         <tr>
                             <th>Role</th>
                             <td><?= esc($roleLabel($row['role'])) ?></td>
                         </tr>
-
                         <tr>
                             <th>Status</th>
                             <td>
-                                <?php if ($row['status'] == "ACTIVE"): ?>
+                                <?php if ($row['status'] === 'ACTIVE'): ?>
                                     <span class="badge badge-completed">ACTIVE</span>
                                 <?php else: ?>
                                     <span class="badge badge-rejected">INACTIVE</span>
                                 <?php endif; ?>
                             </td>
                         </tr>
-
                     </table>
-
                 </div>
 
                 <div class="modal-footer">
-
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">
-                        Close
-                    </button>
-
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
 
             </div>
-
         </div>
-
     </div>
 
 <?php endforeach; ?>
 
+<!-- ===================== ACTIVATE / DEACTIVATE MODALS ===================== -->
 <?php foreach ($users as $row): ?>
+    <?php $isActive = $row['status'] === 'ACTIVE'; ?>
 
-    <div class="modal fade delete-user-modal" id="delete<?= $row['id'] ?>">
-
+    <div class="modal fade" id="status<?= $row['id'] ?>" tabindex="-1">
         <div class="modal-dialog">
-
             <div class="modal-content">
 
-                <form action="<?= base_url('users/delete/' . $row['id']) ?>" method="post">
+                <form action="<?= base_url(($isActive ? 'users/deactivate/' : 'users/activate/') . $row['id']) ?>"
+                    method="post">
                     <?= csrf_field() ?>
 
-                    <div class="modal-header bg-danger text-white">
-
+                    <?php $headerClass = $isActive ? 'bg-danger' : 'bg-success'; ?>
+                    <div class="modal-header <?= $headerClass ?> text-white">
                         <h5 class="modal-title">
-
-                            Delete User
-
+                            <?= $isActive ? 'Deactivate User' : 'Activate User' ?>
                         </h5>
-
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close">
-                        </button>
-
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
 
                     <div class="modal-body">
-
                         <h5 class="text-center">
-
-                            Are you sure you want to delete?
-
+                            Are you sure you want to <?= $isActive ? 'deactivate' : 'activate' ?> this user?
                         </h5>
 
                         <hr>
 
-                        <h4 class="text-center">
+                        <h4 class="text-center"><?= esc($row['fullname']) ?></h4>
 
-                            <?= esc($row['fullname']) ?>
-
-                        </h4>
-
+                        <?php if ($isActive): ?>
+                            <p class="text-muted text-center small mb-0">
+                                They will no longer be able to log in. You can activate the account again anytime.
+                            </p>
+                        <?php endif; ?>
                     </div>
 
                     <div class="modal-footer">
-
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            Cancel
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button class="btn <?= $isActive ? 'btn-danger' : 'btn-success' ?>">
+                            <?= $isActive ? 'Deactivate' : 'Activate' ?>
                         </button>
-
-                        <button class="btn btn-danger">
-
-                            Delete
-
-                        </button>
-
                     </div>
 
                 </form>
 
             </div>
-
         </div>
-
     </div>
 
 <?php endforeach; ?>
@@ -571,7 +483,7 @@ $roleLabel = static function (?string $role) use ($roles): string {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
 
         /* ==========================================
            ACTIVE SIDEBAR MENU
@@ -579,7 +491,7 @@ $roleLabel = static function (?string $role) use ($roles): string {
 
         const currentPath = window.location.pathname.replace(/\/+$/, '');
 
-        document.querySelectorAll('.nav-link:not(.nav-link-logout)').forEach(function(link) {
+        document.querySelectorAll('.nav-link:not(.nav-link-logout)').forEach(function (link) {
 
             const href = link.getAttribute('href');
 
@@ -607,10 +519,10 @@ $roleLabel = static function (?string $role) use ($roles): string {
            MODAL FUNCTIONS
         ========================================== */
 
-        document.querySelectorAll('.modal').forEach(function(modal) {
+        document.querySelectorAll('.modal').forEach(function (modal) {
 
             // Focus first input when modal opens
-            modal.addEventListener('shown.bs.modal', function() {
+            modal.addEventListener('shown.bs.modal', function () {
 
                 const firstField = modal.querySelector(
                     'input:not([type="hidden"]), select, textarea'
@@ -632,7 +544,7 @@ $roleLabel = static function (?string $role) use ($roles): string {
 
         if (addUserModal) {
 
-            addUserModal.addEventListener('hidden.bs.modal', function() {
+            addUserModal.addEventListener('hidden.bs.modal', function () {
 
                 const form = this.querySelector('form');
 
@@ -640,11 +552,11 @@ $roleLabel = static function (?string $role) use ($roles): string {
 
                     form.reset();
 
-                    form.querySelectorAll('.is-invalid').forEach(function(input) {
+                    form.querySelectorAll('.is-invalid').forEach(function (input) {
                         input.classList.remove('is-invalid');
                     });
 
-                    form.querySelectorAll('.is-valid').forEach(function(input) {
+                    form.querySelectorAll('.is-valid').forEach(function (input) {
                         input.classList.remove('is-valid');
                     });
 
@@ -659,12 +571,12 @@ $roleLabel = static function (?string $role) use ($roles): string {
 
     });
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
 
         const successAlert = document.getElementById('successAlert');
 
         if (successAlert) {
-            setTimeout(function() {
+            setTimeout(function () {
                 const bsAlert = bootstrap.Alert.getOrCreateInstance(successAlert);
                 bsAlert.close();
             }, 3000); // Auto close after 3 seconds
@@ -672,7 +584,7 @@ $roleLabel = static function (?string $role) use ($roles): string {
 
     });
 
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
         setCurrentDate();
     });
 
@@ -699,7 +611,7 @@ $roleLabel = static function (?string $role) use ($roles): string {
     const statusToggle = document.getElementById('statusToggle');
     const statusLabel = document.getElementById('statusLabel');
 
-    statusToggle.addEventListener('change', function() {
+    statusToggle.addEventListener('change', function () {
         statusLabel.textContent = this.checked ? 'ACTIVE' : 'INACTIVE';
     });
 
@@ -710,13 +622,13 @@ $roleLabel = static function (?string $role) use ($roles): string {
         'SUPERIOR': 'Training Impact Assessment (TIA) page only.'
     };
 
-    document.getElementById('addRole').addEventListener('change', function() {
+    document.getElementById('addRole').addEventListener('change', function () {
         document.getElementById('roleHint').textContent = roleDescriptions[this.value] || '';
     });
 
     document.querySelectorAll(".toggle-password").forEach(button => {
 
-        button.addEventListener("click", function() {
+        button.addEventListener("click", function () {
 
             const input = document.getElementById(this.dataset.target);
             const icon = this.querySelector("i");
@@ -734,7 +646,7 @@ $roleLabel = static function (?string $role) use ($roles): string {
     });
 </script>
 <script>
-    document.getElementById('togglePassword').addEventListener('click', function() {
+    document.getElementById('togglePassword').addEventListener('click', function () {
 
         const password = document.getElementById('password');
         const icon = this.querySelector('i');
@@ -751,14 +663,14 @@ $roleLabel = static function (?string $role) use ($roles): string {
 
 <script>
     document.querySelectorAll('.status-toggle').forEach(toggle => {
-        toggle.addEventListener('change', function() {
+        toggle.addEventListener('change', function () {
             const label = this.closest('.form-switch').querySelector('.status-label');
             label.textContent = this.checked ? 'ACTIVE' : 'INACTIVE';
         });
     });
 </script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
 
         const loadingScreen =
             document.getElementById('doleLoadingScreen');
@@ -769,9 +681,9 @@ $roleLabel = static function (?string $role) use ($roles): string {
             document.querySelectorAll('.nav-link');
 
 
-        sidebarLinks.forEach(function(link) {
+        sidebarLinks.forEach(function (link) {
 
-            link.addEventListener('click', function(event) {
+            link.addEventListener('click', function (event) {
 
                 const href = this.getAttribute('href');
 
@@ -823,7 +735,7 @@ $roleLabel = static function (?string $role) use ($roles): string {
 
         /* Back / Forward */
 
-        window.addEventListener('pageshow', function() {
+        window.addEventListener('pageshow', function () {
 
             loadingScreen.classList.remove('show');
 

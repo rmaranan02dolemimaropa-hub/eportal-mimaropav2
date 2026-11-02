@@ -120,20 +120,43 @@ class UserController extends BaseController
     }
 
     //===================================================
-    // DELETE USER
-    //===================================================
+// DEACTIVATE USER
+//===================================================
 
-    public function delete($id)
+    public function deactivate($id)
     {
         $id = (int) $id;
 
         // Prevent locking yourself out
         if ($id === (int) session()->get('user_id')) {
-            return redirect()->back()->with('error', 'You cannot delete your own account.');
+            return redirect()->back()->with('error', 'You cannot deactivate your own account.');
         }
 
-        $this->model->delete($id);
+        $user = $this->model->find($id);
+        if (!$user) {
+            return redirect()->back()->with('error', 'User not found.');
+        }
 
-        return redirect()->back()->with('success', 'User deleted successfully.');
+        $this->model->update($id, ['status' => 'INACTIVE']);
+
+        return redirect()->back()->with('success', $user['fullname'] . ' has been deactivated.');
+    }
+
+    //===================================================
+// ACTIVATE USER
+//===================================================
+
+    public function activate($id)
+    {
+        $id = (int) $id;
+
+        $user = $this->model->find($id);
+        if (!$user) {
+            return redirect()->back()->with('error', 'User not found.');
+        }
+
+        $this->model->update($id, ['status' => 'ACTIVE']);
+
+        return redirect()->back()->with('success', $user['fullname'] . ' has been activated.');
     }
 }
