@@ -12,6 +12,22 @@ use App\Models\SuperiorModel;
 
 class HrController extends BaseController
 {
+    /** Days the Annex D form stays open after "Send Form" */
+    private const FORM_DEADLINE_DAYS = 5;
+
+    private const TRAINING_CSV_HEADER = [
+        'TRAINING CODE',
+        'TRAINING TITLE',
+        'TRAINING DATES',
+        'CONDUCTED BY',
+        'OFFICE',
+        'IMMEDIATE SUPERIOR',
+        'COMPETENCY 1',
+        'COMPETENCY 2',
+        'COMPETENCY 3',
+        'COMPETENCY 4',
+    ];
+
     protected $hrModel;
     protected $trainingsModel;
     protected $participantsModel;
@@ -23,9 +39,13 @@ class HrController extends BaseController
         $this->participantsModel = new TrainingParticipantsModel();
     }
 
+    // =========================================================================
+    // PUBLIC: Annex D self-rater form
+    // =========================================================================
+
     /**
      * Show the Training Impact Assessment form
-     * URL: /tia  or  /hr/create
+     * GET /tia_ad?t=TRAINING_CODE&p=PARTICIPANT_ID
      */
     public function create($trainingCode = null)
     {
@@ -92,9 +112,10 @@ class HrController extends BaseController
             'superiors' => (new SuperiorModel())->orderBy('name', 'ASC')->findAll(),
         ]);
     }
+
     /**
      * Store the submitted form
-     * URL: POST /tia  or  /hr/store
+     * POST /tia_store
      */
     public function store()
     {
@@ -155,6 +176,15 @@ class HrController extends BaseController
             ])->setStatusCode(404);
         }
 
+        // --- Deadline ---
+        if ($this->isFormClosed($training)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'The deadline for this assessment has passed. Please contact HR.',
+                'csrf' => csrf_hash(),
+            ])->setStatusCode(403);
+        }
+
         $tiaModel = new \App\Models\TiaResponsesModel();
         $email = strtolower(trim((string) $this->request->getPost('email')));
 
@@ -164,14 +194,6 @@ class HrController extends BaseController
             ->where('email', $email)
             ->first();
 
-        if ($this->isFormClosed($training)) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'The deadline for this assessment has passed. Please contact HR.',
-                'csrf' => csrf_hash(),
-            ])->setStatusCode(403);
-        }
-
         if ($exists) {
             return $this->response->setJSON([
                 'success' => false,
@@ -180,14 +202,6 @@ class HrController extends BaseController
                 'reference_no' => $exists['reference_no'],
                 'csrf' => csrf_hash(),
             ])->setStatusCode(409);
-        }
-
-        if ($this->isFormClosed($training)) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'The deadline for this assessment has passed. Please contact HR.',
-                'csrf' => csrf_hash(),
-            ])->setStatusCode(403);
         }
 
         // --- Competencies defined by HR for this training (labels come from the DB, not the form) ---
@@ -212,7 +226,7 @@ class HrController extends BaseController
             'work_environment',
             'superior_no_support',
             'others',
-            'none'
+            'none',
         ];
         $barriers = array_values(array_intersect(
             (array) $this->request->getPost('barrier'),
@@ -280,8 +294,27 @@ class HrController extends BaseController
     }
 
     /**
-     * List all submissions (for admin)
+     * Already-submitted page, found by reference number
+     * GET /tia_submitted/(:segment)
      */
+    public function submitted($referenceNo = null)
+    {
+        $row = (new \App\Models\TiaResponsesModel())
+            ->where('reference_no', (string) $referenceNo)
+            ->first();
+
+        if (!$row) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Assessment not found.');
+        }
+
+        return view('tia/already_submitted', ['response' => $row]);
+    }
+
+    // =========================================================================
+    // Admin helpers (JSON)
+    // =========================================================================
+
+    /** List all submissions (for admin) */
     public function index()
     {
         $records = $this->hrModel
@@ -290,13 +323,11 @@ class HrController extends BaseController
 
         return $this->response->setJSON([
             'success' => true,
-            'data' => $records
+            'data' => $records,
         ]);
     }
 
-    /**
-     * Show single record
-     */
+    /** Show single record */
     public function show($id = null)
     {
         $record = $this->hrModel->find($id);
@@ -304,22 +335,19 @@ class HrController extends BaseController
         if (!$record) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Record not found'
+                'message' => 'Record not found',
             ])->setStatusCode(404);
         }
 
         return $this->response->setJSON([
             'success' => true,
-            'data' => $record
+            'data' => $record,
         ]);
     }
 
-
-
-
-    // -------------------------------------------------------------------------
-    // Dashboard: Trainings + Participants
-    // -------------------------------------------------------------------------
+    // =========================================================================
+    // DASHBOARD: Trainings
+    // =========================================================================
 
     /**
      * Training list page
@@ -333,9 +361,6 @@ class HrController extends BaseController
 
         return view('dashboard/tia', $data);
     }
-
-
-
 
     /**
      * Store a new Training
@@ -392,328 +417,6 @@ class HrController extends BaseController
             ])->setStatusCode(201);
         } catch (\Exception $e) {
             log_message('error', 'Store Training Error: ' . $e->getMessage());
-
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Server error occurred',
-                'error' => ENVIRONMENT === 'development' ? $e->getMessage() : null,
-            ])->setStatusCode(500);
-        }
-    }
-
-    /**
-     * Add a single participant
-     * POST /tia/add-participant
-     */
-    public function addParticipant()
-    {
-        $rules = [
-            'training_code' => 'required|max_length[50]',
-            'participant_name' => 'required|max_length[150]',
-            'position' => 'required|max_length[150]',
-            'email' => 'required|valid_email|max_length[150]',
-        ];
-
-        if (!$this->validate($rules)) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $this->validator->getErrors(),
-            ])->setStatusCode(422);
-        }
-
-        $trainingCode = $this->request->getPost('training_code');
-
-        $training = $this->trainingsModel
-            ->where('training_code', $trainingCode)
-            ->first();
-
-        if (!$training) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Training not found',
-            ])->setStatusCode(404);
-        }
-
-        $data = [
-            'training_code' => $trainingCode,
-            'participant_name' => $this->request->getPost('participant_name'),
-            'position' => $this->request->getPost('position'),
-            'email' => $this->request->getPost('email'),
-            'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s'),
-        ];
-
-        try {
-            $id = $this->participantsModel->insert($data);
-
-            if ($id === false) {
-                return $this->response->setJSON([
-                    'success' => false,
-                    'message' => 'Failed to add participant',
-                    'errors' => $this->participantsModel->errors(),
-                ])->setStatusCode(500);
-            }
-
-            return $this->response->setJSON([
-                'success' => true,
-                'message' => 'Participant added successfully!',
-                'id' => $id,
-            ])->setStatusCode(201);
-        } catch (\Exception $e) {
-            log_message('error', 'Add Participant Error: ' . $e->getMessage());
-
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Server error occurred',
-                'error' => ENVIRONMENT === 'development' ? $e->getMessage() : null,
-            ])->setStatusCode(500);
-        }
-    }
-
-    /**
-     * Get participants for a training
-     * GET /tia/participants/(:any)
-     */
-    public function getParticipants($trainingCode = null)
-    {
-        if (!$trainingCode) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Training code is required',
-            ])->setStatusCode(400);
-        }
-
-        $participants = $this->participantsModel
-            ->where('training_code', $trainingCode)
-            ->orderBy('id', 'ASC')
-            ->findAll();
-
-        $responses = (new \App\Models\TiaResponsesModel())
-            ->select('email, reference_no, created_at')
-            ->where('training_code', $trainingCode)
-            ->findAll();
-
-        $submitted = [];
-        foreach ($responses as $r) {
-            $submitted[strtolower(trim($r['email']))] = $r;
-        }
-
-        foreach ($participants as &$p) {
-            $key = strtolower(trim((string) ($p['email'] ?? '')));
-            $p['tia_submitted'] = isset($submitted[$key]);
-            $p['tia_reference_no'] = $submitted[$key]['reference_no'] ?? null;
-            $p['tia_submitted_at'] = $submitted[$key]['created_at'] ?? null;
-        }
-        unset($p);
-
-        return $this->response->setJSON([
-            'success' => true,
-            'data' => $participants,
-        ]);
-    }
-
-    /**
-     * Export participants as CSV
-     * GET /tia/export-participants/(:any)
-     */
-    public function exportParticipants($trainingCode = null)
-    {
-        if (!$trainingCode) {
-            return redirect()->back()->with('error', 'Training code is required');
-        }
-
-        $training = $this->trainingsModel
-            ->where('training_code', $trainingCode)
-            ->first();
-
-        if (!$training) {
-            return redirect()->back()->with('error', 'Training not found');
-        }
-
-        $participants = $this->participantsModel
-            ->where('training_code', $trainingCode)
-            ->orderBy('id', 'ASC')
-            ->findAll();
-
-        $safeTitle = preg_replace('/[^A-Za-z0-9_\-]/', '_', $training['training_title']);
-        $filename = 'Participants_' . $safeTitle . '.csv';
-
-        return $this->response
-            ->setHeader('Content-Type', 'text/csv')
-            ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
-            ->setHeader('Pragma', 'no-cache')
-            ->setHeader('Expires', '0')
-            ->setBody($this->buildParticipantsCsv($participants));
-    }
-
-    /**
-     * Build CSV string for participants export
-     */
-    private function buildParticipantsCsv(array $participants): string
-    {
-        $output = fopen('php://temp', 'r+');
-        fputcsv($output, ['Name of Participant', 'Position', 'Email Address']);
-
-        foreach ($participants as $p) {
-            fputcsv($output, [
-                $p['participant_name'] ?? '',
-                $p['position'] ?? '',
-                $p['email'] ?? '',
-            ]);
-        }
-
-        rewind($output);
-        $csv = stream_get_contents($output);
-        fclose($output);
-
-        return $csv !== false ? $csv : '';
-    }
-
-    /**
-     * Bulk add participants
-     * POST /tia/add-participants-bulk
-     */
-    /**
-     * Bulk add participants
-     * POST /tia/add-participants-bulk
-     */
-    public function addParticipantsBulk()
-    {
-        $json = $this->request->getJSON(true) ?? [];
-
-        $trainingCode = $json['training_code'] ?? null;
-        $participants = $json['participants'] ?? [];
-
-        if (!$trainingCode || empty($participants) || !is_array($participants)) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Training code and participants are required',
-            ])->setStatusCode(400);
-        }
-
-        $training = $this->trainingsModel
-            ->where('training_code', $trainingCode)
-            ->first();
-
-        if (!$training) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Training not found',
-            ])->setStatusCode(404);
-        }
-
-        $inserted = 0;
-        $errors = [];
-
-        foreach ($participants as $p) {
-            $name = trim($p['participant_name'] ?? '');
-            $position = trim($p['position'] ?? '');
-            $email = trim($p['email'] ?? '');
-
-            if ($name === '' || $position === '' || $email === '') {
-                $errors[] = $name ?: 'Unknown';
-                continue;
-            }
-
-            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $errors[] = $name . ' (invalid email)';
-                continue;
-            }
-
-            $data = [
-                'training_code' => $trainingCode,
-                'participant_name' => $name,
-                'position' => $position,
-                'email' => $email,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
-            ];
-
-            if ($this->participantsModel->insert($data)) {
-                $inserted++;
-            } else {
-                $errors[] = $name;
-            }
-        }
-
-        // First time participants are saved for this training -> email the superior (once)
-        $notice = null;
-        if (
-            $inserted > 0
-            && empty($training['superior_notified_at'])
-            && ($training['status'] ?? 'active') !== 'canceled'
-        ) {
-            $notice = $this->sendSuperiorNotice($training);
-        }
-
-        return $this->response->setJSON([
-            'success' => true,
-            'message' => "Successfully added {$inserted} participant(s)",
-            'count' => $inserted,
-            'failed' => $errors,
-            'superior_notice' => $notice['message'] ?? null,
-        ]);
-    }
-    /**
-     * Update a participant
-     * POST /tia/update-participant/(:num)
-     */
-    public function updateParticipant($id = null)
-    {
-        if (!$id) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Participant ID is required',
-            ])->setStatusCode(400);
-        }
-
-        $participant = $this->participantsModel->find($id);
-        if (!$participant) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Participant not found',
-            ])->setStatusCode(404);
-        }
-
-        $rules = [
-            'participant_name' => 'required|max_length[150]',
-            'position' => 'required|max_length[150]',
-            'email' => 'required|valid_email|max_length[150]',
-        ];
-
-        if (!$this->validate($rules)) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $this->validator->getErrors(),
-            ])->setStatusCode(422);
-        }
-
-        $data = [
-            'participant_name' => $this->request->getPost('participant_name'),
-            'position' => $this->request->getPost('position'),
-            'email' => $this->request->getPost('email'),
-            'updated_at' => date('Y-m-d H:i:s'),
-        ];
-
-        try {
-            $updated = $this->participantsModel->update($id, $data);
-
-            if ($updated === false) {
-                return $this->response->setJSON([
-                    'success' => false,
-                    'message' => 'Failed to update participant',
-                    'errors' => $this->participantsModel->errors(),
-                ])->setStatusCode(500);
-            }
-
-            return $this->response->setJSON([
-                'success' => true,
-                'message' => 'Participant updated successfully!',
-            ]);
-        } catch (\Exception $e) {
-            log_message('error', 'Update Participant Error: ' . $e->getMessage());
 
             return $this->response->setJSON([
                 'success' => false,
@@ -790,70 +493,6 @@ class HrController extends BaseController
             ]);
         } catch (\Exception $e) {
             log_message('error', 'Update Training Error: ' . $e->getMessage());
-
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Server error occurred',
-                'error' => ENVIRONMENT === 'development' ? $e->getMessage() : null,
-            ])->setStatusCode(500);
-        }
-    }
-
-    /**
-     * Delete a Training + all its participants (by training_code)
-     * POST /tia/delete-training/(:segment)
-     */
-    public function deleteTraining($trainingCode = null)
-    {
-        if (!$trainingCode) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Training code is required',
-            ])->setStatusCode(400);
-        }
-
-        $training = $this->trainingsModel
-            ->where('training_code', $trainingCode)
-            ->first();
-
-        if (!$training) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Training not found',
-            ])->setStatusCode(404);
-        }
-
-        $db = \Config\Database::connect();
-
-        try {
-            $db->transStart();
-
-            // 1. delete participants first
-            $this->participantsModel
-                ->where('training_code', $trainingCode)
-                ->delete();
-
-            // 2. then delete the training
-            $this->trainingsModel
-                ->where('training_code', $trainingCode)
-                ->delete();
-
-            $db->transComplete();
-
-            if ($db->transStatus() === false) {
-                return $this->response->setJSON([
-                    'success' => false,
-                    'message' => 'Failed to delete training',
-                ])->setStatusCode(500);
-            }
-
-            return $this->response->setJSON([
-                'success' => true,
-                'message' => 'Training and its participants were deleted.',
-            ]);
-        } catch (\Exception $e) {
-            $db->transRollback();
-            log_message('error', 'Delete Training Error: ' . $e->getMessage());
 
             return $this->response->setJSON([
                 'success' => false,
@@ -957,6 +596,371 @@ class HrController extends BaseController
             ])->setStatusCode(500);
         }
     }
+
+    /**
+     * Delete a Training + all its participants (by training_code)
+     * POST /tia/delete-training/(:segment)
+     */
+    public function deleteTraining($trainingCode = null)
+    {
+        if (!$trainingCode) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Training code is required',
+            ])->setStatusCode(400);
+        }
+
+        $training = $this->trainingsModel
+            ->where('training_code', $trainingCode)
+            ->first();
+
+        if (!$training) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Training not found',
+            ])->setStatusCode(404);
+        }
+
+        $db = \Config\Database::connect();
+
+        try {
+            $db->transStart();
+
+            // 1. delete participants first
+            $this->participantsModel
+                ->where('training_code', $trainingCode)
+                ->delete();
+
+            // 2. then delete the training
+            $this->trainingsModel
+                ->where('training_code', $trainingCode)
+                ->delete();
+
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to delete training',
+                ])->setStatusCode(500);
+            }
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Training and its participants were deleted.',
+            ]);
+        } catch (\Exception $e) {
+            $db->transRollback();
+            log_message('error', 'Delete Training Error: ' . $e->getMessage());
+
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Server error occurred',
+                'error' => ENVIRONMENT === 'development' ? $e->getMessage() : null,
+            ])->setStatusCode(500);
+        }
+    }
+
+    // =========================================================================
+    // DASHBOARD: Participants
+    // =========================================================================
+
+    /**
+     * Add a single participant
+     * POST /tia/add-participant
+     */
+    public function addParticipant()
+    {
+        $rules = [
+            'training_code' => 'required|max_length[50]',
+            'participant_name' => 'required|max_length[150]',
+            'position' => 'required|max_length[150]',
+            'email' => 'required|valid_email|max_length[150]',
+        ];
+
+        if (!$this->validate($rules)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $this->validator->getErrors(),
+            ])->setStatusCode(422);
+        }
+
+        $trainingCode = $this->request->getPost('training_code');
+
+        $training = $this->trainingsModel
+            ->where('training_code', $trainingCode)
+            ->first();
+
+        if (!$training) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Training not found',
+            ])->setStatusCode(404);
+        }
+
+        $data = [
+            'training_code' => $trainingCode,
+            'participant_name' => $this->request->getPost('participant_name'),
+            'position' => $this->request->getPost('position'),
+            'email' => $this->request->getPost('email'),
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ];
+
+        try {
+            $id = $this->participantsModel->insert($data);
+
+            if ($id === false) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to add participant',
+                    'errors' => $this->participantsModel->errors(),
+                ])->setStatusCode(500);
+            }
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Participant added successfully!',
+                'id' => $id,
+            ])->setStatusCode(201);
+        } catch (\Exception $e) {
+            log_message('error', 'Add Participant Error: ' . $e->getMessage());
+
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Server error occurred',
+                'error' => ENVIRONMENT === 'development' ? $e->getMessage() : null,
+            ])->setStatusCode(500);
+        }
+    }
+
+    /**
+     * Get participants for a training (with TIA submission status)
+     * GET /tia/participants/(:any)
+     */
+    public function getParticipants($trainingCode = null)
+    {
+        if (!$trainingCode) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Training code is required',
+            ])->setStatusCode(400);
+        }
+
+        $participants = $this->participantsModel
+            ->where('training_code', $trainingCode)
+            ->orderBy('id', 'ASC')
+            ->findAll();
+
+        $responses = (new \App\Models\TiaResponsesModel())
+            ->select('email, reference_no, created_at')
+            ->where('training_code', $trainingCode)
+            ->findAll();
+
+        $submitted = [];
+        foreach ($responses as $r) {
+            $submitted[strtolower(trim($r['email']))] = $r;
+        }
+
+        foreach ($participants as &$p) {
+            $key = strtolower(trim((string) ($p['email'] ?? '')));
+            $p['tia_submitted'] = isset($submitted[$key]);
+            $p['tia_reference_no'] = $submitted[$key]['reference_no'] ?? null;
+            $p['tia_submitted_at'] = $submitted[$key]['created_at'] ?? null;
+        }
+        unset($p);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'data' => $participants,
+        ]);
+    }
+
+    /**
+     * Export participants as CSV
+     * GET /tia/export-participants/(:any)
+     */
+    public function exportParticipants($trainingCode = null)
+    {
+        if (!$trainingCode) {
+            return redirect()->back()->with('error', 'Training code is required');
+        }
+
+        $training = $this->trainingsModel
+            ->where('training_code', $trainingCode)
+            ->first();
+
+        if (!$training) {
+            return redirect()->back()->with('error', 'Training not found');
+        }
+
+        $participants = $this->participantsModel
+            ->where('training_code', $trainingCode)
+            ->orderBy('id', 'ASC')
+            ->findAll();
+
+        $safeTitle = preg_replace('/[^A-Za-z0-9_\-]/', '_', $training['training_title']);
+        $filename = 'Participants_' . $safeTitle . '.csv';
+
+        return $this->response
+            ->setHeader('Content-Type', 'text/csv')
+            ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
+            ->setHeader('Pragma', 'no-cache')
+            ->setHeader('Expires', '0')
+            ->setBody($this->buildParticipantsCsv($participants));
+    }
+
+    /**
+     * Bulk add participants
+     * POST /tia/add-participants-bulk
+     */
+    public function addParticipantsBulk()
+    {
+        $json = $this->request->getJSON(true) ?? [];
+
+        $trainingCode = $json['training_code'] ?? null;
+        $participants = $json['participants'] ?? [];
+
+        if (!$trainingCode || empty($participants) || !is_array($participants)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Training code and participants are required',
+            ])->setStatusCode(400);
+        }
+
+        $training = $this->trainingsModel
+            ->where('training_code', $trainingCode)
+            ->first();
+
+        if (!$training) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Training not found',
+            ])->setStatusCode(404);
+        }
+
+        $inserted = 0;
+        $errors = [];
+
+        foreach ($participants as $p) {
+            $name = trim($p['participant_name'] ?? '');
+            $position = trim($p['position'] ?? '');
+            $email = trim($p['email'] ?? '');
+
+            if ($name === '' || $position === '' || $email === '') {
+                $errors[] = $name ?: 'Unknown';
+                continue;
+            }
+
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = $name . ' (invalid email)';
+                continue;
+            }
+
+            $data = [
+                'training_code' => $trainingCode,
+                'participant_name' => $name,
+                'position' => $position,
+                'email' => $email,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ];
+
+            if ($this->participantsModel->insert($data)) {
+                $inserted++;
+            } else {
+                $errors[] = $name;
+            }
+        }
+
+        // First time participants are saved for this training -> email the superior (once)
+        $notice = null;
+        if (
+            $inserted > 0
+            && empty($training['superior_notified_at'])
+            && ($training['status'] ?? 'active') !== 'canceled'
+        ) {
+            $notice = $this->sendSuperiorNotice($training);
+        }
+
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => "Successfully added {$inserted} participant(s)",
+            'count' => $inserted,
+            'failed' => $errors,
+            'superior_notice' => $notice['message'] ?? null,
+        ]);
+    }
+
+    /**
+     * Update a participant
+     * POST /tia/update-participant/(:num)
+     */
+    public function updateParticipant($id = null)
+    {
+        if (!$id) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Participant ID is required',
+            ])->setStatusCode(400);
+        }
+
+        $participant = $this->participantsModel->find($id);
+        if (!$participant) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Participant not found',
+            ])->setStatusCode(404);
+        }
+
+        $rules = [
+            'participant_name' => 'required|max_length[150]',
+            'position' => 'required|max_length[150]',
+            'email' => 'required|valid_email|max_length[150]',
+        ];
+
+        if (!$this->validate($rules)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $this->validator->getErrors(),
+            ])->setStatusCode(422);
+        }
+
+        $data = [
+            'participant_name' => $this->request->getPost('participant_name'),
+            'position' => $this->request->getPost('position'),
+            'email' => $this->request->getPost('email'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ];
+
+        try {
+            $updated = $this->participantsModel->update($id, $data);
+
+            if ($updated === false) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to update participant',
+                    'errors' => $this->participantsModel->errors(),
+                ])->setStatusCode(500);
+            }
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Participant updated successfully!',
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Update Participant Error: ' . $e->getMessage());
+
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Server error occurred',
+                'error' => ENVIRONMENT === 'development' ? $e->getMessage() : null,
+            ])->setStatusCode(500);
+        }
+    }
+
     /**
      * Delete a single participant
      * POST /tia/delete-participant/(:num)
@@ -1004,11 +1008,14 @@ class HrController extends BaseController
         }
     }
 
+    // =========================================================================
+    // EMAILS: Annex D form (all / one) + superior notice
+    // =========================================================================
 
-
-
-    private const FORM_DEADLINE_DAYS = 5;
-
+    /**
+     * Send the Annex D form to ALL participants of a training
+     * POST /tia/send-form-emails
+     */
     public function sendFormEmails()
     {
         if (!$this->request->isAJAX()) {
@@ -1056,9 +1063,6 @@ class HrController extends BaseController
         @set_time_limit(0);
         ignore_user_abort(true);
 
-        $mailer = \Config\Services::email();
-        $cfg = config('Email');
-
         // Deadline: FORM_DEADLINE_DAYS days from now, until 11:59 PM of that day
         $now = date('Y-m-d H:i:s');
         $deadlineAt = date('Y-m-d 23:59:59', strtotime('+' . self::FORM_DEADLINE_DAYS . ' days'));
@@ -1081,35 +1085,13 @@ class HrController extends BaseController
             }
             $seen[$to] = true;
 
-            // Per-participant link: the form opens with this person's details prefilled.
-            // -> http://yourdomain/tia_ad?t=TRN-20261005-AB12C&p=12
-            $formUrl = site_url('tia_ad')
-                . '?t=' . rawurlencode($trainingCode)
-                . '&p=' . (int) $p['id'];
-
-            $mailer->clear(true);
-            $mailer->setMailType('html');
-            if (!empty($cfg->fromEmail)) {
-                $mailer->setFrom($cfg->fromEmail, $cfg->fromName ?? '');
-            }
-            $mailer->setTo($to);
-            $mailer->setSubject('Training Impact Assessment: ' . $training['training_title']);
-            $mailer->setMessage(view('tia/email_tia_link', [
-                'fullname' => $p['participant_name'] ?? '',
-                'training_title' => $training['training_title'],
-                'training_dates' => $training['training_dates'] ?? '',
-                'formUrl' => $formUrl,
-                'deadline' => $deadlineTxt,
-            ]));
-
-            if ($mailer->send(false)) {
+            $err = null;
+            if ($this->sendFormTo($p, $training, $deadlineTxt, $err)) {
                 $sent++;
             } else {
                 $failed[] = ($p['participant_name'] ?? $to) . ' (' . $to . ')';
-                $debug = $mailer->printDebugger(['headers']);
-                log_message('error', 'TIA form email failed for ' . $to . ': ' . $debug);
-                if ($failReason === '') {
-                    $failReason = trim(preg_replace('/\s+/', ' ', strip_tags($debug)));
+                if ($failReason === '' && $err) {
+                    $failReason = $err;
                 }
             }
         }
@@ -1145,68 +1127,92 @@ class HrController extends BaseController
     }
 
     /**
-     * Email the training's immediate superior to rate the participants.
-     * Called automatically from addParticipantsBulk().
-     * Returns ['success' => bool, 'message' => string].
+     * Send the Annex D form to ONE participant
+     * POST /tia/send-form-email/(:num)
      */
-    private function sendSuperiorNotice(array $training): array
+    public function sendFormEmail($id = null)
     {
-        $superiorName = trim((string) ($training['immediate_superior'] ?? ''));
-        $superior = $superiorName !== ''
-            ? (new SuperiorModel())->where('LOWER(TRIM(name))', strtolower($superiorName))->first()
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Invalid request.',
+                'csrf' => csrf_hash(),
+            ])->setStatusCode(403);
+        }
+
+        $participant = $this->participantsModel->find((int) $id);
+        $training = $participant
+            ? $this->trainingsModel->where('training_code', $participant['training_code'])->first()
             : null;
 
-        if (!$superior || empty($superior['email']) || !filter_var($superior['email'], FILTER_VALIDATE_EMAIL)) {
-            return [
+        if (!$participant || !$training) {
+            return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Superior was not emailed: no superior with a valid email matches "'
-                    . $superiorName . '".',
-            ];
+                'message' => 'Participant not found.',
+                'csrf' => csrf_hash(),
+            ])->setStatusCode(404);
         }
 
-        $count = $this->participantsModel
+        $email = strtolower(trim((string) ($participant['email'] ?? '')));
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'This participant has no valid email address.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        // No point emailing someone who already submitted
+        $done = (new \App\Models\TiaResponsesModel())
             ->where('training_code', $training['training_code'])
-            ->countAllResults();
+            ->where('email', $email)
+            ->first();
 
-        $mailer = \Config\Services::email();
-        $cfg = config('Email');
-
-        $mailer->clear(true);
-        $mailer->setMailType('html');
-        if (!empty($cfg->fromEmail)) {
-            $mailer->setFrom($cfg->fromEmail, $cfg->fromName ?? '');
-        }
-        $mailer->setTo($superior['email']);
-        $mailer->setSubject('Action needed: Rate participants – ' . $training['training_title']);
-        $mailer->setMessage(view('tia/email_superior_notify', [
-            'superiorName' => $superior['name'],
-            'training_title' => $training['training_title'],
-            'training_dates' => $training['training_dates'] ?? '',
-            'participantCount' => $count,
-            'dashboardUrl' => site_url('tia-superior'),
-        ]));
-
-        if (!$mailer->send(false)) {
-            log_message('error', 'TIA superior notify failed for ' . $superior['email'] . ': '
-                . $mailer->printDebugger(['headers']));
-
-            return ['success' => false, 'message' => 'Could not email the superior.'];
+        if ($done) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => ($participant['participant_name'] ?? $email) . ' has already submitted the assessment.',
+                'csrf' => csrf_hash(),
+            ]);
         }
 
+        // Keep the current deadline if it is still open; otherwise start a new one
         $now = date('Y-m-d H:i:s');
-        $newCount = ((int) ($training['superior_notify_count'] ?? 0)) + 1;
+        $deadlineAt = $training['form_deadline_at'] ?? null;
+        $newDeadline = empty($deadlineAt) || strtotime($deadlineAt) < time();
+        if ($newDeadline) {
+            $deadlineAt = date('Y-m-d 23:59:59', strtotime('+' . self::FORM_DEADLINE_DAYS . ' days'));
+        }
+        $deadlineTxt = date('F j, Y', strtotime($deadlineAt));
 
-        $this->trainingsModel->update($training['id'], [
-            'superior_notified_at' => $now,
-            'superior_notify_count' => $newCount,
-        ]);
+        $err = null;
+        if (!$this->sendFormTo($participant, $training, $deadlineTxt, $err)) {
+            $msg = 'Failed to send email to ' . $email . '.';
+            if (ENVIRONMENT === 'development' && $err) {
+                $msg .= ' Reason: ' . mb_substr($err, 0, 400);
+            }
 
-        return [
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => $msg,
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        // Only save the deadline once the email actually went out
+        if ($newDeadline) {
+            $this->trainingsModel->update($training['id'], [
+                'form_sent_at' => $now,
+                'form_deadline_at' => $deadlineAt,
+                'form_send_count' => ((int) ($training['form_send_count'] ?? 0)) + 1,
+            ]);
+        }
+
+        return $this->response->setJSON([
             'success' => true,
-            'message' => 'Superior notified: ' . $superior['name'] . ' (' . $superior['email'] . ').',
-            'notify_count' => $newCount,
-            'notified_at' => date('M d, Y h:i A', strtotime($now)),
-        ];
+            'message' => 'Form sent to ' . $email . '. Deadline: ' . $deadlineTxt . '.',
+            'csrf' => csrf_hash(),
+        ]);
     }
 
     /**
@@ -1254,50 +1260,9 @@ class HrController extends BaseController
         return $this->response->setJSON($result);
     }
 
-
-    /**
-     * Already-submitted page, found by reference number
-     * GET /tia_submitted/(:segment)
-     */
-    public function submitted($referenceNo = null)
-    {
-        $row = (new \App\Models\TiaResponsesModel())
-            ->where('reference_no', (string) $referenceNo)
-            ->first();
-
-        if (!$row) {
-            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Assessment not found.');
-        }
-
-        return view('tia/already_submitted', ['response' => $row]);
-    }
-    /** Reads competencies[] from the request -> JSON string (max 4) or null. */
-    private function readCompetencies(): ?string
-    {
-        $list = array_values(array_filter(array_map(
-            fn($v) => mb_substr(trim((string) $v), 0, 255),
-            (array) $this->request->getPost('competencies')
-        ), fn($v) => $v !== ''));
-
-        return $list ? json_encode(array_slice($list, 0, 4), JSON_UNESCAPED_UNICODE) : null;
-    }
-
-    // -------------------------------------------------------------------------
-    // Trainings CSV: template / export / import
-    // -------------------------------------------------------------------------
-
-    private const TRAINING_CSV_HEADER = [
-        'TRAINING CODE',
-        'TRAINING TITLE',
-        'TRAINING DATES',
-        'CONDUCTED BY',
-        'OFFICE',
-        'IMMEDIATE SUPERIOR',
-        'COMPETENCY 1',
-        'COMPETENCY 2',
-        'COMPETENCY 3',
-        'COMPETENCY 4',
-    ];
+    // =========================================================================
+    // TRAININGS CSV: template / export / import
+    // =========================================================================
 
     /** GET /tia/trainings-template */
     public function trainingsTemplate()
@@ -1473,18 +1438,158 @@ class HrController extends BaseController
         return $back->with('success', "Import done: {$inserted} added, {$updated} updated, {$skipped} skipped.");
     }
 
+    // =========================================================================
+    // PRIVATE HELPERS
+    // =========================================================================
+
+    /**
+     * Build + send the Annex D form email to ONE participant.
+     * Used by sendFormEmails() (all) and sendFormEmail() (one).
+     * On failure, $error gets the SMTP debug text.
+     */
+    private function sendFormTo(array $p, array $training, string $deadlineTxt, ?string &$error = null): bool
+    {
+        $to = strtolower(trim((string) ($p['email'] ?? '')));
+        if ($to === '' || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
+            $error = 'invalid email';
+            return false;
+        }
+
+        // Per-participant link: the form opens with this person's details prefilled.
+        // -> http://yourdomain/tia_ad?t=TRN-20261005-AB12C&p=12
+        $formUrl = site_url('tia_ad')
+            . '?t=' . rawurlencode($training['training_code'])
+            . '&p=' . (int) $p['id'];
+
+        $mailer = \Config\Services::email();
+        $cfg = config('Email');
+
+        $mailer->clear(true);
+        $mailer->setMailType('html');
+        if (!empty($cfg->fromEmail)) {
+            $mailer->setFrom($cfg->fromEmail, $cfg->fromName ?? '');
+        }
+        $mailer->setTo($to);
+        $mailer->setSubject('Training Impact Assessment: ' . $training['training_title']);
+        $mailer->setMessage(view('tia/email_tia_link', [
+            'fullname' => $p['participant_name'] ?? '',
+            'training_title' => $training['training_title'],
+            'training_dates' => $training['training_dates'] ?? '',
+            'formUrl' => $formUrl,
+            'deadline' => $deadlineTxt,
+        ]));
+
+        if ($mailer->send(false)) {
+            return true;
+        }
+
+        $debug = $mailer->printDebugger(['headers']);
+        log_message('error', 'TIA form email failed for ' . $to . ': ' . $debug);
+        $error = trim(preg_replace('/\s+/', ' ', strip_tags($debug)));
+        return false;
+    }
+
+    /**
+     * Email the training's immediate superior to rate the participants.
+     * Called automatically from addParticipantsBulk().
+     * Returns ['success' => bool, 'message' => string].
+     */
+    private function sendSuperiorNotice(array $training): array
+    {
+        $superiorName = trim((string) ($training['immediate_superior'] ?? ''));
+        $superior = $superiorName !== ''
+            ? (new SuperiorModel())->where('LOWER(TRIM(name))', strtolower($superiorName))->first()
+            : null;
+
+        if (!$superior || empty($superior['email']) || !filter_var($superior['email'], FILTER_VALIDATE_EMAIL)) {
+            return [
+                'success' => false,
+                'message' => 'Superior was not emailed: no superior with a valid email matches "'
+                    . $superiorName . '".',
+            ];
+        }
+
+        $count = $this->participantsModel
+            ->where('training_code', $training['training_code'])
+            ->countAllResults();
+
+        $mailer = \Config\Services::email();
+        $cfg = config('Email');
+
+        $mailer->clear(true);
+        $mailer->setMailType('html');
+        if (!empty($cfg->fromEmail)) {
+            $mailer->setFrom($cfg->fromEmail, $cfg->fromName ?? '');
+        }
+        $mailer->setTo($superior['email']);
+        $mailer->setSubject('Action needed: Rate participants – ' . $training['training_title']);
+        $mailer->setMessage(view('tia/email_superior_notify', [
+            'superiorName' => $superior['name'],
+            'training_title' => $training['training_title'],
+            'training_dates' => $training['training_dates'] ?? '',
+            'participantCount' => $count,
+            'dashboardUrl' => site_url('tia-superior'),
+        ]));
+
+        if (!$mailer->send(false)) {
+            log_message('error', 'TIA superior notify failed for ' . $superior['email'] . ': '
+                . $mailer->printDebugger(['headers']));
+
+            return ['success' => false, 'message' => 'Could not email the superior.'];
+        }
+
+        $now = date('Y-m-d H:i:s');
+        $newCount = ((int) ($training['superior_notify_count'] ?? 0)) + 1;
+
+        $this->trainingsModel->update($training['id'], [
+            'superior_notified_at' => $now,
+            'superior_notify_count' => $newCount,
+        ]);
+
+        return [
+            'success' => true,
+            'message' => 'Superior notified: ' . $superior['name'] . ' (' . $superior['email'] . ').',
+            'notify_count' => $newCount,
+            'notified_at' => date('M d, Y h:i A', strtotime($now)),
+        ];
+    }
+
+    /** Build CSV string for participants export */
+    private function buildParticipantsCsv(array $participants): string
+    {
+        $output = fopen('php://temp', 'r+');
+        fputcsv($output, ['Name of Participant', 'Position', 'Email Address']);
+
+        foreach ($participants as $p) {
+            fputcsv($output, [
+                $p['participant_name'] ?? '',
+                $p['position'] ?? '',
+                $p['email'] ?? '',
+            ]);
+        }
+
+        rewind($output);
+        $csv = stream_get_contents($output);
+        fclose($output);
+
+        return $csv !== false ? $csv : '';
+    }
+
+    /** Reads competencies[] from the request -> JSON string (max 4) or null. */
+    private function readCompetencies(): ?string
+    {
+        $list = array_values(array_filter(array_map(
+            fn($v) => mb_substr(trim((string) $v), 0, 255),
+            (array) $this->request->getPost('competencies')
+        ), fn($v) => $v !== ''));
+
+        return $list ? json_encode(array_slice($list, 0, 4), JSON_UNESCAPED_UNICODE) : null;
+    }
+
+    /** True when the form deadline has passed */
     private function isFormClosed(array $training): bool
     {
         return !empty($training['form_deadline_at'])
             && strtotime($training['form_deadline_at']) < time();
     }
-
-
-
-
-
 }
-
-
-
-

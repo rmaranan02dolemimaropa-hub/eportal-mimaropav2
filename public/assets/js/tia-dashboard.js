@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initManageParticipants();
   initEditParticipant();
   initDeleteParticipant();
+  initSendFormOne();
 });
 
 /* =========================================================================
@@ -519,6 +520,13 @@ function initManageParticipants() {
             <td class="text-center">${tiaStatusBadge(p)}</td>
             <td class="text-center">
               <div class="row-actions d-flex gap-1 justify-content-center">
+              <button type="button" class="btn btn-sm row-action-btn btn-send-form-one"
+                data-id="${escapeHtml(p.id)}"
+                data-name="${escapeHtml(p.participant_name)}"
+                data-email="${escapeHtml(p.email)}"
+                title="Send form to this participant">
+                <i class="bi bi-envelope-paper"></i>
+              </button>
                 <button type="button" class="btn btn-sm row-action-btn btn-edit-participant"
                   data-id="${escapeHtml(p.id)}"
                   data-name="${escapeHtml(p.participant_name)}"
@@ -949,6 +957,60 @@ function initDeleteParticipant() {
       console.error(err);
       showAlert(
         modalAlert,
+        "danger",
+        err.message || "Network error. Please try again.",
+      );
+    } finally {
+      restore();
+    }
+  });
+}
+
+/* =========================================================================
+ * 11. SEND FORM TO ONE PARTICIPANT
+ * Trigger : .btn-send-form-one (created by JS, so delegated click)
+ * Endpoint: POST tia/send-form-email/{id}
+ * ========================================================================= */
+function initSendFormOne() {
+  const manageAlert = $("participantsAlert");
+
+  $("existingParticipantsBody").addEventListener("click", async (e) => {
+    const btn = e.target.closest(".btn-send-form-one");
+    if (!btn) return;
+
+    const { id, name, email } = btn.dataset;
+    if (!confirm(`Send the TIA form to ${name} (${email})?`)) return;
+
+    hideAlert(manageAlert);
+    const restore = setBusy(
+      btn,
+      '<span class="spinner-border spinner-border-sm"></span>',
+    );
+
+    try {
+      const result = await apiFetch(
+        `${URLS.sendFormEmail}/${encodeURIComponent(id)}`,
+        { method: "POST", body: buildFormData() },
+      );
+
+      if (result.success) {
+        showAlert(
+          manageAlert,
+          "success",
+          result.message || `Form sent to ${email}.`,
+        );
+      } else {
+        showAlert(
+          manageAlert,
+          "danger",
+          result.message || "Failed to send email.",
+          result.errors ? Object.values(result.errors) : [],
+        );
+      }
+    } catch (err) {
+      console.error(err);
+      showAlert(
+        manageAlert,
         "danger",
         err.message || "Network error. Please try again.",
       );

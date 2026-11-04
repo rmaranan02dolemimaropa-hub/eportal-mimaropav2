@@ -88,8 +88,11 @@ $routes->group('', ['filter' => ['auth', 'pwchange']], function ($routes) {
     $routes->get('password/change', 'PasswordController::change');
     $routes->post('password/update', 'PasswordController::update');
 
+    $routes->get('overview', 'OverviewController::index');
+
     // Training Impact Assessment - Dashboard
     $routes->get('tia_page', 'HrController::tia_page');
+    $routes->get('tia-dashboard', 'TiaDashboardController::index');
     $routes->get('tia/participants/(:any)', 'HrController::getParticipants/$1');
     $routes->get('tia/export-participants/(:any)', 'HrController::exportParticipants/$1');
     $routes->get('tia/trainings-template', 'HrController::trainingsTemplate');
@@ -142,6 +145,7 @@ $routes->group('', ['filter' => ['auth:admin', 'pwchange']], function ($routes) 
     $routes->post('tia/update-status/(:segment)', 'HrController::updateTrainingStatus/$1');
     $routes->post('tia/delete-participant/(:num)', 'HrController::deleteParticipant/$1');
     $routes->post('tia/send-form-emails', 'HrController::sendFormEmails');
+    $routes->post('tia/send-form-email/(:num)', 'HrController::sendFormEmail/$1');
     $routes->post('tia/notify-superior', 'HrController::notifySuperior');
     $routes->post('tia/import-trainings', 'HrController::importTrainings');
 

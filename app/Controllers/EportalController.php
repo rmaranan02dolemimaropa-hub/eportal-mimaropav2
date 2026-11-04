@@ -394,6 +394,6 @@ class EportalController extends BaseController
     {
         return strtoupper(trim((string) $role)) === 'SUPERIOR'
             ? site_url('tia-superior/monitoring')
-            : site_url('dashboard');
+            : site_url('overview');
     }
 }

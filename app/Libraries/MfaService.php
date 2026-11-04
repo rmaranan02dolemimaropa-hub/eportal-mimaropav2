@@ -132,7 +132,7 @@ class MfaService
             return base_url('password/change');
         }
 
-        return base_url(strtoupper(trim((string) $role)) === 'SUPERIOR' ? 'tia-superior/monitoring' : 'dashboard');
+        return base_url(strtoupper(trim((string) $role)) === 'SUPERIOR' ? 'tia-superior/monitoring' : 'overview');
     }
 
     // ------------------------------------------------------------------

@@ -89,7 +89,7 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
 
             <div class="d-flex align-items-center gap-2 flex-wrap ms-auto">
                 <select id="filterYear" class="form-select form-select-sm" autocomplete="off"
-                    style="width:130px; flex:0 0 auto;">
+                    style="inline-size:130px; flex:0 0 auto;">
                     <option value="">All years</option>
                     <?php foreach ($years as $yr): ?>
                         <option value="<?= $yr ?>"><?= $yr ?></option>
@@ -97,14 +97,14 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
                 </select>
 
                 <select id="filterQuarter" class="form-select form-select-sm" autocomplete="off"
-                    style="width:170px; flex:0 0 auto;">
+                    style="inline-size:170px; flex:0 0 auto;">
                     <option value="">All quarters</option>
                     <?php foreach ($qMonths as $qn => $label): ?>
                         <option value="<?= $qn ?>">Q<?= $qn ?> (<?= $label ?>)</option>
                     <?php endforeach; ?>
                 </select>
 
-                <div class="input-group input-group-sm" style="width:280px; flex:0 0 auto;">
+                <div class="input-group input-group-sm" style="inline-size:280px; flex:0 0 auto;">
                     <span class="input-group-text"><i class="bi bi-search"></i></span>
                     <input type="search" id="trainingSearch" class="form-control" placeholder="Search trainings..."
                         autocomplete="off">
@@ -428,12 +428,12 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
                         <table class="table requests-table table-sm align-middle mb-0">
                             <thead>
                                 <tr>
-                                    <th style="width:40px;">#</th>
+                                    <th style="inline-size:40px;">#</th>
                                     <th>Name</th>
                                     <th>Position</th>
                                     <th>Email</th>
-                                    <th style="width:130px;" class="text-center">TIA Status</th>
-                                    <th style="width:110px;" class="text-center">Action</th>
+                                    <th style="inline-size:130px;" class="text-center">TIA Status</th>
+                                    <th style="inline-size:110px;" class="text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="existingParticipantsBody">
@@ -474,11 +474,11 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
                         <table class="table requests-table table-sm align-middle mb-0" id="newParticipantsTable">
                             <thead>
                                 <tr>
-                                    <th style="width:40px;">#</th>
+                                    <th style="inline-size:40px;">#</th>
                                     <th>Name of Participant</th>
                                     <th>Position</th>
                                     <th>Email Address</th>
-                                    <th style="width:50px;" class="text-center">Action</th>
+                                    <th style="inline-size:50px;" class="text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="newParticipantsBody">
@@ -684,6 +684,8 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
             updateStatus: '<?= site_url('tia/update-status') ?>',
             deleteParticipant: '<?= site_url('tia/delete-participant') ?>',
             sendFormEmails: '<?= site_url('tia/send-form-emails') ?>',
+            sendFormEmail: '<?= site_url('tia/send-form-email') ?>',
+
             notifySuperior: '<?= site_url('tia/notify-superior') ?>',
         },
         csrf: {
@@ -708,3 +710,5 @@ $qMonths = [1 => 'Jan–Mar', 2 => 'Apr–Jun', 3 => 'Jul–Sep', 4 => 'Oct–De
 <script src="<?= base_url('assets/js/tia-notify-superior.js') ?>"></script>
 <script src="<?= base_url('assets/js/tia-search.js') ?>"></script>
 <script src="<?= base_url('assets/js/tia-competencies.js') ?>"></script>
+<script>window.SUPERIORS_URL = '<?= site_url('superiors/all') ?>';</script>
+<script src="<?= base_url('assets/js/tia-superior-select.js') ?>"></script>
