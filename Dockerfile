@@ -17,4 +17,4 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 RUN chown -R www-data:www-data writable
 
 EXPOSE 80
-CMD ["sh", "-c", "cp /etc/secrets/.env /var/www/html/.env 2>/dev/null; apache2-foreground"]
+CMD ["sh", "-c", "cp /etc/secrets/.env /var/www/html/.env && chown www-data:www-data /var/www/html/.env && chmod 644 /var/www/html/.env; apache2-foreground"]
