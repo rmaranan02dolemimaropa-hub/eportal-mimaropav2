@@ -13,7 +13,7 @@
     <div class="row g-4">
       <div class="col-sm-6 col-lg-4 col-xl-3" data-aos="zoom-in">
         <div class="service-card">
-          <div class="service-icon-wrap"><i class="bi bi-cash-stack"></i></div>
+          <div class="service-icon-wrap"><i class="bi bi-file-earmark-text"></i></div>
           <h3>Online Compliance Portal</h3>
           <p>Submit your reports online for faster processing.</p>
           <a href="https://reports.dole.gov.ph/" class="btn-open-portal">Open Portal <i
@@ -22,7 +22,7 @@
       </div>
       <div class="col-sm-6 col-lg-4 col-xl-3" data-aos="zoom-in" style="--d:.05s">
         <div class="service-card">
-          <div class="service-icon-wrap"><i class="bi bi-mortarboard"></i></div>
+          <div class="service-icon-wrap"><i class="bi bi-cone-striped"></i></div>
           <h3>CSHP Online System</h3>
           <p>CSHP Online System is the Philippines’ official digital platform for Construction Safety and Health Program
             compliance.</p>
@@ -32,7 +32,7 @@
       </div>
       <div class="col-sm-6 col-lg-4 col-xl-3" data-aos="zoom-in" style="--d:.1s">
         <div class="service-card">
-          <div class="service-icon-wrap"><i class="bi bi-people"></i></div>
+          <div class="service-icon-wrap"><i class="bi bi-house-heart"></i></div>
           <h3>Kasambahay Registration & Monitoring System</h3>
           <p>KRMS is a secure web system for LGUs to manage kasambahay registration, records, verification, and
             reporting.</p>
@@ -42,7 +42,7 @@
       </div>
       <div class="col-sm-6 col-lg-4 col-xl-3" data-aos="zoom-in" style="--d:.15s">
         <div class="service-card">
-          <div class="service-icon-wrap"><i class="bi bi-person-badge"></i></div>
+          <div class="service-icon-wrap"><i class="bi bi-building-check"></i></div>
           <h3>DO 174</h3>
           <p>DO 174 MIMAROPA portal is the official online system for registering and renewing contractors under DO 174.
           </p>
@@ -62,7 +62,7 @@
       </div>
       <div class="col-sm-6 col-lg-4 col-xl-3" data-aos="zoom-in" style="--d:.05s">
         <div class="service-card">
-          <div class="service-icon-wrap"><i class="bi bi-graph-up-arrow"></i></div>
+          <div class="service-icon-wrap"><i class="bi bi-patch-check"></i></div>
           <h3>NPC</h3>
           <p>NPC (No Pending Case Management System) is DOLE MIMAROPA’s online portal for applying for a Certificate of
             No Pending Case.</p>
@@ -72,7 +72,7 @@
       </div>
       <div class="col-sm-6 col-lg-4 col-xl-3" data-aos="zoom-in" style="--d:.1s">
         <div class="service-card">
-          <div class="service-icon-wrap"><i class="bi bi-calendar-event"></i></div>
+          <div class="service-icon-wrap"><i class="bi bi-chat-square-text"></i></div>
           <h3>DOLE ARMS</h3>
           <p>DOLE ARMS (Assistance for Request Management System) is the official online portal for filing, tracking,
             and managing Requests for Assistance (RFA) under the Single Entry Approach (SEnA).</p>

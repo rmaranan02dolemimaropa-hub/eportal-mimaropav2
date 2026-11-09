@@ -812,3 +812,54 @@ body.tia-standalone {
     overflow: visible !important;
   }
 }
+
+/* ---------- Annex J: editor (left) + live sheet (right) ---------- */
+.aj-split {
+  display: grid;
+  grid-template-columns: minmax(520px, 520px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.aj-editor {
+  position: sticky;
+  top: 70px; /* adjust to your navbar height */
+  max-height: calc(100vh - 90px);
+  overflow-y: auto;
+}
+.aj-preview {
+  min-width: 0;
+  overflow-x: auto;
+}
+/* shrink the A4 sheet on screen so it fits beside the form */
+.aj-preview .annex-j-sheet {
+  zoom: 0.8;
+  margin: 0 auto;
+}
+
+@media (max-width: 1199.98px) {
+  .aj-split {
+    grid-template-columns: 1fr;
+  }
+  .aj-editor {
+    position: static;
+    max-height: none;
+  }
+  .aj-preview .annex-j-sheet {
+    zoom: 1;
+  }
+}
+
+@media print {
+  .aj-split {
+    display: block;
+  }
+  .aj-editor {
+    display: none !important;
+  }
+  .aj-preview {
+    overflow: visible !important;
+  }
+  .aj-preview .annex-j-sheet {
+    zoom: 1;
+  }
+}
